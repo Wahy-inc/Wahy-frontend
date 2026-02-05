@@ -1,5 +1,5 @@
 import { SignupFormState, SignInFormState, SignUpSchema, SignInSchema } from "../lib/definitions"
-import * as openApi from "../../lib/types"
+import * as openApi from "../../lib/openApi"
 
 const api = new openApi.Api({
     baseUrl: 'http://10.60.184.80:8000',

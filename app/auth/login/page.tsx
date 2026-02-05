@@ -16,7 +16,7 @@ export default function SignIn() {
     const router = useRouter()
 
     if (state?.message === 'Signin successful') {
-        router.push('/dashboard')
+        router.replace('/dashboard')
     }
     
     return (

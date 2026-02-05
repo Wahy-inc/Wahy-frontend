@@ -16,7 +16,7 @@ export default function SignUp() {
     const router = useRouter()
 
     if (state?.message === 'Signup successful') {
-        router.push('/dashboard')
+        router.replace('/dashboard')
     }
 
     return (
