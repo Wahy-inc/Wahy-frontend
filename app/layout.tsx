@@ -28,7 +28,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{ backgroundColor: "#F1F5F9", color: "#1E293B" , display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', flexDirection: 'column'}}
       >
-      <div id="navbar" className="w-[95%] h-14 lg:h-20 absolute top-0 m-2 p-1 flex flex-row items-center rounded-xl bg-slate-900 text-slate-100 shadow-sm">
+      <div id="navbar" className="z-50 w-full h-14 lg:h-20 absolute top-0 p-1 flex flex-row items-center bg-slate-900 text-slate-100 shadow-[0px_4px_30px_rgba(0,0,0,0.3)] backdrop-blur-sm">
         <div className="flex-1">
           <a className="text-2xl pl-4 font-bold">Wahy</a>
         </div>

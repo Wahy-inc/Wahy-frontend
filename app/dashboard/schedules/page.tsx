@@ -28,23 +28,24 @@ export default function Schedules() {
     }, [])
 
     const schedulesElement = (schedule: openApi.ScheduleRead) => (
-        <div className="overflow-x-auto border-2 rounded-xl border-slate-800 flex flex-col gap-4 justify-start p-4 m-4">
-            <div>
-                <div id="profile-image" className="w-10 rounded-full bg-slate-800"></div>
+        <div className="overflow-hidden border-2 rounded-xl bg-white flex flex-col justify-start p-4 shadow-[0px_4px_30px_rgba(0,0,0,0.1)] opacity-90 backdrop-blur-sm hover:opacity-80 transition duration-300 hover:scale-101">
+            <div className='flex flex-row gap-8 justify-start items-center mb-4'>
+                <div id="profile-image" className="w-15 h-15 rounded-full bg-slate-800"></div>
                 <p id="name" className="text-4xl text-slate-800">{schedule.id}</p>
             </div>
-            <p id="start" className="text-slate-700 text-xl">Start at: {schedule.start_time}</p>
-            <p id="end" className="text-slate-700 text-xl">End at: {schedule.end_time}</p>
-            <div className="flex flex-row justify-between">
-                <p id="recurring" className="text-slate-700 text-xl">Recurring {schedule.is_recurring? "✔" : "✘"}</p>
-                <p id="active" className="text-slate-700 text-xl">Active {schedule.is_active? "✔" : "✘"}</p>
+            <p id="start" className="text-slate-700 text-xl flex items-center"><icon.Calendar className='inline mr-2' style={{color: 'rgba(125,125,125,0.8)'}}/> Day: {weekDays[schedule.day_of_week]}</p>
+            <p id="start" className="text-slate-700 text-xl flex items-center"><icon.Clock className='inline mr-2' style={{color: 'rgba(242,129,70,0.95)'}}/> Start at: {formatDate(schedule.start_time)}</p>
+            <p id="end" className="text-slate-700 text-xl flex items-center"><icon.Clock className='inline mr-2' style={{color: 'rgba(242,129,70,0.95)'}}/> End at: {formatDate(schedule.end_time)}</p>
+            <div className="grid grid-cols-2 mt-4 mb-2">
+                <p id="eff_from" className="text-slate-700 text-xl col-start-1 col-end-2 flex items-center"><icon.AlarmClockCheck className='inline mr-2' style={{color: 'rgba(70,242,155,0.95)'}}/> Effective from: {formatDate(schedule.effective_from)}</p>
+                <p id="eff_until" className="text-slate-700 text-xl col-start-2 col-end-3 flex items-center"><icon.AlarmClockMinus className='inline mr-2' style={{color: 'rgba(244,33,32,0.95)'}}/> Effective until: {schedule.effective_until? formatDate(schedule.effective_until) : 'No date Specified'}</p>
             </div>
-            <div className="flex flex-row justify-between">
-                <p id="eff_from" className="text-slate-700 text-xl">Effective from: {schedule.effective_from}</p>
-                <p id="eff_until" className="text-slate-700 text-xl">Effective until: {schedule.effective_until}</p>
+            <div className="grid grid-cols-2 mt-2 mb-2">
+                <p id="recurring" className="text-xl col-start-1 col-end-2 flex items-center" style={{color: schedule.is_recurring? 'green' : '#fb2c36'}}><icon.RefreshCcw className='inline mr-2'/> Recurring {schedule.is_recurring? "✔" : "✘"}</p>
+                <p id="active" className="text-xl col-start-2 col-end-3 flex items-center" style={{color: schedule.is_active? 'green' : '#fb2c36'}}><icon.Power className='inline mr-2'/> Active {schedule.is_active? "✔" : "✘"}</p>
             </div>
-            <p id="notes" className="w-full text-wrap text-[15px] text-slate-700">{schedule.notes}</p>
-            <p id="cancel" className="w-full text-wrap text-[15px] text-red-500">{schedule.cancellation_reason}</p>
+            <p id="notes" className="w-full text-wrap text-[15px] text-slate-700 mt-2 mb-2 flex items-center"><icon.PenTool className='inline mr-2' style={{color: 'rgba(245,174,56,0.95)'}}/> "{schedule.notes}"</p>
+            {schedule.cancellation_reason && (<p id="cancel" className="w-full text-wrap text-[15px] text-red-500 mt-2 mb-2 flex items-center"><icon.AlertOctagon className='inline mr-2' style={{color: 'rgba(242,129,70,0.95)'}}/> {schedule.cancellation_reason}</p>)}
         </div>
     )
 
