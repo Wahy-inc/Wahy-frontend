@@ -25,9 +25,16 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white`}
-        style={{ backgroundColor: "#f2e9e4", color: "#22223b" , display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        style={{ backgroundColor: "#F1F5F9", color: "#1E293B" , display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', flexDirection: 'column'}}
       >
+      <div id="navbar" className="w-[95%] h-14 lg:h-20 absolute top-0 m-2 p-1 flex flex-row items-center rounded-xl bg-slate-900 text-slate-100 shadow-sm">
+        <div className="flex-1">
+          <a className="text-2xl pl-4 font-bold">Wahy</a>
+        </div>
+        <div className="flex-none">
+        </div>
+      </div>
         {children}
       </body>
     </html>
