@@ -87,7 +87,7 @@ enum weekDays {
     friday = 6
 }
 
-export default function dashboardPage({children: children}: {children: React.ReactNode}  ) {
+export default function dashboardPage({children: children, title}: {children: React.ReactNode, title: string}  ) {
     const router = useRouter()
 
     const formatDate = (isoDate: string): string => {
@@ -138,11 +138,13 @@ export default function dashboardPage({children: children}: {children: React.Rea
                 <h2 className="text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => router.push('/dashboard/invoices')}> <icon.DollarSign className='inline mr-4'/>Invoices</h2>
             </div>
             <div id="content" className="m-20 w-full bg-slate-100 min-h-full flex flex-col rounded-xl gap-8">
-                {dummySchedules.map((schedule) => (
+                <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
+                {/* {dummySchedules.map((schedule) => (
                     <div key={schedule.id}>
                         {schedulesElement(schedule)}
                     </div>
-                ))}
+                ))} */}
+                {children}
             </div>
         </div>
     )

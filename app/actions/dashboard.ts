@@ -42,7 +42,7 @@ export async function listScheduals(): Promise<openApi.ScheduleRead[] | null> {
     }
 }
 
-export async function listLessons(stu_id:number | null): Promise<openApi.LessonRead[] | null> {
+export async function listLessons(stu_id:number | null = null): Promise<openApi.LessonRead[] | null> {
     try {
         const response = await api.api.listAllApiV1LessonsGet({student_id: stu_id})
 
