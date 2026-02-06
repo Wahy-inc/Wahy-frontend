@@ -3,6 +3,9 @@
 import * as icon from '@deemlol/next-icons'
 import { useRouter } from 'next/navigation'
 import * as openApi from "../../lib/openApi"
+import { Button } from "@/components/ui/button"
+import { Field } from "@/components/ui/field"
+import { Input } from "@/components/ui/input"
 
 enum weekDays {
     saturday = 0,
@@ -14,7 +17,7 @@ enum weekDays {
     friday = 6
 }
 
-export default function dashboardPage({children: children, title}: {children: React.ReactNode, title: string}  ) {
+export default function dashboardPage({children: children, title: title}: {children: React.ReactNode, title: React.ReactNode}  ) {
     const router = useRouter()
 
     const formatDate = (isoDate: string): string => {
@@ -64,14 +67,18 @@ export default function dashboardPage({children: children, title}: {children: Re
                 <h2 className="text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => router.push('/dashboard/join-requests')}> <icon.Inbox className='inline mr-4'/>Join Requests</h2>
                 <h2 className="text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => router.push('/dashboard/invoices')}> <icon.DollarSign className='inline mr-4'/>Invoices</h2>
             </div>
-            <div id="content" className="m-20 w-full bg-slate-100 min-h-full flex flex-col rounded-xl gap-8">
-                <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
+            <div id="content" className="m-20 w-full bg-slate-100 min-h-full flex flex-col rounded-xl">
+                <div id='title' className='sticky top-0 z-10 bg-slate-100 pt-10 px-10 rounded-xl'>
+                    {title}
+                </div>
                 {/* {dummySchedules.map((schedule) => (
                     <div key={schedule.id}>
                         {schedulesElement(schedule)}
                     </div>
                 ))} */}
-                {children}
+                <div id='children' className='px-10 flex flex-col gap-8 mb-10'>
+                    {children}
+                </div>
             </div>
         </div>
     )

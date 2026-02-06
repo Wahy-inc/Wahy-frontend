@@ -123,7 +123,7 @@ export const dummyLessons: openApi.LessonRead[] = [
   },
 ];
 
-const dummySchedules: openApi.ScheduleRead[] = [
+export const dummySchedules: openApi.ScheduleRead[] = [
     {
         sheikh_id: 1,
         student_id: 2,

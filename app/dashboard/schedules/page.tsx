@@ -5,6 +5,7 @@ import * as openApi from "../../../lib/openApi"
 import { listScheduals } from "@/app/actions/dashboard";
 import dashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
+import { dummySchedules } from "@/lib/dummyData";
 
 enum weekDays {
     saturday = 0,
@@ -72,11 +73,11 @@ export default function Schedules() {
         </div>
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: "Schedules"})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Schedules"})
-    if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: "Schedules"})
+    // if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: "Schedules"})
+    // if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Schedules"})
+    // if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: "Schedules"})
 
-    const content = schedules?.map((schedule) => (
+    const content = dummySchedules?.map((schedule) => (
         <div key={schedule.id}>
             {schedulesElement(schedule)}
         </div>

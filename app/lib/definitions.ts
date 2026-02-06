@@ -1,3 +1,4 @@
+import { AttendanceStatus, LessonQuality, LessonType } from '@/lib/openApi';
 import * as zod from 'zod';
 
 export const SignUpSchema = zod.object({
@@ -51,5 +52,43 @@ export type SignInFormState =
     password?: string[];
     }
     message?: string;
+}
+| undefined;
+
+export const CreatLessonSchema = zod.object({
+    student_id: zod.number({ error: 'Student ID must be a number' }),
+    schedule_id: zod.number({ error: 'Schedule ID must be a number' }),
+    date: zod.string().min(1, { error: 'Date is required' }).trim(),
+    type: zod.enum(LessonType, { error: 'Invalid lesson type' }),
+    attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }),
+    juz: zod.number({ error: 'Juz must be a number' }).min(1, { error: 'Juz is required' }),
+    surah: zod.string().min(1, { error: 'Surah is required' }).trim(),
+    ayah_from: zod.number({ error: 'Ayah from must be a number' }).min(1, { error: 'Ayah from is required' }),
+    ayah_to: zod.number({ error: 'Ayah to must be a number' }).min(1, { error: 'Ayah to is required' }),
+    quality: zod.enum(LessonQuality, { error: 'Invalid lesson quality' }),
+    attempts: zod.number({ error: 'Attempts must be a number' }).min(1, { error: 'Attempts is required' }),
+    absence_reason: zod.string().min(0, { error: 'Absence reason is required' }).trim(),
+    sheikh_notes: zod.string().min(0, { error: 'Sheikh notes is required' }).trim(),
+    student_notes: zod.string().min(0, { error: 'Student notes is required' }).trim(),
+})
+
+export type CreateLessonFormState = 
+| {error?: {
+    student_id?: string[];
+    schedule_id?: string[];
+    date?: string[];
+    type?: string[];
+    attendance?: string[];
+    juz?: string[];
+    surah?: string[];
+    ayah_from?: string[];
+    ayah_to?: string[];
+    quality?: string[];
+    attempts?: string[];
+    absence_reason?: string[];
+    sheikh_notes?: string[];
+    student_notes?: string[];
+}
+message?: string;
 }
 | undefined;
