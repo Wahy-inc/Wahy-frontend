@@ -1,5 +1,6 @@
 import { AttendanceStatus, LessonQuality, LessonType } from '@/lib/openApi';
 import * as zod from 'zod';
+import * as openApi from "../../lib/openApi"
 
 export const SignUpSchema = zod.object({
     arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
@@ -126,5 +127,18 @@ export type UpdateLessonFormState =
     student_notes?: string[];
 }
 message?: string;
+}
+| undefined;
+
+export const GetLessonByID = zod.object({
+    lesson_id: zod.string({ error: 'Lesson ID must be a number' }),
+})
+
+export type GetLessonByIDFormState = 
+| {error?: {
+    lesson_id?: string[];
+}
+message?: string;
+data?: openApi.LessonRead;
 }
 | undefined;

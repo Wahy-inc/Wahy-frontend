@@ -2,7 +2,7 @@
 
 import React, { useActionState } from "react";
 import * as openApi from "../../../lib/openApi"
-import { createLesson, listLessons, updateLesson } from "@/app/actions/dashboard";
+import { createLesson, getLessonByID, listLessons, updateLesson } from "@/app/actions/dashboard";
 import dashboardPage from "../page";
 import { DataTable } from "./data_table";
 import { columns, HWcolumns } from "./columns";
@@ -13,8 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   AlertDialog,
+  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
+  AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
@@ -40,6 +42,11 @@ export default function Lessons() {
     const [createState, createAction, createPending] = useActionState(createLesson, undefined)
     const updateLessonAction = (state: UpdateLessonFormState, formData: FormData) => updateLesson(state, formData, Number(formData.get('lesson-id')))
     const [updateState, updateAction, updatePending] = useActionState(updateLessonAction, undefined)
+    const [getLessonState, getLessonAction, getLessonPending] = useActionState(getLessonByID, undefined)
+    const [fetchedLesson, setFetchedLesson] = React.useState<openApi.LessonRead | null>(null)
+    const [getLessonDialogOpen, setGetLessonDialogOpen] = React.useState(false)
+    const [createLessonDialogOpen, setCreateLessonDialogOpen] = React.useState(false)
+    const [updateLessonDialogOpen, setUpdateLessonDialogOpen] = React.useState(false)
 
     React.useEffect(() => {
         const fetchLessons = async () => {
@@ -57,6 +64,12 @@ export default function Lessons() {
         }
         fetchLessons()
     }, [])
+
+    React.useEffect(() => {
+        if (getLessonState?.message == 'success' && getLessonState.data) {
+            setFetchedLesson(getLessonState.data)
+        }
+    }, [getLessonState])
 
 
     const getQuality = (quality: string | null) => {
@@ -97,7 +110,7 @@ export default function Lessons() {
             {lesson.sheikh_notes && <p className="w-full text-[12px] text-slate-600"><span className="font-bold text-slate-800">Sheikh Notes</span> "{lesson.sheikh_notes}"</p>}
             {lesson.student_notes && <p className="w-full text-[12px] text-slate-600"><span className="font-bold text-slate-800">Student Notes</span> "{lesson.student_notes}"</p>}
             <div className="flex flex-row justify-end">
-                    <AlertDialog>
+                    <AlertDialog open={updateLessonDialogOpen} onOpenChange={updateState?.message == 'success'? () => setUpdateLessonDialogOpen(false) : setUpdateLessonDialogOpen}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 mt-4 cursor-pointer bg-slate-400 hover:bg-slate-600">Update Lesson</Button>
                         </AlertDialogTrigger>
@@ -214,11 +227,12 @@ export default function Lessons() {
                                         {fieldInput("Student Notes", "student-notes", String(lesson.student_notes), "text")}
                                         {updateState?.error?.student_notes && <p className="text-red-500 text-sm">{updateState.error.student_notes}</p>}
                                     </div>
+                                    {updateState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to update lesson. Please check the data and try again.</p> : null}
                                 </div>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
                                 <AlertDialogCancel type="reset" disabled={updatePending}>Cancel</AlertDialogCancel>
-                                <Button type="submit" disabled={updatePending} onClick={() => console.log(updateState?.error)}>{updatePending ? 'Updating...' : 'Update'}</Button>
+                                <Button type="submit" disabled={updatePending}>{updatePending ? 'Updating...' : 'Update'}</Button>
                             </AlertDialogFooter>
                             </form>
                         </AlertDialogContent>
@@ -246,7 +260,7 @@ export default function Lessons() {
                     </div>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
-                    <AlertDialog>
+                    <AlertDialog open={createLessonDialogOpen} onOpenChange={createState?.message == 'success'? () => setCreateLessonDialogOpen(false) : setCreateLessonDialogOpen}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Lesson</Button>
                         </AlertDialogTrigger>
@@ -366,16 +380,39 @@ export default function Lessons() {
                                         {fieldInput("Student Notes", "student-notes", "Enter student notes...", "text")}
                                         {createState?.error?.student_notes && <p className="text-red-500 text-sm">{createState.error.student_notes}</p>}
                                     </div>
+                                    {createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create lesson. Please check the data and try again.</p> : null}
                                 </div>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
                                 <AlertDialogCancel type="reset" disabled={createPending}>Cancel</AlertDialogCancel>
-                                <Button type="submit" disabled={createPending} onClick={() => console.log(createState?.error)}>{createPending ? 'Creating...' : 'Create'}</Button>
+                                <Button type="submit" disabled={createPending}>{createPending ? 'Creating...' : 'Create'}</Button>
                             </AlertDialogFooter>
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
-                    <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Lesson</Button>
+                    <AlertDialog open={getLessonDialogOpen} onOpenChange={getLessonState?.message == 'success'? () => setGetLessonDialogOpen(false) : setGetLessonDialogOpen}>
+                    <AlertDialogTrigger asChild>
+                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Lesson</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <form action={getLessonAction}>
+                        <AlertDialogHeader>
+                        <AlertDialogTitle>Get lesson using ID</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Enter the ID of the lesson you want to retrieve. Make sure to enter a valid lesson ID to get the correct information.
+                        </AlertDialogDescription>
+                        <div className="flex flex-col gap-4 w-full">
+                            {fieldInput("Lesson ID", "lesson-id", "Enter lesson ID...", "number")}
+                            {getLessonState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch lesson. Please check the ID and try again.</p> : null}
+                        </div>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter className="mt-4">
+                            <AlertDialogCancel type="reset" disabled={getLessonPending}>Cancel</AlertDialogCancel>
+                            <Button type="submit" disabled={getLessonPending}>{getLessonPending? 'Loading...' : 'Get'}</Button>
+                        </AlertDialogFooter>
+                        </form>
+                    </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
     )
@@ -390,5 +427,14 @@ export default function Lessons() {
         </div>
     ))
 
-    return dashboardPage({children: content, title: titleElement("Lessons")})
+    if (fetchedLesson && getLessonState?.message == 'success') {
+        return dashboardPage({children: [
+            <div className='flex flex-row justify-end'>
+                <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLesson(null)}}>Clear Filter</Button>
+            </div>
+            ,<div key={fetchedLesson.id}>{lessonElement(fetchedLesson)}</div>], title: titleElement("Lesson Filtered")})
+    } else {
+        return dashboardPage({children: content, title: titleElement("Lessons")})
+    }
+
 }

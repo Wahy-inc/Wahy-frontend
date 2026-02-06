@@ -1,5 +1,6 @@
+import { dummyLessons } from "@/lib/dummyData"
 import * as openApi from "../../lib/openApi"
-import { CreateLessonFormState, CreatLessonSchema, SignInFormState, UpdateLessonFormState, UpdateLessonSchema } from "../lib/definitions"
+import { CreateLessonFormState, CreatLessonSchema, GetLessonByIDFormState, SignInFormState, UpdateLessonFormState, UpdateLessonSchema } from "../lib/definitions"
 
 const api = new openApi.Api({
     baseUrl: 'http://10.60.184.80:8000',
@@ -117,16 +118,31 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         return { error: validation.error.flatten().fieldErrors }
     }
     try {
-        const data:openApi.LessonCreate = validation.data
+        const data:openApi.LessonCreate = {
+        student_id: Number(validation.data.student_id),
+        schedule_id: Number(validation.data.schedule_id),
+        sheikh_notes: validation.data.sheikh_notes,
+        student_notes: validation.data.student_notes,
+        date: validation.data.date,
+        type: validation.data.type,
+        attendance: validation.data.attendance,
+        juz_number: Number(validation.data.juz),
+        surah_name: validation.data.surah,
+        ayah_from: Number(validation.data.ayah_from),
+        ayah_to: Number(validation.data.ayah_to),
+        quality: validation.data.quality,
+        attempts: Number(validation.data.attempts),
+        absence_reason: validation.data.absence_reason,
+        }
         const response = await api.api.createApiV1LessonsPost(data)
 
         if (response.status === 201) {
             listLessons() // Refresh the lessons list after creating a new lesson
             return {message: 'success' }
         }
-        return {message: response.error?.detail?.[0]?.msg || 'Failed to create lesson' }
+        return {message: 'fail' }
     } catch (error) {
-        return { message: 'An error occurred while creating the lesson' }
+        return { message: 'fail' }
     }
 }
 
@@ -151,15 +167,46 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
         return { error: validation.error.flatten().fieldErrors }
     }
     try {
-        const data:openApi.LessonUpdate = validation.data
+        const data:openApi.LessonUpdate = {
+        schedule_id: Number(validation.data.schedule_id),
+        sheikh_notes: validation.data.sheikh_notes,
+        student_notes: validation.data.student_notes,
+        date: validation.data.date,
+        type: validation.data.type,
+        attendance: validation.data.attendance,
+        juz_number: Number(validation.data.juz),
+        surah_name: validation.data.surah,
+        ayah_from: Number(validation.data.ayah_from),
+        ayah_to: Number(validation.data.ayah_to),
+        quality: validation.data.quality,
+        attempts: Number(validation.data.attempts),
+        absence_reason: validation.data.absence_reason,
+        }
         const response = await api.api.updateApiV1LessonsLessonIdPatch(lessonId, data)
 
         if (response.status === 200) {
             listLessons() // Refresh the lessons list after creating a new lesson
             return {message: 'success' }
         }
-        return {message: response.error?.detail?.[0]?.msg || 'Failed to update lesson' }
+        return {message: 'fail' }
     } catch (error) {
-        return { message: 'An error occurred while updating the lesson' }
+        return { message: 'fail' }
+    }
+}
+
+export async function getLessonByID(state:GetLessonByIDFormState, formData: FormData): Promise<GetLessonByIDFormState> {
+    const lessonId = Number(formData.get('lesson-id'))
+    if (isNaN(lessonId)) {
+        return { error: { lesson_id: ['Lesson ID must be a number'] } }
+    }
+    try {
+        const response = await api.api.getOneApiV1LessonsLessonIdGet(lessonId)
+
+        if (response.status === 200) {
+            return {message: 'success' , data: response.data }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
     }
 }

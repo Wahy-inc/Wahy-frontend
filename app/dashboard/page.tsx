@@ -3,9 +3,6 @@
 import * as icon from '@deemlol/next-icons'
 import { useRouter } from 'next/navigation'
 import * as openApi from "../../lib/openApi"
-import { Button } from "@/components/ui/button"
-import { Field } from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
 
 enum weekDays {
     saturday = 0,
