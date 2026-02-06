@@ -1,5 +1,5 @@
 import * as openApi from "../../lib/openApi"
-import { CreateLessonFormState, CreatLessonSchema, SignInFormState } from "../lib/definitions"
+import { CreateLessonFormState, CreatLessonSchema, SignInFormState, UpdateLessonFormState, UpdateLessonSchema } from "../lib/definitions"
 
 const api = new openApi.Api({
     baseUrl: 'http://10.60.184.80:8000',
@@ -127,5 +127,39 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         return {message: response.error?.detail?.[0]?.msg || 'Failed to create lesson' }
     } catch (error) {
         return { message: 'An error occurred while creating the lesson' }
+    }
+}
+
+export async function updateLesson(state: UpdateLessonFormState, formData: FormData, lessonId: number): Promise<UpdateLessonFormState> {
+    const validation = UpdateLessonSchema.safeParse({
+        schedule_id: formData.get('schedule-id'),
+        sheikh_notes: formData.get('sheikh-notes'),
+        student_notes: formData.get('student-notes'),
+        date: formData.get('date'),
+        type: formData.get('type'),
+        attendance: formData.get('attendance'),
+        juz: formData.get('juz'),
+        surah: formData.get('surah'),
+        ayah_from: formData.get('ayah-from'),
+        ayah_to: formData.get('ayah-to'),
+        quality: formData.get('quality'),
+        attempts: formData.get('attempts'),
+        absence_reason: formData.get('absence-reason'),
+    })
+
+    if (!validation.success) {
+        return { error: validation.error.flatten().fieldErrors }
+    }
+    try {
+        const data:openApi.LessonUpdate = validation.data
+        const response = await api.api.updateApiV1LessonsLessonIdPatch(lessonId, data)
+
+        if (response.status === 200) {
+            listLessons() // Refresh the lessons list after creating a new lesson
+            return {message: 'success' }
+        }
+        return {message: response.error?.detail?.[0]?.msg || 'Failed to update lesson' }
+    } catch (error) {
+        return { message: 'An error occurred while updating the lesson' }
     }
 }
