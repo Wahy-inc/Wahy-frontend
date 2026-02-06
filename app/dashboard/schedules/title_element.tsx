@@ -22,6 +22,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import * as openApi from "@/lib/openApi";
 import { JSX } from "react";
+import { CreateScheduleFormState, GetSchedualesForStudentFormState } from "@/app/lib/definitions";
+
+enum weekDays {
+    saturday = 0,
+    sunday = 1,
+    monday = 2,
+    tuesday = 3,
+    wednesday = 4,
+    thursday = 5,
+    friday = 6
+}
 
 export default function titleElement({
     title,
@@ -44,11 +55,11 @@ export default function titleElement({
         handleSearchStudentId: (e: React.ChangeEvent<HTMLInputElement>) => void,
         searchStudentId: string,
         handleClearFilter: () => void,
-        getSchedualesForStudentState: any,
-        getSchedualesForStudentAction: any,
+        getSchedualesForStudentState: GetSchedualesForStudentFormState,
+        getSchedualesForStudentAction: (formData: FormData) => void,
         getSchedualesForStudentPending: boolean,
-        createState: any,
-        createAction: any,
+        createState: CreateScheduleFormState,
+        createAction: (formData: FormData) => void,
         createPending: boolean,
         fieldInput: (label: string, name: string, holder: string, type: string) => JSX.Element,
         createScheduleDialogOpen: boolean,
@@ -79,125 +90,83 @@ export default function titleElement({
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
                     <AlertDialog open={createScheduleDialogOpen} onOpenChange={createState?.message == 'success'? () => setcreateScheduleDialogOpen(false) : setcreateScheduleDialogOpen}>
                         <AlertDialogTrigger asChild>
-                            <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Lesson</Button>
+                            <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Schedule</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <form action={createAction}>
                             <AlertDialogHeader>
-                            <AlertDialogTitle>Create Lesson</AlertDialogTitle>
+                            <AlertDialogTitle>Create Schedule</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                     <div className='flex flex-col'>
                                         {fieldInput("Student ID","student-id", "Enter student id...", "number")}
                                         {createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
-                                    <div className='flex flex-col'>
-                                    {fieldInput("Schedule ID", "schedule-id", "Enter schedule id...", "number")}
-                                    {createState?.error?.schedule_id && <p className="text-red-500 text-sm">{createState.error.schedule_id}</p>}
-                                    </div>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className='flex flex-col'>
-                                            {fieldInput("Date", "date", "Select date...", "date")}
-                                            {createState?.error?.date && <p className="text-red-500 text-sm">{createState.error.date}</p>}
-                                        </div>
-                                    <div className='flex flex-col'>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="type" className="text-sm font-medium">Type</label>
-                                            <Select name="type">
-                                                <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder="Select a type" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectLabel>Type</SelectLabel>
-                                                        <SelectItem value={openApi.LessonType.Evaluation}>Evaluation</SelectItem>
-                                                        <SelectItem value={openApi.LessonType.NewMemorization}>New Memorization</SelectItem>
-                                                        <SelectItem value={openApi.LessonType.Revision}>Revision</SelectItem>
-                                                        <SelectItem value={openApi.LessonType.Makeup}>Makeup</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        {createState?.error?.type && <p className="text-red-500 text-sm">{createState.error.type}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="attendance" className="text-sm font-medium">Attendance</label>
-                                            <Select name="attendance">
-                                                <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder="Attendance" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectLabel>Attendance</SelectLabel>
-                                                        <SelectItem value={openApi.AttendanceStatus.Present}>Present</SelectItem>
-                                                        <SelectItem value={openApi.AttendanceStatus.Absent}>Absent</SelectItem>
-                                                        <SelectItem value={openApi.AttendanceStatus.Excused}>Excused</SelectItem>
-                                                        <SelectItem value={openApi.AttendanceStatus.Late}>Late</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        {createState?.error?.attendance && <p className="text-red-500 text-sm">{createState.error.attendance}</p>}
-                                    </div>
-                                    </div>
-                                    <div className="grid grid-cols-4 gap-4">
-                                        <div className='flex flex-col'>
-                                            {fieldInput("Juz","juz", "juz", "number")}
-                                            {createState?.error?.juz && <p className="text-red-500 text-sm">{createState.error.juz}</p>}
+                                            <div className="flex flex-col">
+                                                <label htmlFor="day_of_week" className="text-sm font-medium">Day of Week</label>
+                                                <Select name="day_of_week">
+                                                    <SelectTrigger className="w-full max-w-48">
+                                                        <SelectValue placeholder="Day of Week" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>Day of Week</SelectLabel>
+                                                            <SelectItem value={String(weekDays.saturday)}>Saturday</SelectItem>
+                                                            <SelectItem value={String(weekDays.sunday)}>Sunday</SelectItem>
+                                                            <SelectItem value={String(weekDays.monday)}>Monday</SelectItem>
+                                                            <SelectItem value={String(weekDays.tuesday)}>Tuesday</SelectItem>
+                                                            <SelectItem value={String(weekDays.wednesday)}>Wednesday</SelectItem>
+                                                            <SelectItem value={String(weekDays.thursday)}>Thursday</SelectItem>
+                                                            <SelectItem value={String(weekDays.friday)}>Friday</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            {createState?.error?.day_of_week && <p className="text-red-500 text-sm">{createState.error.day_of_week}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("Surah", "surah", "surah", "text")}
-                                            {createState?.error?.surah && <p className="text-red-500 text-sm">{createState.error.surah}</p>}
+                                            {fieldInput("Start Time", "start-time", "Select start time...", "time")}
+                                            {createState?.error?.start_time && <p className="text-red-500 text-sm">{createState.error.start_time}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("Ayah from", "ayah-from", "ayah from", "number")}
-                                            {createState?.error?.ayah_from && <p className="text-red-500 text-sm">{createState.error.ayah_from}</p>}
-                                        </div>
-                                        <div className='flex flex-col'>
-                                            {fieldInput("To", "ayah-to", "to", "number")}
-                                            {createState?.error?.ayah_to && <p className="text-red-500 text-sm">{createState.error.ayah_to}</p>}
+                                            {fieldInput("End Time", "end-time", "Select end time...", "time")}
+                                            {createState?.error?.end_time && <p className="text-red-500 text-sm">{createState.error.end_time}</p>}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
+                                        <div className='flex flex-col'>
+                                            {fieldInput("Effective from","effective-from", "date", "date")}
+                                            {createState?.error?.effective_from && <p className="text-red-500 text-sm">{createState.error.effective_from}</p>}
+                                        </div>
+                                        <div className='flex flex-col'>
+                                            {fieldInput("Effective until", "effective-until", "date", "date")}
+                                            {createState?.error?.effective_until && <p className="text-red-500 text-sm">{createState.error.effective_until}</p>}
+                                        </div>
+                                    </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="quality" className="text-sm font-medium">Quality</label>
-                                            <Select name="quality">
+                                            <label htmlFor="recurring" className="text-sm font-medium">Recurring</label>
+                                            <Select name="recurring">
                                                 <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder="Quality" />
+                                                    <SelectValue placeholder="Recurring" />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
-                                                        <SelectLabel>Quality</SelectLabel>
-                                                        <SelectItem value={openApi.LessonQuality.Excellent}>Excellent</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.VeryGood}>Very Good</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.Good}>Good</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.Fair}>Fair</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.NeedsImprovement}>Needs Improvement</SelectItem>
+                                                        <SelectLabel>Recurring</SelectLabel>
+                                                        <SelectItem value='true'>Yes</SelectItem>
+                                                        <SelectItem value='false'>No</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {createState?.error?.quality && <p className="text-red-500 text-sm">{createState.error.quality}</p>}
-                                    </div>
-                                        <div className='flex flex-col'>
-                                            {fieldInput("Attempts", "attempts", "attempts", "number")}
-                                            {createState?.error?.attempts && <p className="text-red-500 text-sm">{createState.error.attempts}</p>}
-                                        </div>
+                                        {createState?.error?.is_recurring && <p className="text-red-500 text-sm">{createState.error.is_recurring}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Absence Reason", "absence-reason", "Enter reason for absence...", "text")}
-                                        {createState?.error?.absence_reason && <p className="text-red-500 text-sm">{createState.error.absence_reason}</p>}
+                                        {fieldInput("Notes", "notes", "Enter notes...", "text")}
+                                        {createState?.error?.notes && <p className="text-red-500 text-sm">{createState.error.notes}</p>}
                                     </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput("Sheikh Notes", "sheikh-notes", "Enter sheikh notes...", "text")}
-                                        {createState?.error?.sheikh_notes && <p className="text-red-500 text-sm">{createState.error.sheikh_notes}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput("Student Notes", "student-notes", "Enter student notes...", "text")}
-                                        {createState?.error?.student_notes && <p className="text-red-500 text-sm">{createState.error.student_notes}</p>}
-                                    </div>
-                                    {createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create lesson. Please check the data and try again.</p> : null}
+                                    {createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create schedule. Please check the data and try again.</p> : null}
                                 </div>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
@@ -209,18 +178,18 @@ export default function titleElement({
                     </AlertDialog>
                     <AlertDialog open={getStudentScheduleDialogOpen} onOpenChange={getSchedualesForStudentState?.message == 'success'? () => setgetStudentScheduleDialogOpen(false) : setgetStudentScheduleDialogOpen}>
                     <AlertDialogTrigger asChild>
-                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Lesson</Button>
+                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Schedules for student</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <form action={getSchedualesForStudentAction}>
                         <AlertDialogHeader>
-                        <AlertDialogTitle>Get lesson using ID</AlertDialogTitle>
+                        <AlertDialogTitle>Get Schedules for student using ID</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Enter the ID of the lesson you want to retrieve. Make sure to enter a valid lesson ID to get the correct information.
+                            Enter the ID of the student you want to retrieve schedules for. Make sure to enter a valid student ID to get the correct information.
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
-                            {fieldInput("Lesson ID", "lesson-id", "Enter lesson ID...", "number")}
-                            {getSchedualesForStudentState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch lesson. Please check the ID and try again.</p> : null}
+                            {fieldInput("Student ID", "student-id", "Enter student ID...", "number")}
+                            {getSchedualesForStudentState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch schedules. Please check the ID and try again.</p> : null}
                         </div>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="mt-4">

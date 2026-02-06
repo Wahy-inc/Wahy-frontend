@@ -1,6 +1,6 @@
 import { dummyLessons } from "@/lib/dummyData"
 import * as openApi from "../../lib/openApi"
-import { CreateLessonFormState, CreatLessonSchema, GetLessonByIDFormState, SignInFormState, UpdateLessonFormState, UpdateLessonSchema } from "../lib/definitions"
+import { CreateLessonFormState, CreateScheduleFormState, createScheduleSchema, CreatLessonSchema, GetLessonByIDFormState, GetSchedualesForStudentFormState, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema } from "../lib/definitions"
 
 const api = new openApi.Api({
     baseUrl: 'http://10.60.184.80:8000',
@@ -31,7 +31,7 @@ export async function listStudents(): Promise<openApi.StudentRead[] | null> {
     }
 }
 
-export async function listScheduals(): Promise<openApi.ScheduleRead[] | null> {
+export async function listSchedules(): Promise<openApi.ScheduleRead[] | null> {
     try {
         const response = await api.api.listAllApiV1SchedulesGet()
 
@@ -41,6 +41,101 @@ export async function listScheduals(): Promise<openApi.ScheduleRead[] | null> {
         return null
     } catch (error) {
         return null
+    }
+}
+
+export async function createSchedule(state: CreateScheduleFormState, formData: FormData): Promise<CreateScheduleFormState> {
+    const validation = createScheduleSchema.safeParse({
+        student_id: formData.get('student-id'),
+        day_of_week: formData.get('day-of-week'),
+        start_time: formData.get('start-time'),
+        end_time: formData.get('end-time'),
+        effective_from: formData.get('effective-from'),
+        effective_until: formData.get('effective-until'),
+        is_recurring: formData.get('is-recurring'),
+        notes: formData.get('notes'),
+    })
+
+    if (!validation.success) {
+        return { error: validation.error.flatten().fieldErrors }
+    }
+    try {
+        const data:openApi.ScheduleCreate = {
+            student_id: Number(validation.data.student_id),
+            day_of_week: Number(validation.data.day_of_week),
+            start_time: validation.data.start_time,
+            end_time: validation.data.end_time,
+            effective_from: validation.data.effective_from,
+            effective_until: validation.data.effective_until,
+            is_recurring: validation.data.is_recurring === 'true',
+            notes: validation.data.notes,
+        }
+        const response = await api.api.createApiV1SchedulesPost(data)
+
+        if (response.status === 201) {
+            listSchedules() // Refresh the schedules list after creating a new schedule
+            return {message: 'success' }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function updateSchedule(state: UpdateScheduleFormState, formData: FormData, scheduleId: number): Promise<UpdateScheduleFormState> {
+    const validation = UpdateScheduleSchema.safeParse({
+        day_of_week: formData.get('day-of-week'),
+        start_time: formData.get('start-time'),
+        end_time: formData.get('end-time'),
+        effective_from: formData.get('effective-from'),
+        effective_until: formData.get('effective-until'),
+        is_recurring: formData.get('is-recurring'),
+        is_active: formData.get('is-active'),
+        cancellation_reason: formData.get('cancellation-reason'),
+        notes: formData.get('notes'),
+    })
+
+    if (!validation.success) {
+        return { error: validation.error.flatten().fieldErrors }
+    }
+    try {
+        const data:openApi.ScheduleUpdate = {
+            day_of_week: Number(validation.data.day_of_week),
+            start_time: validation.data.start_time,
+            end_time: validation.data.end_time,
+            effective_from: validation.data.effective_from,
+            effective_until: validation.data.effective_until,
+            is_recurring: validation.data.is_recurring === 'true',
+            is_active: validation.data.is_active === 'true',
+            cancellation_reason: validation.data.cancellation_reason,
+            notes: validation.data.notes,
+        }
+        const response = await api.api.updateApiV1SchedulesScheduleIdPatch(scheduleId, data)
+
+        if (response.status === 200) {
+            listSchedules() // Refresh the schedules list after updating a schedule
+            return {message: 'success' }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function getSchedulesForStudent(state: GetSchedualesForStudentFormState, formData: FormData): Promise<GetSchedualesForStudentFormState> {
+    const studentId = Number(formData.get('student-id'))
+    if (isNaN(studentId)) {
+        return { error: { student_id: ['Student ID must be a number'] } }
+    }
+    try {
+        const response = await api.api.listForStudentApiV1SchedulesStudentStudentIdGet(studentId)
+
+        if (response.status === 200) {
+            return {message: 'success' , data: response.data }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
     }
 }
 

@@ -65,8 +65,8 @@ export default function Lessons() {
         
         if (studentId === "") {
             setFilteredLessons(null)
-        } else {
-            const filtered = dummyLessons.filter(lesson => 
+        } else if (lessons) {
+            const filtered = lessons.filter(lesson => 
                 lesson.student_id.toString().startsWith(studentId)
             )
             setFilteredLessons(filtered)
@@ -82,7 +82,7 @@ export default function Lessons() {
         }
     }
 
-    let content = dummyLessons?.map((lesson) => (
+    let content = lessons?.map((lesson) => (
         <div key={lesson.id}>
             {lessonElement({lesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput})}
         </div>

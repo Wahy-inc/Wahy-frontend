@@ -142,3 +142,80 @@ message?: string;
 data?: openApi.LessonRead;
 }
 | undefined;
+
+enum weekDays {
+    saturday = 0,
+    sunday = 1,
+    monday = 2,
+    tuesday = 3,
+    wednesday = 4,
+    thursday = 5,
+    friday = 6
+}
+
+export const createScheduleSchema = zod.object({
+    student_id: zod.string({ error: 'Student ID must be a number' }),
+    day_of_week: zod.enum(weekDays, { error: 'Invalid day of week' }),
+    start_time: zod.string().min(1, { error: 'Start time is required' }).trim(),
+    end_time: zod.string().min(1, { error: 'End time is required' }).trim(),
+    effective_from: zod.string().min(1, { error: 'Effective from is required' }).trim(),
+    effective_until: zod.string().min(0, { error: 'Effective until is required' }).trim(),
+    is_recurring: zod.enum(['true', 'false'], { error: 'Is recurring must be yes or no' }),
+    notes: zod.string().min(0, { error: 'Notes is required' }).trim(),
+})
+
+export type CreateScheduleFormState = 
+| {error?: {
+    student_id?: string[];
+    day_of_week?: string[];
+    start_time?: string[];
+    end_time?: string[];
+    effective_from?: string[];
+    effective_until?: string[];
+    is_recurring?: string[];
+    notes?: string[];
+}
+message?: string;
+}
+| undefined;
+
+export const UpdateScheduleSchema = zod.object({
+    day_of_week: zod.enum(weekDays, { error: 'Invalid day of week' }),
+    start_time: zod.string().min(1, { error: 'Start time is required' }).trim(),
+    end_time: zod.string().min(1, { error: 'End time is required' }).trim(),
+    effective_from: zod.string().min(1, { error: 'Effective from is required' }).trim(),
+    effective_until: zod.string().min(0, { error: 'Effective until is required' }).trim(),
+    is_recurring: zod.enum(['true', 'false'], { error: 'Is recurring must be yes or no' }),
+    is_active: zod.enum(['true', 'false'], { error: 'Is active must be yes or no' }),
+    cancellation_reason: zod.string().min(0, { error: 'Cancellation reason is required' }).trim(),
+    notes: zod.string().min(0, { error: 'Notes is required' }).trim(),
+})
+
+export type UpdateScheduleFormState = 
+| {error?: {
+    day_of_week?: string[];
+    start_time?: string[];
+    end_time?: string[];
+    effective_from?: string[];
+    effective_until?: string[];
+    is_recurring?: string[];
+    is_active?: string[];
+    cancellation_reason?: string[];
+    notes?: string[];
+}
+message?: string;
+}
+| undefined;
+
+export const getSchedualesForStudentSchema = zod.object({
+    student_id: zod.string({ error: 'Student ID must be a number' }),
+})
+
+export type GetSchedualesForStudentFormState = 
+| {error?: {
+    student_id?: string[];
+}
+message?: string;
+data?: openApi.ScheduleRead[];
+}
+| undefined;
