@@ -106,9 +106,9 @@ export default function Lessons() {
     }
 
 
-    // if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading lessons...</p>, title: "Lessons"})
-    // if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Lessons"})
-    // if (!lessons || lessons.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No lessons found.</p>, title: "Lessons"})
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading lessons...</p>, title: "Lessons"})
+    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Lessons"})
+    if (!lessons || lessons.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No lessons found.</p>, title: "Lessons"})
 
     if (fetchedLesson && getLessonState?.message == 'success') {
         return dashboardPage({children: [

@@ -1,6 +1,8 @@
 import { AttendanceStatus, LessonQuality, LessonType } from '@/lib/openApi';
 import * as zod from 'zod';
 import * as openApi from "../../lib/openApi"
+import { url } from 'inspector';
+import { access } from 'fs';
 
 export const SignUpSchema = zod.object({
     arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
@@ -217,5 +219,44 @@ export type GetSchedualesForStudentFormState =
 }
 message?: string;
 data?: openApi.ScheduleRead[];
+}
+| undefined;
+
+export const createLibraryItemSchema = zod.object({
+    title: zod.string().min(1, { error: 'Title is required' }).trim(),
+    url: zod.string().min(1, { error: 'URL is required' }).url({ error: 'Invalid URL format' }).trim(),
+    description: zod.string().min(0, { error: 'Description is required' }).trim(),
+    category: zod.string().min(1, { error: 'Category is required' }).trim(),
+    tags: zod.string().min(0, { error: 'Tags is required' }).trim(),
+    access_level: zod.enum(openApi.LibraryAccessLevel, { error: 'Access level is required' }),
+    thumbnail: zod.string().min(0, { error: 'Thumbnail is required' }).url({ error: 'Invalid URL format' }).trim(),
+    student_ids: zod.string().min(0, { error: 'Student IDs is required' }).trim(),
+})
+
+export type CreateLibraryItemFormState = 
+| {error?: {
+    title?: string[];
+    url?: string[];
+    description?: string[];
+    category?: string[];
+    tags?: string[];
+    access_level?: string[];
+    thumbnail?: string[];
+    student_ids?: string[];
+}
+message?: string;
+}
+| undefined;
+
+export const getLibraryItemByIDSchema = zod.object({
+    item_id: zod.string({ error: 'Item ID must be a number' }),
+})
+
+export type GetLibraryItemByIDFormState = 
+| {error?: {
+    item_id?: string[];
+}
+message?: string;
+data?: openApi.LibraryItemRead;
 }
 | undefined;

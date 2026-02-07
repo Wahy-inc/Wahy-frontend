@@ -2,85 +2,117 @@
 
 import React from "react";
 import * as openApi from "../../../lib/openApi"
-import { listScheduals } from "@/app/actions/dashboard";
+import { createLibraryItem, deleteLibraryItem, getLibraryItem, listLibrary } from "@/app/actions/dashboard";
 import dashboardPage from "../page";
-import * as icon from '@deemlol/next-icons'
+import titleElement from "./title_element";
+import { Field } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge"
+import * as icon from "lucide-react"
+import {
+  Card,
+  CardAction,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { dummyLibraryItems } from "@/lib/dummyData";
+import { Button } from "@/components/ui/button";
 
-enum weekDays {
-    saturday = 0,
-    sunday = 1,
-    monday = 2,
-    tuesday = 3,
-    wednesday = 4,
-    thursday = 5,
-    friday = 6
-}
 
 export default function Schedules() {
-    const [schedules, setSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
+    const [libraryItems, setLibraryItems] = React.useState<openApi.LibraryItemRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
+    const [createLibraryItemState, createLibraryItemAction, createLibraryItemPending] = React.useActionState(createLibraryItem, undefined)
+    const [getLibraryItemState, getLibraryItemAction, getLibraryItemPending] = React.useActionState(getLibraryItem, undefined)
+    const [createLibraryDialogOpen, setCreateLibraryDialogOpen] = React.useState(false)
+    const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
 
     React.useEffect(() => {
-        const fetchSchedules = async () => {
+        const fetchLibraryItems = async () => {
             try {
                 setLoading(true)
-                const data = await listScheduals()
-                setSchedules(data)
+                const data = await listLibrary()
+                setLibraryItems(data)
                 setError(null)
             } catch (err) {
-                setError('Failed to load schedules')
-                setSchedules(null)
+                setError('Failed to load library items')
+                setLibraryItems(null)
             } finally {
                 setLoading(false)
             }
         }
-        fetchSchedules()
+        fetchLibraryItems()
     }, [])
 
-    const formatDate = (isoDate: string): string => {
-        return new Date(isoDate).toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            second: '2-digit',
-            hour12: false,
-        })
-    }
-
-    const schedulesElement = (schedule: openApi.ScheduleRead) => (
-        <div className="overflow-hidden border-2 rounded-xl bg-white flex flex-col justify-start p-4 shadow-[0px_4px_30px_rgba(0,0,0,0.1)] opacity-90 backdrop-blur-sm hover:opacity-80 transition duration-300 hover:scale-101">
-            <div className='flex flex-row gap-8 justify-start items-center mb-4'>
-                <div id="profile-image" className="w-15 h-15 rounded-full bg-slate-800"></div>
-                <p id="name" className="text-4xl text-slate-800">{schedule.id}</p>
-            </div>
-            <p id="start" className="text-slate-700 text-xl flex items-center"><icon.Calendar className='inline mr-2' style={{color: 'rgba(125,125,125,0.8)'}}/> Day: {weekDays[schedule.day_of_week]}</p>
-            <p id="start" className="text-slate-700 text-xl flex items-center"><icon.Clock className='inline mr-2' style={{color: 'rgba(242,129,70,0.95)'}}/> Start at: {formatDate(schedule.start_time)}</p>
-            <p id="end" className="text-slate-700 text-xl flex items-center"><icon.Clock className='inline mr-2' style={{color: 'rgba(242,129,70,0.95)'}}/> End at: {formatDate(schedule.end_time)}</p>
-            <div className="grid grid-cols-2 mt-4 mb-2">
-                <p id="eff_from" className="text-slate-700 text-xl col-start-1 col-end-2 flex items-center"><icon.AlarmClockCheck className='inline mr-2' style={{color: 'rgba(70,242,155,0.95)'}}/> Effective from: {formatDate(schedule.effective_from)}</p>
-                <p id="eff_until" className="text-slate-700 text-xl col-start-2 col-end-3 flex items-center"><icon.AlarmClockMinus className='inline mr-2' style={{color: 'rgba(244,33,32,0.95)'}}/> Effective until: {schedule.effective_until? formatDate(schedule.effective_until) : 'No date Specified'}</p>
-            </div>
-            <div className="grid grid-cols-2 mt-2 mb-2">
-                <p id="recurring" className="text-xl col-start-1 col-end-2 flex items-center" style={{color: schedule.is_recurring? 'green' : '#fb2c36'}}><icon.RefreshCcw className='inline mr-2'/> Recurring {schedule.is_recurring? "✔" : "✘"}</p>
-                <p id="active" className="text-xl col-start-2 col-end-3 flex items-center" style={{color: schedule.is_active? 'green' : '#fb2c36'}}><icon.Power className='inline mr-2'/> Active {schedule.is_active? "✔" : "✘"}</p>
-            </div>
-            <p id="notes" className="w-full text-wrap text-[15px] text-slate-700 mt-2 mb-2 flex items-center"><icon.PenTool className='inline mr-2' style={{color: 'rgba(245,174,56,0.95)'}}/> "{schedule.notes}"</p>
-            {schedule.cancellation_reason && (<p id="cancel" className="w-full text-wrap text-[15px] text-red-500 mt-2 mb-2 flex items-center"><icon.AlertOctagon className='inline mr-2' style={{color: 'rgba(242,129,70,0.95)'}}/> {schedule.cancellation_reason}</p>)}
-        </div>
+    const fieldInput = (label: string, name: string, holder: string, type: string) => (        
+        <Field orientation="vertical" className='w-full inline'>
+            <Label htmlFor={name}>{label}</Label>
+            <Input id={name} name={name} type={type} placeholder={holder} defaultValue={holder}></Input>
+        </Field>
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: "Schedules"})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Schedules"})
-    if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: "Schedules"})
+    const libraryItemElement = (item: openApi.LibraryItemRead) => (
+            <Card className="relative mx-auto w-full max-w-sm pt-0 overflow-hidden pb-2 min-h-full flex flex-col justify-between">
+            <div onClick={() => window.location.href=item.external_url} className="cursor-pointer">
+                <div className="absolute inset-0 z-10 aspect-video bg-black/35" />
+                <img
+                    src={item.thumbnail_image_path || 'https://via.placeholder.com/400x200?text=No+Image'}
+                    alt="Event cover"
+                    className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale dark:brightness-40"
+                />
+                <CardHeader>
+                    <div className="grid grid-rows-3 gap-1 pt-1">
+                        <CardAction className='mb-3' style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '1 !important', gridRowEnd:'2 !important'}}>
+                            <Badge variant="secondary" className='mx-1'>{item.category || 'Uncategorized'}</Badge>
+                            <Badge variant="secondary" className='mx-1'>{item.access_level || 'No Access Level'}</Badge>
+                            <Badge variant="secondary" className='mx-1'>{item.download_count || '0'}</Badge>
+                            <Badge variant="secondary" className='mx-1'>{item.view_count || '0'}</Badge>
+                        </CardAction>
+                        <CardTitle style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '2 !important', gridRowEnd:'3 !important'}}>{item.title}</CardTitle>
+                        <CardDescription style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '3 !important', gridRowEnd:'4 !important'}}>
+                            {item.description && item.description.length > 100 ? item.description.substring(0, 100) + '...' : 'No description provided.'}
+                        </CardDescription>
+                    </div>
+                </CardHeader>
+                <CardFooter>
+                            {item.tags?.map((tag, index) => (
+                                <Badge key={index} variant="outline" className='mx-1'>{tag}</Badge>
+                            ))}
+                </CardFooter>
+                </div>
+                <Button onClick={() => deleteLibraryItem(item.id)} variant='destructive' className="transition duration-300 hover:bg-red-800 mx-2">
+                    <icon.Trash className="text-white cursor-pointer" size={16}/>
+                </Button>
+            </Card>
+    )
 
-    const content = schedules?.map((schedule) => (
-        <div key={schedule.id}>
-            {schedulesElement(schedule)}
+    // if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: "Schedules"})
+    // if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Schedules"})
+    // if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: "Schedules"})
+
+    const content = dummyLibraryItems?.map((item) => (
+        <div key={item.id} className="w-full">
+            {libraryItemElement(item)}
         </div>
     ))
 
-    return dashboardPage({children: content, title: "Schedules"})
+    return dashboardPage({children: <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-4 md:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>, title: titleElement({
+        title: "Library",
+        createAction: createLibraryItemAction,
+        createState: createLibraryItemState,
+        createPending: createLibraryItemPending,
+        getLibraryAction: getLibraryItemAction,
+        getLibraryState: getLibraryItemState,
+        getLibraryPending: getLibraryItemPending,
+        fieldInput: fieldInput,
+        createLibraryDialogOpen: createLibraryDialogOpen,
+        setcreateLibraryDialogOpen: setCreateLibraryDialogOpen,
+        getLibraryDialogOpen: getLibraryDialogOpen,
+        setgetLibraryDialogOpen: setGetLibraryDialogOpen,
+    }
+    )})
 }

@@ -65,7 +65,7 @@ export default function dashboardPage({children: children, title: title}: {child
                 <h2 className="text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => router.push('/dashboard/invoices')}> <icon.DollarSign className='inline mr-4'/>Invoices</h2>
             </div>
             <div id="content" className="m-20 w-full bg-slate-100 min-h-full flex flex-col rounded-xl">
-                <div id='title' className='sticky top-0 z-10 bg-slate-100 pt-10 px-10 rounded-xl'>
+                <div id='title' className='sticky top-0 z-50 bg-slate-100 pt-10 px-10 rounded-xl pb-4'>
                     {title}
                 </div>
                 {/* {dummySchedules.map((schedule) => (

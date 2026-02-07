@@ -20,7 +20,6 @@ import {
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import * as openApi from "@/lib/openApi";
 import { JSX } from "react";
 import { CreateScheduleFormState, GetSchedualesForStudentFormState } from "@/app/lib/definitions";
 

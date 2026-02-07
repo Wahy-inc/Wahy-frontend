@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as openApi from "../../../lib/openApi"
-import { createSchedule, getSchedulesForStudent, listSchedules, updateSchedule } from "@/app/actions/dashboard";
+import { createSchedule, deleteSchedule, getSchedulesForStudent, listSchedules, updateSchedule } from "@/app/actions/dashboard";
 import dashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
 import { dummySchedules } from "@/lib/dummyData";
@@ -11,9 +11,10 @@ import { UpdateScheduleFormState } from "@/app/lib/definitions";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Trash2Icon } from "lucide-react";
 
 enum weekDays {
     saturday = 0,
@@ -138,7 +139,7 @@ export default function Schedules() {
             </div>
             <p id="notes" className="w-full text-wrap text-[15px] text-slate-700 mt-2 mb-2 flex items-center"><icon.PenTool className='inline mr-2'/> "{schedule.notes}"</p>
             {schedule.cancellation_reason && (<p id="cancel" className="w-full text-wrap text-[15px] text-red-500 mt-2 mb-2 flex items-center"><icon.AlertOctagon className='inline mr-2'/> {schedule.cancellation_reason}</p>)}
-            <div className="flex flex-row justify-end">
+            <div className="flex flex-row justify-end items-end gap-4">
                     <AlertDialog open={updateScheduleDialogOpen} onOpenChange={updateScheduleState?.message == 'success'? () => setUpdateScheduleDialogOpen(false) : setUpdateScheduleDialogOpen}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 mt-4 cursor-pointer bg-slate-400 hover:bg-slate-600">Update Schedule</Button>
@@ -148,6 +149,7 @@ export default function Schedules() {
                             <AlertDialogHeader>
                             <AlertDialogTitle>Update Schedule</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
+                                    <input type="hidden" name="schedule_id" value={schedule.id} />
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className='flex flex-col'>
                                             <div className="flex flex-col">
@@ -245,13 +247,33 @@ export default function Schedules() {
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
+                    <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="destructive">Delete Schedule</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent size="sm">
+                        <AlertDialogHeader>
+                        <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                            <Trash2Icon />
+                        </AlertDialogMedia>
+                        <AlertDialogTitle>Delete Schedule?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            This will permanently delete this Schedule data.This operation is not reversible. Are you sure you want to continue?
+                        </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                        <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
+                        <AlertDialogAction variant="destructive" onClick={() => deleteSchedule(schedule.id)}>Delete</AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                    </AlertDialog>
             </div>
         </div>
     )
 
-    // if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: "Schedules"})
-    // if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Schedules"})
-    // if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: "Schedules"})
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: "Schedules"})
+    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Schedules"})
+    if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: "Schedules"})
 
     const content = dummySchedules?.map((schedule) => (
         <div key={schedule.id}>

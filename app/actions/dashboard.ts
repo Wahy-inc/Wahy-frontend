@@ -1,6 +1,6 @@
 import { dummyLessons } from "@/lib/dummyData"
 import * as openApi from "../../lib/openApi"
-import { CreateLessonFormState, CreateScheduleFormState, createScheduleSchema, CreatLessonSchema, GetLessonByIDFormState, GetSchedualesForStudentFormState, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema } from "../lib/definitions"
+import { CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreatLessonSchema, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetSchedualesForStudentFormState, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema } from "../lib/definitions"
 
 const api = new openApi.Api({
     baseUrl: 'http://10.60.184.80:8000',
@@ -139,6 +139,20 @@ export async function getSchedulesForStudent(state: GetSchedualesForStudentFormS
     }
 }
 
+export async function deleteSchedule(scheduleId: number): Promise<boolean> {
+    try {
+        const response = await api.api.deleteApiV1SchedulesScheduleIdDelete(scheduleId)
+
+        if (response.status === 204) {
+            listSchedules() // Refresh the schedules list after deleting a schedule
+            return true
+        }
+        return false
+    }   catch (error) {
+        return false
+    }
+}
+
 export async function listLessons(stu_id:number | null = null): Promise<openApi.LessonRead[] | null> {
     try {
         const response = await api.api.listAllApiV1LessonsGet({student_id: stu_id})
@@ -163,6 +177,76 @@ export async function listLibrary(): Promise<openApi.LibraryItemRead[] | null> {
     } catch (error) {
         return null
     }
+}
+
+export async function getLibraryItem(state: GetLibraryItemByIDFormState, formData: FormData): Promise<GetLibraryItemByIDFormState> {
+    const id = Number(formData.get('item-id'))
+    if (isNaN(id)) {
+        return { error: { item_id: ['Item ID must be a number'] } }
+    }
+    try {
+        const response = await api.api.getOneApiV1LibraryItemIdGet(id)
+
+        if (response.status === 200) {
+            return {message: 'success', data: response.data }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function createLibraryItem(state: CreateLibraryItemFormState, formData: FormData): Promise<CreateLibraryItemFormState> {
+    const validation = createLibraryItemSchema.safeParse({
+        title: formData.get('title'),
+        url: formData.get('url'),
+        description: formData.get('description'),
+        category: formData.get('category'),
+        tags: formData.get('tags'),
+        access_level: formData.get('access_level'),
+        thumbnail: formData.get('thumbnail'),
+        student_ids: formData.get('students_ids'),
+    })
+
+    if (!validation.success) {
+        return { error: validation.error.flatten().fieldErrors }
+    }
+    try {
+        const data = {
+            title: validation.data.title,
+            external_url: validation.data.url,
+            description: validation.data.description,
+            category: validation.data.category,
+            tags: validation.data.tags.split(',').map(tag => tag.trim()),
+            access_level: validation.data.access_level,
+            thumbnail_image_path: validation.data.thumbnail,
+            student_ids: validation.data.student_ids ? validation.data.student_ids.split(',').map(id => Number(id.trim())) : [],
+        }
+        const response = await api.api.createApiV1LibraryPost(data)
+
+        if (response.status === 201) {
+            listLibrary() // Refresh the library list after creating a new library item
+            return {message: 'success' }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function deleteLibraryItem(id: number): Promise<boolean> {
+    try {
+        const response = await api.api.deleteApiV1LibraryItemIdDelete(id)
+
+        if (response.status === 204) {
+            listLessons() // Refresh the schedules list after deleting a schedule
+            return true
+        }
+        return false
+    }   catch (error) {
+        return false
+    }
+
 }
 
 export async function listInvoices(stu_id:number | null): Promise<openApi.InvoiceRead[] | null> {
