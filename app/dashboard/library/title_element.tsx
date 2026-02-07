@@ -68,7 +68,7 @@ export default function titleElement({
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
                     <AlertDialog open={createLibraryDialogOpen} onOpenChange={createState?.message == 'success'? () => setcreateLibraryDialogOpen(false) : setcreateLibraryDialogOpen}>
                         <AlertDialogTrigger asChild>
-                            <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Schedule</Button>
+                            <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Library Item</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <form action={createAction}>
@@ -89,7 +89,7 @@ export default function titleElement({
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className='flex flex-col'>
-                                            {fieldInput("Category","category", "text", "text")}
+                                            {fieldInput("Category","category", "Enter category...", "text")}
                                             {createState?.error?.category && <p className="text-red-500 text-sm">{createState.error.category}</p>}
                                         </div>
                                         <div className='flex flex-col'>
@@ -123,7 +123,7 @@ export default function titleElement({
                     </AlertDialog>
                     <AlertDialog open={getLibraryDialogOpen} onOpenChange={getLibraryState?.message == 'success'? () => setgetLibraryDialogOpen(false) : setgetLibraryDialogOpen}>
                     <AlertDialogTrigger asChild>
-                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Schedules for student</Button>
+                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Library Item</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <form action={getLibraryAction}>

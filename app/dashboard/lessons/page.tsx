@@ -105,10 +105,28 @@ export default function Lessons() {
         }
     }
 
+    const title = titleElement({
+            title: displayTitle,
+            handleSearchStudentId: handleSearchStudentId,
+            searchStudentId: searchStudentId,
+            handleClearFilter: handleClearFilter,
+            getLessonState: getLessonState,
+            getLessonAction: getLessonAction,
+            getLessonPending: getLessonPending,
+            createState: createState,
+            createAction: createAction,
+            createPending: createPending,
+            fieldInput: fieldInput,
+            createLessonDialogOpen: createLessonDialogOpen,
+            setCreateLessonDialogOpen: setCreateLessonDialogOpen,
+            getLessonDialogOpen: getLessonDialogOpen,
+            setGetLessonDialogOpen: setGetLessonDialogOpen,
+        })
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading lessons...</p>, title: "Lessons"})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Lessons"})
-    if (!lessons || lessons.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No lessons found.</p>, title: "Lessons"})
+
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading lessons...</p>, title: title})
+    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
+    if (!lessons || lessons.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No lessons found.</p>, title: title})
 
     if (fetchedLesson && getLessonState?.message == 'success') {
         return dashboardPage({children: [
@@ -133,23 +151,7 @@ export default function Lessons() {
                 getLessonPending: getLessonPending
             })})
     } else {
-        return dashboardPage({children: displayContent, title: titleElement({
-            title: displayTitle,
-            handleSearchStudentId: handleSearchStudentId,
-            searchStudentId: searchStudentId,
-            handleClearFilter: handleClearFilter,
-            getLessonState: getLessonState,
-            getLessonAction: getLessonAction,
-            getLessonPending: getLessonPending,
-            createState: createState,
-            createAction: createAction,
-            createPending: createPending,
-            fieldInput: fieldInput,
-            createLessonDialogOpen: createLessonDialogOpen,
-            setCreateLessonDialogOpen: setCreateLessonDialogOpen,
-            getLessonDialogOpen: getLessonDialogOpen,
-            setGetLessonDialogOpen: setGetLessonDialogOpen,
-        })})
+        return dashboardPage({children: displayContent, title: title})
     }
 
 }

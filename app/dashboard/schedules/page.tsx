@@ -271,17 +271,7 @@ export default function Schedules() {
         </div>
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: "Schedules"})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Schedules"})
-    if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: "Schedules"})
-
-    const content = dummySchedules?.map((schedule) => (
-        <div key={schedule.id}>
-            {schedulesElement(schedule)}
-        </div>
-    ))
-
-    return dashboardPage({children: content, title: titleElement({
+    const title = titleElement({
         title: "Schedules",
         handleSearchStudentId: handleSearchStudentId,
         searchStudentId: searchStudentId,
@@ -297,6 +287,16 @@ export default function Schedules() {
         setcreateScheduleDialogOpen: setCreateScheduleDialogOpen,
         getStudentScheduleDialogOpen: getScheduleDialogOpen,
         setgetStudentScheduleDialogOpen: setGetScheduleDialogOpen,
-    }
-    )})
+    })
+
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: title})
+    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
+    if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: title})
+    const content = dummySchedules?.map((schedule) => (
+        <div key={schedule.id}>
+            {schedulesElement(schedule)}
+        </div>
+    ))
+
+    return dashboardPage({children: content, title: title})
 }
