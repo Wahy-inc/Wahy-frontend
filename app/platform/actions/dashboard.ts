@@ -1,4 +1,3 @@
-import { dummyLessons } from "@/lib/dummyData"
 import * as openApi from "@/lib/openApi"
 import { CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetSchedualesForStudentFormState, GetStudentFormState, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState } from "@/app/platform/lib/definitions"
 
@@ -401,16 +400,16 @@ export async function deleteLibraryItem(id: number): Promise<boolean> {
 
 }
 
-export async function listInvoices(stu_id:number | null): Promise<openApi.InvoiceRead[] | null> {
+export async function listInvoices(): Promise<openApi.InvoiceRead[]> {
     try {
-        const response = await api.api.listAllApiV1InvoicesGet({student_id: stu_id})
+        const response = await api.api.listAllApiV1InvoicesGet()
 
         if (response.status === 200) {
             return response.data
         }
-        return null
+        return []
     } catch (error) {
-        return null
+        return []
     }
 }
 

@@ -349,3 +349,11 @@ export type UpdateStudentFormState =
 message?: string;
 }
 | undefined;
+
+export const createInvoiceSchema = zod.object({
+    student_id: zod.string({ error: 'Student ID must be a number' }),
+    period_from: zod.string().min(1, { error: 'Period from is required' }).trim(),
+    period_to: zod.string().min(1, { error: 'Period to is required' }).trim(),
+    due_date: zod.string().min(1, { error: 'Due date is required' }).trim(),
+})
+ 

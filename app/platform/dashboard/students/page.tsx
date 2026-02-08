@@ -110,7 +110,7 @@ export default function Students() {
                         <AlertDialogTrigger asChild>
                             <ItemActions>
                                 <Button onClick={() => (student.id, {})} size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white">
-                                    Update
+                                    Information
                                 </Button>
                             </ItemActions>
                         </AlertDialogTrigger>
