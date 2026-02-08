@@ -20,7 +20,7 @@ export default function SignUp() {
     }
 
     return (
-    <form action={action} className="w-xs lg:w-5xl mx-auto my-10 border-2 border-slate-800 p-6 rounded-lg shadow-lg bg-slate-800 text-slate-100">
+    <form action={action} className="w-xs lg:w-5xl mx-auto my-30 border-2 border-slate-800 p-6 rounded-lg shadow-lg bg-slate-800 text-slate-100">
     <FieldGroup>
       <div className="flex flex-row justify-between gap-3">
       <Field>

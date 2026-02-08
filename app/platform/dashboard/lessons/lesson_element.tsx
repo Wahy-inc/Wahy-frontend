@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { columns, HWcolumns } from "./columns"
 import * as Icon from '@deemlol/next-icons'
 import { JSX } from "react"
-import { UpdateLessonFormState } from "@/app/lib/definitions"
+import { UpdateLessonFormState } from "@/app/platform/lib/definitions"
 
 const getQuality = (quality: string | null) => {
         switch (quality) {
@@ -43,9 +43,9 @@ export default function lessonElement({lesson, updateAction, updateState, update
                 <p className="text-lg text-slate-600 pb-0.5">New Memorization</p>
                 <DataTable columns={HWcolumns} data={[lesson]} />
             </div>
-            {lesson.absence_reason && <p className="w-full text-[12px] text-slate-600"><span className="font-bold text-slate-800">Absence Reason</span> "{lesson.absence_reason}"</p>}
-            {lesson.sheikh_notes && <p className="w-full text-[12px] text-slate-600"><span className="font-bold text-slate-800">Sheikh Notes</span> "{lesson.sheikh_notes}"</p>}
-            {lesson.student_notes && <p className="w-full text-[12px] text-slate-600"><span className="font-bold text-slate-800">Student Notes</span> "{lesson.student_notes}"</p>}
+            {lesson.absence_reason && <p className="w-full text-[12px] text-slate-600"><span className="font-bold text-slate-800">Absence Reason</span> &quot;{lesson.absence_reason}&quot;</p>}
+            {lesson.sheikh_notes && <p className="w-full text-[12px] text-slate-600"><span className="font-bold text-slate-800">Sheikh Notes</span> &quot;{lesson.sheikh_notes}&quot;</p>}
+            {lesson.student_notes && <p className="w-full text-[12px] text-slate-600"><span className="font-bold text-slate-800">Student Notes</span> &quot;{lesson.student_notes}&quot;</p>}
             <div className="flex flex-row justify-end">
                     <AlertDialog open={updateLessonDialogOpen} onOpenChange={updateState?.message == 'success'? () => setUpdateLessonDialogOpen(false) : setUpdateLessonDialogOpen}>
                         <AlertDialogTrigger asChild>

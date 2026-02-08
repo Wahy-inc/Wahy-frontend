@@ -1,7 +1,7 @@
 'use client'
 
 import {ColumnDef} from "@tanstack/react-table";
-import * as openApi from "../../../lib/openApi"
+import * as openApi from "@/lib/openApi"
 
 export const columns: ColumnDef<openApi.LessonRead>[] = [
     {

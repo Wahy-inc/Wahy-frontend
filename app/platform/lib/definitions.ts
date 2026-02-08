@@ -1,8 +1,6 @@
 import { AttendanceStatus, LessonQuality, LessonType } from '@/lib/openApi';
 import * as zod from 'zod';
-import * as openApi from "../../lib/openApi"
-import { url } from 'inspector';
-import { access } from 'fs';
+import * as openApi from "@/lib/openApi";
 
 export const SignUpSchema = zod.object({
     arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
@@ -258,5 +256,96 @@ export type GetLibraryItemByIDFormState =
 }
 message?: string;
 data?: openApi.LibraryItemRead;
+}
+| undefined;
+
+export const createStudentSchema = zod.object({
+    id: zod.string({ error: 'ID must be a number' }),
+    arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
+    enname: zod.string().min(1, { error: 'Name is required' }).regex(/^[A-Za-z\s]+$/, { error: 'Name must be in English' }).trim(),
+    phone: zod.string().min(1, { error: 'Phone number is required' }).trim(),
+    dateOfBirth: zod.string().min(1, { error: 'Date of birth is required' }).trim(),
+    timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
+    currjuz: zod.string().min(1, { error: 'Current Juz is required' }).trim(),
+    currsurah: zod.string().min(1, { error: 'Current Surah is required' }).trim(),
+    currayah: zod.string().min(1, { error: 'Current Ayah is required' }).trim(),
+    lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
+    lessonRate: zod.string().min(1, { error: 'Lesson rate is required' }).trim(),
+    BillingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }),
+    specialNotes: zod.string().min(0, { error: 'Special notes is required' }).trim(),
+    privateNotes: zod.string().min(0, { error: 'Private notes is required' }).trim(),
+})
+
+export type CreateStudentFormState = 
+| {error?: {
+    id?: string[];
+    arname?: string[];
+    enname?: string[];
+    phone?: string[];
+    dateOfBirth?: string[];
+    timeZone?: string[];
+    currjuz?: string[];
+    currsurah?: string[];
+    currayah?: string[];
+    lessonsPerWeek?: string[];
+    lessonRate?: string[];
+    BillingCycle?: string[];
+    specialNotes?: string[];
+    privateNotes?: string[];
+}
+message?: string;
+}
+| undefined;
+
+export const getStudentSchema = zod.object({
+    id: zod.string({ error: 'ID must be a number' }),
+})
+
+export type GetStudentFormState = 
+| {error?: {
+    id?: string[];
+}
+message?: string;
+data?: openApi.StudentRead;
+}
+| undefined;
+
+export const updateStudentSchema = zod.object({
+    arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
+    enname: zod.string().min(1, { error: 'Name is required' }).regex(/^[A-Za-z\s]+$/, { error: 'Name must be in English' }).trim(),
+    phone: zod.string().min(1, { error: 'Phone number is required' }).trim(),
+    dateOfBirth: zod.string().min(1, { error: 'Date of birth is required' }).trim(),
+    timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
+    registerationStatus: zod.enum(openApi.RegistrationStatus, { error: 'Invalid registration status' }),
+    status: zod.enum(openApi.StudentStatus, { error: 'Invalid student status' }),
+    currjuz: zod.string().min(1, { error: 'Current Juz is required' }).trim(),
+    currsurah: zod.string().min(1, { error: 'Current Surah is required' }).trim(),
+    currayah: zod.string().min(1, { error: 'Current Ayah is required' }).trim(),
+    lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
+    lessonRate: zod.string().min(1, { error: 'Lesson rate is required' }).trim(),
+    BillingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }),
+    specialNotes: zod.string().min(0, { error: 'Special notes is required' }).trim(),
+    privateNotes: zod.string().min(0, { error: 'Private notes is required' }).trim(),
+})
+
+export type UpdateStudentFormState = 
+| {error?: {
+    arname?: string[];
+    enname?: string[];
+    phone?: string[];
+    dateOfBirth?: string[];
+    timeZone?: string[];
+    registerationStatus?: string[];
+    status?: string[];
+    currjuz?: string[];
+    currsurah?: string[];
+    currayah?: string[];
+    lessonsPerWeek?: string[];
+    lessonRate?: string[];
+    BillingCycle?: string[];
+    specialNotes?: string[];
+    privateNotes?: string[];
+}
+message?: string;
 }
 | undefined;

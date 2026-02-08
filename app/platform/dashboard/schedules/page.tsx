@@ -1,13 +1,13 @@
 'use client'
 
 import React from "react";
-import * as openApi from "../../../lib/openApi"
-import { createSchedule, deleteSchedule, getSchedulesForStudent, listSchedules, updateSchedule } from "@/app/actions/dashboard";
+import * as openApi from "@/lib/openApi"
+import { createSchedule, deleteSchedule, getSchedulesForStudent, listSchedules, updateSchedule } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
 import { dummySchedules } from "@/lib/dummyData";
 import titleElement from "./title_element";
-import { UpdateScheduleFormState } from "@/app/lib/definitions";
+import { UpdateScheduleFormState } from "@/app/platform/lib/definitions";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -137,7 +137,7 @@ export default function Schedules() {
             <div className="grid grid-cols-2 mt-2 mb-2">
                 <p id="recurring" className="text-xl col-start-1 col-end-2 flex items-center"><icon.RefreshCcw className='inline mr-2'/> Recurring: {schedule.is_recurring? "Yes" : "No"}</p>
             </div>
-            <p id="notes" className="w-full text-wrap text-[15px] text-slate-700 mt-2 mb-2 flex items-center"><icon.PenTool className='inline mr-2'/> "{schedule.notes}"</p>
+            <p id="notes" className="w-full text-wrap text-[15px] text-slate-700 mt-2 mb-2 flex items-center"><icon.PenTool className='inline mr-2'/> &quot;{schedule.notes}&quot;</p>
             {schedule.cancellation_reason && (<p id="cancel" className="w-full text-wrap text-[15px] text-red-500 mt-2 mb-2 flex items-center"><icon.AlertOctagon className='inline mr-2'/> {schedule.cancellation_reason}</p>)}
             <div className="flex flex-row justify-end items-end gap-4">
                     <AlertDialog open={updateScheduleDialogOpen} onOpenChange={updateScheduleState?.message == 'success'? () => setUpdateScheduleDialogOpen(false) : setUpdateScheduleDialogOpen}>

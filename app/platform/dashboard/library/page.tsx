@@ -1,8 +1,8 @@
 'use client'
 
 import React from "react";
-import * as openApi from "../../../lib/openApi"
-import { createLibraryItem, deleteLibraryItem, getLibraryItem, listLibrary } from "@/app/actions/dashboard";
+import * as openApi from "@/lib/openApi"
+import { createLibraryItem, deleteLibraryItem, getLibraryItem, listLibrary } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import titleElement from "./title_element";
 import { Field } from "@/components/ui/field";
@@ -66,12 +66,12 @@ export default function Schedules() {
                 />
                 <CardHeader>
                     <div className="grid grid-rows-3 gap-1 pt-1">
-                        <CardAction className='mb-3' style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '1 !important', gridRowEnd:'2 !important'}}>
+                        <div className='mb-3' style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '1 !important', gridRowEnd:'2 !important'}}>
                             <Badge variant="secondary" className='mx-1'>{item.category || 'Uncategorized'}</Badge>
                             <Badge variant="secondary" className='mx-1'>{item.access_level || 'No Access Level'}</Badge>
                             <Badge variant="secondary" className='mx-1'>{item.download_count || '0'}</Badge>
                             <Badge variant="secondary" className='mx-1'>{item.view_count || '0'}</Badge>
-                        </CardAction>
+                        </div>
                         <CardTitle style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '2 !important', gridRowEnd:'3 !important'}}>{item.title}</CardTitle>
                         <CardDescription style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '3 !important', gridRowEnd:'4 !important'}}>
                             {item.description && item.description.length > 100 ? item.description.substring(0, 100) + '...' : 'No description provided.'}

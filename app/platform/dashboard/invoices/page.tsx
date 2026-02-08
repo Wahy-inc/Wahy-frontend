@@ -1,8 +1,8 @@
 'use client'
 
 import React from "react";
-import * as openApi from "../../../lib/openApi"
-import { listScheduals } from "@/app/actions/dashboard";
+import * as openApi from "@/lib/openApi"
+import { listSchedules } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
 
@@ -25,7 +25,7 @@ export default function Schedules() {
         const fetchSchedules = async () => {
             try {
                 setLoading(true)
-                const data = await listScheduals()
+                const data = await listSchedules()
                 setSchedules(data)
                 setError(null)
             } catch (err) {

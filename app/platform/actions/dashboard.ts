@@ -1,6 +1,6 @@
 import { dummyLessons } from "@/lib/dummyData"
-import * as openApi from "../../lib/openApi"
-import { CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreatLessonSchema, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetSchedualesForStudentFormState, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema } from "../lib/definitions"
+import * as openApi from "@/lib/openApi"
+import { CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetSchedualesForStudentFormState, GetStudentFormState, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState } from "@/app/platform/lib/definitions"
 
 const api = new openApi.Api({
     baseUrl: 'http://10.60.184.80:8000',
@@ -28,6 +28,158 @@ export async function listStudents(): Promise<openApi.StudentRead[] | null> {
         return null
     } catch (error) {
         return null
+    }
+}
+
+export async function createStudent(state: CreateStudentFormState, formData: FormData): Promise<CreateStudentFormState> {
+    const validation = createStudentSchema.safeParse({
+        id: formData.get('id'),
+        arname: formData.get('ar-name'),
+        enname: formData.get('en-name'),
+        phone: formData.get('phone'),
+        date_of_birth: formData.get('date-of-birth'),
+        timezone: formData.get('time-zone'),
+        current_juz: formData.get('current-juz'),
+        current_surah: formData.get('current-surah'),
+        current_ayah: formData.get('current-ayah'),
+        lessons_per_week: formData.get('lessons-per-week'),
+        lesson_rate: formData.get('lesson-rate'),
+        billing_cycle: formData.get('billing-cycle'),
+        special_notes: formData.get('special-notes'),
+        private_notes: formData.get('private-notes'),
+    })
+
+    if (!validation.success) {
+        return { error: validation.error.flatten().fieldErrors }
+    }
+
+    try {
+        const data: openApi.StudentCreate = {
+            user_id: Number(validation.data.id),
+            full_name_arabic: validation.data.arname,
+            full_name_english: validation.data.enname,
+            phone: validation.data.phone,
+            date_of_birth: validation.data.dateOfBirth,
+            timezone: validation.data.timeZone,
+            current_juz: Number(validation.data.currjuz),
+            current_surah: validation.data.currsurah,
+            current_ayah: Number(validation.data.currayah),
+            lessons_per_week: Number(validation.data.lessonsPerWeek),
+            lesson_rate: Number(validation.data.lessonRate),
+            billing_cycle: validation.data.BillingCycle as openApi.BillingCycle,
+            special_notes: validation.data.specialNotes,
+            private_notes: validation.data.privateNotes,
+        }
+        const response = await api.api.createApiV1StudentsPost(data)
+
+        if (response.status === 201) {
+            listStudents() // Refresh the students list after creating a new student
+            return {message: 'success' }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function getStudent(state: GetStudentFormState, formData: FormData): Promise<GetStudentFormState> {
+    const id = Number(formData.get('student-id'))
+
+    if (isNaN(id)) {
+        return { error: { id: ['Student ID must be a number'] } }
+    }
+
+    try {
+        const response = await api.api.getOneApiV1StudentsStudentIdGet(id)
+        if (response.status === 200) {
+            return { data: response.data }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function updateStudent(state: UpdateStudentFormState, formData: FormData, studentId: number): Promise<UpdateStudentFormState> {
+    const validation = createStudentSchema.safeParse({
+        arname: formData.get('ar-name'),
+        enname: formData.get('en-name'),
+        phone: formData.get('phone'),
+        date_of_birth: formData.get('date-of-birth'),
+        timezone: formData.get('time-zone'),
+        current_juz: formData.get('current-juz'),
+        current_surah: formData.get('current-surah'),
+        current_ayah: formData.get('current-ayah'),
+        lessons_per_week: formData.get('lessons-per-week'),
+        lesson_rate: formData.get('lesson-rate'),
+        billing_cycle: formData.get('billing-cycle'),
+        special_notes: formData.get('special-notes'),
+        private_notes: formData.get('private-notes'),
+    })
+
+    if (!validation.success) {
+        return { error: validation.error.flatten().fieldErrors }
+    }
+
+    try {
+        const data: openApi.StudentUpdate = {
+            full_name_arabic: validation.data.arname,
+            full_name_english: validation.data.enname,
+            phone: validation.data.phone,
+            date_of_birth: validation.data.dateOfBirth,
+            timezone: validation.data.timeZone,
+            current_juz: Number(validation.data.currjuz),
+            current_surah: validation.data.currsurah,
+            current_ayah: Number(validation.data.currayah),
+            lessons_per_week: Number(validation.data.lessonsPerWeek),
+            lesson_rate: Number(validation.data.lessonRate),
+            billing_cycle: validation.data.BillingCycle as openApi.BillingCycle,
+            special_notes: validation.data.specialNotes,
+            private_notes: validation.data.privateNotes,
+        }
+        const response = await api.api.updateApiV1StudentsStudentIdPatch(studentId, data)
+
+        if (response.status === 200) {
+            listStudents() // Refresh the students list after updating a student
+            return {message: 'success' }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function approveStudent(id:number, note: openApi.StudentApprovalRequest): Promise<boolean> {
+    const studentId = Number(id)
+    if (isNaN(studentId)) {
+        return false
+    }
+    try {
+        const response = await api.api.approveApiV1StudentsStudentIdApprovePost(id, note)
+        if (response.status === 200) {
+            listStudents() // Refresh the students list after approving a student
+            return true
+        }
+        return false
+    } catch (error) {
+        return false
+    }
+}
+
+export async function rejectStudent(id:number, note: openApi.StudentApprovalRequest): Promise<boolean> {
+    const studentId = Number(id)
+    if (isNaN(studentId)) {
+        return false
+    }
+    try {
+        const response = await api.api.rejectApiV1StudentsStudentIdRejectPost(id, note)
+        if (response.status === 200) {
+            listStudents() // Refresh the students list after approving a student
+            return true
+        }
+        return false
+    } catch (error) {
+        return false
     }
 }
 

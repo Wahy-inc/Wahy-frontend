@@ -1,15 +1,15 @@
 'use client'
 
 import React, { useActionState } from "react";
-import * as openApi from "../../../lib/openApi"
-import { createLesson, getLessonByID, listLessons, updateLesson } from "@/app/actions/dashboard";
+import * as openApi from "@/lib/openApi"
+import { createLesson, getLessonByID, listLessons, updateLesson } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import { dummyLessons } from "@/lib/dummyData";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UpdateLessonFormState } from "@/app/lib/definitions";
+import { UpdateLessonFormState } from "@/app/platform/lib/definitions";
 import lessonElement from "./lesson_element";
 import titleElement from "./title_element";
 
@@ -82,7 +82,7 @@ export default function Lessons() {
         }
     }
 
-    let content = lessons?.map((lesson) => (
+    const content = lessons?.map((lesson) => (
         <div key={lesson.id}>
             {lessonElement({lesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput})}
         </div>
@@ -93,7 +93,7 @@ export default function Lessons() {
 
     if (searchStudentId && filteredLessons) {
         if (filteredLessons.length === 0) {
-            displayContent = [<p className="text-slate-700 text-xl">No lessons found for student ID: {searchStudentId}</p>]
+            displayContent = [<p key="no-lessons" className="text-slate-700 text-xl">No lessons found for student ID: {searchStudentId}</p>]
             displayTitle = `Lessons - Student ${searchStudentId}`
         } else {
             displayContent = filteredLessons.map((lesson) => (
@@ -130,7 +130,7 @@ export default function Lessons() {
 
     if (fetchedLesson && getLessonState?.message == 'success') {
         return dashboardPage({children: [
-            <div className='flex flex-row justify-end'>
+            <div key="clear-filter" className='flex flex-row justify-end'>
                 <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLesson(null)}}>Clear Filter</Button>
             </div>
             ,<div key={fetchedLesson.id}>{lessonElement({lesson: fetchedLesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput})}</div>], title: titleElement({

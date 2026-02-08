@@ -8,30 +8,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { JSX } from "react";
-import { CreateLibraryItemFormState, CreateScheduleFormState, GetLibraryItemByIDFormState, GetSchedualesForStudentFormState } from "@/app/lib/definitions";
-
-enum weekDays {
-    saturday = 0,
-    sunday = 1,
-    monday = 2,
-    tuesday = 3,
-    wednesday = 4,
-    thursday = 5,
-    friday = 6
-}
+import { CreateLibraryItemFormState, GetLibraryItemByIDFormState } from "@/app/platform/lib/definitions";
 
 export default function titleElement({
     title,

@@ -21,7 +21,7 @@ import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { JSX } from "react";
-import { CreateScheduleFormState, GetSchedualesForStudentFormState } from "@/app/lib/definitions";
+import { CreateScheduleFormState, GetSchedualesForStudentFormState } from "@/app/platform/lib/definitions";
 
 enum weekDays {
     saturday = 0,
