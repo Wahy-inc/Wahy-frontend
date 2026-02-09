@@ -26,15 +26,20 @@ import {
 } from "@/components/ui/accordion"
 import {DollarSign} from 'lucide-react'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { useAuth } from "@/lib/auth-context";
+import { GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
 
 export default function Invoices() {
-    const role = localStorage.getItem('role')
+    const { isAdmin, isLoading: authLoading } = useAuth()
     const [invoices, setInvoices] = React.useState<openApi.InvoiceRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const [overrideInvoiceState, overrideInvoiceAction, overrideInvoicePending] = React.useActionState(overrideInvoice, undefined)
     const [createInvoiceState, createInvoiceAction, createInvoicePending] = React.useActionState(createInvoices, undefined)
-    const [getInvoiceState, getInvoiceAction, getInvoicePending] = React.useActionState(role == 'admin'? getInvoice : getInvoiceMe, undefined)
+    const getInvoiceAction = async (state: GetInvoiceByIDFormState, formData: FormData) => {
+        return isAdmin ? getInvoice(state, formData) : getInvoiceMe(state, formData)
+    }
+    const [getInvoiceState, getInvoiceFormAction, getInvoicePending] = React.useActionState(getInvoiceAction, undefined)
     const [payInvoiceState, payInvoiceAction, payInvoicePending] = React.useActionState(markInvoiceAsPaid, undefined)
     const [createInvoiceDialogOpen, setCreateInvoiceDialogOpen] = React.useState(false)
     const [getInvoiceDialogOpen, setGetInvoiceDialogOpen] = React.useState(false)
@@ -48,15 +53,15 @@ export default function Invoices() {
     }, [getInvoiceState])
 
     React.useEffect(() => {
+        if (authLoading) return
+        
         const fetchInvoices = async () => {
             try {
                 setLoading(true)
-                const role = localStorage.getItem('role')
-                if (role == 'admin') {
+                if (isAdmin) {
                     const data = await listInvoices()
                     setInvoices(data)
-                } 
-                if (role == 'student') {
+                } else {
                     const data = await listInvoicesMe()
                     setInvoices(data)
                 }
@@ -69,7 +74,7 @@ export default function Invoices() {
             }
         }
         fetchInvoices()
-    }, [])
+    }, [authLoading, isAdmin])
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
         <Field orientation="vertical" className='w-full inline'>
@@ -109,7 +114,7 @@ export default function Invoices() {
                 </ItemContent>
                 <ItemActions>
                     <Button size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white" onClick={() => {
-                        if (role == 'admin') {
+                        if (isAdmin) {
                             downloadInvoicePDF(invoice.id)
                         } else {
                             downloadInvoicePDFMe(invoice.id)
@@ -118,7 +123,7 @@ export default function Invoices() {
                         Download PDF
                     </Button>
                 </ItemActions>
-                {role == 'admin'? (
+                {isAdmin ? (
                     <div>
                     {invoice.status === openApi.InvoiceStatus.Generated? (
                         <ItemActions>
@@ -211,7 +216,7 @@ export default function Invoices() {
         createAction: createInvoiceAction,
         createState: createInvoiceState,
         createPending: createInvoicePending,
-        getInvoiceAction: getInvoiceAction,
+        getInvoiceAction: getInvoiceFormAction,
         getInvoiceState: getInvoiceState,
         getInvoicePending: getInvoicePending,
         fieldInput: fieldInput,
@@ -295,7 +300,7 @@ export default function Invoices() {
         createAction: createInvoiceAction,
         createState: createInvoiceState,
         createPending: createInvoicePending,
-        getInvoiceAction: getInvoiceAction,
+        getInvoiceAction: getInvoiceFormAction,
         getInvoiceState: getInvoiceState,
         getInvoicePending: getInvoicePending,
         fieldInput: fieldInput,

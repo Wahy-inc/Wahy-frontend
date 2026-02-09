@@ -9,20 +9,24 @@ import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UpdateLessonFormState } from "@/app/platform/lib/definitions";
+import { UpdateLessonFormState, GetLessonByIDFormState } from "@/app/platform/lib/definitions";
 import lessonElement from "./lesson_element";
 import titleElement from "./title_element";
+import { useAuth } from "@/lib/auth-context";
 
 
 export default function Lessons() {
-    const role = localStorage.getItem('role')
+    const { isAdmin, isLoading: authLoading } = useAuth()
     const [lessons, setLessons] = React.useState<openApi.LessonRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const [createState, createAction, createPending] = useActionState(createLesson, undefined)
     const updateLessonAction = (state: UpdateLessonFormState, formData: FormData) => updateLesson(state, formData, Number(formData.get('lesson-id')))
     const [updateState, updateAction, updatePending] = useActionState(updateLessonAction, undefined)
-    const [getLessonState, getLessonAction, getLessonPending] = useActionState(role === 'admin' ? getLessonByID : getLessonByIDMe, undefined)
+    const getLessonAction = async (state: GetLessonByIDFormState, formData: FormData) => {
+        return isAdmin ? getLessonByID(state, formData) : getLessonByIDMe(state, formData)
+    }
+    const [getLessonState, getLessonFormAction, getLessonPending] = useActionState(getLessonAction, undefined)
     const [fetchedLesson, setFetchedLesson] = React.useState<openApi.LessonRead | null>(null)
     const [getLessonDialogOpen, setGetLessonDialogOpen] = React.useState(false)
     const [createLessonDialogOpen, setCreateLessonDialogOpen] = React.useState(false)
@@ -31,10 +35,12 @@ export default function Lessons() {
     const [filteredLessons, setFilteredLessons] = React.useState<openApi.LessonRead[] | null>(null)
 
     React.useEffect(() => {
+        if (authLoading) return
+        
         const fetchLessons = async () => {
             try {
                 setLoading(true)
-                const data = await (role === 'admin' ? listLessons() : listLessonsMe())
+                const data = await (isAdmin ? listLessons() : listLessonsMe())
                 setLessons(data)
                 setError(null)
             } catch (err) {
@@ -45,7 +51,7 @@ export default function Lessons() {
             }
         }
         fetchLessons()
-    }, [])
+    }, [authLoading, isAdmin])
 
     React.useEffect(() => {
         if (getLessonState?.message == 'success' && getLessonState.data) {
@@ -112,7 +118,7 @@ export default function Lessons() {
             searchStudentId: searchStudentId,
             handleClearFilter: handleClearFilter,
             getLessonState: getLessonState,
-            getLessonAction: getLessonAction,
+            getLessonAction: getLessonFormAction,
             getLessonPending: getLessonPending,
             createState: createState,
             createAction: createAction,
@@ -148,7 +154,7 @@ export default function Lessons() {
                 searchStudentId: searchStudentId,
                 handleClearFilter: handleClearFilter,
                 getLessonState: getLessonState,
-                getLessonAction: getLessonAction,
+                getLessonAction: getLessonFormAction,
                 getLessonPending: getLessonPending
             })})
     } else {
