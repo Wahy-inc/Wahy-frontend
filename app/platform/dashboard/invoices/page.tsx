@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createInvoices, createStudent, downloadInvoicePDF, getInvoice, getLocalStudent, getStudent, listInvoices, listStudents, markInvoiceAsPaid, overrideInvoice, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
+import { createInvoices, createStudent, downloadInvoicePDF, downloadInvoicePDFMe, getInvoice, getInvoiceMe, getLocalStudent, getStudent, listInvoices, listInvoicesMe, listStudents, markInvoiceAsPaid, overrideInvoice, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import titleElement from "./title_element";
 import { Field } from "@/components/ui/field";
@@ -28,12 +28,13 @@ import {DollarSign} from 'lucide-react'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 export default function Invoices() {
+    const role = localStorage.getItem('role')
     const [invoices, setInvoices] = React.useState<openApi.InvoiceRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const [overrideInvoiceState, overrideInvoiceAction, overrideInvoicePending] = React.useActionState(overrideInvoice, undefined)
     const [createInvoiceState, createInvoiceAction, createInvoicePending] = React.useActionState(createInvoices, undefined)
-    const [getInvoiceState, getInvoiceAction, getInvoicePending] = React.useActionState(getInvoice, undefined)
+    const [getInvoiceState, getInvoiceAction, getInvoicePending] = React.useActionState(role == 'admin'? getInvoice : getInvoiceMe, undefined)
     const [payInvoiceState, payInvoiceAction, payInvoicePending] = React.useActionState(markInvoiceAsPaid, undefined)
     const [createInvoiceDialogOpen, setCreateInvoiceDialogOpen] = React.useState(false)
     const [getInvoiceDialogOpen, setGetInvoiceDialogOpen] = React.useState(false)
@@ -50,11 +51,18 @@ export default function Invoices() {
         const fetchInvoices = async () => {
             try {
                 setLoading(true)
-                const data = await listInvoices()
-                setInvoices(data)
+                const role = localStorage.getItem('role')
+                if (role == 'admin') {
+                    const data = await listInvoices()
+                    setInvoices(data)
+                } 
+                if (role == 'student') {
+                    const data = await listInvoicesMe()
+                    setInvoices(data)
+                }
                 setError(null)
             } catch (err) {
-                setError('Failed to load library items')
+                setError('Failed to load invoices')
                 setInvoices(null)
             } finally {
                 setLoading(false)
@@ -100,11 +108,19 @@ export default function Invoices() {
                 </ItemDescription>
                 </ItemContent>
                 <ItemActions>
-                    <Button size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white" onClick={() => downloadInvoicePDF(invoice.id)}>
+                    <Button size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white" onClick={() => {
+                        if (role == 'admin') {
+                            downloadInvoicePDF(invoice.id)
+                        } else {
+                            downloadInvoicePDFMe(invoice.id)
+                        }
+                    }}>
                         Download PDF
                     </Button>
                 </ItemActions>
-                    {invoice.status === openApi.InvoiceStatus.Generated ? (
+                {role == 'admin'? (
+                    <div>
+                    {invoice.status === openApi.InvoiceStatus.Generated? (
                         <ItemActions>
                             <AlertDialog open={paidInvoiceDialogOpen} onOpenChange={payInvoiceState?.message == 'success'? () => setPaidInvoiceDialogOpen(false) : setPaidInvoiceDialogOpen}>
                                 <AlertDialogTrigger asChild>
@@ -185,7 +201,7 @@ export default function Invoices() {
                                 Paid
                             </Button>
                         </ItemActions>
-                    ) : null}
+                    ) : null}</div>) : null}
             </Item>
         </div>
     )

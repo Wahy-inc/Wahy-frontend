@@ -438,6 +438,19 @@ export async function listInvoices(): Promise<openApi.InvoiceRead[]> {
     }
 }
 
+export async function listInvoicesMe(): Promise<openApi.InvoiceRead[]> {
+    try {
+        const response = await api.api.listMyInvoicesApiV1InvoicesMeGet()
+
+        if (response.status === 200) {
+            return response.data
+        }
+        return []
+    } catch (error) {
+        return []
+    }
+}
+
 export async function getInvoice(state: GetInvoiceByIDFormState, formData: FormData): Promise<GetInvoiceByIDFormState> {
     const id = Number(formData.get('invoice_id'))
     if (isNaN(id)) {
@@ -445,6 +458,23 @@ export async function getInvoice(state: GetInvoiceByIDFormState, formData: FormD
     }
     try {
         const response = await api.api.getOneApiV1InvoicesInvoiceIdGet(id)
+
+        if (response.status === 200) {
+            return {message: 'success', data: response.data }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return {message: 'fail' }
+    }
+}
+
+export async function getInvoiceMe(state: GetInvoiceByIDFormState, formData: FormData): Promise<GetInvoiceByIDFormState> {
+    const id = Number(formData.get('invoice_id'))
+    if (isNaN(id)) {
+        return { error: { invoice_id: ['Invoice ID must be a number'] } }
+    }
+    try {
+        const response = await api.api.getMyInvoiceApiV1InvoicesMeInvoiceIdGet(id)
 
         if (response.status === 200) {
             return {message: 'success', data: response.data }
@@ -519,6 +549,26 @@ export async function overrideInvoice(state: OverrideInvoiceFormState, formData:
 export async function downloadInvoicePDF(id: number): Promise<boolean> {
     try {
         const response = await api.api.getPdfApiV1InvoicesInvoiceIdPdfGet(id)
+
+        if (response.status === 200) {
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', `invoice_${id}.pdf`)
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            return true
+        }
+        return false
+    } catch (error) {
+        return false
+    }
+}
+
+export async function downloadInvoicePDFMe(id: number): Promise<boolean> {
+    try {
+        const response = await api.api.getMyPdfApiV1InvoicesMeInvoiceIdPdfGet(id)
 
         if (response.status === 200) {
             const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))

@@ -41,6 +41,7 @@ export default function Home() {
             href="./platform/auth/login"
             target="_self"
             rel="noopener noreferrer"
+            onClick={() => localStorage.setItem('role', 'admin')}
           >
             Admin Login
           </a>
@@ -49,6 +50,7 @@ export default function Home() {
             href="./platform/auth/signup"
             target="_self"
             rel="noopener noreferrer"
+            onClick={() => localStorage.setItem('role', 'student')}
           >
             Student Signup
           </a>
@@ -57,6 +59,7 @@ export default function Home() {
             href="./platform/auth/login"
             target="_self"
             rel="noopener noreferrer"
+            onClick={() => localStorage.setItem('role', 'student')}
           >
             Student Login
           </a>
