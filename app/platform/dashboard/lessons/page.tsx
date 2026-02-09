@@ -2,7 +2,7 @@
 
 import React, { useActionState } from "react";
 import * as openApi from "@/lib/openApi"
-import { createLesson, getLessonByID, listLessons, updateLesson } from "@/app/platform/actions/dashboard";
+import { createLesson, getLessonByID, getLessonByIDMe, listLessons, listLessonsMe, updateLesson } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import { dummyLessons } from "@/lib/dummyData";
 import { Field } from "@/components/ui/field";
@@ -15,13 +15,14 @@ import titleElement from "./title_element";
 
 
 export default function Lessons() {
+    const role = localStorage.getItem('role')
     const [lessons, setLessons] = React.useState<openApi.LessonRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const [createState, createAction, createPending] = useActionState(createLesson, undefined)
     const updateLessonAction = (state: UpdateLessonFormState, formData: FormData) => updateLesson(state, formData, Number(formData.get('lesson-id')))
     const [updateState, updateAction, updatePending] = useActionState(updateLessonAction, undefined)
-    const [getLessonState, getLessonAction, getLessonPending] = useActionState(getLessonByID, undefined)
+    const [getLessonState, getLessonAction, getLessonPending] = useActionState(role === 'admin' ? getLessonByID : getLessonByIDMe, undefined)
     const [fetchedLesson, setFetchedLesson] = React.useState<openApi.LessonRead | null>(null)
     const [getLessonDialogOpen, setGetLessonDialogOpen] = React.useState(false)
     const [createLessonDialogOpen, setCreateLessonDialogOpen] = React.useState(false)
@@ -33,7 +34,7 @@ export default function Lessons() {
         const fetchLessons = async () => {
             try {
                 setLoading(true)
-                const data = await listLessons()
+                const data = await (role === 'admin' ? listLessons() : listLessonsMe())
                 setLessons(data)
                 setError(null)
             } catch (err) {

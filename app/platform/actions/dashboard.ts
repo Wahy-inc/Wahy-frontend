@@ -342,6 +342,19 @@ export async function listLessons(stu_id:number | null = null): Promise<openApi.
     }
 }
 
+export async function listLessonsMe(stu_id:number | null = null): Promise<openApi.LessonRead[] | null> {
+    try {
+        const response = await api.api.listMyLessonsApiV1LessonsMeGet()
+
+        if (response.status === 200) {
+            return response.data
+        }
+        return null
+    } catch (error) {
+        return null
+    }
+}
+
 export async function listLibrary(): Promise<openApi.LibraryItemRead[] | null> {
     try {
         const response = await api.api.listAllApiV1LibraryGet()
@@ -724,6 +737,23 @@ export async function getLessonByID(state:GetLessonByIDFormState, formData: Form
     }
     try {
         const response = await api.api.getOneApiV1LessonsLessonIdGet(lessonId)
+
+        if (response.status === 200) {
+            return {message: 'success' , data: response.data }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function getLessonByIDMe(state:GetLessonByIDFormState, formData: FormData): Promise<GetLessonByIDFormState> {
+    const lessonId = Number(formData.get('lesson-id'))
+    if (isNaN(lessonId)) {
+        return { error: { lesson_id: ['Lesson ID must be a number'] } }
+    }
+    try {
+        const response = await api.api.getMyLessonApiV1LessonsMeLessonIdGet(lessonId)
 
         if (response.status === 200) {
             return {message: 'success' , data: response.data }
