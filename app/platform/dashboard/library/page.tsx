@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createLibraryItem, deleteLibraryItem, getLibraryItem, listLibrary } from "@/app/platform/actions/dashboard";
+import { createLibraryItem, deleteLibraryItem, getLibraryItem, listLibrary, listLibraryMe } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import titleElement from "./title_element";
 import { Field } from "@/components/ui/field";
@@ -12,14 +12,13 @@ import { Badge } from "@/components/ui/badge"
 import * as icon from "lucide-react"
 import {
   Card,
-  CardAction,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { dummyLibraryItems } from "@/lib/dummyData";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/auth-context";
 
 
 export default function Schedules() {
@@ -30,6 +29,7 @@ export default function Schedules() {
     const [getLibraryItemState, getLibraryItemAction, getLibraryItemPending] = React.useActionState(getLibraryItem, undefined)
     const [createLibraryDialogOpen, setCreateLibraryDialogOpen] = React.useState(false)
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
+    const { isAdmin, isLoading: authLoading } = useAuth()
 
     React.useEffect(() => {
         if (getLibraryItemState?.message === 'success' && getLibraryItemState.data) {
@@ -41,7 +41,7 @@ export default function Schedules() {
         const fetchLibraryItems = async () => {
             try {
                 setLoading(true)
-                const data = await listLibrary()
+                const data = await (isAdmin ? listLibrary() : listLibraryMe())
                 setLibraryItems(data)
                 setError(null)
             } catch (err) {
@@ -52,7 +52,7 @@ export default function Schedules() {
             }
         }
         fetchLibraryItems()
-    }, [])
+    }, [isAdmin, authLoading])
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
         <Field orientation="vertical" className='w-full inline'>
@@ -109,6 +109,7 @@ export default function Schedules() {
         setcreateLibraryDialogOpen: setCreateLibraryDialogOpen,
         getLibraryDialogOpen: getLibraryDialogOpen,
         setgetLibraryDialogOpen: setGetLibraryDialogOpen,
+        isAdmin: isAdmin,
     })
 
     if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading library items...</p>, title: title})
@@ -121,19 +122,5 @@ export default function Schedules() {
         </div>
     ))
 
-    return dashboardPage({children: <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-4 md:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>, title: titleElement({
-        title: "Library",
-        createAction: createLibraryItemAction,
-        createState: createLibraryItemState,
-        createPending: createLibraryItemPending,
-        getLibraryAction: getLibraryItemAction,
-        getLibraryState: getLibraryItemState,
-        getLibraryPending: getLibraryItemPending,
-        fieldInput: fieldInput,
-        createLibraryDialogOpen: createLibraryDialogOpen,
-        setcreateLibraryDialogOpen: setCreateLibraryDialogOpen,
-        getLibraryDialogOpen: getLibraryDialogOpen,
-        setgetLibraryDialogOpen: setGetLibraryDialogOpen,
-    }
-    )})
+    return dashboardPage({children: <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-4 md:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>, title: title})
 }

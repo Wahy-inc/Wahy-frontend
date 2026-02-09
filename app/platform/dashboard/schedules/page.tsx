@@ -2,10 +2,9 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createSchedule, deleteSchedule, getSchedulesForStudent, listSchedules, updateSchedule } from "@/app/platform/actions/dashboard";
+import { createSchedule, deleteSchedule, getSchedulesForStudent, listSchedules, listSchedulesMe, updateSchedule } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
-import { dummySchedules } from "@/lib/dummyData";
 import titleElement from "./title_element";
 import { UpdateScheduleFormState } from "@/app/platform/lib/definitions";
 import { Field } from "@/components/ui/field";
@@ -15,6 +14,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Trash2Icon } from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
 
 enum weekDays {
     saturday = 0,
@@ -39,6 +39,7 @@ export default function Schedules() {
     const [createScheduleDialogOpen, setCreateScheduleDialogOpen] = React.useState(false)
     const [getScheduleDialogOpen, setGetScheduleDialogOpen] = React.useState(false)
     const [updateScheduleDialogOpen, setUpdateScheduleDialogOpen] = React.useState(false)
+    const { isAdmin, isLoading: authLoading } = useAuth()
 
      React.useEffect(() => {
         if (getScheduleState?.message == 'success' && getScheduleState.data) {
@@ -50,7 +51,7 @@ export default function Schedules() {
         const fetchSchedules = async () => {
             try {
                 setLoading(true)
-                const data = await listSchedules()
+                const data = await (isAdmin ? listSchedules() : listSchedulesMe())
                 setSchedules(data)
                 setError(null)
             } catch (err) {
@@ -139,7 +140,8 @@ export default function Schedules() {
             </div>
             <p id="notes" className="w-full text-wrap text-[15px] text-slate-700 mt-2 mb-2 flex items-center"><icon.PenTool className='inline mr-2'/> &quot;{schedule.notes}&quot;</p>
             {schedule.cancellation_reason && (<p id="cancel" className="w-full text-wrap text-[15px] text-red-500 mt-2 mb-2 flex items-center"><icon.AlertOctagon className='inline mr-2'/> {schedule.cancellation_reason}</p>)}
-            <div className="flex flex-row justify-end items-end gap-4">
+                {isAdmin? (
+                <div className="flex flex-row justify-end items-end gap-4">
                     <AlertDialog open={updateScheduleDialogOpen} onOpenChange={updateScheduleState?.message == 'success'? () => setUpdateScheduleDialogOpen(false) : setUpdateScheduleDialogOpen}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 mt-4 cursor-pointer bg-slate-400 hover:bg-slate-600">Update Schedule</Button>
@@ -267,7 +269,8 @@ export default function Schedules() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                     </AlertDialog>
-            </div>
+                </div>
+                ) : null}
         </div>
     )
 
@@ -287,6 +290,7 @@ export default function Schedules() {
         setcreateScheduleDialogOpen: setCreateScheduleDialogOpen,
         getStudentScheduleDialogOpen: getScheduleDialogOpen,
         setgetStudentScheduleDialogOpen: setGetScheduleDialogOpen,
+        isAdmin: isAdmin,
     })
 
     if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: title})

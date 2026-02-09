@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import * as openApi from "@/lib/openApi";
 import { JSX } from "react";
+import { CreateLessonFormState, GetLessonByIDFormState } from "../../lib/definitions";
 
 export default function titleElement({
     title,
@@ -40,22 +41,24 @@ export default function titleElement({
     setCreateLessonDialogOpen,
     getLessonDialogOpen,
     setGetLessonDialogOpen,
+    isAdmin
 }: {
         title: string,
         handleSearchStudentId: (e: React.ChangeEvent<HTMLInputElement>) => void,
         searchStudentId: string,
         handleClearFilter: () => void,
-        getLessonState: any,
-        getLessonAction: any,
+        getLessonState: GetLessonByIDFormState,
+        getLessonAction: (formData: FormData) => void,
         getLessonPending: boolean,
-        createState: any,
-        createAction: any,
+        createState: CreateLessonFormState,
+        createAction: (formData: FormData) => void,
         createPending: boolean,
         fieldInput: (label: string, name: string, holder: string, type: string) => JSX.Element,
         createLessonDialogOpen: boolean,
         setCreateLessonDialogOpen: (open: boolean) => void,
         getLessonDialogOpen: boolean,
-        setGetLessonDialogOpen: (open: boolean) => void
+        setGetLessonDialogOpen: (open: boolean) => void,
+        isAdmin: boolean
     }) {
     return (
             <div className="flex flex-col justify-center">
@@ -78,6 +81,8 @@ export default function titleElement({
                     </div>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
+                    {isAdmin ?
+                    <div>
                     <AlertDialog open={createLessonDialogOpen} onOpenChange={createState?.message == 'success'? () => setCreateLessonDialogOpen(false) : setCreateLessonDialogOpen}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Lesson</Button>
@@ -208,6 +213,7 @@ export default function titleElement({
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
+                    </div> : <div></div>}
                     <AlertDialog open={getLessonDialogOpen} onOpenChange={getLessonState?.message == 'success'? () => setGetLessonDialogOpen(false) : setGetLessonDialogOpen}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Lesson</Button>

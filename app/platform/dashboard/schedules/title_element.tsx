@@ -49,6 +49,7 @@ export default function titleElement({
     setcreateScheduleDialogOpen,
     getStudentScheduleDialogOpen,
     setgetStudentScheduleDialogOpen,
+    isAdmin
 }: {
         title: string,
         handleSearchStudentId: (e: React.ChangeEvent<HTMLInputElement>) => void,
@@ -64,7 +65,8 @@ export default function titleElement({
         createScheduleDialogOpen: boolean,
         setcreateScheduleDialogOpen: (open: boolean) => void,
         getStudentScheduleDialogOpen: boolean,
-        setgetStudentScheduleDialogOpen: (open: boolean) => void
+        setgetStudentScheduleDialogOpen: (open: boolean) => void,
+        isAdmin: boolean
     }) {
     return (
             <div className="flex flex-col justify-center">
@@ -87,6 +89,8 @@ export default function titleElement({
                     </div>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
+                    {isAdmin? 
+                    <div>
                     <AlertDialog open={createScheduleDialogOpen} onOpenChange={createState?.message == 'success'? () => setcreateScheduleDialogOpen(false) : setcreateScheduleDialogOpen}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Schedule</Button>
@@ -175,6 +179,7 @@ export default function titleElement({
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
+                    </div> : <div></div> }
                     <AlertDialog open={getStudentScheduleDialogOpen} onOpenChange={getSchedualesForStudentState?.message == 'success'? () => setgetStudentScheduleDialogOpen(false) : setgetStudentScheduleDialogOpen}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Schedules for student</Button>

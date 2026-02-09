@@ -25,6 +25,7 @@ export default function titleElement({
     setcreateLibraryDialogOpen,
     getLibraryDialogOpen,
     setgetLibraryDialogOpen,
+    isAdmin
 }: {
         title: string,
         getLibraryState: GetLibraryItemByIDFormState,
@@ -37,7 +38,8 @@ export default function titleElement({
         createLibraryDialogOpen: boolean,
         setcreateLibraryDialogOpen: (open: boolean) => void,
         getLibraryDialogOpen: boolean,
-        setgetLibraryDialogOpen: (open: boolean) => void
+        setgetLibraryDialogOpen: (open: boolean) => void,
+        isAdmin: boolean
     }) {
     return (
             <div className="flex flex-col justify-center">
@@ -45,6 +47,8 @@ export default function titleElement({
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
+                    {isAdmin ? 
+                    <div>
                     <AlertDialog open={createLibraryDialogOpen} onOpenChange={createState?.message == 'success'? () => setcreateLibraryDialogOpen(false) : setcreateLibraryDialogOpen}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Library Item</Button>
@@ -100,6 +104,7 @@ export default function titleElement({
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
+                    </div> : <div></div>}
                     <AlertDialog open={getLibraryDialogOpen} onOpenChange={getLibraryState?.message == 'success'? () => setgetLibraryDialogOpen(false) : setgetLibraryDialogOpen}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Library Item</Button>

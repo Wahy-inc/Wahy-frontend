@@ -11,6 +11,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { JSX } from "react";
 import { CreateInvoiceFormState, GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
+import { useAuth } from "@/lib/auth-context";
+
 
 export default function titleElement({
     title,
@@ -25,19 +27,21 @@ export default function titleElement({
     setcreateInvoicesDialogOpen,
     getInvoicesDialogOpen,
     setgetInvoicesDialogOpen,
+    isAdmin,
 }: {
-        title: string,
-        getInvoiceState: GetInvoiceByIDFormState,
-        getInvoiceAction: (formData: FormData) => void,
-        getInvoicePending: boolean,
-        createState: CreateInvoiceFormState,
-        createAction: (formData: FormData) => void,
+    title: string,
+    getInvoiceState: GetInvoiceByIDFormState,
+    getInvoiceAction: (formData: FormData) => void,
+    getInvoicePending: boolean,
+    createState: CreateInvoiceFormState,
+    createAction: (formData: FormData) => void,
         createPending: boolean,
         fieldInput: (label: string, name: string, holder: string, type: string) => JSX.Element,
         createInvoicesDialogOpen: boolean,
         setcreateInvoicesDialogOpen: (open: boolean) => void,
         getInvoicesDialogOpen: boolean,
-        setgetInvoicesDialogOpen: (open: boolean) => void
+        setgetInvoicesDialogOpen: (open: boolean) => void,
+        isAdmin: boolean
     }) {
     return (
             <div className="flex flex-col justify-center">
@@ -45,6 +49,8 @@ export default function titleElement({
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
+                    {isAdmin ?
+                    <div>
                     <AlertDialog open={createInvoicesDialogOpen} onOpenChange={createState?.message == 'success'? () => setcreateInvoicesDialogOpen(false) : setcreateInvoicesDialogOpen}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Generate Invoice</Button>
@@ -79,6 +85,7 @@ export default function titleElement({
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
+                    </div> : <div></div>}
                     <AlertDialog open={getInvoicesDialogOpen} onOpenChange={getInvoiceState?.message == 'success'? () => setgetInvoicesDialogOpen(false) : setgetInvoicesDialogOpen}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Invoice</Button>

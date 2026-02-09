@@ -4,7 +4,6 @@ import React, { useActionState } from "react";
 import * as openApi from "@/lib/openApi"
 import { createLesson, getLessonByID, getLessonByIDMe, listLessons, listLessonsMe, updateLesson } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
-import { dummyLessons } from "@/lib/dummyData";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -128,6 +127,7 @@ export default function Lessons() {
             setCreateLessonDialogOpen: setCreateLessonDialogOpen,
             getLessonDialogOpen: getLessonDialogOpen,
             setGetLessonDialogOpen: setGetLessonDialogOpen,
+            isAdmin: isAdmin
         })
 
 
@@ -155,7 +155,8 @@ export default function Lessons() {
                 handleClearFilter: handleClearFilter,
                 getLessonState: getLessonState,
                 getLessonAction: getLessonFormAction,
-                getLessonPending: getLessonPending
+                getLessonPending: getLessonPending,
+                isAdmin: isAdmin
             })})
     } else {
         return dashboardPage({children: displayContent, title: title})

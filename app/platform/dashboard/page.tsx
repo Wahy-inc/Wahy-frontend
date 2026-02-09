@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { signout } from '../actions/auth'
 import { listStudents } from '../actions/dashboard'
+import { useAuth } from '@/lib/auth-context'
 
 export default function DashboardPage({children: children, title: title}: {children: React.ReactNode, title: React.ReactNode}  ) {
     const router = useRouter()
+    const { isAdmin, isStudent } = useAuth()
     
     useEffect(() => {
         localStorage.setItem('access_token', '')
@@ -26,7 +28,8 @@ export default function DashboardPage({children: children, title: title}: {child
                     <h2 className="text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => router.push('/platform/dashboard/schedules')}> <icon.Clock className='inline mr-4'/>Schedules</h2>
                     <h2 className="text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => router.push('/platform/dashboard/lessons')}> <icon.Layers className='inline mr-4'/>Lessons</h2>
                     <h2 className="text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => router.push('/platform/dashboard/library')}> <icon.Book className='inline mr-4'/>Library</h2>
-                    <h2 className="text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => router.push('/platform/dashboard/students')}> <icon.Users className='inline mr-4'/>My Students</h2>
+                    {isAdmin? <h2 className="text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => router.push('/platform/dashboard/students')}> <icon.Users className='inline mr-4'/>My Students</h2> : null}
+                    {isStudent? <h2 className="text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => router.push('/platform/dashboard/profile')}> <icon.Users className='inline mr-4'/>My Profile</h2> : null}
                     <h2 className="text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => router.push('/platform/dashboard/invoices')}> <icon.DollarSign className='inline mr-4'/>Invoices</h2>
                 </div>
                 <div id='logout'>

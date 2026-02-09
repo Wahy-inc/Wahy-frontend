@@ -17,6 +17,18 @@ export async function studentData(id: number): Promise<openApi.StudentRead | nul
     }
 }
 
+export async function getStudentMe(): Promise<openApi.StudentSelfRead | null> {
+    try {
+        const response = await api.api.getMeApiV1StudentsMeGet()
+        if (response.status === 200) {
+            return response.data
+        }
+        return null
+    } catch (error) {
+        return null
+    }
+}
+
 export async function listStudents(): Promise<openApi.StudentRead[] | null> {
     try {
         const response = await api.api.listAllApiV1StudentsGet()
@@ -220,6 +232,19 @@ export async function listSchedules(): Promise<openApi.ScheduleRead[] | null> {
     }
 }
 
+export async function listSchedulesMe(): Promise<openApi.ScheduleRead[] | null> {
+    try {
+        const response = await api.api.listMyScheduleApiV1SchedulesMeGet()
+
+        if (response.status === 200) {
+            return response.data
+        }
+        return null
+    } catch (error) {
+        return null
+    }
+}
+
 export async function createSchedule(state: CreateScheduleFormState, formData: FormData): Promise<CreateScheduleFormState> {
     const validation = createScheduleSchema.safeParse({
         student_id: formData.get('student-id'),
@@ -368,6 +393,19 @@ export async function listLibrary(): Promise<openApi.LibraryItemRead[] | null> {
     }
 }
 
+export async function listLibraryMe(): Promise<openApi.LibraryItemRead[] | null> {
+    try {
+        const response = await api.api.listMyLibraryApiV1LibraryMeGet()
+
+        if (response.status === 200) {
+            return response.data
+        }
+        return null
+    } catch (error) {
+        return null
+    }
+}
+
 export async function getLibraryItem(state: GetLibraryItemByIDFormState, formData: FormData): Promise<GetLibraryItemByIDFormState> {
     const id = Number(formData.get('item-id'))
     if (isNaN(id)) {
@@ -375,6 +413,23 @@ export async function getLibraryItem(state: GetLibraryItemByIDFormState, formDat
     }
     try {
         const response = await api.api.getOneApiV1LibraryItemIdGet(id)
+
+        if (response.status === 200) {
+            return {message: 'success', data: response.data }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function getLibraryItemMe(state: GetLibraryItemByIDFormState, formData: FormData): Promise<GetLibraryItemByIDFormState> {
+    const id = Number(formData.get('item-id'))
+    if (isNaN(id)) {
+        return { error: { item_id: ['Item ID must be a number'] } }
+    }
+    try {
+        const response = await api.api.getMyItemApiV1LibraryMeItemIdGet(id)
 
         if (response.status === 200) {
             return {message: 'success', data: response.data }
