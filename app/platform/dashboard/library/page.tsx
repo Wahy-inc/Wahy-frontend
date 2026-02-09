@@ -32,6 +32,12 @@ export default function Schedules() {
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
 
     React.useEffect(() => {
+        if (getLibraryItemState?.message === 'success' && getLibraryItemState.data) {
+            setLibraryItems([getLibraryItemState.data])
+        }
+    }, [getLibraryItemState])
+
+    React.useEffect(() => {
         const fetchLibraryItems = async () => {
             try {
                 setLoading(true)
@@ -90,11 +96,11 @@ export default function Schedules() {
             </Card>
     )
 
-    // if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: "Schedules"})
-    // if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Schedules"})
-    // if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: "Schedules"})
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading library items...</p>, title: "Library"})
+    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Library"})
+    if (!libraryItems || libraryItems.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No library items found.</p>, title: "Library"})
 
-    const content = dummyLibraryItems?.map((item) => (
+    const content = libraryItems?.map((item) => (
         <div key={item.id} className="w-full">
             {libraryItemElement(item)}
         </div>

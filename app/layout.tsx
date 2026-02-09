@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./style/globals.css";
+import { TokenRefresher } from "@/components/TokenRefresher";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,6 +29,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{ backgroundColor: "#F1F5F9", color: "#1E293B" , display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', flexDirection: 'column'}}
       >
+        <TokenRefresher />
         {children}
       <footer className="w-full bg-slate-950 text-slate-100 text-md p-8">
         <p className="text-slate-100 pt-12 pb-2 text-5xl font-bold">Wahy.</p>

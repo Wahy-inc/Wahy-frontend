@@ -5,6 +5,18 @@ const api = new openApi.Api({
     baseUrl: 'http://10.60.184.80:8000',
 })
 
+const formatDate = (isoDate: string): string | undefined => {
+    return new Date(isoDate).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+    })
+}
+
 export async function signup(state: SignupFormState, formData: FormData): Promise<SignupFormState> {
     const validation = SignUpSchema.safeParse({
         name: formData.get('name'),
@@ -47,6 +59,7 @@ export async function signup(state: SignupFormState, formData: FormData): Promis
         
         if (response.status === 201 && response.data.access_token) {
             localStorage.setItem('access_token', response.data.access_token)
+            localStorage.setItem('expire', formatDate(response.data.expires_at) || '')
             return {message: 'Signup successful' }
         }
         if (response.status === 422) {
@@ -78,6 +91,7 @@ export async function signin(state: SignInFormState, formData: FormData): Promis
         
         if (response.status === 200 && response.data.access_token) {
             localStorage.setItem('access_token', response.data.access_token)
+            localStorage.setItem('expire', formatDate(response.data.expires_at) || '')
             return {message: 'Signin successful' }
         }
         if (response.status === 422) {
@@ -87,5 +101,34 @@ export async function signin(state: SignInFormState, formData: FormData): Promis
         return {message: response.error?.detail?.[0]?.msg || 'Signin failed' }
     } catch (error) {
         return { message: 'An error occurred during signin' }
+    }
+}
+
+export async function refreshAccessToken() {
+    try {
+        const response = await api.api.refreshApiV1AuthRefreshPost()
+
+        if (response.status === 200 && response.data.access_token) {
+            localStorage.setItem('access_token', response.data.access_token)
+            localStorage.setItem('expire', formatDate(response.data.expires_at) || '')
+            return {message: 'Token refreshed successfully' }
+        }
+    } catch (error) {
+        return { message: 'An error occurred during token refresh' }
+    }
+}
+
+export async function signout() {
+    try {
+        const response = await api.api.logoutApiV1AuthLogoutPost()
+
+        if (response.status === 204) {
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('expire')
+            window.location.href = '/'
+            return {message: 'Signout successful' }
+        }
+    } catch (error) {
+        return { message: 'An error occurred during signout' }
     }
 }

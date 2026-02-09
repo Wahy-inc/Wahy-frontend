@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createInvoices, createStudent, getInvoice, getLocalStudent, getStudent, listInvoices, listStudents, markInvoiceAsPaid, overrideInvoice, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
+import { createInvoices, createStudent, downloadInvoicePDF, getInvoice, getLocalStudent, getStudent, listInvoices, listStudents, markInvoiceAsPaid, overrideInvoice, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import titleElement from "./title_element";
 import { Field } from "@/components/ui/field";
@@ -39,6 +39,12 @@ export default function Invoices() {
     const [getInvoiceDialogOpen, setGetInvoiceDialogOpen] = React.useState(false)
     const [overrideInvoiceDialogOpen, setOverrideInvoiceDialogOpen] = React.useState(false)
     const [paidInvoiceDialogOpen, setPaidInvoiceDialogOpen] = React.useState(false)
+
+    React.useEffect(() => {
+        if (getInvoiceState?.message === 'success' && getInvoiceState.data) {
+            setInvoices([getInvoiceState.data])
+        }
+    }, [getInvoiceState])
 
     React.useEffect(() => {
         const fetchInvoices = async () => {
@@ -93,6 +99,11 @@ export default function Invoices() {
                     </div>
                 </ItemDescription>
                 </ItemContent>
+                <ItemActions>
+                    <Button size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white" onClick={() => downloadInvoicePDF(invoice.id)}>
+                        Download PDF
+                    </Button>
+                </ItemActions>
                     {invoice.status === openApi.InvoiceStatus.Generated ? (
                         <ItemActions>
                             <AlertDialog open={paidInvoiceDialogOpen} onOpenChange={payInvoiceState?.message == 'success'? () => setPaidInvoiceDialogOpen(false) : setPaidInvoiceDialogOpen}>
@@ -179,23 +190,23 @@ export default function Invoices() {
         </div>
     )
 
-    // if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: "Schedules"})
-    // if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Schedules"})
-    // if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: "Schedules"})
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading invoices...</p>, title: "Invoices"})
+    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Invoices"})
+    if (!invoices || invoices.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No invoices found.</p>, title: "Invoices"})
 
-    const paidInvoices = dummyInvoices?.filter((invoice) => {
+    const paidInvoices = invoices?.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Paid;
     })
-    const generatedInvoices = dummyInvoices?.filter((invoice) => {
+    const generatedInvoices = invoices?.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Generated;
     })
-    const cancelledInvoices = dummyInvoices?.filter((invoice) => {
+    const cancelledInvoices = invoices?.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Cancelled;
     })
-    const overDueInvoices = dummyInvoices?.filter((invoice) => {
+    const overDueInvoices = invoices?.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Overdue;
     })
-    const sentInvoices = dummyInvoices?.filter((invoice) => {
+    const sentInvoices = invoices?.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Sent;
     })
 

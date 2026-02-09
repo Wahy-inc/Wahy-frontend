@@ -292,7 +292,7 @@ export default function Schedules() {
     if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: title})
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
     if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: title})
-    const content = dummySchedules?.map((schedule) => (
+    const content = filteredSchedules?.map((schedule) => (
         <div key={schedule.id}>
             {schedulesElement(schedule)}
         </div>

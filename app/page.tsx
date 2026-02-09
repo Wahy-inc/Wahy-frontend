@@ -14,7 +14,7 @@ export default function Home() {
           priority
         />
         <div className="flex flex-col items-center gap-6 text-start sm:items-start sm:text-left">
-          <h1 className="max-w-xs lg:text-[100px] text-5xl font-semibold leading-10 tracking-tight text-slate-950 dark:text-zinc-50">
+          <h1 className="max-w-xs lg:text-[100px] text-5xl font-semibold leading-10 tracking-tight text-slate-900 dark:text-zinc-50">
             Wahy
           </h1>
           <p className="max-w-md mt-4 text-lg leading-8 text-zinc-600 dark:text-zinc-400">
@@ -37,7 +37,7 @@ export default function Home() {
         </div>
         <div className="flex flex-col justify-between gap-4 text-base font-medium lg:flex-row">
           <a
-            className="w-39.5 flex h-12 items-center justify-center gap-2 rounded-full bg-slate-950 px-5 text-slate-100 transition-colors hover:bg-slate-800 hover:text-slate-100 hover:border-slate-800 border md:w-75 md:h-20"
+            className="w-39.5 flex h-12 items-center justify-center gap-2 rounded-full bg-slate-900 px-5 text-slate-100 transition-colors hover:bg-slate-800 hover:text-slate-100 hover:border-slate-800 border md:w-75 md:h-20"
             href="./platform/auth/login"
             target="_self"
             rel="noopener noreferrer"
@@ -45,7 +45,7 @@ export default function Home() {
             Admin Login
           </a>
           <a
-            className="flex h-12 w-39.5 items-center justify-center rounded-full border border-solid text-slate-950 border-slate-950 px-5 transition-colors hover:bg-black/4 md:w-75 md:h-20"
+            className="flex h-12 w-39.5 items-center justify-center rounded-full border border-solid text-slate-900 border-slate-900 px-5 transition-colors hover:bg-black/4 md:w-75 md:h-20"
             href="./platform/auth/signup"
             target="_self"
             rel="noopener noreferrer"
@@ -53,7 +53,7 @@ export default function Home() {
             Student Signup
           </a>
           <a
-            className="flex h-12 w-39.5 items-center justify-center rounded-full border border-solid text-slate-950 border-slate-950 px-5 transition-colors hover:bg-black/4 md:w-75 md:h-20"
+            className="flex h-12 w-39.5 items-center justify-center rounded-full border border-solid text-slate-900 border-slate-900 px-5 transition-colors hover:bg-black/4 md:w-75 md:h-20"
             href="./platform/auth/login"
             target="_self"
             rel="noopener noreferrer"

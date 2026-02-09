@@ -39,6 +39,7 @@ export async function listStudents(): Promise<openApi.StudentRead[] | null> {
 }
 
 export function getLocalStudent(id: number) {
+    if (typeof window === 'undefined') return null
     const students = localStorage.getItem('students')
     if (students) {
         const studentsArray = JSON.parse(students)
@@ -512,6 +513,26 @@ export async function overrideInvoice(state: OverrideInvoiceFormState, formData:
         return {message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
+    }
+}
+
+export async function downloadInvoicePDF(id: number): Promise<boolean> {
+    try {
+        const response = await api.api.getPdfApiV1InvoicesInvoiceIdPdfGet(id)
+
+        if (response.status === 200) {
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', `invoice_${id}.pdf`)
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            return true
+        }
+        return false
+    } catch (error) {
+        return false
     }
 }
 

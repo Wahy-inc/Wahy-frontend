@@ -59,6 +59,12 @@ export default function Students() {
     })
 
     React.useEffect(() => {
+        if (getStudentState?.message === 'success' && getStudentState.data) {
+            setStudents([getStudentState.data])
+        }
+    }, [getStudentState])
+
+    React.useEffect(() => {
         const fetchStudents = async () => {
             try {
                 setLoading(true)
@@ -66,7 +72,7 @@ export default function Students() {
                 setStudents(data)
                 setError(null)
             } catch (err) {
-                setError('Failed to load library items')
+                setError('Failed to load students')
                 setStudents(null)
             } finally {
                 setLoading(false)
@@ -267,9 +273,9 @@ export default function Students() {
         </div>
     )
 
-    // if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: "Schedules"})
-    // if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Schedules"})
-    // if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: "Schedules"})
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading students...</p>, title: "Students"})
+    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Students"})
+    if (!students || students.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No students found.</p>, title: "Students"})
 
     const pendingStudents = dummyStudents?.filter((student) => {
         return student.registration_status === openApi.RegistrationStatus.Pending;
