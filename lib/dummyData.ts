@@ -522,3 +522,22 @@ export const dummyInvoices: openApi.InvoiceRead[] = [
     pdf_generated_at: "2025-12-01T08:45:00Z",
   },
 ];
+
+export const dummyProfile: openApi.StudentSelfRead = {
+  id: 101,
+  user_id: 1001,
+  full_name_arabic: "أحمد محمد علي",
+  full_name_english: "Ahmed Mohammed Ali",
+  date_of_birth: "1995-03-15",
+  phone: "+966 50 123 4567",
+  timezone: "Asia/Riyadh",
+  registration_status: openApi.RegistrationStatus.Approved,
+  status: openApi.StudentStatus.Active,
+  current_juz: 5,
+  current_surah: "An-Nisa",
+  current_ayah: 23,
+  lessons_per_week: 3,
+  lesson_rate: 50,
+  billing_cycle: openApi.BillingCycle.Monthly,
+  special_notes: "Student prefers morning lessons. Has excellent tajweed skills and is progressing well through the memorization curriculum. Focus on revision of earlier juz during weekly sessions.",
+};
