@@ -13,8 +13,11 @@ import { Input } from "@/components/ui/input";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogMedia, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Trash2Icon } from "lucide-react";
+import { Trash2Icon, Clock, Calendar, RefreshCw, Power, User, MessageSquare, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 enum weekDays {
     saturday = 0,
@@ -39,7 +42,7 @@ export default function Schedules() {
     const [createScheduleDialogOpen, setCreateScheduleDialogOpen] = React.useState(false)
     const [getScheduleDialogOpen, setGetScheduleDialogOpen] = React.useState(false)
     const [updateScheduleDialogOpen, setUpdateScheduleDialogOpen] = React.useState(false)
-    const { isAdmin, isLoading: authLoading } = useAuth()
+    const { isAdmin } = useAuth()
 
      React.useEffect(() => {
         if (getScheduleState?.message == 'success' && getScheduleState.data) {
@@ -54,7 +57,7 @@ export default function Schedules() {
                 const data = await (isAdmin ? listSchedules() : listSchedulesMe())
                 setSchedules(data)
                 setError(null)
-            } catch (err) {
+            } catch {
                 setError('Failed to load schedules')
                 setSchedules(null)
             } finally {
@@ -62,28 +65,7 @@ export default function Schedules() {
             }
         }
         fetchSchedules()
-    }, [])
-
-    const formatDate = (isoDate: string, option:string): string | undefined => {
-        if (option === 'full') {
-            return new Date(isoDate).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false,
-            })
-        } else if (option === 'time') {
-            return new Date(isoDate).toLocaleTimeString('en-US', {
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false,
-            })
-        }
-    }
+    }, [isAdmin])
 
     const handleSearchStudentId = (e: React.ChangeEvent<HTMLInputElement>) => {
         const studentId = e.target.value.trim()
@@ -115,33 +97,137 @@ export default function Schedules() {
         </Field>
     )
 
+    const getDayColor = (day: number): string => {
+        const colors = [
+            'bg-purple-500', // Saturday
+            'bg-blue-500',   // Sunday
+            'bg-green-500',  // Monday
+            'bg-yellow-500', // Tuesday
+            'bg-orange-500', // Wednesday
+            'bg-red-500',    // Thursday
+            'bg-pink-500',   // Friday
+        ]
+        return colors[day] || 'bg-slate-500'
+    }
+
+    const getDayName = (day: number): string => {
+        const days = ['Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+        return days[day] || 'Unknown'
+    }
+
     const schedulesElement = (schedule: openApi.ScheduleRead) => (
-        <div className="overflow-hidden border-2 rounded-xl bg-white flex flex-col justify-start p-4 shadow-[0px_4px_30px_rgba(0,0,0,0.1)] opacity-90 backdrop-blur-sm hover:opacity-80 transition duration-300 hover:scale-101">
-            <div className='flex flex-row gap-8 justify-start items-center mb-4'>
-                <div id="profile-image" className="w-15 h-15 rounded-full bg-slate-800"></div>
-                <div className="flex flex-col justify-start">
-                    <p id="name" className="text-4xl text-slate-800">{schedule.id}</p>
-                    <div className="flex flex-row gap-12">
-                        <p id="start" className="text-slate-700 text-sm flex items-center"><icon.Calendar className='inline mr-1 w-4'/> Day: {weekDays[schedule.day_of_week]}</p>
-                        <p id="active" className="text-sm col-start-2 col-end-3 flex items-center" style={{color: schedule.is_active? 'green' : '#fb2c36'}}><icon.Power className='inline mr-1 w-4'/> Active: {schedule.is_active? "Yes" : "No"}</p>
+        <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            {/* Day Header Bar */}
+            <div className={`${getDayColor(schedule.day_of_week)} h-2`} />
+            
+            <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        {/* Day Circle */}
+                        <div className={`${getDayColor(schedule.day_of_week)} w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md`}>
+                            {getDayName(schedule.day_of_week).slice(0, 3)}
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-bold text-slate-800">{getDayName(schedule.day_of_week)}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline" className="text-xs">
+                                    <User className="w-3 h-3 mr-1" />
+                                    Student #{schedule.student_id}
+                                </Badge>
+                                <span className="text-slate-400 text-sm">ID: {schedule.id}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Status Badges */}
+                    <div className="flex flex-col gap-2 items-end">
+                        <Badge variant={schedule.is_active ? "default" : "destructive"} className="gap-1">
+                            <Power className="w-3 h-3" />
+                            {schedule.is_active ? "Active" : "Inactive"}
+                        </Badge>
+                        {schedule.is_recurring && (
+                            <Badge variant="secondary" className="gap-1">
+                                <RefreshCw className="w-3 h-3" />
+                                Recurring
+                            </Badge>
+                        )}
                     </div>
                 </div>
-            </div>
-            <div className="grid grid-cols-2">
-                <p id="start" className="text-slate-700 text-xl flex items-center"><icon.Clock className='inline mr-2'/> Start at: {formatDate(schedule.start_time, 'time')}</p>
-                <p id="end" className="text-slate-700 text-xl flex items-center"><icon.Clock className='inline mr-2'/> End at: {formatDate(schedule.end_time, 'time')}</p>
-            </div>
-            <div className="grid grid-cols-2 mt-4 mb-2">
-                <p id="eff_from" className="text-slate-700 text-xl col-start-1 col-end-2 flex items-center"><icon.AlarmClockCheck className='inline mr-2'/> Effective from: {formatDate(schedule.effective_from, 'full')}</p>
-                <p id="eff_until" className="text-slate-700 text-xl col-start-2 col-end-3 flex items-center"><icon.AlarmClockMinus className='inline mr-2'/> Effective until: {schedule.effective_until? formatDate(schedule.effective_until, 'full') : 'No date Specified'}</p>
-            </div>
-            <div className="grid grid-cols-2 mt-2 mb-2">
-                <p id="recurring" className="text-xl col-start-1 col-end-2 flex items-center"><icon.RefreshCcw className='inline mr-2'/> Recurring: {schedule.is_recurring? "Yes" : "No"}</p>
-            </div>
-            <p id="notes" className="w-full text-wrap text-[15px] text-slate-700 mt-2 mb-2 flex items-center"><icon.PenTool className='inline mr-2'/> &quot;{schedule.notes}&quot;</p>
-            {schedule.cancellation_reason && (<p id="cancel" className="w-full text-wrap text-[15px] text-red-500 mt-2 mb-2 flex items-center"><icon.AlertOctagon className='inline mr-2'/> {schedule.cancellation_reason}</p>)}
-                {isAdmin? (
-                <div className="flex flex-row justify-end items-end gap-4">
+            </CardHeader>
+
+            <CardContent className="pt-4">
+                {/* Time Display */}
+                <div className="bg-linear-to-r from-slate-50 to-slate-100 rounded-xl p-4 mb-4">
+                    <div className="flex items-center justify-center gap-8">
+                        <div className="text-center">
+                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Start Time</p>
+                            <div className="flex items-center gap-2">
+                                <Clock className="w-5 h-5 text-green-500" />
+                                <span className="text-2xl font-bold text-slate-800">{schedule.start_time}</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center">
+                            <div className="w-12 h-0.5 bg-slate-300" />
+                            <icon.ChevronRight className="w-5 h-5 text-slate-400" />
+                            <div className="w-12 h-0.5 bg-slate-300" />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">End Time</p>
+                            <div className="flex items-center gap-2">
+                                <Clock className="w-5 h-5 text-red-500" />
+                                <span className="text-2xl font-bold text-slate-800">{schedule.end_time}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Effective Dates */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-100">
+                        <Calendar className="w-5 h-5 text-green-600" />
+                        <div>
+                            <p className="text-xs text-green-600 font-medium">Effective From</p>
+                            <p className="text-sm font-semibold text-slate-700">{schedule.effective_from}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100">
+                        <Calendar className="w-5 h-5 text-orange-600" />
+                        <div>
+                            <p className="text-xs text-orange-600 font-medium">Effective Until</p>
+                            <p className="text-sm font-semibold text-slate-700">
+                                {schedule.effective_until || "No end date"}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Notes Section */}
+                {schedule.notes && (
+                    <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100 mb-4">
+                        <MessageSquare className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <div>
+                            <p className="text-xs text-blue-600 font-medium mb-1">Notes</p>
+                            <p className="text-sm text-slate-700">{schedule.notes}</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Cancellation Reason */}
+                {schedule.cancellation_reason && (
+                    <div className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-200 mb-4">
+                        <AlertTriangle className="w-5 h-5 text-red-600 mt-0.5" />
+                        <div>
+                            <p className="text-xs text-red-600 font-medium mb-1">Cancellation Reason</p>
+                            <p className="text-sm text-red-700">{schedule.cancellation_reason}</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Actions */}
+                {isAdmin && (
+                    <>
+                        <Separator className="my-4" />
+                        <div className="flex justify-end gap-3">
                     <AlertDialog open={updateScheduleDialogOpen} onOpenChange={updateScheduleState?.message == 'success'? () => setUpdateScheduleDialogOpen(false) : setUpdateScheduleDialogOpen}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 mt-4 cursor-pointer bg-slate-400 hover:bg-slate-600">Update Schedule</Button>
@@ -269,9 +355,11 @@ export default function Schedules() {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                     </AlertDialog>
-                </div>
-                ) : null}
-        </div>
+                        </div>
+                    </>
+                )}
+            </CardContent>
+        </Card>
     )
 
     const title = titleElement({
