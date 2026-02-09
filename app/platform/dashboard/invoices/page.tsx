@@ -190,9 +190,24 @@ export default function Invoices() {
         </div>
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading invoices...</p>, title: "Invoices"})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Invoices"})
-    if (!invoices || invoices.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No invoices found.</p>, title: "Invoices"})
+    const title = titleElement({
+        title: "My Invoices",
+        createAction: createInvoiceAction,
+        createState: createInvoiceState,
+        createPending: createInvoicePending,
+        getInvoiceAction: getInvoiceAction,
+        getInvoiceState: getInvoiceState,
+        getInvoicePending: getInvoicePending,
+        fieldInput: fieldInput,
+        createInvoicesDialogOpen: createInvoiceDialogOpen,
+        setcreateInvoicesDialogOpen: setCreateInvoiceDialogOpen,
+        getInvoicesDialogOpen: getInvoiceDialogOpen,
+        setgetInvoicesDialogOpen: setGetInvoiceDialogOpen,
+    })
+
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading invoices...</p>, title: title})
+    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
+    if (!invoices || invoices.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No invoices found.</p>, title: title})
 
     const paidInvoices = invoices?.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Paid;

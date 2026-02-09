@@ -96,9 +96,24 @@ export default function Schedules() {
             </Card>
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading library items...</p>, title: "Library"})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Library"})
-    if (!libraryItems || libraryItems.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No library items found.</p>, title: "Library"})
+    const title = titleElement({
+        title: "Library",
+        createAction: createLibraryItemAction,
+        createState: createLibraryItemState,
+        createPending: createLibraryItemPending,
+        getLibraryAction: getLibraryItemAction,
+        getLibraryState: getLibraryItemState,
+        getLibraryPending: getLibraryItemPending,
+        fieldInput: fieldInput,
+        createLibraryDialogOpen: createLibraryDialogOpen,
+        setcreateLibraryDialogOpen: setCreateLibraryDialogOpen,
+        getLibraryDialogOpen: getLibraryDialogOpen,
+        setgetLibraryDialogOpen: setGetLibraryDialogOpen,
+    })
+
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading library items...</p>, title: title})
+    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
+    if (!libraryItems || libraryItems.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No library items found.</p>, title: title})
 
     const content = libraryItems?.map((item) => (
         <div key={item.id} className="w-full">

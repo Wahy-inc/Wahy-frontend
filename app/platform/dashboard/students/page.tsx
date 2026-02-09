@@ -273,9 +273,24 @@ export default function Students() {
         </div>
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading students...</p>, title: "Students"})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: "Students"})
-    if (!students || students.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No students found.</p>, title: "Students"})
+    const title = titleElement({
+        title: "My Students",
+        createAction: createStudentAction,
+        createState: createStudentState,
+        createPending: createStudentPending,
+        getStudentAction: getStudentAction,
+        getStudentState: getStudentState,
+        getStudentPending: getStudentPending,
+        fieldInput: fieldInput,
+        createStudentDialogOpen: createStudentDialogOpen,
+        setcreateStudentDialogOpen: setCreateStudentDialogOpen,
+        getStudentDialogOpen: getStudentDialogOpen,
+        setgetStudentDialogOpen: setGetStudentDialogOpen,
+    })
+
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading students...</p>, title: title})
+    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
+    if (!students || students.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No students found.</p>, title: title})
 
     const pendingStudents = dummyStudents?.filter((student) => {
         return student.registration_status === openApi.RegistrationStatus.Pending;
