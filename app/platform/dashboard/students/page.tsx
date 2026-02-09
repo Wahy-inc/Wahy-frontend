@@ -23,6 +23,7 @@ import {User} from 'lucide-react'
 import { UpdateStudentFormState } from "../../lib/definitions";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export default function Students() {
     const [students, setStudents] = React.useState<openApi.StudentRead[] | null>(null)
@@ -90,9 +91,27 @@ export default function Students() {
                     </ItemMedia>
                 <ItemTitle>{student.full_name_english}</ItemTitle>
                 <ItemDescription>
-                    {student.phone} <br />
-                    Juz: {student.current_juz} , Surah: {student.current_surah} , Ayah: {student.current_ayah} <br />
-                    lesson Rate: {student.lesson_rate} , lessons per week: {student.lessons_per_week}
+                    Registration Status: {student.registration_status} <br />
+                    <div id="accordion-data">
+                        <Accordion
+                        type="single"
+                        collapsible
+                        className="w-full"
+                        >
+                            <AccordionItem key={student.id} value={student.id.toString()}>
+                            <AccordionTrigger>More Details</AccordionTrigger>
+                            <AccordionContent>
+                                Phone: {student.phone}    ,    Status: {student.status}<br />
+                                Date of Birth: {student.date_of_birth}   ,   Time zone: {student.timezone}<br />
+                                Juz: {student.current_juz} , Surah: {student.current_surah} , Ayah: {student.current_ayah} <br />
+                                lesson Rate: {student.lesson_rate} , lessons per week: {student.lessons_per_week} <br />
+                                Billing Cycle: {student.billing_cycle}    ,    <br /><br />
+                                Private Notes: {student.private_notes} <br />
+                                Special Notes: {student.special_notes} <br />
+                            </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                    </div>
                 </ItemDescription>
                 </ItemContent>
                     {student.registration_status === openApi.RegistrationStatus.Pending ? (
@@ -110,12 +129,12 @@ export default function Students() {
                         <AlertDialogTrigger asChild>
                             <ItemActions>
                                 <Button onClick={() => (student.id, {})} size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white">
-                                    Information
+                                    Update
                                 </Button>
                             </ItemActions>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
-                            <form action={updateStudentAction}>
+                            <form action={updateStudentAction} id={`update-${student.id}`}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>Create Student</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">

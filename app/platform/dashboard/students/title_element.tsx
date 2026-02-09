@@ -52,7 +52,7 @@ export default function titleElement({
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Student</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
-                            <form action={createAction}>
+                            <form action={createAction} id={`create-student-form-${Date.now()}`}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>Create Student</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">

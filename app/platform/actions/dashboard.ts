@@ -1,5 +1,5 @@
 import * as openApi from "@/lib/openApi"
-import { CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetSchedualesForStudentFormState, GetStudentFormState, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState } from "@/app/platform/lib/definitions"
+import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState } from "@/app/platform/lib/definitions"
 
 const api = new openApi.Api({
     baseUrl: 'http://10.60.184.80:8000',
@@ -22,12 +22,36 @@ export async function listStudents(): Promise<openApi.StudentRead[] | null> {
         const response = await api.api.listAllApiV1StudentsGet()
 
         if (response.status === 200) {
+            const Students = response.data.map((student) => {
+                return {
+                    student_id: student.id,
+                    full_name_arabic: student.full_name_arabic,
+                    full_name_english: student.full_name_english,
+                }
+            })
+            localStorage.setItem('students', JSON.stringify(Students))
             return response.data
         }
         return null
     } catch (error) {
         return null
     }
+}
+
+export function getLocalStudent(id: number) {
+    const students = localStorage.getItem('students')
+    if (students) {
+        const studentsArray = JSON.parse(students)
+        return studentsArray.map((student: { student_id: number, full_name_arabic: string, full_name_english: string }) => {
+            if (student.student_id === id) {
+                return {
+                    full_name_arabic: student.full_name_arabic,
+                    full_name_english: student.full_name_english,
+                }
+            }
+        }) || null
+    }
+    return null
 }
 
 export async function createStudent(state: CreateStudentFormState, formData: FormData): Promise<CreateStudentFormState> {
@@ -413,16 +437,114 @@ export async function listInvoices(): Promise<openApi.InvoiceRead[]> {
     }
 }
 
-export async function getInvoice(id:number): Promise<openApi.InvoiceRead | null> {
+export async function getInvoice(state: GetInvoiceByIDFormState, formData: FormData): Promise<GetInvoiceByIDFormState> {
+    const id = Number(formData.get('invoice_id'))
+    if (isNaN(id)) {
+        return { error: { invoice_id: ['Invoice ID must be a number'] } }
+    }
     try {
         const response = await api.api.getOneApiV1InvoicesInvoiceIdGet(id)
 
         if (response.status === 200) {
-            return response.data
+            return {message: 'success', data: response.data }
         }
-        return null
+        return {message: 'fail' }
     } catch (error) {
-        return null
+        return {message: 'fail' }
+    }
+}
+
+export async function createInvoices(state: CreateInvoiceFormState, formData: FormData): Promise<CreateInvoiceFormState> {
+    const validation = createInvoiceSchema.safeParse({
+        student_id: formData.get('student_id'),
+        period_from: formData.get('period_from'),
+        period_to: formData.get('period_to'),
+        due_date: formData.get('due_date'),
+    })
+
+    if (!validation.success) {
+        return { error: validation.error.flatten().fieldErrors }
+    }
+
+    try {
+        const data: openApi.InvoiceGenerateRequest = {
+            student_id: Number(validation.data.student_id),
+            period_from: validation.data.period_from,
+            period_to: validation.data.period_to,
+            due_date: validation.data.due_date,
+        }
+        const response = await api.api.generateApiV1InvoicesGeneratePost(data)
+
+        if (response.status === 201) {
+            listInvoices() // Refresh the invoices list after creating a new invoice
+            return {message: 'success' }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function overrideInvoice(state: OverrideInvoiceFormState, formData: FormData): Promise<OverrideInvoiceFormState> {
+    const validation = overrideInvoiceSchema.safeParse({
+        id: formData.get('id'),
+        billabe: formData.get('billable'),
+        override_reason: formData.get('override_reason'),
+    })
+
+    if (!validation.success) {
+        return {message: 'faile'}
+    }
+
+    try {
+        const data: openApi.InvoiceItemOverrideRequest = {
+            item_id: Number(validation.data.invoice_id),
+            billable: validation.data.billable === 'true',
+            override_reason: validation.data.override_reason,
+        }
+        const id = Number(validation.data.invoice_id)
+        const response = await api.api.overrideItemApiV1InvoicesInvoiceIdOverridesPost(id, data)
+
+        if (response.status === 200) {
+            listInvoices() // Refresh the invoices list after overriding an invoice item
+            return {message: 'success' }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function markInvoiceAsPaid(state: PayInvoiceFormState, formData: FormData): Promise<PayInvoiceFormState> {
+    const validation = payInvoiceSchema.safeParse({
+        invoice_id: formData.get('invoice_id'),
+        paid_date: formData.get('paid_date'),
+        payment_method: formData.get('payment_method'),
+        payment_reference: formData.get('payment_reference'),
+        payment_notes: formData.get('payment_notes'),
+    })
+
+    if (!validation.success) {
+        return { error: validation.error.flatten().fieldErrors }
+    }
+
+    try {
+        const id = Number(validation.data.invoice_id)
+        const data: openApi.InvoicePaidRequest = {
+            paid_date: validation.data.paid_date,
+            payment_method: validation.data.payment_method,
+            payment_reference: validation.data.payment_reference,
+            payment_notes: validation.data.payment_notes,
+        }
+        const response = await api.api.markInvoicePaidApiV1InvoicesInvoiceIdPaidPatch(id, data)
+
+        if (response.status === 200) {
+            listInvoices() // Refresh the invoices list after marking an invoice as paid
+            return {message: 'success' }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
     }
 }
 

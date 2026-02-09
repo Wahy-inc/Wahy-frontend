@@ -20,6 +20,7 @@ export default function SignIn() {
     }
     
     return (
+    <div className="w-full my-50">
     <form action={action} className="w-xs lg:w-lg mx-auto my-10 border-2 border-slate-800 p-6 rounded-lg shadow-lg bg-slate-800 text-slate-100">
     <FieldGroup>
       <Field>
@@ -56,5 +57,6 @@ export default function SignIn() {
       </Field>
     </FieldGroup>
     </form>
+    </div>
     )
 }

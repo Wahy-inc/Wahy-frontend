@@ -357,3 +357,58 @@ export const createInvoiceSchema = zod.object({
     due_date: zod.string().min(1, { error: 'Due date is required' }).trim(),
 })
  
+export type CreateInvoiceFormState = 
+| {error?: {
+    student_id?: string[];
+    period_from?: string[];
+    period_to?: string[];
+    due_date?: string[];
+}
+message?: string;
+}
+| undefined;
+
+export const getInvoiceByIDSchema = zod.object({
+    invoice_id: zod.string({ error: 'Invoice ID must be a number' }),
+})
+
+export type GetInvoiceByIDFormState = 
+| {error?: {
+    invoice_id?: string[];
+}
+message?: string;
+data?: openApi.InvoiceRead;
+}
+| undefined;
+
+export const overrideInvoiceSchema = zod.object({
+    invoice_id: zod.string(),
+    billable: zod.string(),
+    override_reason: zod.string().trim(),
+})
+
+export type OverrideInvoiceFormState = 
+| {
+message?: string;
+}
+| undefined;
+
+export const payInvoiceSchema = zod.object({
+    invoice_id: zod.string(),
+    paid_date: zod.string().min(1, { error: 'Paid date is required' }).trim(),
+    payment_method: zod.string().trim(),
+    payment_reference: zod.string().trim(),
+    payment_notes: zod.string().trim(),
+})
+
+export type PayInvoiceFormState = 
+| { error?: {
+    invoice_id?: string[];
+    paid_date?: string[];
+    payment_method?: string[];
+    payment_reference?: string[];
+    payment_notes?: string[];
+}
+message?: string;
+}
+| undefined;

@@ -1,12 +1,13 @@
 import Image from "next/image";
+import logo from "../public/quran.png";
 
 export default function Home() {
   return (
-    <div className="flex w-full min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full min-h-screen flex-col items-start justify-between py-32 px-16 lg:items-center">
+    <div className="flex w-full min-h-screen justify-center flex-row bg-zinc-50 font-sans dark:bg-black">
+      <main className="flex min-h-screen flex-col items-start justify-between py-32 px-16 lg:items-start">
         <Image
           className="dark:invert"
-          src="/next.svg"
+          src={logo}
           alt="Next.js logo"
           width={100}
           height={20}
@@ -34,7 +35,7 @@ export default function Home() {
             their students and their progress.
           </p>
         </div>
-        <div className="flex flex-col justify-between w-[50%] gap-4 text-base font-medium lg:flex-row">
+        <div className="flex flex-col justify-between gap-4 text-base font-medium lg:flex-row">
           <a
             className="w-39.5 flex h-12 items-center justify-center gap-2 rounded-full bg-slate-950 px-5 text-slate-100 transition-colors hover:bg-slate-800 hover:text-slate-100 hover:border-slate-800 border md:w-75 md:h-20"
             href="./platform/auth/login"

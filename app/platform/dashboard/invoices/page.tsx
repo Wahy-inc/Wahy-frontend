@@ -1,15 +1,14 @@
 'use client'
 
 import React from "react";
-import { useForm } from "react-hook-form";
 import * as openApi from "@/lib/openApi"
-import { approveStudent, createStudent, getStudent, listInvoices, listStudents, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
+import { createInvoices, createStudent, getInvoice, getLocalStudent, getStudent, listInvoices, listStudents, markInvoiceAsPaid, overrideInvoice, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import titleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { dummyInvoices, dummyStudents } from "@/lib/dummyData";
+import { dummyInvoices } from "@/lib/dummyData";
 import { Button } from "@/components/ui/button"
 import {
   Item,
@@ -19,22 +18,27 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
-import {User} from 'lucide-react'
-import { UpdateStudentFormState } from "../../lib/definitions";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+import {DollarSign} from 'lucide-react'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function Invoices() {
     const [invoices, setInvoices] = React.useState<openApi.InvoiceRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
-    const updateStudentActionState = (state: UpdateStudentFormState, formData: FormData) => updateStudent(state, formData, Number(formData.get('id')))
-    const [updateStudentState, updateStudentAction, updateStudentPending] = React.useActionState(updateStudentActionState, undefined)
-    const [createStudentState, createStudentAction, createStudentPending] = React.useActionState(createStudent, undefined)
-    const [getStudentState, getStudentAction, getStudentPending] = React.useActionState(getStudent, undefined)
-    const [createStudentDialogOpen, setCreateStudentDialogOpen] = React.useState(false)
-    const [getStudentDialogOpen, setGetStudentDialogOpen] = React.useState(false)
-    const [updateStudentDialogOpen, setUpdateStudentDialogOpen] = React.useState(false)
+    const [overrideInvoiceState, overrideInvoiceAction, overrideInvoicePending] = React.useActionState(overrideInvoice, undefined)
+    const [createInvoiceState, createInvoiceAction, createInvoicePending] = React.useActionState(createInvoices, undefined)
+    const [getInvoiceState, getInvoiceAction, getInvoicePending] = React.useActionState(getInvoice, undefined)
+    const [payInvoiceState, payInvoiceAction, payInvoicePending] = React.useActionState(markInvoiceAsPaid, undefined)
+    const [createInvoiceDialogOpen, setCreateInvoiceDialogOpen] = React.useState(false)
+    const [getInvoiceDialogOpen, setGetInvoiceDialogOpen] = React.useState(false)
+    const [overrideInvoiceDialogOpen, setOverrideInvoiceDialogOpen] = React.useState(false)
+    const [paidInvoiceDialogOpen, setPaidInvoiceDialogOpen] = React.useState(false)
 
     React.useEffect(() => {
         const fetchInvoices = async () => {
@@ -65,19 +69,33 @@ export default function Invoices() {
             <Item variant="outline" style={{borderColor: color}}>
                 <ItemContent>
                     <ItemMedia variant="icon">
-                        <User />
+                        <DollarSign />
                     </ItemMedia>
-                <ItemTitle>{invoice.invoice_number}</ItemTitle>
-                <ItemDescription>
+                <ItemTitle>Invoice ID: {invoice.invoice_number} , Student: {getLocalStudent(invoice.student_id)?.full_name_english}</ItemTitle>
+                <ItemDescription className="text-sm ">
                     Amount: {invoice.total_amount} {invoice.currency} , Status: {invoice.status} <br />
-                    Period From: {invoice.period_from} To {invoice.period_to} , Generated: {invoice.generated_date} , Due {invoice.due_date} <br />
-                    Payment Method: {invoice.payment_method} , Reference: {invoice.payment_reference} <br /><br />
-                    Notes: {invoice.payment_notes}
+                    <div id="accordion-data">
+                        <Accordion
+                        type="single"
+                        collapsible
+                        className="w-full"
+                        >
+                            <AccordionItem key={invoice.id} value={invoice.id.toString()}>
+                            <AccordionTrigger>More Details</AccordionTrigger>
+                            <AccordionContent>
+                                Period From: {invoice.period_from} To {invoice.period_to} <br />
+                                Generated: {invoice.generated_date}    ,    Due {invoice.due_date} <br />
+                                Payment Method: {invoice.payment_method}    ,    Reference: {invoice.payment_reference} <br /><br />
+                                Notes: {invoice.payment_notes}
+                            </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                    </div>
                 </ItemDescription>
                 </ItemContent>
                     {invoice.status === openApi.InvoiceStatus.Generated ? (
                         <ItemActions>
-                            <AlertDialog open={updateStudentDialogOpen} onOpenChange={updateStudentState?.message == 'success'? () => setUpdateStudentDialogOpen(false) : setUpdateStudentDialogOpen}>
+                            <AlertDialog open={paidInvoiceDialogOpen} onOpenChange={payInvoiceState?.message == 'success'? () => setPaidInvoiceDialogOpen(false) : setPaidInvoiceDialogOpen}>
                                 <AlertDialogTrigger asChild>
                                     <ItemActions>
                                         <Button size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white">
@@ -86,31 +104,32 @@ export default function Invoices() {
                                     </ItemActions>
                                 </AlertDialogTrigger>
                                 <AlertDialogContent>
-                                    <form action={updateStudentAction}>
+                                    <form action={payInvoiceAction} id={`pay-${invoice.id.toString()}`}>
                                     <AlertDialogHeader>
-                                    <AlertDialogTitle>Create Student</AlertDialogTitle>
+                                    <AlertDialogTitle>Mark Invoice as Paid</AlertDialogTitle>
                                         <div className="flex flex-col gap-4 w-full">
+                                            <input hidden name="invoice_id" value={invoice.id} type="text" />
                                             <div className='flex flex-col'>
-                                                {fieldInput("Date","date", '', "date")}
-                                                {updateStudentState?.error?.arname && <p className="text-red-500 text-sm">{updateStudentState.error.arname}</p>}
+                                                {fieldInput("Date","paid_date", '', "date")}
+                                                {payInvoiceState?.error?.paid_date && <p className="text-red-500 text-sm">{payInvoiceState.error.paid_date}</p>}
                                             </div>
                                             <div className='flex flex-col'>
                                                 {fieldInput("Payment Method","payment_method", '', "text")}
-                                                {updateStudentState?.error?.enname && <p className="text-red-500 text-sm">{updateStudentState.error.enname}</p>}
+                                                {payInvoiceState?.error?.payment_method && <p className="text-red-500 text-sm">{payInvoiceState.error.payment_method}</p>}
                                             </div>
                                             <div className='flex flex-col'>
                                                 {fieldInput("Payment Reference","payment_reference", '', "text")}
-                                                {updateStudentState?.error?.enname && <p className="text-red-500 text-sm">{updateStudentState.error.enname}</p>}
+                                                {payInvoiceState?.error?.payment_reference && <p className="text-red-500 text-sm">{payInvoiceState.error.payment_reference}</p>}
                                             </div>
                                             <div className='flex flex-col'>
                                                 {fieldInput("Payment Notes","payment_notes", '', "text")}
-                                                {updateStudentState?.error?.enname && <p className="text-red-500 text-sm">{updateStudentState.error.enname}</p>}
+                                                {payInvoiceState?.error?.payment_notes && <p className="text-red-500 text-sm">{payInvoiceState.error.payment_notes}</p>}
                                             </div>
                                         </div>
                                     </AlertDialogHeader>
                                     <AlertDialogFooter className="mt-4">
-                                        <AlertDialogCancel type="reset" disabled={updateStudentPending}>Cancel</AlertDialogCancel>
-                                        <Button type="submit" disabled={updateStudentPending}>{updateStudentPending ? 'Updating...' : 'Update'}</Button>
+                                        <AlertDialogCancel type="reset" disabled={payInvoicePending}>Cancel</AlertDialogCancel>
+                                        <Button type="submit" disabled={payInvoicePending}>{payInvoicePending ? 'Updating...' : 'Update'}</Button>
                                     </AlertDialogFooter>
                                     </form>
                                 </AlertDialogContent>
@@ -121,9 +140,40 @@ export default function Invoices() {
                         </ItemActions>
                     ) : null}
                     {invoice.status === openApi.InvoiceStatus.Paid ? (
+                        <ItemActions>
+                            <AlertDialog open={overrideInvoiceDialogOpen} onOpenChange={overrideInvoiceState?.message == 'success'? () => setOverrideInvoiceDialogOpen(false) : setOverrideInvoiceDialogOpen}>
+                                <AlertDialogTrigger asChild>
+                                    <ItemActions>
+                                        <Button size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white">
+                                            Override
+                                        </Button>
+                                    </ItemActions>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <form action={overrideInvoiceAction} id={`override-${invoice.id.toString()}`}>
+                                    <AlertDialogHeader>
+                                    <AlertDialogTitle>Override Invoice</AlertDialogTitle>
+                                        <div className="flex flex-col gap-4 w-full">
+                                            <input hidden value={invoice.id} name="invoice_id" type="text" />
+                                            <div className='flex flex-col'>
+                                                {fieldInput("Billable","billable", 'Yes or No', "text")}
+                                            </div>
+                                            <div className='flex flex-col'>
+                                                {fieldInput("Override Reason","override_reason", '', "text")}
+                                            </div>
+                                        </div>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter className="mt-4">
+                                        <AlertDialogCancel type="reset" disabled={overrideInvoicePending}>Cancel</AlertDialogCancel>
+                                        <Button type="submit" disabled={overrideInvoicePending}>{overrideInvoicePending ? 'Overriding...' : 'Override'}</Button>
+                                    </AlertDialogFooter>
+                                    </form>
+                                </AlertDialogContent>
+                            </AlertDialog>
                             <Button disabled={true} size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent">
                                 Paid
                             </Button>
+                        </ItemActions>
                     ) : null}
             </Item>
         </div>
@@ -200,17 +250,17 @@ export default function Invoices() {
 
     return dashboardPage({children: <div className="flex flex-col gap-4 w-full">{content}</div>, title: titleElement({
         title: "My Invoices",
-        createAction: createStudentAction,
-        createState: createStudentState,
-        createPending: createStudentPending,
-        getStudentAction: getStudentAction,
-        getStudentState: getStudentState,
-        getStudentPending: getStudentPending,
+        createAction: createInvoiceAction,
+        createState: createInvoiceState,
+        createPending: createInvoicePending,
+        getInvoiceAction: getInvoiceAction,
+        getInvoiceState: getInvoiceState,
+        getInvoicePending: getInvoicePending,
         fieldInput: fieldInput,
-        createStudentDialogOpen: createStudentDialogOpen,
-        setcreateStudentDialogOpen: setCreateStudentDialogOpen,
-        getStudentDialogOpen: getStudentDialogOpen,
-        setgetStudentDialogOpen: setGetStudentDialogOpen,
+        createInvoicesDialogOpen: createInvoiceDialogOpen,
+        setcreateInvoicesDialogOpen: setCreateInvoiceDialogOpen,
+        getInvoicesDialogOpen: getInvoiceDialogOpen,
+        setgetInvoicesDialogOpen: setGetInvoiceDialogOpen,
     }
     )})
 }
