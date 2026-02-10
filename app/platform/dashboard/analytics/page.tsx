@@ -7,7 +7,10 @@ import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import dashboardPage from "../page";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import React from "react";
+import React, { useState } from "react";
+import { attendanceAnalytics, financialAnalytics, getLocalStudent, operationalAnalytics, performanceAnalytics } from "../../actions/dashboard";
+import { useAuth } from "@/lib/auth-context";
+import { Button } from "@/components/ui/button";
 interface student {
     student_id: number,
     full_name_arabic: string,
@@ -15,18 +18,71 @@ interface student {
 
 }
 export default function Home() {
-    const [students, setStudents] = React.useState<student[]>([]);
+    const { isAdmin, isLoading: authLoading } = useAuth()
+    const [attendance, setattendance] = React.useState<openApi.AttendanceAnalytics | null>(null);
+    const [performance, setPerformance] = React.useState<openApi.PerformanceAnalytics | null>(null);
+    const [financial, setFinancial] = React.useState<openApi.FinancialAnalytics | null>(null);
+    const [operational, setOperational] = React.useState<openApi.OperationalAnalytics | null>(null);
+    const [attendanceState, attendanceAction, attendancePending] = React.useActionState(attendanceAnalytics, undefined);
+    const [performanceState, performanceAction, performancePending] = React.useActionState(performanceAnalytics, undefined);
+    const [financialState, financialAction, financialPending] = React.useActionState(financialAnalytics, undefined);
+    const [operationalState, operationalAction, operationalPending] = React.useActionState(operationalAnalytics, undefined);
 
     React.useEffect(() => {
-        try {
-        const data = localStorage.getItem("students")? JSON.parse(localStorage.getItem("students")!) as student[] : [];
-        console.log(data);
-        setStudents(data);
-        } catch (error) {
-            console.error("Failed to parse students from localStorage:", error);
-            setStudents([]);
+        if (!isAdmin || authLoading) return;
+
+        setattendance({
+                period_start: "2024-01-01",
+                period_end: "2024-01-01",
+                total_lessons: 0,
+                present_count: 0,
+                late_count: 0,
+                absent_count: 0,
+                excused_count: 0,
+                attendance_rate: 0
+        });
+        setPerformance({
+            period_start: "2024-01-01",
+            period_end: "2024-01-01",
+            attended_count: 0,
+            passed_count: 0,
+            pass_rate: 0,
+            attendance_rate: 0,
+            homework_rate: 0,
+            timeliness_rate: 0,
+            determination_score: 0
+        });
+        setFinancial({
+            period_start: "2024-01-01",
+            period_end: "2024-01-01",
+            total_revenue: 0,
+            invoice_count: 0,
+            overdue_count: 0,
+            revenue_per_student: []
+        });
+        setOperational({
+            period_start: "2024-01-01",
+            period_end: "2024-01-01",
+            new_registrations: 0,
+            active_students: 0,
+            lessons_recorded: 0
+        });
+    }, [attendance, performance, financial, operational, isAdmin, authLoading])
+
+    React.useEffect(() => {
+        if (attendanceState?.message === 'success' && attendanceState.data) {
+            setattendance(attendanceState.data)
         }
-    }, [])
+        if (performanceState?.message === 'success' && performanceState.data) {
+            setPerformance(performanceState.data)
+        }
+        if (financialState?.message === 'success' && financialState.data) {
+            setFinancial(financialState.data)
+        }
+        if (operationalState?.message === 'success' && operationalState.data) {
+            setOperational(operationalState.data)
+        }
+    }, [attendanceState, performanceState, financialState, operationalState])
 
     const timeElement = (analytic: {
         period_start: string;
@@ -59,17 +115,20 @@ export default function Home() {
         )
     }
 
-    const titleElement = (title: string) => {
+    const titleElement = (title: string, action: (formData: FormData) => void, pending: boolean) => {
         return (
             <div className="flex flex-row justify-between my-3">
                 <div id="title">
                     <p className='text-4xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>
                 <div id="period" className="flex flex-row items-center">
-                    <p className="inline px-1">Period From</p>
-                    <Input className="w-32" type="date"></Input>
-                    <p className="inline px-1">To</p>
-                    <Input className="w-32" type="date"></Input>
+                    <form action={action}>
+                        <p className="inline px-1">Period From</p>
+                        <Input className="w-32" type="date"></Input>
+                        <p className="inline px-1">To</p>
+                        <Input className="w-32" type="date"></Input>
+                        <Button disabled={pending} id="submit" type="submit" className="bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800">Submit</Button>
+                    </form>
                 </div>
             </div>
         )
@@ -78,7 +137,7 @@ export default function Home() {
     const attendanceAnalyticsElement =  (analytic: openApi.AttendanceAnalytics) => {
         return (
             <div className="w-full my-6">
-                {titleElement("Attendance Analytics")}
+                {titleElement("Attendance Analytics", attendanceAction, attendancePending)}
                 <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
                     {timeElement({
                         period_start: analytic.period_start,
@@ -124,7 +183,7 @@ export default function Home() {
     const performanceAnalyticsElement =  (analytic: openApi.PerformanceAnalytics) => {
         return (
             <div className="w-full my-6">
-                {titleElement("Performance Analytics")}
+                {titleElement("Performance Analytics", performanceAction, performancePending)}
                 <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
                     {timeElement({
                         period_start: analytic.period_start,
@@ -172,7 +231,7 @@ export default function Home() {
     const financialAnalyticsElement =  (analytic: openApi.FinancialAnalytics) => {
         return (
             <div className="w-full my-6">
-                {titleElement("Financial Analytics")}
+                {titleElement("Financial Analytics", financialAction, financialPending)}
                 <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
                     {timeElement({
                         period_start: analytic.period_start,
@@ -219,7 +278,7 @@ export default function Home() {
                             {analytic.revenue_per_student.map((item) => {
                                 return (
                                         <AccordionContent key={item.student_id} className="bg-slate-50 rounded-xl p-2 text-gray-500 text-lg my-1">
-                                            Name: {students.find(s => s.student_id === item.student_id)?.full_name_english || "Unknown"} <br />
+                                            Name: {getLocalStudent(item.student_id)?.full_name_english || "Unknown"} <br />
                                             Revenue: {item.total_revenue}
                                         </AccordionContent>
                                 )
@@ -236,7 +295,7 @@ export default function Home() {
     const operationalAnalyticsElement =  (analytic: openApi.OperationalAnalytics) => {
         return (
             <div className="w-full my-6">
-                {titleElement("Operational Analytics")}
+                {titleElement("Operational Analytics", operationalAction, operationalPending)}
                 <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
                     {timeElement({
                         period_start: analytic.period_start,

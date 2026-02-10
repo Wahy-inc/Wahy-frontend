@@ -1,5 +1,5 @@
 import * as openApi from "@/lib/openApi"
-import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState } from "@/app/platform/lib/definitions"
+import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState } from "@/app/platform/lib/definitions"
 
 const api = new openApi.Api({
     baseUrl: 'http://10.60.184.80:8000',
@@ -809,6 +809,106 @@ export async function getLessonByIDMe(state:GetLessonByIDFormState, formData: Fo
     }
     try {
         const response = await api.api.getMyLessonApiV1LessonsMeLessonIdGet(lessonId)
+
+        if (response.status === 200) {
+            return {message: 'success' , data: response.data }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function attendanceAnalytics(state:GetAttendanceAnalyticsFormState, formData: FormData): Promise<GetAttendanceAnalyticsFormState> {
+    const validation = getAttendanceAnalyticsSchema.safeParse({
+        period_from: formData.get('period-from'),
+        period_to: formData.get('period-to'),
+    })
+
+    if (!validation.success) {
+        return { message: 'fail' }
+    }
+    try {
+        const data = {
+            start_date: validation.data.period_start,
+            end_date: validation.data.period_end,
+        }
+        const response = await api.api.attendanceApiV1AnalyticsAttendanceGet(data)
+
+        if (response.status === 200) {
+            return {message: 'success' , data: response.data }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function financialAnalytics(state:GetFinancialAnalyticsFormState, formData: FormData): Promise<GetFinancialAnalyticsFormState> {
+    const validation = getFinancialAnalyticsSchema.safeParse({
+        period_from: formData.get('period-from'),
+        period_to: formData.get('period-to'),
+    })
+
+    if (!validation.success) {
+        return { message: 'fail' }
+    }
+    try {
+        const data = {
+            start_date: validation.data.period_start,
+            end_date: validation.data.period_end,
+        }
+        const response = await api.api.financialApiV1AnalyticsFinancialGet(data)
+
+        if (response.status === 200) {
+            return {message: 'success' , data: response.data }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function performanceAnalytics(state:GetPerformanceAnalyticsFormState, formData: FormData): Promise<GetPerformanceAnalyticsFormState> {
+    const validation = getPerformanceAnalyticsSchema.safeParse({
+        period_from: formData.get('period-from'),
+        period_to: formData.get('period-to'),
+    })
+
+    if (!validation.success) {
+        return { message: 'fail' }
+    }
+    try {
+        const data = {
+            start_date: validation.data.period_start,
+            end_date: validation.data.period_end,
+        }
+        const response = await api.api.performanceApiV1AnalyticsPerformanceGet(data)
+
+        if (response.status === 200) {
+            return {message: 'success' , data: response.data }
+        }
+        return {message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function operationalAnalytics(state:GetOperationalAnalyticsFormState, formData: FormData): Promise<GetOperationalAnalyticsFormState> {
+    const validation = getOperationalAnalyticsSchema.safeParse({
+        period_from: formData.get('period-from'),
+        period_to: formData.get('period-to'),
+    })
+
+    if (!validation.success) {
+        return { message: 'fail' }
+    }
+    try {
+        const data = {
+            start_date: validation.data.period_start,
+            end_date: validation.data.period_end,
+        }
+        const response = await api.api.operationalApiV1AnalyticsOperationalGet(data)
 
         if (response.status === 200) {
             return {message: 'success' , data: response.data }

@@ -412,3 +412,51 @@ export type PayInvoiceFormState =
 message?: string;
 }
 | undefined;
+
+export const getOperationalAnalyticsSchema = zod.object({
+    period_start: zod.string().min(1).trim(),
+    period_end: zod.string().min(1).trim(),
+})
+
+export type GetOperationalAnalyticsFormState = 
+| { 
+message?: string;
+data?: openApi.OperationalAnalytics;
+}
+| undefined;
+
+export const getAttendanceAnalyticsSchema = zod.object({
+    period_start: zod.string().min(1).trim(),
+    period_end: zod.string().min(1).trim(),
+})
+
+export type GetAttendanceAnalyticsFormState = 
+| { 
+message?: string;
+data?: openApi.AttendanceAnalytics;
+}
+| undefined;
+
+export const getPerformanceAnalyticsSchema = zod.object({
+    period_start: zod.string().min(1).trim(),
+    period_end: zod.string().min(1).trim(),
+})
+
+export type GetPerformanceAnalyticsFormState = 
+| { 
+message?: string;
+data?: openApi.PerformanceAnalytics;
+}
+| undefined;
+
+export const getFinancialAnalyticsSchema = zod.object({
+    period_start: zod.string().min(1).trim(),
+    period_end: zod.string().min(1).trim(),
+})
+
+export type GetFinancialAnalyticsFormState = 
+| { 
+message?: string;
+data?: openApi.FinancialAnalytics;
+}
+| undefined;
