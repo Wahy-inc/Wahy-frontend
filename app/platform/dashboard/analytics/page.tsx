@@ -29,47 +29,6 @@ export default function Home() {
     const [operationalState, operationalAction, operationalPending] = React.useActionState(operationalAnalytics, undefined);
 
     React.useEffect(() => {
-        if (!isAdmin || authLoading) return;
-
-        setattendance({
-                period_start: "2024-01-01",
-                period_end: "2024-01-01",
-                total_lessons: 0,
-                present_count: 0,
-                late_count: 0,
-                absent_count: 0,
-                excused_count: 0,
-                attendance_rate: 0
-        });
-        setPerformance({
-            period_start: "2024-01-01",
-            period_end: "2024-01-01",
-            attended_count: 0,
-            passed_count: 0,
-            pass_rate: 0,
-            attendance_rate: 0,
-            homework_rate: 0,
-            timeliness_rate: 0,
-            determination_score: 0
-        });
-        setFinancial({
-            period_start: "2024-01-01",
-            period_end: "2024-01-01",
-            total_revenue: 0,
-            invoice_count: 0,
-            overdue_count: 0,
-            revenue_per_student: []
-        });
-        setOperational({
-            period_start: "2024-01-01",
-            period_end: "2024-01-01",
-            new_registrations: 0,
-            active_students: 0,
-            lessons_recorded: 0
-        });
-    }, [attendance, performance, financial, operational, isAdmin, authLoading])
-
-    React.useEffect(() => {
         if (attendanceState?.message === 'success' && attendanceState.data) {
             setattendance(attendanceState.data)
         }
@@ -126,7 +85,7 @@ export default function Home() {
                         <p className="inline px-1">Period From</p>
                         <Input className="w-32" type="date"></Input>
                         <p className="inline px-1">To</p>
-                        <Input className="w-32" type="date"></Input>
+                        <Input className="w-32 mr-2" type="date"></Input>
                         <Button disabled={pending} id="submit" type="submit" className="bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800">Submit</Button>
                     </form>
                 </div>
@@ -336,68 +295,43 @@ export default function Home() {
         <p className='text-5xl text-slate-950 font-bold mb-5'>Analytics</p>
     )
 
-    const content = (
+    const content =  (
         <div className="flex flex-col items-center">
-            {attendanceAnalyticsElement({
+            {attendance? attendanceAnalyticsElement(attendance) : attendanceAnalyticsElement({
             period_start: "2024-01-01",
             period_end: "2024-01-31",
-            total_lessons: 20,
-            present_count: 15,
-            late_count: 2,
-            absent_count: 2,
-            excused_count: 1,
-            attendance_rate: 0.75
+            total_lessons: 0,
+            present_count: 0,
+            late_count: 0,
+            absent_count: 0,
+            excused_count: 0,
+            attendance_rate: 0
         })}
-        {performanceAnalyticsElement({
+        {performance? performanceAnalyticsElement(performance) : performanceAnalyticsElement({
             period_start: "2024-01-01",
             period_end: "2024-01-31",
-            attended_count: 18,
-            passed_count: 14,
-            pass_rate: 0.78,
-            attendance_rate: 0.75,
-            homework_rate: 0.8,
-            timeliness_rate: 0.9,
-            determination_score: 85
+            attended_count: 0,
+            passed_count: 0,
+            pass_rate: 0,
+            attendance_rate: 0,
+            homework_rate: 0,
+            timeliness_rate: 0,
+            determination_score: 0
         })}
-        {financialAnalyticsElement({
+        {financial? financialAnalyticsElement(financial) : financialAnalyticsElement({
             period_start: "2024-01-01",
             period_end: "2024-01-31",
-            total_revenue: 5000,
-            invoice_count: 50,
-            overdue_count: 5,
-            revenue_per_student: [
-                {
-                    student_id: 1,
-                    total_revenue: 2000
-                },
-                {
-                    student_id: 2,
-                    total_revenue: 1500
-                },
-                {
-                    student_id: 3,
-                    total_revenue: 1500
-                },
-                {
-                    student_id: 4,
-                    total_revenue: 2000
-                },
-                {
-                    student_id: 5,
-                    total_revenue: 1500
-                },
-                {
-                    student_id: 6,
-                    total_revenue: 1500
-                }
-            ]
+            total_revenue: 0,
+            invoice_count: 0,
+            overdue_count: 0,
+            revenue_per_student: []
         })}
-        {operationalAnalyticsElement({
+        {operational? operationalAnalyticsElement(operational) : operationalAnalyticsElement({
             period_start: "2024-01-01",
             period_end: "2024-01-31",
-            new_registrations: 30,
-            active_students: 120,
-            lessons_recorded: 200
+            new_registrations: 0,
+            active_students: 0,
+            lessons_recorded: 0
         })}
         </div>
 )

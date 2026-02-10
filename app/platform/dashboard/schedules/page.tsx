@@ -5,7 +5,7 @@ import * as openApi from "@/lib/openApi"
 import { createSchedule, deleteSchedule, getSchedulesForStudent, listSchedules, listSchedulesMe, updateSchedule } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
-import titleElement from "./title_element";
+import TitleElement from "./title_element";
 import { UpdateScheduleFormState } from "@/app/platform/lib/definitions";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -362,24 +362,26 @@ export default function Schedules() {
         </Card>
     )
 
-    const title = titleElement({
-        title: "Schedules",
-        handleSearchStudentId: handleSearchStudentId,
-        searchStudentId: searchStudentId,
-        handleClearFilter: handleClearFilter,
-        createAction: createScheduleAction,
-        createState: createScheduleState,
-        createPending: createSchedulePending,
-        getSchedualesForStudentAction: getScheduleAction,
-        getSchedualesForStudentState: getScheduleState,
-        getSchedualesForStudentPending: getSchedulePending,
-        fieldInput: fieldInput,
-        createScheduleDialogOpen: createScheduleDialogOpen,
-        setcreateScheduleDialogOpen: setCreateScheduleDialogOpen,
-        getStudentScheduleDialogOpen: getScheduleDialogOpen,
-        setgetStudentScheduleDialogOpen: setGetScheduleDialogOpen,
-        isAdmin: isAdmin,
-    })
+    const title = (
+        <TitleElement
+            title="Schedules"
+            handleSearchStudentId={handleSearchStudentId}
+            searchStudentId={searchStudentId}
+            handleClearFilter={handleClearFilter}
+            createAction={createScheduleAction}
+            createState={createScheduleState}
+            createPending={createSchedulePending}
+            getSchedualesForStudentAction={getScheduleAction}
+            getSchedualesForStudentState={getScheduleState}
+            getSchedualesForStudentPending={getSchedulePending}
+            fieldInput={fieldInput}
+            createScheduleDialogOpen={createScheduleDialogOpen}
+            setcreateScheduleDialogOpen={setCreateScheduleDialogOpen}
+            getStudentScheduleDialogOpen={getScheduleDialogOpen}
+            setgetStudentScheduleDialogOpen={setGetScheduleDialogOpen}
+            isAdmin={isAdmin}
+        />
+    )
 
     if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: title})
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})

@@ -20,7 +20,7 @@ import {
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { JSX } from "react";
+import React, { JSX, useState } from "react";
 import { CreateScheduleFormState, GetSchedualesForStudentFormState } from "@/app/platform/lib/definitions";
 
 enum weekDays {
@@ -33,7 +33,7 @@ enum weekDays {
     friday = 6
 }
 
-export default function titleElement({
+export default function TitleElement({
     title,
     handleClearFilter,
     handleSearchStudentId,
@@ -68,6 +68,42 @@ export default function titleElement({
         setgetStudentScheduleDialogOpen: (open: boolean) => void,
         isAdmin: boolean
     }) {
+    // Track if forms have been submitted in current dialog session
+    const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
+    const [getFormSubmitted, setGetFormSubmitted] = useState(false)
+
+    const handleCreateDialogOpenChange = (open: boolean) => {
+        if (!open) {
+            setCreateFormSubmitted(false)
+        }
+        if (createState?.message === 'success') {
+            setcreateScheduleDialogOpen(false)
+        } else {
+            setcreateScheduleDialogOpen(open)
+        }
+    }
+
+    const handleGetDialogOpenChange = (open: boolean) => {
+        if (!open) {
+            setGetFormSubmitted(false)
+        }
+        if (getSchedualesForStudentState?.message === 'success') {
+            setgetStudentScheduleDialogOpen(false)
+        } else {
+            setgetStudentScheduleDialogOpen(open)
+        }
+    }
+
+    const handleCreateSubmit = (formData: FormData) => {
+        setCreateFormSubmitted(true)
+        createAction(formData)
+    }
+
+    const handleGetSubmit = (formData: FormData) => {
+        setGetFormSubmitted(true)
+        getSchedualesForStudentAction(formData)
+    }
+
     return (
             <div className="flex flex-col justify-center">
                 <div className='flex flex-row justify-between items-center'>
@@ -91,18 +127,18 @@ export default function titleElement({
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
                     {isAdmin? 
                     <div>
-                    <AlertDialog open={createScheduleDialogOpen} onOpenChange={createState?.message == 'success'? () => setcreateScheduleDialogOpen(false) : setcreateScheduleDialogOpen}>
+                    <AlertDialog open={createScheduleDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Schedule</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
-                            <form action={createAction}>
+                            <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>Create Schedule</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                     <div className='flex flex-col'>
                                         {fieldInput("Student ID","student-id", "Enter student id...", "number")}
-                                        {createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
+                                        {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className='flex flex-col'>
@@ -126,25 +162,25 @@ export default function titleElement({
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                            {createState?.error?.day_of_week && <p className="text-red-500 text-sm">{createState.error.day_of_week}</p>}
+                                            {createFormSubmitted && createState?.error?.day_of_week && <p className="text-red-500 text-sm">{createState.error.day_of_week}</p>}
                                         </div>
                                         <div className='flex flex-col'>
                                             {fieldInput("Start Time", "start-time", "Select start time...", "time")}
-                                            {createState?.error?.start_time && <p className="text-red-500 text-sm">{createState.error.start_time}</p>}
+                                            {createFormSubmitted && createState?.error?.start_time && <p className="text-red-500 text-sm">{createState.error.start_time}</p>}
                                         </div>
                                         <div className='flex flex-col'>
                                             {fieldInput("End Time", "end-time", "Select end time...", "time")}
-                                            {createState?.error?.end_time && <p className="text-red-500 text-sm">{createState.error.end_time}</p>}
+                                            {createFormSubmitted && createState?.error?.end_time && <p className="text-red-500 text-sm">{createState.error.end_time}</p>}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className='flex flex-col'>
                                             {fieldInput("Effective from","effective-from", "date", "date")}
-                                            {createState?.error?.effective_from && <p className="text-red-500 text-sm">{createState.error.effective_from}</p>}
+                                            {createFormSubmitted && createState?.error?.effective_from && <p className="text-red-500 text-sm">{createState.error.effective_from}</p>}
                                         </div>
                                         <div className='flex flex-col'>
                                             {fieldInput("Effective until", "effective-until", "date", "date")}
-                                            {createState?.error?.effective_until && <p className="text-red-500 text-sm">{createState.error.effective_until}</p>}
+                                            {createFormSubmitted && createState?.error?.effective_until && <p className="text-red-500 text-sm">{createState.error.effective_until}</p>}
                                         </div>
                                     </div>
                                     <div className='flex flex-col'>
@@ -163,13 +199,13 @@ export default function titleElement({
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {createState?.error?.is_recurring && <p className="text-red-500 text-sm">{createState.error.is_recurring}</p>}
+                                        {createFormSubmitted && createState?.error?.is_recurring && <p className="text-red-500 text-sm">{createState.error.is_recurring}</p>}
                                     </div>
                                     <div className='flex flex-col'>
                                         {fieldInput("Notes", "notes", "Enter notes...", "text")}
-                                        {createState?.error?.notes && <p className="text-red-500 text-sm">{createState.error.notes}</p>}
+                                        {createFormSubmitted && createState?.error?.notes && <p className="text-red-500 text-sm">{createState.error.notes}</p>}
                                     </div>
-                                    {createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create schedule. Please check the data and try again.</p> : null}
+                                    {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create schedule. Please check the data and try again.</p> : null}
                                 </div>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
@@ -180,12 +216,12 @@ export default function titleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     </div> : <div></div> }
-                    <AlertDialog open={getStudentScheduleDialogOpen} onOpenChange={getSchedualesForStudentState?.message == 'success'? () => setgetStudentScheduleDialogOpen(false) : setgetStudentScheduleDialogOpen}>
+                    <AlertDialog open={getStudentScheduleDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Schedules for student</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
-                        <form action={getSchedualesForStudentAction}>
+                        <form action={handleGetSubmit}>
                         <AlertDialogHeader>
                         <AlertDialogTitle>Get Schedules for student using ID</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -193,7 +229,7 @@ export default function titleElement({
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
                             {fieldInput("Student ID", "student-id", "Enter student ID...", "number")}
-                            {getSchedualesForStudentState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch schedules. Please check the ID and try again.</p> : null}
+                            {getFormSubmitted && getSchedualesForStudentState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch schedules. Please check the ID and try again.</p> : null}
                         </div>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="mt-4">
