@@ -9,12 +9,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
-import { JSX } from "react";
+import React, { JSX, useState } from "react";
 import { CreateInvoiceFormState, GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
-import { useAuth } from "@/lib/auth-context";
 
 
-export default function titleElement({
+export default function TitleElement({
     title,
     createAction,
     createPending,
@@ -43,6 +42,42 @@ export default function titleElement({
         setgetInvoicesDialogOpen: (open: boolean) => void,
         isAdmin: boolean
     }) {
+    // Track if forms have been submitted in current dialog session
+    const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
+    const [getFormSubmitted, setGetFormSubmitted] = useState(false)
+
+    const handleCreateDialogOpenChange = (open: boolean) => {
+        if (!open) {
+            setCreateFormSubmitted(false)
+        }
+        if (createState?.message === 'success') {
+            setcreateInvoicesDialogOpen(false)
+        } else {
+            setcreateInvoicesDialogOpen(open)
+        }
+    }
+
+    const handleGetDialogOpenChange = (open: boolean) => {
+        if (!open) {
+            setGetFormSubmitted(false)
+        }
+        if (getInvoiceState?.message === 'success') {
+            setgetInvoicesDialogOpen(false)
+        } else {
+            setgetInvoicesDialogOpen(open)
+        }
+    }
+
+    const handleCreateSubmit = (formData: FormData) => {
+        setCreateFormSubmitted(true)
+        createAction(formData)
+    }
+
+    const handleGetSubmit = (formData: FormData) => {
+        setGetFormSubmitted(true)
+        getInvoiceAction(formData)
+    }
+
     return (
             <div className="flex flex-col justify-center">
                 <div className='flex flex-row justify-between items-center'>
@@ -51,30 +86,30 @@ export default function titleElement({
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
                     {isAdmin ?
                     <div>
-                    <AlertDialog open={createInvoicesDialogOpen} onOpenChange={createState?.message == 'success'? () => setcreateInvoicesDialogOpen(false) : setcreateInvoicesDialogOpen}>
+                    <AlertDialog open={createInvoicesDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Generate Invoice</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
-                            <form action={createAction}>
+                            <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>Generate Invoice</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                 <div className="flex flex-col">
                                     {fieldInput("Student ID","student_id", "", "number")}
-                                    {createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
+                                    {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                 </div>
                                 <div className="flex flex-col">
                                     {fieldInput("Period from","period_from", "", "date")}
-                                    {createState?.error?.period_from && <p className="text-red-500 text-sm">{createState.error.period_from}</p>}
+                                    {createFormSubmitted && createState?.error?.period_from && <p className="text-red-500 text-sm">{createState.error.period_from}</p>}
                                 </div>
                                 <div className="flex flex-col">
                                     {fieldInput("Period to","period_to", "", "date")}
-                                    {createState?.error?.period_to && <p className="text-red-500 text-sm">{createState.error.period_to}</p>}
+                                    {createFormSubmitted && createState?.error?.period_to && <p className="text-red-500 text-sm">{createState.error.period_to}</p>}
                                 </div>
                                 <div className="flex flex-col">
                                     {fieldInput("Due date","due_date", "", "date")}
-                                    {createState?.error?.due_date && <p className="text-red-500 text-sm">{createState.error.due_date}</p>}
+                                    {createFormSubmitted && createState?.error?.due_date && <p className="text-red-500 text-sm">{createState.error.due_date}</p>}
                                 </div>
                                 </div>
                             </AlertDialogHeader>
@@ -86,12 +121,12 @@ export default function titleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     </div> : <div></div>}
-                    <AlertDialog open={getInvoicesDialogOpen} onOpenChange={getInvoiceState?.message == 'success'? () => setgetInvoicesDialogOpen(false) : setgetInvoicesDialogOpen}>
+                    <AlertDialog open={getInvoicesDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Invoice</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
-                        <form action={getInvoiceAction}>
+                        <form action={handleGetSubmit}>
                         <AlertDialogHeader>
                         <AlertDialogTitle>Get Invoice</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -99,7 +134,7 @@ export default function titleElement({
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
                             {fieldInput("Invoice ID", "invoice-id", "Enter invoice ID...", "number")}
-                            {getInvoiceState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch invoice. Please check the ID and try again.</p> : null}
+                            {getFormSubmitted && getInvoiceState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch invoice. Please check the ID and try again.</p> : null}
                         </div>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="mt-4">

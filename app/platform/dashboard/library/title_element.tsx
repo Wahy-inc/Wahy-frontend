@@ -9,10 +9,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
-import { JSX } from "react";
+import React, { JSX, useState } from "react";
 import { CreateLibraryItemFormState, GetLibraryItemByIDFormState } from "@/app/platform/lib/definitions";
 
-export default function titleElement({
+export default function TitleElement({
     title,
     createAction,
     createPending,
@@ -41,6 +41,42 @@ export default function titleElement({
         setgetLibraryDialogOpen: (open: boolean) => void,
         isAdmin: boolean
     }) {
+    // Track if forms have been submitted in current dialog session
+    const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
+    const [getFormSubmitted, setGetFormSubmitted] = useState(false)
+
+    const handleCreateDialogOpenChange = (open: boolean) => {
+        if (!open) {
+            setCreateFormSubmitted(false)
+        }
+        if (createState?.message === 'success') {
+            setcreateLibraryDialogOpen(false)
+        } else {
+            setcreateLibraryDialogOpen(open)
+        }
+    }
+
+    const handleGetDialogOpenChange = (open: boolean) => {
+        if (!open) {
+            setGetFormSubmitted(false)
+        }
+        if (getLibraryState?.message === 'success') {
+            setgetLibraryDialogOpen(false)
+        } else {
+            setgetLibraryDialogOpen(open)
+        }
+    }
+
+    const handleCreateSubmit = (formData: FormData) => {
+        setCreateFormSubmitted(true)
+        createAction(formData)
+    }
+
+    const handleGetSubmit = (formData: FormData) => {
+        setGetFormSubmitted(true)
+        getLibraryAction(formData)
+    }
+
     return (
             <div className="flex flex-col justify-center">
                 <div className='flex flex-row justify-between items-center'>
@@ -49,52 +85,52 @@ export default function titleElement({
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
                     {isAdmin ? 
                     <div>
-                    <AlertDialog open={createLibraryDialogOpen} onOpenChange={createState?.message == 'success'? () => setcreateLibraryDialogOpen(false) : setcreateLibraryDialogOpen}>
+                    <AlertDialog open={createLibraryDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Library Item</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
-                            <form action={createAction}>
+                            <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>Create Library Item</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                     <div className='flex flex-col'>
                                         {fieldInput("Title","title", "Enter title...", "text")}
-                                        {createState?.error?.title && <p className="text-red-500 text-sm">{createState.error.title}</p>}
+                                        {createFormSubmitted && createState?.error?.title && <p className="text-red-500 text-sm">{createState.error.title}</p>}
                                     </div>
                                     <div className='flex flex-col'>
                                         {fieldInput("Description","description", "Enter description...", "text")}
-                                        {createState?.error?.description && <p className="text-red-500 text-sm">{createState.error.description}</p>}
+                                        {createFormSubmitted && createState?.error?.description && <p className="text-red-500 text-sm">{createState.error.description}</p>}
                                     </div>
                                     <div className='flex flex-col'>
                                         {fieldInput("URL","url", "Enter URL...", "text")}
-                                        {createState?.error?.url && <p className="text-red-500 text-sm">{createState.error.url}</p>}
+                                        {createFormSubmitted && createState?.error?.url && <p className="text-red-500 text-sm">{createState.error.url}</p>}
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className='flex flex-col'>
                                             {fieldInput("Category","category", "Enter category...", "text")}
-                                            {createState?.error?.category && <p className="text-red-500 text-sm">{createState.error.category}</p>}
+                                            {createFormSubmitted && createState?.error?.category && <p className="text-red-500 text-sm">{createState.error.category}</p>}
                                         </div>
                                         <div className='flex flex-col'>
                                             {fieldInput("Tags", "tags", "separated by commas", "text")}
-                                            {createState?.error?.tags && <p className="text-red-500 text-sm">{createState.error.tags}</p>}
+                                            {createFormSubmitted && createState?.error?.tags && <p className="text-red-500 text-sm">{createState.error.tags}</p>}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className='flex flex-col'>
                                             {fieldInput("Access level","access_level", "access", "text")}
-                                            {createState?.error?.access_level && <p className="text-red-500 text-sm">{createState.error.access_level}</p>}
+                                            {createFormSubmitted && createState?.error?.access_level && <p className="text-red-500 text-sm">{createState.error.access_level}</p>}
                                         </div>
                                         <div className='flex flex-col'>
                                             {fieldInput("Thumbnail URL", "thumbnail", "Enter thumbnail URL...", "text")}
-                                            {createState?.error?.thumbnail && <p className="text-red-500 text-sm">{createState.error.thumbnail}</p>}
+                                            {createFormSubmitted && createState?.error?.thumbnail && <p className="text-red-500 text-sm">{createState.error.thumbnail}</p>}
                                         </div>
                                     </div>
                                     <div className='flex flex-col'>
                                         {fieldInput("Students IDs", "students_ids", "separated by commas", "text")}
-                                        {createState?.error?.student_ids && <p className="text-red-500 text-sm">{createState.error.student_ids}</p>}
+                                        {createFormSubmitted && createState?.error?.student_ids && <p className="text-red-500 text-sm">{createState.error.student_ids}</p>}
                                     </div>
-                                    {createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create schedule. Please check the data and try again.</p> : null}
+                                    {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create schedule. Please check the data and try again.</p> : null}
                                 </div>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
@@ -105,12 +141,12 @@ export default function titleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     </div> : <div></div>}
-                    <AlertDialog open={getLibraryDialogOpen} onOpenChange={getLibraryState?.message == 'success'? () => setgetLibraryDialogOpen(false) : setgetLibraryDialogOpen}>
+                    <AlertDialog open={getLibraryDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Library Item</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
-                        <form action={getLibraryAction}>
+                        <form action={handleGetSubmit}>
                         <AlertDialogHeader>
                         <AlertDialogTitle>Get Library Item</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -118,7 +154,7 @@ export default function titleElement({
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
                             {fieldInput("Item ID", "item-id", "Enter item ID...", "number")}
-                            {getLibraryState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch item. Please check the ID and try again.</p> : null}
+                            {getFormSubmitted && getLibraryState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch item. Please check the ID and try again.</p> : null}
                         </div>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="mt-4">

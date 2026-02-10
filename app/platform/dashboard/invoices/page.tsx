@@ -4,7 +4,7 @@ import React from "react";
 import * as openApi from "@/lib/openApi"
 import { createInvoices, downloadInvoicePDF, downloadInvoicePDFMe, getInvoice, getInvoiceMe, getLocalStudent, listInvoices, listInvoicesMe, markInvoiceAsPaid, overrideInvoice } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
-import titleElement from "./title_element";
+import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -210,21 +210,23 @@ export default function Invoices() {
         </div>
     )
 
-    const title = titleElement({
-        title: "My Invoices",
-        createAction: createInvoiceAction,
-        createState: createInvoiceState,
-        createPending: createInvoicePending,
-        getInvoiceAction: getInvoiceFormAction,
-        getInvoiceState: getInvoiceState,
-        getInvoicePending: getInvoicePending,
-        fieldInput: fieldInput,
-        createInvoicesDialogOpen: createInvoiceDialogOpen,
-        setcreateInvoicesDialogOpen: setCreateInvoiceDialogOpen,
-        getInvoicesDialogOpen: getInvoiceDialogOpen,
-        setgetInvoicesDialogOpen: setGetInvoiceDialogOpen,
-        isAdmin: isAdmin,
-    })
+    const title = (
+        <TitleElement
+            title="My Invoices"
+            createAction={createInvoiceAction}
+            createState={createInvoiceState}
+            createPending={createInvoicePending}
+            getInvoiceAction={getInvoiceFormAction}
+            getInvoiceState={getInvoiceState}
+            getInvoicePending={getInvoicePending}
+            fieldInput={fieldInput}
+            createInvoicesDialogOpen={createInvoiceDialogOpen}
+            setcreateInvoicesDialogOpen={setCreateInvoiceDialogOpen}
+            getInvoicesDialogOpen={getInvoiceDialogOpen}
+            setgetInvoicesDialogOpen={setGetInvoiceDialogOpen}
+            isAdmin={isAdmin}
+        />
+    )
 
     if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading invoices...</p>, title: title})
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})

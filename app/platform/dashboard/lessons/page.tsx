@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UpdateLessonFormState, GetLessonByIDFormState } from "@/app/platform/lib/definitions";
 import lessonElement from "./lesson_element";
-import titleElement from "./title_element";
+import TitleElement from "./title_element";
 import { useAuth } from "@/lib/auth-context";
 
 
@@ -111,24 +111,26 @@ export default function Lessons() {
         }
     }
 
-    const title = titleElement({
-            title: displayTitle,
-            handleSearchStudentId: handleSearchStudentId,
-            searchStudentId: searchStudentId,
-            handleClearFilter: handleClearFilter,
-            getLessonState: getLessonState,
-            getLessonAction: getLessonFormAction,
-            getLessonPending: getLessonPending,
-            createState: createState,
-            createAction: createAction,
-            createPending: createPending,
-            fieldInput: fieldInput,
-            createLessonDialogOpen: createLessonDialogOpen,
-            setCreateLessonDialogOpen: setCreateLessonDialogOpen,
-            getLessonDialogOpen: getLessonDialogOpen,
-            setGetLessonDialogOpen: setGetLessonDialogOpen,
-            isAdmin: isAdmin
-        })
+    const title = (
+        <TitleElement
+            title={displayTitle}
+            handleSearchStudentId={handleSearchStudentId}
+            searchStudentId={searchStudentId}
+            handleClearFilter={handleClearFilter}
+            getLessonState={getLessonState}
+            getLessonAction={getLessonFormAction}
+            getLessonPending={getLessonPending}
+            createState={createState}
+            createAction={createAction}
+            createPending={createPending}
+            fieldInput={fieldInput}
+            createLessonDialogOpen={createLessonDialogOpen}
+            setCreateLessonDialogOpen={setCreateLessonDialogOpen}
+            getLessonDialogOpen={getLessonDialogOpen}
+            setGetLessonDialogOpen={setGetLessonDialogOpen}
+            isAdmin={isAdmin}
+        />
+    )
 
 
     if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading lessons...</p>, title: title})
@@ -140,24 +142,26 @@ export default function Lessons() {
             <div key="clear-filter" className='flex flex-row justify-end'>
                 <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLesson(null)}}>Clear Filter</Button>
             </div>
-            ,<div key={fetchedLesson.id}>{lessonElement({lesson: fetchedLesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput})}</div>], title: titleElement({
-                title: `Lesson Details - ID ${fetchedLesson.id}`,
-                createAction: createAction,
-                createState: createState,
-                createPending: createPending,
-                setCreateLessonDialogOpen: setCreateLessonDialogOpen,
-                createLessonDialogOpen: createLessonDialogOpen,
-                fieldInput: fieldInput,
-                getLessonDialogOpen: getLessonDialogOpen,
-                setGetLessonDialogOpen: setGetLessonDialogOpen,
-                handleSearchStudentId: handleSearchStudentId,
-                searchStudentId: searchStudentId,
-                handleClearFilter: handleClearFilter,
-                getLessonState: getLessonState,
-                getLessonAction: getLessonFormAction,
-                getLessonPending: getLessonPending,
-                isAdmin: isAdmin
-            })})
+            ,<div key={fetchedLesson.id}>{lessonElement({lesson: fetchedLesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput})}</div>], title: (
+            <TitleElement
+                title={`Lesson Details - ID ${fetchedLesson.id}`}
+                createAction={createAction}
+                createState={createState}
+                createPending={createPending}
+                setCreateLessonDialogOpen={setCreateLessonDialogOpen}
+                createLessonDialogOpen={createLessonDialogOpen}
+                fieldInput={fieldInput}
+                getLessonDialogOpen={getLessonDialogOpen}
+                setGetLessonDialogOpen={setGetLessonDialogOpen}
+                handleSearchStudentId={handleSearchStudentId}
+                searchStudentId={searchStudentId}
+                handleClearFilter={handleClearFilter}
+                getLessonState={getLessonState}
+                getLessonAction={getLessonFormAction}
+                getLessonPending={getLessonPending}
+                isAdmin={isAdmin}
+            />
+        )})
     } else {
         return dashboardPage({children: displayContent, title: title})
     }

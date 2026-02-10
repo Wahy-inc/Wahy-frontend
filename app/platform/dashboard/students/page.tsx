@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import * as openApi from "@/lib/openApi"
 import { approveStudent, createStudent, getStudent, listStudents, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
-import titleElement from "./title_element";
+import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -273,20 +273,22 @@ export default function Students() {
         </div>
     )
 
-    const title = titleElement({
-        title: "My Students",
-        createAction: createStudentAction,
-        createState: createStudentState,
-        createPending: createStudentPending,
-        getStudentAction: getStudentAction,
-        getStudentState: getStudentState,
-        getStudentPending: getStudentPending,
-        fieldInput: fieldInput,
-        createStudentDialogOpen: createStudentDialogOpen,
-        setcreateStudentDialogOpen: setCreateStudentDialogOpen,
-        getStudentDialogOpen: getStudentDialogOpen,
-        setgetStudentDialogOpen: setGetStudentDialogOpen,
-    })
+    const title = (
+        <TitleElement
+            title="My Students"
+            createAction={createStudentAction}
+            createState={createStudentState}
+            createPending={createStudentPending}
+            getStudentAction={getStudentAction}
+            getStudentState={getStudentState}
+            getStudentPending={getStudentPending}
+            fieldInput={fieldInput}
+            createStudentDialogOpen={createStudentDialogOpen}
+            setcreateStudentDialogOpen={setCreateStudentDialogOpen}
+            getStudentDialogOpen={getStudentDialogOpen}
+            setgetStudentDialogOpen={setGetStudentDialogOpen}
+        />
+    )
 
     if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading students...</p>, title: title})
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
@@ -334,19 +336,20 @@ export default function Students() {
         </div>
     )
 
-    return dashboardPage({children: <div className="flex flex-col gap-4 w-full">{content}</div>, title: titleElement({
-        title: "My Students",
-        createAction: createStudentAction,
-        createState: createStudentState,
-        createPending: createStudentPending,
-        getStudentAction: getStudentAction,
-        getStudentState: getStudentState,
-        getStudentPending: getStudentPending,
-        fieldInput: fieldInput,
-        createStudentDialogOpen: createStudentDialogOpen,
-        setcreateStudentDialogOpen: setCreateStudentDialogOpen,
-        getStudentDialogOpen: getStudentDialogOpen,
-        setgetStudentDialogOpen: setGetStudentDialogOpen,
-    }
+    return dashboardPage({children: <div className="flex flex-col gap-4 w-full">{content}</div>, title: (
+        <TitleElement
+            title="My Students"
+            createAction={createStudentAction}
+            createState={createStudentState}
+            createPending={createStudentPending}
+            getStudentAction={getStudentAction}
+            getStudentState={getStudentState}
+            getStudentPending={getStudentPending}
+            fieldInput={fieldInput}
+            createStudentDialogOpen={createStudentDialogOpen}
+            setcreateStudentDialogOpen={setCreateStudentDialogOpen}
+            getStudentDialogOpen={getStudentDialogOpen}
+            setgetStudentDialogOpen={setGetStudentDialogOpen}
+        />
     )})
 }

@@ -4,7 +4,7 @@ import React from "react";
 import * as openApi from "@/lib/openApi"
 import { createLibraryItem, deleteLibraryItem, getLibraryItem, listLibrary, listLibraryMe } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
-import titleElement from "./title_element";
+import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -96,21 +96,23 @@ export default function Schedules() {
             </Card>
     )
 
-    const title = titleElement({
-        title: "Library",
-        createAction: createLibraryItemAction,
-        createState: createLibraryItemState,
-        createPending: createLibraryItemPending,
-        getLibraryAction: getLibraryItemAction,
-        getLibraryState: getLibraryItemState,
-        getLibraryPending: getLibraryItemPending,
-        fieldInput: fieldInput,
-        createLibraryDialogOpen: createLibraryDialogOpen,
-        setcreateLibraryDialogOpen: setCreateLibraryDialogOpen,
-        getLibraryDialogOpen: getLibraryDialogOpen,
-        setgetLibraryDialogOpen: setGetLibraryDialogOpen,
-        isAdmin: isAdmin,
-    })
+    const title = (
+        <TitleElement
+            title="Library"
+            createAction={createLibraryItemAction}
+            createState={createLibraryItemState}
+            createPending={createLibraryItemPending}
+            getLibraryAction={getLibraryItemAction}
+            getLibraryState={getLibraryItemState}
+            getLibraryPending={getLibraryItemPending}
+            fieldInput={fieldInput}
+            createLibraryDialogOpen={createLibraryDialogOpen}
+            setcreateLibraryDialogOpen={setCreateLibraryDialogOpen}
+            getLibraryDialogOpen={getLibraryDialogOpen}
+            setgetLibraryDialogOpen={setGetLibraryDialogOpen}
+            isAdmin={isAdmin}
+        />
+    )
 
     if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading library items...</p>, title: title})
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})

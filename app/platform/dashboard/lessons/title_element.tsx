@@ -22,10 +22,10 @@ import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import * as openApi from "@/lib/openApi";
-import { JSX } from "react";
+import React, { JSX, useState } from "react";
 import { CreateLessonFormState, GetLessonByIDFormState } from "../../lib/definitions";
 
-export default function titleElement({
+export default function TitleElement({
     title,
     handleClearFilter,
     handleSearchStudentId,
@@ -60,6 +60,42 @@ export default function titleElement({
         setGetLessonDialogOpen: (open: boolean) => void,
         isAdmin: boolean
     }) {
+    // Track if forms have been submitted in current dialog session
+    const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
+    const [getFormSubmitted, setGetFormSubmitted] = useState(false)
+
+    const handleCreateDialogOpenChange = (open: boolean) => {
+        if (!open) {
+            setCreateFormSubmitted(false)
+        }
+        if (createState?.message === 'success') {
+            setCreateLessonDialogOpen(false)
+        } else {
+            setCreateLessonDialogOpen(open)
+        }
+    }
+
+    const handleGetDialogOpenChange = (open: boolean) => {
+        if (!open) {
+            setGetFormSubmitted(false)
+        }
+        if (getLessonState?.message === 'success') {
+            setGetLessonDialogOpen(false)
+        } else {
+            setGetLessonDialogOpen(open)
+        }
+    }
+
+    const handleCreateSubmit = (formData: FormData) => {
+        setCreateFormSubmitted(true)
+        createAction(formData)
+    }
+
+    const handleGetSubmit = (formData: FormData) => {
+        setGetFormSubmitted(true)
+        getLessonAction(formData)
+    }
+
     return (
             <div className="flex flex-col justify-center">
                 <div className='flex flex-row justify-between items-center'>
@@ -83,27 +119,27 @@ export default function titleElement({
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
                     {isAdmin ?
                     <div>
-                    <AlertDialog open={createLessonDialogOpen} onOpenChange={createState?.message == 'success'? () => setCreateLessonDialogOpen(false) : setCreateLessonDialogOpen}>
+                    <AlertDialog open={createLessonDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Lesson</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
-                            <form action={createAction}>
+                            <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>Create Lesson</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                     <div className='flex flex-col'>
                                         {fieldInput("Student ID","student-id", "Enter student id...", "number")}
-                                        {createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
+                                        {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
                                     <div className='flex flex-col'>
                                     {fieldInput("Schedule ID", "schedule-id", "Enter schedule id...", "number")}
-                                    {createState?.error?.schedule_id && <p className="text-red-500 text-sm">{createState.error.schedule_id}</p>}
+                                    {createFormSubmitted && createState?.error?.schedule_id && <p className="text-red-500 text-sm">{createState.error.schedule_id}</p>}
                                     </div>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className='flex flex-col'>
                                             {fieldInput("Date", "date", "Select date...", "date")}
-                                            {createState?.error?.date && <p className="text-red-500 text-sm">{createState.error.date}</p>}
+                                            {createFormSubmitted && createState?.error?.date && <p className="text-red-500 text-sm">{createState.error.date}</p>}
                                         </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
@@ -123,7 +159,7 @@ export default function titleElement({
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {createState?.error?.type && <p className="text-red-500 text-sm">{createState.error.type}</p>}
+                                        {createFormSubmitted && createState?.error?.type && <p className="text-red-500 text-sm">{createState.error.type}</p>}
                                     </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
@@ -143,25 +179,25 @@ export default function titleElement({
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {createState?.error?.attendance && <p className="text-red-500 text-sm">{createState.error.attendance}</p>}
+                                        {createFormSubmitted && createState?.error?.attendance && <p className="text-red-500 text-sm">{createState.error.attendance}</p>}
                                     </div>
                                     </div>
                                     <div className="grid grid-cols-4 gap-4">
                                         <div className='flex flex-col'>
                                             {fieldInput("Juz","juz", "juz", "number")}
-                                            {createState?.error?.juz && <p className="text-red-500 text-sm">{createState.error.juz}</p>}
+                                            {createFormSubmitted && createState?.error?.juz && <p className="text-red-500 text-sm">{createState.error.juz}</p>}
                                         </div>
                                         <div className='flex flex-col'>
                                             {fieldInput("Surah", "surah", "surah", "text")}
-                                            {createState?.error?.surah && <p className="text-red-500 text-sm">{createState.error.surah}</p>}
+                                            {createFormSubmitted && createState?.error?.surah && <p className="text-red-500 text-sm">{createState.error.surah}</p>}
                                         </div>
                                         <div className='flex flex-col'>
                                             {fieldInput("Ayah from", "ayah-from", "ayah from", "number")}
-                                            {createState?.error?.ayah_from && <p className="text-red-500 text-sm">{createState.error.ayah_from}</p>}
+                                            {createFormSubmitted && createState?.error?.ayah_from && <p className="text-red-500 text-sm">{createState.error.ayah_from}</p>}
                                         </div>
                                         <div className='flex flex-col'>
                                             {fieldInput("To", "ayah-to", "to", "number")}
-                                            {createState?.error?.ayah_to && <p className="text-red-500 text-sm">{createState.error.ayah_to}</p>}
+                                            {createFormSubmitted && createState?.error?.ayah_to && <p className="text-red-500 text-sm">{createState.error.ayah_to}</p>}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
@@ -184,26 +220,26 @@ export default function titleElement({
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {createState?.error?.quality && <p className="text-red-500 text-sm">{createState.error.quality}</p>}
+                                        {createFormSubmitted && createState?.error?.quality && <p className="text-red-500 text-sm">{createState.error.quality}</p>}
                                     </div>
                                         <div className='flex flex-col'>
                                             {fieldInput("Attempts", "attempts", "attempts", "number")}
-                                            {createState?.error?.attempts && <p className="text-red-500 text-sm">{createState.error.attempts}</p>}
+                                            {createFormSubmitted && createState?.error?.attempts && <p className="text-red-500 text-sm">{createState.error.attempts}</p>}
                                         </div>
                                     </div>
                                     <div className='flex flex-col'>
                                         {fieldInput("Absence Reason", "absence-reason", "Enter reason for absence...", "text")}
-                                        {createState?.error?.absence_reason && <p className="text-red-500 text-sm">{createState.error.absence_reason}</p>}
+                                        {createFormSubmitted && createState?.error?.absence_reason && <p className="text-red-500 text-sm">{createState.error.absence_reason}</p>}
                                     </div>
                                     <div className='flex flex-col'>
                                         {fieldInput("Sheikh Notes", "sheikh-notes", "Enter sheikh notes...", "text")}
-                                        {createState?.error?.sheikh_notes && <p className="text-red-500 text-sm">{createState.error.sheikh_notes}</p>}
+                                        {createFormSubmitted && createState?.error?.sheikh_notes && <p className="text-red-500 text-sm">{createState.error.sheikh_notes}</p>}
                                     </div>
                                     <div className='flex flex-col'>
                                         {fieldInput("Student Notes", "student-notes", "Enter student notes...", "text")}
-                                        {createState?.error?.student_notes && <p className="text-red-500 text-sm">{createState.error.student_notes}</p>}
+                                        {createFormSubmitted && createState?.error?.student_notes && <p className="text-red-500 text-sm">{createState.error.student_notes}</p>}
                                     </div>
-                                    {createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create lesson. Please check the data and try again.</p> : null}
+                                    {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create lesson. Please check the data and try again.</p> : null}
                                 </div>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
@@ -214,12 +250,12 @@ export default function titleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     </div> : <div></div>}
-                    <AlertDialog open={getLessonDialogOpen} onOpenChange={getLessonState?.message == 'success'? () => setGetLessonDialogOpen(false) : setGetLessonDialogOpen}>
+                    <AlertDialog open={getLessonDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Lesson</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
-                        <form action={getLessonAction}>
+                        <form action={handleGetSubmit}>
                         <AlertDialogHeader>
                         <AlertDialogTitle>Get lesson using ID</AlertDialogTitle>
                         <AlertDialogDescription>
@@ -227,7 +263,7 @@ export default function titleElement({
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
                             {fieldInput("Lesson ID", "lesson-id", "Enter lesson ID...", "number")}
-                            {getLessonState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch lesson. Please check the ID and try again.</p> : null}
+                            {getFormSubmitted && getLessonState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch lesson. Please check the ID and try again.</p> : null}
                         </div>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="mt-4">
