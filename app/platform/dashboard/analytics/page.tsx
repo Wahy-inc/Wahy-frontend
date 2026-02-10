@@ -86,7 +86,7 @@ export default function Home() {
                         <Input className="w-32" type="date"></Input>
                         <p className="inline px-1">To</p>
                         <Input className="w-32 mr-2" type="date"></Input>
-                        <Button disabled={pending} id="submit" type="submit" className="bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800">Submit</Button>
+                        <Button disabled={pending} id="submit" type="submit" className="bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800 hover:border-slate-800 border-2">Submit</Button>
                     </form>
                 </div>
             </div>
