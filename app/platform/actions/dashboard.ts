@@ -128,7 +128,7 @@ export async function getStudent(state: GetStudentFormState, formData: FormData)
     try {
         const response = await api.api.getOneApiV1StudentsStudentIdGet(id)
         if (response.status === 200) {
-            return { data: response.data }
+            return { message: 'success', data: response.data }
         }
         return { message: 'fail' }
     } catch (error) {

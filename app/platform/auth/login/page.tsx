@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from "react"
+import React, { useActionState } from "react"
 import { useRouter } from "next/navigation"
 import { signin } from "../../actions/auth"
 import { Button } from "@/components/ui/button"
@@ -15,9 +15,11 @@ export default function SignIn() {
     const [state, action, pending] = useActionState(signin, undefined)
     const router = useRouter()
 
-    if (state?.message === 'Signin successful') {
-        router.replace('/dashboard')
-    }
+    React.useEffect(() => {
+        if (state?.message === 'Signin successful') {
+            router.replace('/platform/dashboard')
+        }
+    }, [state, router])
     
     return (
     <div className="w-full my-50">

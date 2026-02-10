@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState } from "react"
+import React, { useActionState } from "react"
 import { useRouter } from "next/navigation"
 import { signup } from "../../actions/auth"
 import { Button } from "@/components/ui/button"
@@ -15,9 +15,11 @@ export default function SignUp() {
     const [state, action, pending] = useActionState(signup, undefined)
     const router = useRouter()
 
-    if (state?.message === 'Signup successful') {
-        router.replace('/dashboard')
-    }
+    React.useEffect(() => {
+        if (state?.message === 'Signup successful') {
+            router.replace('/platform/dashboard')
+        }
+    }, [state, router])
 
     return (
     <form action={action} className="w-xs lg:w-5xl mx-auto my-30 border-2 border-slate-800 p-6 rounded-lg shadow-lg bg-slate-800 text-slate-100">
