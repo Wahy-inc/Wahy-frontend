@@ -99,13 +99,13 @@ export default function Schedules() {
 
     const getDayColor = (day: number): string => {
         const colors = [
-            'bg-purple-500', // Saturday
-            'bg-blue-500',   // Sunday
-            'bg-green-500',  // Monday
-            'bg-yellow-500', // Tuesday
-            'bg-orange-500', // Wednesday
-            'bg-red-500',    // Thursday
-            'bg-pink-500',   // Friday
+            'bg-purple-700', // Saturday
+            'bg-blue-700',   // Sunday
+            'bg-green-700',  // Monday
+            'bg-yellow-700', // Tuesday
+            'bg-orange-700', // Wednesday
+            'bg-red-700',    // Thursday
+            'bg-pink-700',   // Friday
         ]
         return colors[day] || 'bg-slate-500'
     }

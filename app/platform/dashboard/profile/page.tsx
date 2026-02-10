@@ -11,7 +11,7 @@ import { User, Phone, Calendar, Clock, BookOpen, DollarSign, FileText } from 'lu
 import { dummyProfile } from "@/lib/dummyData"
 
 // Set to true to use dummy data for testing
-const USE_DUMMY_DATA = true
+const USE_DUMMY_DATA = false
 
 export default function Profile() {
     const [profile, setProfile] = React.useState<openApi.StudentSelfRead | null>(null)

@@ -1,5 +1,7 @@
+'use client';
 import Image from "next/image";
 import logo from "../public/quran.png";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -36,33 +38,36 @@ export default function Home() {
           </p>
         </div>
         <div className="flex flex-col justify-between gap-4 text-base font-medium lg:flex-row">
-          <a
-            className="w-39.5 flex h-12 items-center justify-center gap-2 rounded-full bg-slate-900 px-5 text-slate-100 transition-colors hover:bg-slate-800 hover:text-slate-100 hover:border-slate-800 border md:w-75 md:h-20"
-            href="./platform/auth/login"
-            target="_self"
+          <Button
+            className="w-39.5 lg:text-xl flex h-12 items-center justify-center gap-2 rounded-full bg-slate-900 px-5 text-slate-100 transition-colors hover:bg-slate-800 hover:text-slate-100 hover:border-slate-800 border md:w-75 md:h-20"
             rel="noopener noreferrer"
-            onClick={() => localStorage.setItem('role', 'admin')}
+            onClick={() => {
+              localStorage.setItem('role', 'admin');
+              window.location.href = './platform/auth/login';
+            }}
           >
             Admin Login
-          </a>
-          <a
-            className="flex h-12 w-39.5 items-center justify-center rounded-full border border-solid text-slate-900 border-slate-900 px-5 transition-colors hover:bg-black/4 md:w-75 md:h-20"
-            href="./platform/auth/signup"
-            target="_self"
-            rel="noopener noreferrer"
-            onClick={() => localStorage.setItem('role', 'student')}
+          </Button>
+          <Button
+            variant="outline"
+            className="flex lg:text-xl h-12 w-39.5 items-center justify-center rounded-full border border-solid text-slate-900 border-slate-900 px-5 transition-colors hover:bg-black/4 md:w-75 md:h-20"
+            onClick={() => {
+              localStorage.setItem('role', 'student');
+              window.location.href = './platform/auth/signup';
+            }}
           >
             Student Signup
-          </a>
-          <a
-            className="flex h-12 w-39.5 items-center justify-center rounded-full border border-solid text-slate-900 border-slate-900 px-5 transition-colors hover:bg-black/4 md:w-75 md:h-20"
-            href="./platform/auth/login"
-            target="_self"
-            rel="noopener noreferrer"
-            onClick={() => localStorage.setItem('role', 'student')}
+          </Button>
+          <Button
+            variant="outline"
+            className="flex lg:text-xl h-12 w-39.5 items-center justify-center rounded-full border border-solid text-slate-900 border-slate-900 px-5 transition-colors hover:bg-black/4 md:w-75 md:h-20"
+            onClick={() => {
+              localStorage.setItem('role', 'student');
+              window.location.href = './platform/auth/login';
+            }}
           >
             Student Login
-          </a>
+          </Button>
         </div>
       </main>
     </div>
