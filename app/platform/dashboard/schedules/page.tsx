@@ -42,10 +42,12 @@ export default function Schedules() {
     const [createScheduleDialogOpen, setCreateScheduleDialogOpen] = React.useState(false)
     const [getScheduleDialogOpen, setGetScheduleDialogOpen] = React.useState(false)
     const [editingScheduleId, setEditingScheduleId] = React.useState<number | null>(null)
-    const { isAdmin } = useAuth()
+    const { isAdmin, isLoading: authLoading } = useAuth()
 
     
     React.useEffect(() => {
+        if (authLoading) return
+
         if (getScheduleState?.message == 'success' && getScheduleState.data) {
             setFilteredSchedules(getScheduleState.data)
         }
@@ -67,9 +69,11 @@ export default function Schedules() {
             }
             fetchSchedules()
         }
-    }, [getScheduleState, createScheduleState, updateScheduleState, isAdmin])
+    }, [getScheduleState, createScheduleState, updateScheduleState, isAdmin, authLoading])
 
     React.useEffect(() => {
+        if (authLoading) return
+
             const fetchSchedules = async () => {
                 try {
                     setLoading(true)
@@ -86,7 +90,7 @@ export default function Schedules() {
                 }
             }
         fetchSchedules()
-    }, [isAdmin])
+    }, [isAdmin, authLoading])
 
     const handleSearchStudentId = (e: React.ChangeEvent<HTMLInputElement>) => {
         const studentId = e.target.value.trim()

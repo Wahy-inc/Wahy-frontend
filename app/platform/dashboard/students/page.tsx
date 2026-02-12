@@ -21,6 +21,7 @@ import { UpdateStudentFormState } from "../../lib/definitions";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { useAuth } from "@/lib/auth-context";
 
 export default function Students() {
     const [students, setStudents] = React.useState<openApi.StudentRead[] | null>(null)
@@ -33,32 +34,50 @@ export default function Students() {
     const [createStudentDialogOpen, setCreateStudentDialogOpen] = React.useState(false)
     const [getStudentDialogOpen, setGetStudentDialogOpen] = React.useState(false)
     const [updateStudentDialogOpen, setUpdateStudentDialogOpen] = React.useState(false)
+    const { isAdmin, isLoading: authLoading } = useAuth()
 
-    const fetchStudents = async () => {
-        try {
-            setLoading(true)
-            const data = await listStudents()
-            setStudents(data)
-            setError(null)
-        } catch (err) {
-            setError('Failed to load students')
-            setStudents(null)
-        } finally {
-            setLoading(false)
-        }
-    }
     
     React.useEffect(() => {
+        if (authLoading) return
+        
         if (getStudentState?.message === 'success' && getStudentState.data) {
             setStudents([getStudentState.data])
         }
         if (createStudentState?.message === 'success' || updateStudentState?.message === 'success') {
+            const fetchStudents = async () => {
+                try {
+                    setLoading(true)
+                    const data = await listStudents()
+                    setStudents(data)
+                    setError(null)
+                } catch (err) {
+                    setError('Failed to load students')
+                    setStudents(null)
+                } finally {
+                    setLoading(false)
+                }
+            }
             fetchStudents()
         }
     }, [getStudentState, createStudentState, updateStudentState])
 
 
     React.useEffect(() => {
+        if (authLoading) return
+
+        const fetchStudents = async () => {
+                try {
+                    setLoading(true)
+                    const data = await listStudents()
+                    setStudents(data)
+                    setError(null)
+                } catch (err) {
+                    setError('Failed to load students')
+                    setStudents(null)
+                } finally {
+                    setLoading(false)
+                }
+            }
         fetchStudents()
     }, [])
 

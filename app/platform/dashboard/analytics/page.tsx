@@ -11,12 +11,7 @@ import React, { useState } from "react";
 import { attendanceAnalytics, financialAnalytics, getLocalStudent, operationalAnalytics, performanceAnalytics } from "../../actions/dashboard";
 import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
-interface student {
-    student_id: number,
-    full_name_arabic: string,
-    full_name_english: string,
 
-}
 export default function Home() {
     const { isAdmin, isLoading: authLoading } = useAuth()
     const [attendance, setattendance] = React.useState<openApi.AttendanceAnalytics | null>(null);
@@ -29,6 +24,8 @@ export default function Home() {
     const [operationalState, operationalAction, operationalPending] = React.useActionState(operationalAnalytics, undefined);
 
     React.useEffect(() => {
+        if (authLoading) return
+
         if (attendanceState?.message === 'success' && attendanceState.data) {
             setattendance(attendanceState.data)
         }
@@ -41,7 +38,7 @@ export default function Home() {
         if (operationalState?.message === 'success' && operationalState.data) {
             setOperational(operationalState.data)
         }
-    }, [attendanceState, performanceState, financialState, operationalState])
+    }, [attendanceState, performanceState, financialState, operationalState, authLoading])
 
     const timeElement = (analytic: {
         period_start: string;

@@ -13,7 +13,6 @@ import {
   Item,
   ItemActions,
   ItemContent,
-  ItemDescription,
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
@@ -46,6 +45,8 @@ export default function Invoices() {
     const [paidInvoiceDialogOpen, setPaidInvoiceDialogOpen] = React.useState(false)
 
     React.useEffect(() => {
+        if (authLoading) return
+
         if (getInvoiceState?.message === 'success' && getInvoiceState.data) {
             setInvoices([getInvoiceState.data])
         }
@@ -70,7 +71,7 @@ export default function Invoices() {
         }
         fetchInvoices()
         }
-    }, [getInvoiceState, createInvoiceState, isAdmin])
+    }, [getInvoiceState, createInvoiceState, isAdmin, authLoading])
 
     React.useEffect(() => {
         if (authLoading) return
@@ -111,9 +112,8 @@ export default function Invoices() {
                         <DollarSign />
                     </ItemMedia>
                 <ItemTitle>Invoice ID: {invoice.invoice_number} , Student: {getLocalStudent(invoice.student_id)?.full_name_english}</ItemTitle>
-                <ItemDescription className="text-sm ">
                     Amount: {invoice.total_amount} {invoice.currency} , Status: {invoice.status} <br />
-                    <div id="accordion-data">
+                    <div id="accordion-data" className="text-sm">
                         <Accordion
                         type="single"
                         collapsible
@@ -130,7 +130,6 @@ export default function Invoices() {
                             </AccordionItem>
                         </Accordion>
                     </div>
-                </ItemDescription>
                 </ItemContent>
                 <ItemActions>
                     <Button size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white" onClick={() => {

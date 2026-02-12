@@ -53,6 +53,8 @@ export default function Lessons() {
     }, [authLoading, isAdmin])
 
     React.useEffect(() => {
+        if (authLoading) return
+        
         if (getLessonState?.message == 'success' && getLessonState.data) {
             setFetchedLesson(getLessonState.data)
         }
@@ -72,7 +74,7 @@ export default function Lessons() {
             }
             fetchLessons()
         }
-    }, [getLessonState, createState, updateState, isAdmin])
+    }, [getLessonState, createState, updateState, isAdmin, authLoading])
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
         <Field orientation="vertical" className='w-full inline'>

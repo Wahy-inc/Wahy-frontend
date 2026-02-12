@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { User, Phone, Calendar, Clock, BookOpen, DollarSign, FileText } from 'lucide-react'
 import { dummyProfile } from "@/lib/dummyData"
+import { useAuth } from "@/lib/auth-context"
 
 // Set to true to use dummy data for testing
 const USE_DUMMY_DATA = false
@@ -17,8 +18,11 @@ export default function Profile() {
     const [profile, setProfile] = React.useState<openApi.StudentSelfRead | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
+    const { isLoading: authLoading } = useAuth()
 
     React.useEffect(() => {
+        if (authLoading) return
+        
         const fetchProfile = async () => {
             try {
                 setLoading(true)
@@ -38,7 +42,7 @@ export default function Profile() {
             }
         }
         fetchProfile()
-    }, [])
+    }, [authLoading])
 
     const getStatusBadgeVariant = (status: openApi.StudentStatus): "default" | "secondary" | "destructive" | "outline" => {
         switch (status) {
