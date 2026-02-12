@@ -1,8 +1,8 @@
 import * as openApi from "@/lib/openApi"
-import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState } from "@/app/platform/lib/definitions"
+import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
 
 const api = new openApi.Api({
-    baseUrl: 'http://10.60.184.80:8000',
+    baseUrl: '',
 })
 
 export async function studentData(id: number): Promise<openApi.StudentRead | null> {
@@ -55,12 +55,13 @@ export function getLocalStudent(id: number) {
     const students = localStorage.getItem('students')
     if (students) {
         const studentsArray = JSON.parse(students)
-        return studentsArray.map((student: { student_id: number, full_name_arabic: string, full_name_english: string }) => {
+        return studentsArray.find((student: { student_id: number, full_name_arabic: string, full_name_english: string }) => {
             if (student.student_id === id) {
-                return {
+                const data = {
                     full_name_arabic: student.full_name_arabic,
                     full_name_english: student.full_name_english,
                 }
+                return data
             }
         }) || null
     }
@@ -73,16 +74,16 @@ export async function createStudent(state: CreateStudentFormState, formData: For
         arname: formData.get('ar-name'),
         enname: formData.get('en-name'),
         phone: formData.get('phone'),
-        date_of_birth: formData.get('date-of-birth'),
-        timezone: formData.get('time-zone'),
-        current_juz: formData.get('current-juz'),
-        current_surah: formData.get('current-surah'),
-        current_ayah: formData.get('current-ayah'),
-        lessons_per_week: formData.get('lessons-per-week'),
-        lesson_rate: formData.get('lesson-rate'),
-        billing_cycle: formData.get('billing-cycle'),
-        special_notes: formData.get('special-notes'),
-        private_notes: formData.get('private-notes'),
+        dateOfBirth: formData.get('dateOfBirth'),
+        timeZone: formData.get('timeZone'),
+        currjuz: formData.get('currjuz'),
+        currsurah: formData.get('currsurah'),
+        currayah: formData.get('currayah'),
+        lessonsPerWeek: formData.get('lessonsPerWeek'),
+        lessonRate: formData.get('lessonRate'),
+        billingCycle: formData.get('billingCycle'),
+        specialNotes: formData.get('specialNotes'),
+        privateNotes: formData.get('privateNotes'),
     })
 
     if (!validation.success) {
@@ -102,7 +103,7 @@ export async function createStudent(state: CreateStudentFormState, formData: For
             current_ayah: Number(validation.data.currayah),
             lessons_per_week: Number(validation.data.lessonsPerWeek),
             lesson_rate: Number(validation.data.lessonRate),
-            billing_cycle: validation.data.BillingCycle as openApi.BillingCycle,
+            billing_cycle: validation.data.billingCycle as openApi.BillingCycle,
             special_notes: validation.data.specialNotes,
             private_notes: validation.data.privateNotes,
         }
@@ -137,20 +138,22 @@ export async function getStudent(state: GetStudentFormState, formData: FormData)
 }
 
 export async function updateStudent(state: UpdateStudentFormState, formData: FormData, studentId: number): Promise<UpdateStudentFormState> {
-    const validation = createStudentSchema.safeParse({
+    const validation = updateStudentSchema.safeParse({
         arname: formData.get('ar-name'),
         enname: formData.get('en-name'),
         phone: formData.get('phone'),
-        date_of_birth: formData.get('date-of-birth'),
-        timezone: formData.get('time-zone'),
-        current_juz: formData.get('current-juz'),
-        current_surah: formData.get('current-surah'),
-        current_ayah: formData.get('current-ayah'),
-        lessons_per_week: formData.get('lessons-per-week'),
-        lesson_rate: formData.get('lesson-rate'),
-        billing_cycle: formData.get('billing-cycle'),
-        special_notes: formData.get('special-notes'),
-        private_notes: formData.get('private-notes'),
+        dateOfBirth: formData.get('date-of-birth'),
+        timeZone: formData.get('time-zone'),
+        currjuz: formData.get('current-juz'),
+        currsurah: formData.get('current-surah'),
+        currayah: formData.get('current-ayah'),
+        lessonsPerWeek: formData.get('lessons-per-week'),
+        lessonRate: formData.get('lesson-rate'),
+        billingCycle: formData.get('billing-cycle'),
+        specialNotes: formData.get('special-notes'),
+        privateNotes: formData.get('private-notes'),
+        registerationStatus: formData.get('registeration-status'),
+        status: formData.get('status'),
     })
 
     if (!validation.success) {
@@ -169,7 +172,7 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
             current_ayah: Number(validation.data.currayah),
             lessons_per_week: Number(validation.data.lessonsPerWeek),
             lesson_rate: Number(validation.data.lessonRate),
-            billing_cycle: validation.data.BillingCycle as openApi.BillingCycle,
+            billing_cycle: validation.data.billingCycle as openApi.BillingCycle,
             special_notes: validation.data.specialNotes,
             private_notes: validation.data.privateNotes,
         }
@@ -193,7 +196,7 @@ export async function approveStudent(id:number, note: openApi.StudentApprovalReq
     try {
         const response = await api.api.approveApiV1StudentsStudentIdApprovePost(id, note)
         if (response.status === 200) {
-            listStudents() // Refresh the students list after approving a student
+            window.location.reload() // Refresh the page after approving a student
             return true
         }
         return false
@@ -210,7 +213,7 @@ export async function rejectStudent(id:number, note: openApi.StudentApprovalRequ
     try {
         const response = await api.api.rejectApiV1StudentsStudentIdRejectPost(id, note)
         if (response.status === 200) {
-            listStudents() // Refresh the students list after approving a student
+            window.location.reload() // Refresh the page after rejecting a student
             return true
         }
         return false
@@ -274,7 +277,6 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
         const response = await api.api.createApiV1SchedulesPost(data)
 
         if (response.status === 201) {
-            listSchedules() // Refresh the schedules list after creating a new schedule
             return {message: 'success' }
         }
         return {message: 'fail' }
@@ -345,7 +347,7 @@ export async function deleteSchedule(scheduleId: number): Promise<boolean> {
         const response = await api.api.deleteApiV1SchedulesScheduleIdDelete(scheduleId)
 
         if (response.status === 204) {
-            listSchedules() // Refresh the schedules list after deleting a schedule
+            window.location.reload() // Refresh the page after deleting a schedule
             return true
         }
         return false
@@ -464,7 +466,7 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
             tags: validation.data.tags.split(',').map(tag => tag.trim()),
             access_level: validation.data.access_level,
             thumbnail_image_path: validation.data.thumbnail,
-            student_ids: validation.data.student_ids ? validation.data.student_ids.split(',').map(id => Number(id.trim())) : [],
+            student_ids: validation.data.student_ids,
         }
         const response = await api.api.createApiV1LibraryPost(data)
 
@@ -483,7 +485,7 @@ export async function deleteLibraryItem(id: number): Promise<boolean> {
         const response = await api.api.deleteApiV1LibraryItemIdDelete(id)
 
         if (response.status === 204) {
-            listLessons() // Refresh the schedules list after deleting a schedule
+            window.location.reload() // Refresh the page after deleting a library item
             return true
         }
         return false
@@ -689,20 +691,21 @@ export async function markInvoiceAsPaid(state: PayInvoiceFormState, formData: Fo
 
 export async function createLesson(state: CreateLessonFormState, formData: FormData): Promise<CreateLessonFormState> {
     const validation = CreatLessonSchema.safeParse({
-        student_id: formData.get('student-id'),
-        schedule_id: formData.get('schedule-id'),
-        sheikh_notes: formData.get('sheikh-notes'),
-        student_notes: formData.get('student-notes'),
+        student_id: formData.get('student_id'),
+        schedule_id: formData.get('schedule_id'),
+        sheikh_notes: formData.get('sheikh_notes'),
+        student_notes: formData.get('student_notes'),
         date: formData.get('date'),
         type: formData.get('type'),
         attendance: formData.get('attendance'),
         juz: formData.get('juz'),
         surah: formData.get('surah'),
-        ayah_from: formData.get('ayah-from'),
-        ayah_to: formData.get('ayah-to'),
+        ayah_from: formData.get('ayah_from'),
+        ayah_to: formData.get('ayah_to'),
         quality: formData.get('quality'),
         attempts: formData.get('attempts'),
-        absence_reason: formData.get('absence-reason'),
+        absence_reason: formData.get('absence_reason'),
+        pass_fail: formData.get('pass_fail'),
     })
 
     if (!validation.success) {
@@ -710,20 +713,21 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
     }
     try {
         const data:openApi.LessonCreate = {
-        student_id: Number(validation.data.student_id),
-        schedule_id: Number(validation.data.schedule_id),
+        student_id: String(validation.data.student_id),
+        schedule_id: String(validation.data.schedule_id),
         sheikh_notes: validation.data.sheikh_notes,
         student_notes: validation.data.student_notes,
         date: validation.data.date,
         type: validation.data.type,
         attendance: validation.data.attendance,
-        juz_number: Number(validation.data.juz),
+        juz_number: String(validation.data.juz),
         surah_name: validation.data.surah,
-        ayah_from: Number(validation.data.ayah_from),
-        ayah_to: Number(validation.data.ayah_to),
+        ayah_from: String(validation.data.ayah_from),
+        ayah_to: String(validation.data.ayah_to),
         quality: validation.data.quality,
-        attempts: Number(validation.data.attempts),
+        attempts: String(validation.data.attempts),
         absence_reason: validation.data.absence_reason,
+        pass_fail: validation.data.pass_fail === 'true'? true : false,
         }
         const response = await api.api.createApiV1LessonsPost(data)
 
@@ -771,7 +775,7 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
         ayah_to: Number(validation.data.ayah_to),
         quality: validation.data.quality,
         attempts: Number(validation.data.attempts),
-        absence_reason: validation.data.absence_reason,
+        absence_reason: validation.data.absence_reason
         }
         const response = await api.api.updateApiV1LessonsLessonIdPatch(lessonId, data)
 
@@ -821,11 +825,12 @@ export async function getLessonByIDMe(state:GetLessonByIDFormState, formData: Fo
 
 export async function attendanceAnalytics(state:GetAttendanceAnalyticsFormState, formData: FormData): Promise<GetAttendanceAnalyticsFormState> {
     const validation = getAttendanceAnalyticsSchema.safeParse({
-        period_from: formData.get('period-from'),
-        period_to: formData.get('period-to'),
+        period_start: formData.get('period_start'),
+        period_end: formData.get('period_end'),
     })
 
     if (!validation.success) {
+        console.log('succeded');
         return { message: 'fail' }
     }
     try {
@@ -846,8 +851,8 @@ export async function attendanceAnalytics(state:GetAttendanceAnalyticsFormState,
 
 export async function financialAnalytics(state:GetFinancialAnalyticsFormState, formData: FormData): Promise<GetFinancialAnalyticsFormState> {
     const validation = getFinancialAnalyticsSchema.safeParse({
-        period_from: formData.get('period-from'),
-        period_to: formData.get('period-to'),
+        period_start: formData.get('period_start'),
+        period_end: formData.get('period_end'),
     })
 
     if (!validation.success) {
@@ -871,8 +876,8 @@ export async function financialAnalytics(state:GetFinancialAnalyticsFormState, f
 
 export async function performanceAnalytics(state:GetPerformanceAnalyticsFormState, formData: FormData): Promise<GetPerformanceAnalyticsFormState> {
     const validation = getPerformanceAnalyticsSchema.safeParse({
-        period_from: formData.get('period-from'),
-        period_to: formData.get('period-to'),
+        period_start: formData.get('period_start'),
+        period_end: formData.get('period_end'),
     })
 
     if (!validation.success) {
@@ -896,8 +901,8 @@ export async function performanceAnalytics(state:GetPerformanceAnalyticsFormStat
 
 export async function operationalAnalytics(state:GetOperationalAnalyticsFormState, formData: FormData): Promise<GetOperationalAnalyticsFormState> {
     const validation = getOperationalAnalyticsSchema.safeParse({
-        period_from: formData.get('period-from'),
-        period_to: formData.get('period-to'),
+        period_start: formData.get('period_start'),
+        period_end: formData.get('period_end'),
     })
 
     if (!validation.success) {

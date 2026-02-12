@@ -49,7 +49,28 @@ export default function Invoices() {
         if (getInvoiceState?.message === 'success' && getInvoiceState.data) {
             setInvoices([getInvoiceState.data])
         }
-    }, [getInvoiceState])
+        if (createInvoiceState?.message === 'success') {
+                    const fetchInvoices = async () => {
+            try {
+                setLoading(true)
+                if (isAdmin) {
+                    const data = await listInvoices()
+                    setInvoices(data)
+                } else {
+                    const data = await listInvoicesMe()
+                    setInvoices(data)
+                }
+                setError(null)
+            } catch (err) {
+                setError('Failed to load invoices')
+                setInvoices(null)
+            } finally {
+                setLoading(false)
+            }
+        }
+        fetchInvoices()
+        }
+    }, [getInvoiceState, createInvoiceState, isAdmin])
 
     React.useEffect(() => {
         if (authLoading) return

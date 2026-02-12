@@ -35,9 +35,27 @@ export default function Schedules() {
         if (getLibraryItemState?.message === 'success' && getLibraryItemState.data) {
             setLibraryItems([getLibraryItemState.data])
         }
-    }, [getLibraryItemState])
+        if (createLibraryItemState?.message === 'success') {
+            const fetchLibraryItems = async () => {
+                try {
+                    setLoading(true)
+                    const data = await (isAdmin ? listLibrary() : listLibraryMe())
+                    setLibraryItems(data)
+                    setError(null)
+                } catch (err) {
+                    setError('Failed to load library items')
+                    setLibraryItems(null)
+                } finally {
+                    setLoading(false)
+                }
+            }
+            fetchLibraryItems()
+        }
+    }, [getLibraryItemState, createLibraryItemState, isAdmin])
 
     React.useEffect(() => {
+        if (authLoading) return // Wait until auth is loaded
+        
         const fetchLibraryItems = async () => {
             try {
                 setLoading(true)
@@ -85,9 +103,16 @@ export default function Schedules() {
                     </div>
                 </CardHeader>
                 <CardFooter>
-                            {item.tags?.map((tag, index) => (
-                                <Badge key={index} variant="outline" className='mx-1'>{tag}</Badge>
-                            ))}
+                            {item.tags && item.tags.length > 0 ? (() => {
+                                try {
+                                    const parsedTags = JSON.parse(item.tags[0])
+                                    return parsedTags.map((tag: string, index: number) => (
+                                        <Badge key={index} variant="outline" className='mx-1'>{tag}</Badge>
+                                    ))
+                                } catch {
+                                    return <span>Error parsing tags</span>
+                                }
+                            })() : null}
                 </CardFooter>
                 </div>
                 <Button onClick={() => deleteLibraryItem(item.id)} variant='destructive' className="transition duration-300 hover:bg-red-800 mx-2">

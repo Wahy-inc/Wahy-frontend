@@ -24,13 +24,13 @@ import React, { JSX, useState } from "react";
 import { CreateScheduleFormState, GetSchedualesForStudentFormState } from "@/app/platform/lib/definitions";
 
 enum weekDays {
-    saturday = 0,
-    sunday = 1,
-    monday = 2,
-    tuesday = 3,
-    wednesday = 4,
-    thursday = 5,
-    friday = 6
+    saturday = '0',
+    sunday = '1',
+    monday = '2',
+    tuesday = '3',
+    wednesday = '4',
+    thursday = '5',
+    friday = '6'
 }
 
 export default function TitleElement({
@@ -143,21 +143,21 @@ export default function TitleElement({
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className='flex flex-col'>
                                             <div className="flex flex-col">
-                                                <label htmlFor="day_of_week" className="text-sm font-medium">Day of Week</label>
-                                                <Select name="day_of_week">
+                                                <label htmlFor="day-of-week" className="text-sm font-medium">Day of Week</label>
+                                                <Select name="day-of-week">
                                                     <SelectTrigger className="w-full max-w-48">
                                                         <SelectValue placeholder="Day of Week" />
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectGroup>
                                                             <SelectLabel>Day of Week</SelectLabel>
-                                                            <SelectItem value={String(weekDays.saturday)}>Saturday</SelectItem>
-                                                            <SelectItem value={String(weekDays.sunday)}>Sunday</SelectItem>
-                                                            <SelectItem value={String(weekDays.monday)}>Monday</SelectItem>
-                                                            <SelectItem value={String(weekDays.tuesday)}>Tuesday</SelectItem>
-                                                            <SelectItem value={String(weekDays.wednesday)}>Wednesday</SelectItem>
-                                                            <SelectItem value={String(weekDays.thursday)}>Thursday</SelectItem>
-                                                            <SelectItem value={String(weekDays.friday)}>Friday</SelectItem>
+                                                            <SelectItem value={weekDays.saturday}>Saturday</SelectItem>
+                                                            <SelectItem value={weekDays.sunday}>Sunday</SelectItem>
+                                                            <SelectItem value={weekDays.monday}>Monday</SelectItem>
+                                                            <SelectItem value={weekDays.tuesday}>Tuesday</SelectItem>
+                                                            <SelectItem value={weekDays.wednesday}>Wednesday</SelectItem>
+                                                            <SelectItem value={weekDays.thursday}>Thursday</SelectItem>
+                                                            <SelectItem value={weekDays.friday}>Friday</SelectItem>
                                                         </SelectGroup>
                                                     </SelectContent>
                                                 </Select>
@@ -185,8 +185,8 @@ export default function TitleElement({
                                     </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="recurring" className="text-sm font-medium">Recurring</label>
-                                            <Select name="recurring">
+                                            <label htmlFor="is-recurring" className="text-sm font-medium">Recurring</label>
+                                            <Select name="is-recurring">
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder="Recurring" />
                                                 </SelectTrigger>
@@ -216,7 +216,7 @@ export default function TitleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     </div> : <div></div> }
-                    <AlertDialog open={getStudentScheduleDialogOpen} onOpenChange={handleGetDialogOpenChange}>
+                    <AlertDialog open={getStudentScheduleDialogOpen} onOpenChange={setgetStudentScheduleDialogOpen}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Schedules for student</Button>
                     </AlertDialogTrigger>

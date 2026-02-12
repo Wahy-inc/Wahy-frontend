@@ -8,11 +8,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import * as openApi from "../../../../lib/openApi"
 import { Button } from "@/components/ui/button";
-import React, { JSX, useState } from "react";
-import { CreateLibraryItemFormState, CreateStudentFormState, GetLibraryItemByIDFormState, GetStudentFormState } from "@/app/platform/lib/definitions";
-import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { JSX, useState } from "react";
+import { CreateStudentFormState, GetStudentFormState } from "@/app/platform/lib/definitions";
+import { Select, SelectGroup, SelectContent, SelectTrigger, SelectValue, SelectLabel, SelectItem } from "@/components/ui/select";
 
 export default function TitleElement({
     title,
@@ -77,6 +77,8 @@ export default function TitleElement({
         getStudentAction(formData)
     }
 
+    const date = new Date()
+
     return (
             <div className="flex flex-col justify-center">
                 <div className='flex flex-row justify-between items-center'>
@@ -88,7 +90,7 @@ export default function TitleElement({
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Student</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
-                            <form action={handleCreateSubmit} id={`create-student-form-${Date.now()}`}>
+                            <form action={handleCreateSubmit} id={`create-student-form-${date.getTime()}`}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>Create Student</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
@@ -112,47 +114,62 @@ export default function TitleElement({
                                 </div>
                                 <div className="flex flex-row justify-between gap-3">
                                     <div className='flex flex-col'>
-                                        {fieldInput("Date of Birth","date-of-birth", "", "date")}
+                                        {fieldInput("Date of Birth","dateOfBirth", "", "date")}
                                         {createFormSubmitted && createState?.error?.dateOfBirth && <p className="text-red-500 text-sm">{createState.error.dateOfBirth}</p>}
                                     </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput("Timezone","timezone", "", "text")}
+                                    {fieldInput("Timezone","timeZone", "", "text")}
                                     {createFormSubmitted && createState?.error?.timeZone && <p className="text-red-500 text-sm">{createState.error.timeZone}</p>}
                                 </div>
                                 </div>
                                 <div className="flex flex-row justify-between gap-3">
                                     <div className='flex flex-col'>
-                                        {fieldInput("Current juz","current-juz", "", "number")}
+                                        {fieldInput("Current juz","currjuz", "", "number")}
                                         {createFormSubmitted && createState?.error?.currjuz && <p className="text-red-500 text-sm">{createState.error.currjuz}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Current surah","current-surah", "", "text")}
+                                        {fieldInput("Current surah","currsurah", "", "text")}
                                         {createFormSubmitted && createState?.error?.currsurah && <p className="text-red-500 text-sm">{createState.error.currsurah}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Current ayah","current-ayah", "", "number")}
+                                        {fieldInput("Current ayah","currayah", "", "number")}
                                         {createFormSubmitted && createState?.error?.currayah && <p className="text-red-500 text-sm">{createState.error.currayah}</p>}
                                     </div>
                                 </div>
                                 <div className="flex flex-row justify-between gap-3 items-center">
                                     <div className='flex flex-col'>
-                                        {fieldInput("Lessons per week","lessons-per-week", "", "text")}
+                                        {fieldInput("Lessons per week","lessonsPerWeek", "", "text")}
                                         {createFormSubmitted && createState?.error?.lessonsPerWeek && <p className="text-red-500 text-sm">{createState.error.lessonsPerWeek}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Lessons rate","lessons-rate", "", "number")}
+                                        {fieldInput("Lessons rate","lessonRate", "", "number")}
                                         {createFormSubmitted && createState?.error?.lessonRate && <p className="text-red-500 text-sm">{createState.error.lessonRate}</p>}
                                     </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput("Billing cycle","billing-cycle", "Enter your billing cycle (e.g., monthly, weekly)", "number")}
+                                    <div className="flex flex-col">
+                                        <div className="flex flex-col w-35">
+                                        <label htmlFor="billingCycle" className="text-sm font-medium">Billing Cycle</label>
+                                            <Select name="billingCycle" disabled={createPending}>
+                                                <SelectTrigger className="w-full max-w-48" >
+                                                    <SelectValue placeholder="Billing Cycle" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                <SelectGroup>
+                                                    <SelectLabel>Billing Cycle</SelectLabel>
+                                                    <SelectItem value={openApi.BillingCycle.Weekly}>Weekly</SelectItem>
+                                                    <SelectItem value={openApi.BillingCycle.Monthly}>Monthly</SelectItem>
+                                                </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                    {createFormSubmitted && createState?.error?.billingCycle && <p className="text-red-500 text-sm">{createState.error.billingCycle}</p>}
                                     </div>
                                 </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput("Private notes","private-notes", "", "text")}
+                                    {fieldInput("Private notes","privateNotes", "", "text")}
                                     {createFormSubmitted && createState?.error?.privateNotes && <p className="text-red-500 text-sm">{createState.error.privateNotes}</p>}
                                 </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput("Special notes","special-notes", "", "text")}
+                                    {fieldInput("Special notes","specialNotes", "", "text")}
                                     {createFormSubmitted && createState?.error?.specialNotes && <p className="text-red-500 text-sm">{createState.error.specialNotes}</p>}
                                 </div>
                                 </div>

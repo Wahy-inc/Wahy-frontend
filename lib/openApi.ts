@@ -147,7 +147,7 @@ export interface BodyCreateApiV1LibraryPost {
   /** Thumbnail */
   thumbnail?: File | null;
   /** Student Ids */
-  student_ids?: number[] | null;
+  student_ids?: String | null;
 }
 
 /** FinancialAnalytics */
@@ -353,9 +353,9 @@ export interface InvoiceWithItemsRead {
 /** LessonCreate */
 export interface LessonCreate {
   /** Student Id */
-  student_id: number;
+  student_id: string;
   /** Schedule Id */
-  schedule_id?: number | null;
+  schedule_id?: string | null;
   /**
    * Date
    * @format date
@@ -365,11 +365,11 @@ export interface LessonCreate {
   /** Surah Name */
   surah_name?: string | null;
   /** Juz Number */
-  juz_number?: number | null;
+  juz_number?: string | null;
   /** Ayah From */
-  ayah_from?: number | null;
+  ayah_from?: string | null;
   /** Ayah To */
-  ayah_to?: number | null;
+  ayah_to?: string | null;
   quality?: LessonQuality | null;
   /** Pass Fail */
   pass_fail?: boolean | null;
@@ -377,7 +377,7 @@ export interface LessonCreate {
    * Attempts
    * @default 1
    */
-  attempts?: number;
+  attempts?: string;
   /** @default "present" */
   attendance?: AttendanceStatus;
   /** Absence Reason */

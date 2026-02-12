@@ -1,7 +1,6 @@
 'use client'
 
 import React from "react";
-import { useForm } from "react-hook-form";
 import * as openApi from "@/lib/openApi"
 import { approveStudent, createStudent, getStudent, listStudents, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
@@ -9,13 +8,11 @@ import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { dummyStudents } from "@/lib/dummyData";
 import { Button } from "@/components/ui/button"
 import {
   Item,
   ItemActions,
   ItemContent,
-  ItemDescription,
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
@@ -37,47 +34,31 @@ export default function Students() {
     const [getStudentDialogOpen, setGetStudentDialogOpen] = React.useState(false)
     const [updateStudentDialogOpen, setUpdateStudentDialogOpen] = React.useState(false)
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm({
-        defaultValues: {
-            id: undefined,
-            arname: "",
-            enname: "",
-            phone: "",
-            dateOfBirth: "",
-            timeZone: "",
-            currentJuz: undefined,
-            currentSurah: "",
-            currentAyah: undefined,
-            lessonsPerWeek: undefined,
-            lessonRate: undefined,
-            billingCycle: openApi.BillingCycle.Monthly,
-            registrationStatus: openApi.RegistrationStatus.Pending,
-            status: openApi.StudentStatus.Active,
-            privateNotes: "",
-            specialNotes: ""
+    const fetchStudents = async () => {
+        try {
+            setLoading(true)
+            const data = await listStudents()
+            setStudents(data)
+            setError(null)
+        } catch (err) {
+            setError('Failed to load students')
+            setStudents(null)
+        } finally {
+            setLoading(false)
         }
-    })
-
+    }
+    
     React.useEffect(() => {
         if (getStudentState?.message === 'success' && getStudentState.data) {
             setStudents([getStudentState.data])
         }
-    }, [getStudentState])
+        if (createStudentState?.message === 'success' || updateStudentState?.message === 'success') {
+            fetchStudents()
+        }
+    }, [getStudentState, createStudentState, updateStudentState])
+
 
     React.useEffect(() => {
-        const fetchStudents = async () => {
-            try {
-                setLoading(true)
-                const data = await listStudents()
-                setStudents(data)
-                setError(null)
-            } catch (err) {
-                setError('Failed to load students')
-                setStudents(null)
-            } finally {
-                setLoading(false)
-            }
-        }
         fetchStudents()
     }, [])
 
@@ -95,8 +76,7 @@ export default function Students() {
                     <ItemMedia variant="icon">
                         <User />
                     </ItemMedia>
-                <ItemTitle>{student.full_name_english}</ItemTitle>
-                <ItemDescription>
+                <ItemTitle>ID: {student.id} | {student.full_name_english}</ItemTitle>
                     Registration Status: {student.registration_status} <br />
                     <div id="accordion-data">
                         <Accordion
@@ -118,7 +98,6 @@ export default function Students() {
                             </AccordionItem>
                         </Accordion>
                     </div>
-                </ItemDescription>
                 </ItemContent>
                     {student.registration_status === openApi.RegistrationStatus.Pending ? (
                         <ItemActions>
@@ -131,7 +110,7 @@ export default function Students() {
                         </ItemActions>
                     ) : null}
                     {student.registration_status === openApi.RegistrationStatus.Approved ? (
-                    <AlertDialog open={updateStudentDialogOpen} onOpenChange={updateStudentState?.message == 'success'? () => setUpdateStudentDialogOpen(false) : setUpdateStudentDialogOpen}>
+                    <AlertDialog open={updateStudentDialogOpen} onOpenChange={setUpdateStudentDialogOpen}>
                         <AlertDialogTrigger asChild>
                             <ItemActions>
                                 <Button onClick={() => (student.id, {})} size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white">
@@ -142,9 +121,10 @@ export default function Students() {
                         <AlertDialogContent>
                             <form action={updateStudentAction} id={`update-${student.id}`}>
                             <AlertDialogHeader>
-                            <AlertDialogTitle>Create Student</AlertDialogTitle>
+                            <AlertDialogTitle>Update Student</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                 <div className="flex flex-row justify-between gap-3">
+                                    <input type="number" name="id" id="id" hidden value={Number(student.id)} readOnly />
                                     <div className='flex flex-col'>
                                         {fieldInput("Name in Arabic","ar-name", student.full_name_arabic, "text")}
                                         {updateStudentState?.error?.arname && <p className="text-red-500 text-sm">{updateStudentState.error.arname}</p>}
@@ -164,7 +144,7 @@ export default function Students() {
                                         {updateStudentState?.error?.dateOfBirth && <p className="text-red-500 text-sm">{updateStudentState.error.dateOfBirth}</p>}
                                     </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput("Timezone","timezone", String(student.timezone), "text")}
+                                    {fieldInput("Timezone","time-zone", String(student.timezone), "text")}
                                     {updateStudentState?.error?.timeZone && <p className="text-red-500 text-sm">{updateStudentState.error.timeZone}</p>}
                                 </div>
                                 </div>
@@ -207,14 +187,14 @@ export default function Students() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {updateStudentState?.error?.status && <p className="text-red-500 text-sm">{updateStudentState.error.status}</p>}
+                                        {updateStudentState?.error?.billingCycle && <p className="text-red-500 text-sm">{updateStudentState.error.status}</p>}
                                     </div>
                                 </div>
                                 <div className="flex flex-row justify-between gap-3 items-center">
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="registration-status" className="text-sm font-medium">Registration Status</label>
-                                            <Select name="registration-status" defaultValue={student.registration_status}>
+                                            <label htmlFor="registeration-status" className="text-sm font-medium">Registration Status</label>
+                                            <Select name="registeration-status" defaultValue={student.registration_status}>
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder="Select a type" />
                                                 </SelectTrigger>
@@ -228,7 +208,7 @@ export default function Students() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {updateStudentState?.error?.status && <p className="text-red-500 text-sm">{updateStudentState.error.status}</p>}
+                                        {updateStudentState?.error?.registerationStatus && <p className="text-red-500 text-sm">{updateStudentState.error.registerationStatus}</p>}
                                     </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
@@ -262,8 +242,8 @@ export default function Students() {
                                 </div>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
-                                <AlertDialogCancel type="reset" disabled={updateStudentPending} onClick={() => reset()}>Cancel</AlertDialogCancel>
-                                <Button type="submit" disabled={updateStudentPending} onSubmit={handleSubmit(() => reset())}>{updateStudentPending ? 'Updating...' : 'Update'}</Button>
+                                <AlertDialogCancel type="reset" disabled={updateStudentPending}>Cancel</AlertDialogCancel>
+                                <Button type="submit" disabled={updateStudentPending} >{updateStudentPending ? 'Updating...' : 'Update'}</Button>
                             </AlertDialogFooter>
                             </form>
                         </AlertDialogContent>
@@ -294,14 +274,14 @@ export default function Students() {
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
     if (!students || students.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No students found.</p>, title: title})
 
-    const pendingStudents = dummyStudents?.filter((student) => {
+    const pendingStudents = students?.filter((student) => {
         return student.registration_status === openApi.RegistrationStatus.Pending;
     })
-    const approvedStudents = dummyStudents?.filter((student) => {
+    const approvedStudents = students?.filter((student) => {
         return student.registration_status === openApi.RegistrationStatus.Approved;
     })
     
-    const rejectedStudents = dummyStudents?.filter((student) => {
+    const rejectedStudents = students?.filter((student) => {
         return student.registration_status === openApi.RegistrationStatus.Rejected;
     })
 

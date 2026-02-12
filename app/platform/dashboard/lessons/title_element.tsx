@@ -129,12 +129,12 @@ export default function TitleElement({
                             <AlertDialogTitle>Create Lesson</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                     <div className='flex flex-col'>
-                                        {fieldInput("Student ID","student-id", "Enter student id...", "number")}
+                                        {fieldInput("Student ID","student_id", "Enter student id...", "number")}
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                    {fieldInput("Schedule ID", "schedule-id", "Enter schedule id...", "number")}
-                                    {createFormSubmitted && createState?.error?.schedule_id && <p className="text-red-500 text-sm">{createState.error.schedule_id}</p>}
+                                        {fieldInput("Schedule ID", "schedule_id", "Enter schedule id...", "number")}
+                                        {createFormSubmitted && createState?.error?.schedule_id && <p className="text-red-500 text-sm">{createState.error.schedule_id}</p>}
                                     </div>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className='flex flex-col'>
@@ -188,15 +188,15 @@ export default function TitleElement({
                                             {createFormSubmitted && createState?.error?.juz && <p className="text-red-500 text-sm">{createState.error.juz}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("Surah", "surah", "surah", "text")}
+                                            {fieldInput("Surah", "surah", "", "text")}
                                             {createFormSubmitted && createState?.error?.surah && <p className="text-red-500 text-sm">{createState.error.surah}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("Ayah from", "ayah-from", "ayah from", "number")}
+                                            {fieldInput("Ayah from", "ayah_from", "ayah from", "number")}
                                             {createFormSubmitted && createState?.error?.ayah_from && <p className="text-red-500 text-sm">{createState.error.ayah_from}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("To", "ayah-to", "to", "number")}
+                                            {fieldInput("To", "ayah_to", "to", "number")}
                                             {createFormSubmitted && createState?.error?.ayah_to && <p className="text-red-500 text-sm">{createState.error.ayah_to}</p>}
                                         </div>
                                     </div>
@@ -222,21 +222,40 @@ export default function TitleElement({
                                         </div>
                                         {createFormSubmitted && createState?.error?.quality && <p className="text-red-500 text-sm">{createState.error.quality}</p>}
                                     </div>
+                                    <div className='flex flex-col'>
+                                        <div className="flex flex-col">
+                                            <label htmlFor="pass_fail" className="text-sm font-medium">Pass/Fail</label>
+                                            <Select name="pass_fail">
+                                                <SelectTrigger className="w-full max-w-48">
+                                                    <SelectValue placeholder="Select Pass or Fail" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectGroup>
+                                                        <SelectLabel>Pass/Fail</SelectLabel>
+                                                        <SelectItem value="true">Pass</SelectItem>
+                                                        <SelectItem value="false">Fail</SelectItem>
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        {createFormSubmitted && createState?.error?.pass_fail && <p className="text-red-500 text-sm">{createState.error.pass_fail}</p>}
+                                    </div>
+
                                         <div className='flex flex-col'>
                                             {fieldInput("Attempts", "attempts", "attempts", "number")}
                                             {createFormSubmitted && createState?.error?.attempts && <p className="text-red-500 text-sm">{createState.error.attempts}</p>}
                                         </div>
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Absence Reason", "absence-reason", "Enter reason for absence...", "text")}
+                                        {fieldInput("Absence Reason", "absence_reason", "Enter reason for absence...", "text")}
                                         {createFormSubmitted && createState?.error?.absence_reason && <p className="text-red-500 text-sm">{createState.error.absence_reason}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Sheikh Notes", "sheikh-notes", "Enter sheikh notes...", "text")}
+                                        {fieldInput("Sheikh Notes", "sheikh_notes", "Enter sheikh notes...", "text")}
                                         {createFormSubmitted && createState?.error?.sheikh_notes && <p className="text-red-500 text-sm">{createState.error.sheikh_notes}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Student Notes", "student-notes", "Enter student notes...", "text")}
+                                        {fieldInput("Student Notes", "student_notes", "Enter student notes...", "text")}
                                         {createFormSubmitted && createState?.error?.student_notes && <p className="text-red-500 text-sm">{createState.error.student_notes}</p>}
                                     </div>
                                     {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create lesson. Please check the data and try again.</p> : null}

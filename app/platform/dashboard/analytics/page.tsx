@@ -83,9 +83,9 @@ export default function Home() {
                 <div id="period" className="flex flex-row items-center">
                     <form action={action}>
                         <p className="inline px-1">Period From</p>
-                        <Input className="w-32" type="date"></Input>
+                        <Input className="w-32" type="date" name="period_start" id="period_start"></Input>
                         <p className="inline px-1">To</p>
-                        <Input className="w-32 mr-2" type="date"></Input>
+                        <Input className="w-32 mr-2" type="date" name="period_end" id="period_end"></Input>
                         <Button disabled={pending} id="submit" type="submit" className="bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800 hover:border-slate-800 border-2">Submit</Button>
                     </form>
                 </div>
@@ -298,8 +298,8 @@ export default function Home() {
     const content =  (
         <div className="flex flex-col items-center">
             {attendance? attendanceAnalyticsElement(attendance) : attendanceAnalyticsElement({
-            period_start: "2024-01-01",
-            period_end: "2024-01-31",
+            period_start: "____-__-__",
+            period_end: "____-__-__",
             total_lessons: 0,
             present_count: 0,
             late_count: 0,
@@ -308,8 +308,8 @@ export default function Home() {
             attendance_rate: 0
         })}
         {performance? performanceAnalyticsElement(performance) : performanceAnalyticsElement({
-            period_start: "2024-01-01",
-            period_end: "2024-01-31",
+            period_start: "____-__-__",
+            period_end: "____-__-__",
             attended_count: 0,
             passed_count: 0,
             pass_rate: 0,
@@ -319,16 +319,16 @@ export default function Home() {
             determination_score: 0
         })}
         {financial? financialAnalyticsElement(financial) : financialAnalyticsElement({
-            period_start: "2024-01-01",
-            period_end: "2024-01-31",
+            period_start: "____-__-__",
+            period_end: "____-__-__",
             total_revenue: 0,
             invoice_count: 0,
             overdue_count: 0,
             revenue_per_student: []
         })}
         {operational? operationalAnalyticsElement(operational) : operationalAnalyticsElement({
-            period_start: "2024-01-01",
-            period_end: "2024-01-31",
+            period_start: "____-__-__",
+            period_end: "____-__-__",
             new_registrations: 0,
             active_students: 0,
             lessons_recorded: 0

@@ -2,7 +2,7 @@
 
 import React, { useActionState } from "react"
 import { useRouter } from "next/navigation"
-import { signin } from "../../actions/auth"
+import { signinAdmin, signinStudent } from "../../actions/auth"
 import { Button } from "@/components/ui/button"
 import {
   Field,
@@ -10,20 +10,23 @@ import {
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import { useAuth } from "@/lib/auth-context"
 
 export default function SignIn() {
-    const [state, action, pending] = useActionState(signin, undefined)
+    const { isAdmin } = useAuth()
+    const [state, action, pending] = useActionState(signinAdmin, undefined)
+    const [Studentstate, Studentaction, Studentpending] = useActionState(signinStudent, undefined)
     const router = useRouter()
 
     React.useEffect(() => {
-        if (state?.message === 'Signin successful') {
+        if ((isAdmin ? state?.message : Studentstate?.message) === 'Signin successful') {
             router.replace('/platform/dashboard')
         }
-    }, [state, router])
+    }, [state, Studentstate, router, isAdmin])
     
     return (
     <div className="w-full my-50">
-    <form action={action} className="w-xs lg:w-lg mx-auto my-10 border-2 border-slate-800 p-6 rounded-lg shadow-lg bg-slate-800 text-slate-100">
+    <form action={isAdmin ? action : Studentaction} className="w-xs lg:w-lg mx-auto my-10 border-2 border-slate-800 p-6 rounded-lg shadow-lg bg-slate-800 text-slate-100">
     <FieldGroup>
       <Field>
         <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -33,9 +36,9 @@ export default function SignIn() {
           type="email"
           placeholder="name@example.com"
           className="bg-slate-100 text-slate-800"
-          disabled={pending}
+          disabled={isAdmin ? pending : Studentpending}
         />
-        {state?.error?.email && <p className="text-red-500 text-sm">{state.error.email}</p>}
+        {isAdmin ? (state?.error?.email && <p className="text-red-500 text-sm">{state.error.email}</p>) : (Studentstate?.error?.email && <p className="text-red-500 text-sm">{Studentstate.error.email}</p>)}
       </Field>
       <Field>
         <FieldLabel htmlFor="password">Password</FieldLabel>
@@ -45,16 +48,16 @@ export default function SignIn() {
           type="password"
           placeholder="Enter your password"
           className="bg-slate-100 text-slate-800"
-          disabled={pending}
+          disabled={isAdmin ? pending : Studentpending}
         />
-        {state?.error?.password && <p className="text-red-500 text-sm">{state.error.password}</p>}
+        {isAdmin ? (state?.error?.password && <p className="text-red-500 text-sm">{state.error.password}</p>) : (Studentstate?.error?.password && <p className="text-red-500 text-sm">{Studentstate.error.password}</p>)}
       </Field>
       <Field orientation="horizontal">
-        <Button type="reset" variant="outline" className="text-slate-800 border-2 border-slate-800" disabled={pending}>
+        <Button type="reset" variant="outline" className="text-slate-800 border-2 border-slate-800" disabled={isAdmin ? pending : Studentpending}>
           Reset
         </Button>
-        <Button type="submit" disabled={pending}>
-          {pending ? "Submitting..." : "Submit"}
+        <Button type="submit" disabled={isAdmin ? pending : Studentpending}>
+          {isAdmin ? (pending ? "Submitting..." : "Submit") : (Studentpending ? "Submitting..." : "Submit")}
         </Button>
       </Field>
     </FieldGroup>

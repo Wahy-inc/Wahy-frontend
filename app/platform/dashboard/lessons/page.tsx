@@ -56,7 +56,23 @@ export default function Lessons() {
         if (getLessonState?.message == 'success' && getLessonState.data) {
             setFetchedLesson(getLessonState.data)
         }
-    }, [getLessonState])
+        if (createState?.message === 'success' || updateState?.message === 'success') {
+            const fetchLessons = async () => {
+                try {
+                    setLoading(true)
+                    const data = await (isAdmin ? listLessons() : listLessonsMe())
+                    setLessons(data)
+                    setError(null)
+                } catch (err) {
+                    setError('Failed to load Lessons')
+                    setLessons(null)
+                } finally {
+                    setLoading(false)
+                }
+            }
+            fetchLessons()
+        }
+    }, [getLessonState, createState, updateState, isAdmin])
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
         <Field orientation="vertical" className='w-full inline'>

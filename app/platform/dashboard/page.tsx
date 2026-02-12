@@ -12,11 +12,11 @@ export default function DashboardPage({children: children, title: title}: {child
     const { isAdmin, isStudent } = useAuth()
     
     useEffect(() => {
-        localStorage.setItem('access_token', '')
-        localStorage.setItem('expire', '')
         localStorage.setItem('students', JSON.stringify([]))
-        listStudents()
-    }, [])
+        if (isAdmin) {
+            listStudents()
+        }
+    }, [isAdmin])
 
     return (
         <div className="flex flex-row justify-between w-full mt-15 min-h-[90vh]">

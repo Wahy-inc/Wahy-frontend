@@ -10,8 +10,14 @@ export function TokenRefresher() {
             if (expire) {
                 const expireDate = new Date(expire)
                 const now = new Date()
-                if (expireDate <= now) {
+                // Refresh if token will expire in the next 5 minutes
+                const fiveMinutesFromNow = new Date(now.getTime() + 5 * 60000)
+                if (expireDate <= fiveMinutesFromNow && expireDate > now) {
                     refreshAccessToken()
+                } else if (expireDate <= now) {
+                    // If already expired, clear tokens
+                    localStorage.removeItem('access_token')
+                    localStorage.removeItem('expire')
                 }
             }
         }, 10000)

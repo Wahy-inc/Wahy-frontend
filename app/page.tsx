@@ -2,8 +2,31 @@
 import Image from "next/image";
 import logo from "../public/quran.png";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const accessToken = localStorage.getItem('access_token');
+    const expire = localStorage.getItem('expire');
+    const role = localStorage.getItem('role');
+
+    if (accessToken && expire && role) {
+      const expireDate = new Date(expire);
+      const now = new Date();
+      
+      if (expireDate > now) {
+        router.push('./platform/dashboard');
+      } else {
+        // Clear expired tokens
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('expire');
+      }
+    }
+  }, [router]);
+  
   return (
     <div className="flex w-full min-h-screen justify-center flex-row bg-zinc-50 font-sans dark:bg-black">
       <main className="flex min-h-screen flex-col items-start justify-between py-32 px-16 lg:items-start">

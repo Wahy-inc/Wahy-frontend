@@ -3,8 +3,8 @@ import * as zod from 'zod';
 import * as openApi from "@/lib/openApi";
 
 export const SignUpSchema = zod.object({
-    arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
-    enname: zod.string().min(1, { error: 'Name is required' }).regex(/^[A-Za-z\s]+$/, { error: 'Name must be in English' }).trim(),
+    arname: zod.string().min(1, { error: 'Name is required' }).trim(),
+    enname: zod.string().min(1, { error: 'Name is required' }).trim(),
     email: zod.email({ error: 'Invalid email address' }).trim(),
     password: zod.string().min(6, { error: 'Password must be at least 6 characters long' })
     .regex(/[a-zA-Z]/, { error: 'Password must contain at least one letter' })
@@ -17,7 +17,7 @@ export const SignUpSchema = zod.object({
     currayah: zod.string().min(1, { error: 'Current Ayah is required' }).trim(),
     lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
     lessonRate: zod.string().min(1, { error: 'Lesson rate is required' }).trim(),
-    BillingCycle: zod.string().min(1, { error: 'Billing cycle is required' }).trim(),
+    billingCycle: zod.enum(openApi.BillingCycle, { error: 'Invalid billing cycle' }),
     specialNotes: zod.string().min(0, { error: 'Special notes is required' }).trim(),
 })
 
@@ -35,7 +35,7 @@ export type SignupFormState =
     currayah?: string[];
     lessonsPerWeek?: string[];
     lessonRate?: string[];
-    BillingCycle?: string[];
+    billingCycle?: string[];
     specialNotes?: string[];
     }
     message?: string;
@@ -57,10 +57,11 @@ export type SignInFormState =
 | undefined;
 
 export const CreatLessonSchema = zod.object({
-    student_id: zod.string({ error: 'Student ID must be a number' }),
-    schedule_id: zod.string({ error: 'Schedule ID must be a number' }),
+    student_id: zod.string().min(1, { error: 'Student ID is required' }),
+    schedule_id: zod.string().min(1, { error: 'Schedule ID is required' }),
     date: zod.string().min(1, { error: 'Date is required' }).trim(),
     type: zod.enum(LessonType, { error: 'Invalid lesson type' }),
+    pass_fail: zod.string({ error: 'Pass/Fail is required' }).trim(),
     attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }),
     juz: zod.string({ error: 'Juz must be a number' }).min(1, { error: 'Juz is required' }),
     surah: zod.string().min(1, { error: 'Surah is required' }).trim(),
@@ -68,9 +69,9 @@ export const CreatLessonSchema = zod.object({
     ayah_to: zod.string({ error: 'Ayah to must be a number' }).min(1, { error: 'Ayah to is required' }),
     quality: zod.enum(LessonQuality, { error: 'Invalid lesson quality' }),
     attempts: zod.string({ error: 'Attempts must be a number' }).min(1, { error: 'Attempts is required' }),
-    absence_reason: zod.string().min(0, { error: 'Absence reason is required' }).trim(),
-    sheikh_notes: zod.string().min(0, { error: 'Sheikh notes is required' }).trim(),
-    student_notes: zod.string().min(0, { error: 'Student notes is required' }).trim(),
+    absence_reason: zod.string().min(0).trim(),
+    sheikh_notes: zod.string().min(0).trim(),
+    student_notes: zod.string().min(0).trim(),
 })
 
 export type CreateLessonFormState = 
@@ -89,6 +90,7 @@ export type CreateLessonFormState =
     absence_reason?: string[];
     sheikh_notes?: string[];
     student_notes?: string[];
+    pass_fail?: string[];
 }
 message?: string;
 }
@@ -143,19 +145,9 @@ data?: openApi.LessonRead;
 }
 | undefined;
 
-enum weekDays {
-    saturday = 0,
-    sunday = 1,
-    monday = 2,
-    tuesday = 3,
-    wednesday = 4,
-    thursday = 5,
-    friday = 6
-}
-
 export const createScheduleSchema = zod.object({
     student_id: zod.string({ error: 'Student ID must be a number' }),
-    day_of_week: zod.enum(weekDays, { error: 'Invalid day of week' }),
+    day_of_week: zod.enum(['0', '1', '2', '3', '4', '5', '6'], { error: 'Invalid day of week' }),
     start_time: zod.string().min(1, { error: 'Start time is required' }).trim(),
     end_time: zod.string().min(1, { error: 'End time is required' }).trim(),
     effective_from: zod.string().min(1, { error: 'Effective from is required' }).trim(),
@@ -180,7 +172,7 @@ message?: string;
 | undefined;
 
 export const UpdateScheduleSchema = zod.object({
-    day_of_week: zod.enum(weekDays, { error: 'Invalid day of week' }),
+    day_of_week: zod.enum(['0', '1', '2', '3', '4', '5', '6'], { error: 'Invalid day of week' }),
     start_time: zod.string().min(1, { error: 'Start time is required' }).trim(),
     end_time: zod.string().min(1, { error: 'End time is required' }).trim(),
     effective_from: zod.string().min(1, { error: 'Effective from is required' }).trim(),
@@ -271,7 +263,7 @@ export const createStudentSchema = zod.object({
     currayah: zod.string().min(1, { error: 'Current Ayah is required' }).trim(),
     lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
     lessonRate: zod.string().min(1, { error: 'Lesson rate is required' }).trim(),
-    BillingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }),
+    billingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }),
     specialNotes: zod.string().min(0, { error: 'Special notes is required' }).trim(),
     privateNotes: zod.string().min(0, { error: 'Private notes is required' }).trim(),
 })
@@ -289,7 +281,7 @@ export type CreateStudentFormState =
     currayah?: string[];
     lessonsPerWeek?: string[];
     lessonRate?: string[];
-    BillingCycle?: string[];
+    billingCycle?: string[];
     specialNotes?: string[];
     privateNotes?: string[];
 }
@@ -323,7 +315,7 @@ export const updateStudentSchema = zod.object({
     currayah: zod.string().min(1, { error: 'Current Ayah is required' }).trim(),
     lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
     lessonRate: zod.string().min(1, { error: 'Lesson rate is required' }).trim(),
-    BillingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }),
+    billingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }),
     specialNotes: zod.string().min(0, { error: 'Special notes is required' }).trim(),
     privateNotes: zod.string().min(0, { error: 'Private notes is required' }).trim(),
 })
@@ -342,7 +334,7 @@ export type UpdateStudentFormState =
     currayah?: string[];
     lessonsPerWeek?: string[];
     lessonRate?: string[];
-    BillingCycle?: string[];
+    billingCycle?: string[];
     specialNotes?: string[];
     privateNotes?: string[];
 }

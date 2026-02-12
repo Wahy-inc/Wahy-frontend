@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createSchedule, deleteSchedule, getSchedulesForStudent, listSchedules, listSchedulesMe, updateSchedule } from "@/app/platform/actions/dashboard";
+import { createSchedule, deleteSchedule, getLocalStudent, getSchedulesForStudent, listSchedules, listSchedulesMe, updateSchedule } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
 import TitleElement from "./title_element";
@@ -41,29 +41,50 @@ export default function Schedules() {
     const [getScheduleState, getScheduleAction, getSchedulePending] = React.useActionState(getSchedulesForStudent, undefined)
     const [createScheduleDialogOpen, setCreateScheduleDialogOpen] = React.useState(false)
     const [getScheduleDialogOpen, setGetScheduleDialogOpen] = React.useState(false)
-    const [updateScheduleDialogOpen, setUpdateScheduleDialogOpen] = React.useState(false)
+    const [editingScheduleId, setEditingScheduleId] = React.useState<number | null>(null)
     const { isAdmin } = useAuth()
 
-     React.useEffect(() => {
+    
+    React.useEffect(() => {
         if (getScheduleState?.message == 'success' && getScheduleState.data) {
             setFilteredSchedules(getScheduleState.data)
         }
-    }, [getScheduleState])
+        if (createScheduleState?.message == 'success' || updateScheduleState?.message == 'success') {
+            const fetchSchedules = async () => {
+                try {
+                    setLoading(true)
+                    const data = await (isAdmin? listSchedules() : listSchedulesMe())
+                    console.log('Fetched schedules data:', data);
+                    setSchedules(data)
+                    console.log(data);
+                    setError(null)
+                } catch (err) {
+                    console.error('Error fetching schedules:', err);
+                    setError('Failed to load schedules')
+                } finally {
+                    setLoading(false)
+                }
+            }
+            fetchSchedules()
+        }
+    }, [getScheduleState, createScheduleState, updateScheduleState, isAdmin])
 
     React.useEffect(() => {
-        const fetchSchedules = async () => {
-            try {
-                setLoading(true)
-                const data = await (isAdmin ? listSchedules() : listSchedulesMe())
-                setSchedules(data)
-                setError(null)
-            } catch {
-                setError('Failed to load schedules')
-                setSchedules(null)
-            } finally {
-                setLoading(false)
+            const fetchSchedules = async () => {
+                try {
+                    setLoading(true)
+                    const data = await (isAdmin? listSchedules() : listSchedulesMe())
+                    console.log('Fetched schedules data:', data);
+                    setSchedules(data)
+                    console.log(data);
+                    setError(null)
+                } catch (err) {
+                    console.error('Error fetching schedules:', err);
+                    setError('Failed to load schedules')
+                } finally {
+                    setLoading(false)
+                }
             }
-        }
         fetchSchedules()
     }, [isAdmin])
 
@@ -132,7 +153,7 @@ export default function Schedules() {
                             <div className="flex items-center gap-2 mt-1">
                                 <Badge variant="outline" className="text-xs">
                                     <User className="w-3 h-3 mr-1" />
-                                    Student #{schedule.student_id}
+                                    {getLocalStudent(schedule.student_id)?.full_name_english || `Student #${schedule.student_id}`}
                                 </Badge>
                                 <span className="text-slate-400 text-sm">ID: {schedule.id}</span>
                             </div>
@@ -228,23 +249,23 @@ export default function Schedules() {
                     <>
                         <Separator className="my-4" />
                         <div className="flex justify-end gap-3">
-                    <AlertDialog open={updateScheduleDialogOpen} onOpenChange={updateScheduleState?.message == 'success'? () => setUpdateScheduleDialogOpen(false) : setUpdateScheduleDialogOpen}>
+                    <AlertDialog open={editingScheduleId === schedule.id} onOpenChange={(open) => setEditingScheduleId(open ? schedule.id : null)}>
                         <AlertDialogTrigger asChild>
-                            <Button className="transition duration-300 mt-4 cursor-pointer bg-slate-400 hover:bg-slate-600">Update Schedule</Button>
+                            <Button className="transition duration-300 cursor-pointer bg-slate-400 hover:bg-slate-600">Update Schedule</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <form action={updateScheduleActionState}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>Update Schedule</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
-                                    <input type="hidden" name="schedule_id" value={schedule.id} />
+                                    <input type="hidden" name="schedule-id" value={schedule.id} />
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className='flex flex-col'>
                                             <div className="flex flex-col">
-                                                <label htmlFor="day_of_week" className="text-sm font-medium">Day of Week</label>
-                                                <Select name="day_of_week">
+                                                <label htmlFor="day-of-week" className="text-sm font-medium">Day of Week</label>
+                                                <Select name="day-of-week" defaultValue={schedule.day_of_week.toString()}>
                                                     <SelectTrigger className="w-full max-w-48">
-                                                        <SelectValue placeholder="Day of Week" />
+                                                        <SelectValue placeholder="Day of Week"  />
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectGroup>
@@ -263,28 +284,28 @@ export default function Schedules() {
                                             {updateScheduleState?.error?.day_of_week && <p className="text-red-500 text-sm">{updateScheduleState.error.day_of_week}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("Start Time", "start-time", "Select start time...", "time")}
+                                            {fieldInput("Start Time", "start-time", schedule.start_time, "time")}
                                             {updateScheduleState?.error?.start_time && <p className="text-red-500 text-sm">{updateScheduleState.error.start_time}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("End Time", "end-time", "Select end time...", "time")}
+                                            {fieldInput("End Time", "end-time", schedule.end_time, "time")}
                                             {updateScheduleState?.error?.end_time && <p className="text-red-500 text-sm">{updateScheduleState.error.end_time}</p>}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className='flex flex-col'>
-                                            {fieldInput("Effective from","effective-from", "date", "date")}
+                                            {fieldInput("Effective from","effective-from", schedule.effective_from, "date")}
                                             {updateScheduleState?.error?.effective_from && <p className="text-red-500 text-sm">{updateScheduleState.error.effective_from}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("Effective until", "effective-until", "date", "date")}
+                                            {fieldInput("Effective until", "effective-until", schedule.effective_until?? 'undetermined', "date")}
                                             {updateScheduleState?.error?.effective_until && <p className="text-red-500 text-sm">{updateScheduleState.error.effective_until}</p>}
                                         </div>
                                     </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="recurring" className="text-sm font-medium">Recurring</label>
-                                            <Select name="recurring">
+                                            <label htmlFor="is-recurring" className="text-sm font-medium">Recurring</label>
+                                            <Select name="is-recurring" defaultValue={schedule.is_recurring.toString() === 'true' ? 'Yes' : 'No'}>
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder="Recurring" />
                                                 </SelectTrigger>
@@ -301,8 +322,8 @@ export default function Schedules() {
                                     </div>
                                         <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="active" className="text-sm font-medium">Active</label>
-                                            <Select name="active">
+                                            <label htmlFor="is-active" className="text-sm font-medium">Active</label>
+                                            <Select name="is-active" defaultValue={schedule.is_active.toString() === 'true' ? 'Yes' : 'No'}>
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder="Active" />
                                                 </SelectTrigger>
@@ -318,11 +339,11 @@ export default function Schedules() {
                                         {updateScheduleState?.error?.is_active && <p className="text-red-500 text-sm">{updateScheduleState.error.is_active}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Cancellation Reason", "cancellation_reason", "Enter cancellation reason...", "text")}
+                                        {fieldInput("Cancellation Reason", "cancellation-reason", schedule.cancellation_reason ?? "Enter cancellation reason...", "text")}
                                         {updateScheduleState?.error?.cancellation_reason && <p className="text-red-500 text-sm">{updateScheduleState.error.cancellation_reason}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Notes", "notes", "Enter notes...", "text")}
+                                        {fieldInput("Notes", "notes", schedule.notes ?? "Enter notes...", "text")}
                                         {updateScheduleState?.error?.notes && <p className="text-red-500 text-sm">{updateScheduleState.error.notes}</p>}
                                     </div>
                                     {updateScheduleState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to update schedule. Please check the data and try again.</p> : null}
@@ -335,26 +356,28 @@ export default function Schedules() {
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
-                    <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="destructive">Delete Schedule</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent size="sm">
-                        <AlertDialogHeader>
-                        <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
-                            <Trash2Icon />
-                        </AlertDialogMedia>
-                        <AlertDialogTitle>Delete Schedule?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This will permanently delete this Schedule data.This operation is not reversible. Are you sure you want to continue?
-                        </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                        <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
-                        <AlertDialogAction variant="destructive" onClick={() => deleteSchedule(schedule.id)}>Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                    </AlertDialog>
+                    {!(schedule.cancellation_reason || schedule.is_active === false) ? (
+                        <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive">Delete Schedule</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent size="sm">
+                            <AlertDialogHeader>
+                            <AlertDialogMedia className="bg-destructive/10 text-destructive dark:bg-destructive/20 dark:text-destructive">
+                                <Trash2Icon />
+                            </AlertDialogMedia>
+                            <AlertDialogTitle>Delete Schedule?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This will permanently delete this Schedule data.This operation is not reversible. Are you sure you want to continue?
+                            </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                            <AlertDialogCancel variant="outline">Cancel</AlertDialogCancel>
+                            <AlertDialogAction variant="destructive" onClick={() => deleteSchedule(schedule.id)}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                        </AlertDialog>
+                        ) : <div></div> }
                         </div>
                     </>
                 )}
@@ -386,7 +409,8 @@ export default function Schedules() {
     if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading schedules...</p>, title: title})
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
     if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: title})
-    const content = filteredSchedules?.map((schedule) => (
+    const displaySchedules = filteredSchedules || schedules
+    const content = displaySchedules?.map((schedule) => (
         <div key={schedule.id}>
             {schedulesElement(schedule)}
         </div>

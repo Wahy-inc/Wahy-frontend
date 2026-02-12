@@ -4,12 +4,14 @@ import React, { useActionState } from "react"
 import { useRouter } from "next/navigation"
 import { signup } from "../../actions/auth"
 import { Button } from "@/components/ui/button"
+import * as openApi from "@/lib/openApi"
 import {
   Field,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
+import {Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 export default function SignUp() {
     const [state, action, pending] = useActionState(signup, undefined)
@@ -173,18 +175,24 @@ export default function SignUp() {
         />
         {state?.error?.lessonRate && <p className="text-red-500 text-sm">{state.error.lessonRate}</p>}
       </Field>
-      <Field>
-      <FieldLabel htmlFor="billing-cycle" style={{minHeight: '3rem'}}>Billing cycle</FieldLabel>
-        <Input 
-          id="billing-cycle" 
-          name="billing-cycle"
-          placeholder="Enter your billing cycle (e.g., monthly, weekly)" 
-          className="bg-slate-100 text-slate-800"
-          disabled={pending}
-          type="number"
-        />
-        {state?.error?.BillingCycle && <p className="text-red-500 text-sm">{state.error.BillingCycle}</p>}
-      </Field>
+      <div className="flex flex-col">
+        <div className="flex flex-col">
+          <label htmlFor="billingCycle" className="text-sm font-medium p-5">Billing Cycle</label>
+            <Select name="billingCycle" disabled={pending}>
+                <SelectTrigger className="w-full max-w-48" >
+                    <SelectValue placeholder="Billing Cycle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Billing Cycle</SelectLabel>
+                    <SelectItem value={openApi.BillingCycle.Weekly}>Weekly</SelectItem>
+                    <SelectItem value={openApi.BillingCycle.Monthly}>Monthly</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+            </Select>
+        </div>
+      {state?.error?.billingCycle && <p className="text-red-500 text-sm">{state.error.billingCycle}</p>}
+      </div>
       </div>
       <Field>
       <FieldLabel htmlFor="special-notes">Special notes</FieldLabel>

@@ -2,7 +2,7 @@ import { SignupFormState, SignInFormState, SignUpSchema, SignInSchema } from "@/
 import * as openApi from "@/lib/openApi"
 
 const api = new openApi.Api({
-    baseUrl: 'http://10.60.184.80:8000',
+    baseUrl: '',
 })
 
 const formatDate = (isoDate: string): string | undefined => {
@@ -19,7 +19,8 @@ const formatDate = (isoDate: string): string | undefined => {
 
 export async function signup(state: SignupFormState, formData: FormData): Promise<SignupFormState> {
     const validation = SignUpSchema.safeParse({
-        name: formData.get('name'),
+        arname: formData.get('ar-name'),
+        enname: formData.get('en-name'),
         email: formData.get('email'),
         password: formData.get('password'),
         phone: formData.get('phone'),
@@ -29,8 +30,8 @@ export async function signup(state: SignupFormState, formData: FormData): Promis
         currsurah: formData.get('current-surah'),
         currayah: formData.get('current-ayah'),
         lessonsPerWeek: formData.get('lessons-per-week'),
-        lessonRate: formData.get('lesson-rate'),
-        BillingCycle: formData.get('billing-cycle'),
+        lessonRate: formData.get('lessons-rate'),
+        billingCycle: formData.get('billingCycle'),
         specialNotes: formData.get('special-notes'),
     })
 
@@ -52,14 +53,14 @@ export async function signup(state: SignupFormState, formData: FormData): Promis
             current_ayah: Number(validation.data.currayah),
             lessons_per_week: Number(validation.data.lessonsPerWeek),
             lesson_rate: Number(validation.data.lessonRate),
-            billing_cycle: validation.data.BillingCycle as openApi.BillingCycle,
+            billing_cycle: validation.data.billingCycle as openApi.BillingCycle,
             special_notes: validation.data.specialNotes,
         }
         const response = await api.api.studentSignupApiV1AuthStudentSignupPost(data)
         
         if (response.status === 201 && response.data.access_token) {
             localStorage.setItem('access_token', response.data.access_token)
-            localStorage.setItem('expire', formatDate(response.data.expires_at) || '')
+            localStorage.setItem('expire', response.data.expires_at)
             return {message: 'Signup successful' }
         }
         if (response.status === 422) {
@@ -72,7 +73,7 @@ export async function signup(state: SignupFormState, formData: FormData): Promis
     }
 }
 
-export async function signin(state: SignInFormState, formData: FormData): Promise<SignInFormState> {
+export async function signinStudent(state: SignInFormState, formData: FormData): Promise<SignInFormState> {
     const validation = SignInSchema.safeParse({
         email: formData.get('email'),
         password: formData.get('password'),
@@ -91,7 +92,38 @@ export async function signin(state: SignInFormState, formData: FormData): Promis
         
         if (response.status === 200 && response.data.access_token) {
             localStorage.setItem('access_token', response.data.access_token)
-            localStorage.setItem('expire', formatDate(response.data.expires_at) || '')
+            localStorage.setItem('expire', response.data.expires_at)
+            return {message: 'Signin successful' }
+        }
+        if (response.status === 422) {
+            return { message: 'Validation error' }
+        }
+
+        return {message: response.error?.detail?.[0]?.msg || 'Signin failed' }
+    } catch (error) {
+        return { message: 'An error occurred during signin' }
+    }
+}
+export async function signinAdmin(state: SignInFormState, formData: FormData): Promise<SignInFormState> {
+    const validation = SignInSchema.safeParse({
+        email: formData.get('email'),
+        password: formData.get('password'),
+    })
+
+    if (!validation.success) {
+        return { error: validation.error.flatten().fieldErrors }
+    }
+
+    try {
+        const data = {
+            email: validation.data.email,
+            password: validation.data.password,
+        }
+        const response = await api.api.adminSigninApiV1AuthAdminSigninPost(data)
+        
+        if (response.status === 200 && response.data.access_token) {
+            localStorage.setItem('access_token', response.data.access_token)
+            localStorage.setItem('expire', response.data.expires_at)
             return {message: 'Signin successful' }
         }
         if (response.status === 422) {
@@ -110,7 +142,7 @@ export async function refreshAccessToken() {
 
         if (response.status === 200 && response.data.access_token) {
             localStorage.setItem('access_token', response.data.access_token)
-            localStorage.setItem('expire', formatDate(response.data.expires_at) || '')
+            localStorage.setItem('expire', response.data.expires_at)
             return {message: 'Token refreshed successfully' }
         }
     } catch (error) {

@@ -9,8 +9,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
-import React, { JSX, useState } from "react";
+import { JSX, useState } from "react";
+import * as openApi from "../../../../lib/openApi"
 import { CreateLibraryItemFormState, GetLibraryItemByIDFormState } from "@/app/platform/lib/definitions";
+import { Select, SelectContent, SelectGroup, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SelectItem } from "@/components/ui/select";
 
 export default function TitleElement({
     title,
@@ -95,20 +98,20 @@ export default function TitleElement({
                             <AlertDialogTitle>Create Library Item</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                     <div className='flex flex-col'>
-                                        {fieldInput("Title","title", "Enter title...", "text")}
+                                        {fieldInput("Title","title", "", "text")}
                                         {createFormSubmitted && createState?.error?.title && <p className="text-red-500 text-sm">{createState.error.title}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Description","description", "Enter description...", "text")}
+                                        {fieldInput("Description","description", "", "text")}
                                         {createFormSubmitted && createState?.error?.description && <p className="text-red-500 text-sm">{createState.error.description}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("URL","url", "Enter URL...", "text")}
+                                        {fieldInput("URL","url", "", "text")}
                                         {createFormSubmitted && createState?.error?.url && <p className="text-red-500 text-sm">{createState.error.url}</p>}
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className='flex flex-col'>
-                                            {fieldInput("Category","category", "Enter category...", "text")}
+                                            {fieldInput("Category","category", "", "text")}
                                             {createFormSubmitted && createState?.error?.category && <p className="text-red-500 text-sm">{createState.error.category}</p>}
                                         </div>
                                         <div className='flex flex-col'>
@@ -117,17 +120,32 @@ export default function TitleElement({
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                        <div className='flex flex-col'>
-                                            {fieldInput("Access level","access_level", "access", "text")}
-                                            {createFormSubmitted && createState?.error?.access_level && <p className="text-red-500 text-sm">{createState.error.access_level}</p>}
+                                    <div className='flex flex-col'>
+                                        <div className="flex flex-col">
+                                            <label htmlFor="access_level" className="text-sm font-medium">Access</label>
+                                            <Select name="access_level">
+                                                <SelectTrigger className="w-full max-w-48">
+                                                    <SelectValue placeholder="Select Access Level" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectGroup>
+                                                        <SelectLabel>Access Level</SelectLabel>
+                                                        <SelectItem value={openApi.LibraryAccessLevel.AllStudents}>All Students</SelectItem>
+                                                        <SelectItem value={openApi.LibraryAccessLevel.Groups}>Groups</SelectItem>
+                                                        <SelectItem value={openApi.LibraryAccessLevel.SpecificStudents}>Specific Students</SelectItem>
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
                                         </div>
+                                        {createFormSubmitted && createState?.error?.access_level && <p className="text-red-500 text-sm">{createState.error.access_level}</p>}
+                                    </div>
                                         <div className='flex flex-col'>
                                             {fieldInput("Thumbnail URL", "thumbnail", "Enter thumbnail URL...", "text")}
                                             {createFormSubmitted && createState?.error?.thumbnail && <p className="text-red-500 text-sm">{createState.error.thumbnail}</p>}
                                         </div>
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Students IDs", "students_ids", "separated by commas", "text")}
+                                        {fieldInput("Student ID", "students_ids", "", "text")}
                                         {createFormSubmitted && createState?.error?.student_ids && <p className="text-red-500 text-sm">{createState.error.student_ids}</p>}
                                     </div>
                                     {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create schedule. Please check the data and try again.</p> : null}
