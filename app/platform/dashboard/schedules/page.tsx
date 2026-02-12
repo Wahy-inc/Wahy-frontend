@@ -46,8 +46,6 @@ export default function Schedules() {
 
     
     React.useEffect(() => {
-        if (authLoading) return
-
         if (getScheduleState?.message == 'success' && getScheduleState.data) {
             setFilteredSchedules(getScheduleState.data)
         }
@@ -69,7 +67,7 @@ export default function Schedules() {
             }
             fetchSchedules()
         }
-    }, [getScheduleState, createScheduleState, updateScheduleState, isAdmin, authLoading])
+    }, [getScheduleState, createScheduleState, updateScheduleState, isAdmin])
 
     React.useEffect(() => {
         if (authLoading) return

@@ -38,8 +38,6 @@ export default function Students() {
 
     
     React.useEffect(() => {
-        if (authLoading) return
-        
         if (getStudentState?.message === 'success' && getStudentState.data) {
             setStudents([getStudentState.data])
         }
@@ -59,7 +57,7 @@ export default function Students() {
             }
             fetchStudents()
         }
-    }, [getStudentState, createStudentState, updateStudentState])
+    }, [getStudentState, createStudentState, updateStudentState, isAdmin])
 
 
     React.useEffect(() => {
@@ -79,7 +77,7 @@ export default function Students() {
                 }
             }
         fetchStudents()
-    }, [])
+    }, [isAdmin, authLoading])
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
         <Field orientation="vertical" className='w-full inline'>

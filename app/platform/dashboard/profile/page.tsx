@@ -20,9 +20,7 @@ export default function Profile() {
     const [error, setError] = React.useState<string | null>(null)
     const { isLoading: authLoading } = useAuth()
 
-    React.useEffect(() => {
-        if (authLoading) return
-        
+    React.useEffect(() => {        
         const fetchProfile = async () => {
             try {
                 setLoading(true)
@@ -42,7 +40,7 @@ export default function Profile() {
             }
         }
         fetchProfile()
-    }, [authLoading])
+    }, [])
 
     const getStatusBadgeVariant = (status: openApi.StudentStatus): "default" | "secondary" | "destructive" | "outline" => {
         switch (status) {

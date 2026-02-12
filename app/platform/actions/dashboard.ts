@@ -577,7 +577,6 @@ export async function createInvoices(state: CreateInvoiceFormState, formData: Fo
         const response = await api.api.generateApiV1InvoicesGeneratePost(data)
 
         if (response.status === 201) {
-            listInvoices() // Refresh the invoices list after creating a new invoice
             return {message: 'success' }
         }
         return {message: 'fail' }
@@ -588,18 +587,19 @@ export async function createInvoices(state: CreateInvoiceFormState, formData: Fo
 
 export async function overrideInvoice(state: OverrideInvoiceFormState, formData: FormData): Promise<OverrideInvoiceFormState> {
     const validation = overrideInvoiceSchema.safeParse({
-        id: formData.get('id'),
-        billabe: formData.get('billable'),
+        invoice_id: formData.get('invoice_id'),
+        billable: formData.get('billable'),
         override_reason: formData.get('override_reason'),
     })
 
     if (!validation.success) {
+        console.log('override invoice Validation failed:', validation.error.flatten().fieldErrors);
         return {message: 'faile'}
     }
 
     try {
         const data: openApi.InvoiceItemOverrideRequest = {
-            item_id: Number(validation.data.invoice_id),
+            item_id: validation.data.invoice_id,
             billable: validation.data.billable === 'true',
             override_reason: validation.data.override_reason,
         }
@@ -621,13 +621,16 @@ export async function downloadInvoicePDF(id: number): Promise<boolean> {
         const response = await api.api.getPdfApiV1InvoicesInvoiceIdPdfGet(id)
 
         if (response.status === 200) {
-            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+            // Handle response.data as binary blob to prevent PDF corruption
+            const blob = response.data instanceof Blob ? response.data : new Blob([response.data], { type: 'application/pdf' })
+            const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
             link.setAttribute('download', `invoice_${id}.pdf`)
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
+            window.URL.revokeObjectURL(url)
             return true
         }
         return false
@@ -641,13 +644,16 @@ export async function downloadInvoicePDFMe(id: number): Promise<boolean> {
         const response = await api.api.getMyPdfApiV1InvoicesMeInvoiceIdPdfGet(id)
 
         if (response.status === 200) {
-            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }))
+            // Handle response.data as binary blob to prevent PDF corruption
+            const blob = response.data instanceof Blob ? response.data : new Blob([response.data], { type: 'application/pdf' })
+            const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
             link.setAttribute('download', `invoice_${id}.pdf`)
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
+            window.URL.revokeObjectURL(url)
             return true
         }
         return false

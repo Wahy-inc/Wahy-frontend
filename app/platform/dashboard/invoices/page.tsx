@@ -45,13 +45,11 @@ export default function Invoices() {
     const [paidInvoiceDialogOpen, setPaidInvoiceDialogOpen] = React.useState(false)
 
     React.useEffect(() => {
-        if (authLoading) return
-
         if (getInvoiceState?.message === 'success' && getInvoiceState.data) {
             setInvoices([getInvoiceState.data])
         }
-        if (createInvoiceState?.message === 'success') {
-                    const fetchInvoices = async () => {
+        if (createInvoiceState?.message === 'success' || overrideInvoiceState?.message === 'success' || payInvoiceState?.message === 'success') {
+        const fetchInvoices = async () => {
             try {
                 setLoading(true)
                 if (isAdmin) {
@@ -71,7 +69,7 @@ export default function Invoices() {
         }
         fetchInvoices()
         }
-    }, [getInvoiceState, createInvoiceState, isAdmin, authLoading])
+    }, [getInvoiceState, createInvoiceState, overrideInvoiceState, payInvoiceState, isAdmin])
 
     React.useEffect(() => {
         if (authLoading) return
@@ -279,15 +277,17 @@ export default function Invoices() {
                 )) : <p className="text-slate-700 text-xl">No generated invoices.</p>}
             </div>
             <div className="w-full h-1 bg-gray-400"></div>
-            <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">Sent Invoices</p>
-                {sentInvoices && sentInvoices.length > 0 ? sentInvoices.map((invoice) => (
-                    <div key={invoice.id}>
-                        {invoiceElement(invoice, '#6a7282')}
+                {sentInvoices && sentInvoices.length > 0 && isAdmin ? (
+                    <div className="flex flex-col gap-4">
+                        <p className="text-2xl text-slate-700 font-semibold">Sent Invoices</p>
+                        {sentInvoices.map((invoice) => (
+                            <div key={invoice.id}>
+                                {invoiceElement(invoice, '#6a7282')}
+                            </div>
+                        ))}
+                        <div className="w-full h-1 bg-gray-400"></div>
                     </div>
-                )) : <p className="text-slate-700 text-xl">No sent invoices.</p>}
-            </div>
-            <div className="w-full h-1 bg-gray-400"></div>
+                ) : null}
             <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">Paid Invoices</p>
                 {paidInvoices && paidInvoices.length > 0 ? paidInvoices.map((invoice) => (

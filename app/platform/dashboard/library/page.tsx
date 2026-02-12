@@ -31,9 +31,7 @@ export default function Schedules() {
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
     const { isAdmin, isLoading: authLoading } = useAuth()
 
-    React.useEffect(() => {
-        if (authLoading) return
-        
+    React.useEffect(() => {        
         if (getLibraryItemState?.message === 'success' && getLibraryItemState.data) {
             setLibraryItems([getLibraryItemState.data])
         }
@@ -53,7 +51,7 @@ export default function Schedules() {
             }
             fetchLibraryItems()
         }
-    }, [getLibraryItemState, createLibraryItemState, isAdmin, authLoading])
+    }, [getLibraryItemState, createLibraryItemState, isAdmin])
 
     React.useEffect(() => {
         if (authLoading) return // Wait until auth is loaded

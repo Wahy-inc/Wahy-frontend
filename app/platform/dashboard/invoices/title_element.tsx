@@ -133,7 +133,7 @@ export default function TitleElement({
                             Enter the ID of the Invoice you want to retrieve. Make sure to enter a valid ID to get the correct information.
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
-                            {fieldInput("Invoice ID", "invoice-id", "Enter invoice ID...", "number")}
+                            {fieldInput("Invoice ID", "invoice-id", "", "text")}
                             {getFormSubmitted && getInvoiceState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch invoice. Please check the ID and try again.</p> : null}
                         </div>
                         </AlertDialogHeader>

@@ -24,8 +24,6 @@ export default function Home() {
     const [operationalState, operationalAction, operationalPending] = React.useActionState(operationalAnalytics, undefined);
 
     React.useEffect(() => {
-        if (authLoading) return
-
         if (attendanceState?.message === 'success' && attendanceState.data) {
             setattendance(attendanceState.data)
         }
@@ -38,7 +36,7 @@ export default function Home() {
         if (operationalState?.message === 'success' && operationalState.data) {
             setOperational(operationalState.data)
         }
-    }, [attendanceState, performanceState, financialState, operationalState, authLoading])
+    }, [attendanceState, performanceState, financialState, operationalState])
 
     const timeElement = (analytic: {
         period_start: string;

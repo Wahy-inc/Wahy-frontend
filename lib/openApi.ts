@@ -202,7 +202,7 @@ export interface InvoiceGenerateRequest {
 /** InvoiceItemOverrideRequest */
 export interface InvoiceItemOverrideRequest {
   /** Item Id */
-  item_id: number;
+  item_id: String;
   /** Billable */
   billable: boolean;
   /**
@@ -1744,7 +1744,7 @@ export class Api<
       this.request<any, HTTPValidationError>({
         path: `/api/v1/invoices/me/${invoiceId}/pdf`,
         method: "GET",
-        format: "json",
+        format: "blob",
         ...params,
       }),
 
@@ -1870,7 +1870,7 @@ export class Api<
       this.request<any, HTTPValidationError>({
         path: `/api/v1/invoices/${invoiceId}/pdf`,
         method: "GET",
-        format: "json",
+        format: "blob",
         ...params,
       }),
 
