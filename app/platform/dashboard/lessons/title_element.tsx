@@ -99,6 +99,7 @@ export default function TitleElement({
             <div className="flex flex-col justify-center">
                 <div className='flex flex-row justify-between items-center'>
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
+                    {isAdmin ?
                     <div className='flex flex-row gap-2 items-center'>
                         <Field orientation="horizontal" className='w-80'>
                             <Input onChange={handleSearchStudentId} id="student-id-search" name="student-id-search" type="search" placeholder="Enter student id..." className='border-slate-950'/>
@@ -113,7 +114,7 @@ export default function TitleElement({
                                 Clear
                             </Button>
                         )}
-                    </div>
+                    </div> : <div></div>}
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
                     {isAdmin ?
