@@ -22,6 +22,7 @@ import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/lib/auth-context";
+import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 
@@ -38,10 +39,11 @@ export default function Students() {
     const [updateStudentDialogOpen, setUpdateStudentDialogOpen] = React.useState(false)
     const [approvalStatus, setApprovalStatus] = React.useState<'success' | 'queued' | 'fail' | null>(null)
     const { isAdmin, isLoading: authLoading } = useAuth()
+    const { t, language } = useLocalization()
 
-    useToastListener(createStudentState, {functionName: "Create Student", successMessage: "Student created successfully", errorMessage: "Failed to create student"})
-    useToastListener(updateStudentState, {functionName: "Update Student", successMessage: "Student updated successfully", errorMessage: "Failed to update student"})
-    useToastListener(getStudentState, {functionName: "Get Student", successMessage: "Student fetched successfully", errorMessage: "Failed to fetch student"})
+    useToastListener(createStudentState, {functionName: "Create Student", successMessage: t('students.create_success'), errorMessage: t('students.create_error')})
+    useToastListener(updateStudentState, {functionName: "Update Student", successMessage: t('students.update_success'), errorMessage: t('students.update_error')})
+    useToastListener(getStudentState, {functionName: "Get Student", successMessage: t('students.create_success'), errorMessage: t('students.create_error')})
     
     React.useEffect(() => {
         if (getStudentState?.message === 'success' && getStudentState.data) {
@@ -123,6 +125,23 @@ export default function Students() {
         }
     }
 
+    const getRegistrationStatusLabel = (status: string): string => {
+        const statusLower = status?.toLowerCase() || ''
+        if (statusLower.includes('approved')) return t('common.yes')
+        if (statusLower.includes('pending')) return t('common.no')
+        if (statusLower.includes('rejected')) return t('students.reject')
+        return status
+    }
+
+    const getStudentStatusLabel = (status: string): string => {
+        const statusLower = status?.toLowerCase() || ''
+        if (statusLower.includes('active')) return t('schedules.active')
+        if (statusLower.includes('graduated')) return t('students.status_graduated')
+        if (statusLower.includes('inactive')) return t('schedules.inactive')
+        if (statusLower.includes('on_hold') || statusLower.includes('onhold')) return t('students.status_on_hold')
+        return status
+    }
+
     const studentElement = (student: openApi.StudentRead, color: string) => (
         <div className="flex w-full flex-col gap-6">
             <Item variant="outline" style={{borderColor: color}}>
@@ -130,8 +149,8 @@ export default function Students() {
                     <ItemMedia variant="icon">
                         <User />
                     </ItemMedia>
-                <ItemTitle>ID: {student.id} | {student.full_name_english}</ItemTitle>
-                    Registration Status: {student.registration_status} <br />
+                <ItemTitle>ID: {student.id} | {language === 'ar' ? student.full_name_arabic : student.full_name_english}</ItemTitle>
+                    {t('students.registration_status')}: {getRegistrationStatusLabel(student.registration_status)} <br />
                     <div id="accordion-data">
                         <Accordion
                         type="single"
@@ -139,15 +158,15 @@ export default function Students() {
                         className="w-full"
                         >
                             <AccordionItem key={student.id} value={student.id.toString()}>
-                            <AccordionTrigger>More Details</AccordionTrigger>
+                            <AccordionTrigger>{t('common.edit')}</AccordionTrigger>
                             <AccordionContent>
-                                Phone: {student.phone}    ,    Status: {student.status}<br />
-                                Date of Birth: {student.date_of_birth}   ,   Time zone: {student.timezone}<br />
-                                Juz: {student.current_juz} , Surah: {student.current_surah} , Ayah: {student.current_ayah} <br />
-                                lesson Rate: {student.lesson_rate} , lessons per week: {student.lessons_per_week} <br />
-                                Billing Cycle: {student.billing_cycle}    ,    <br /><br />
-                                Private Notes: {student.private_notes} <br />
-                                Special Notes: {student.special_notes} <br />
+                                {t('students.phone')}: {student.phone}    ,    {t('students.status')}: {getStudentStatusLabel(student.status)}<br />
+                                {t('students.date_of_birth')}: {student.date_of_birth}   ,   {t('students.timezone')}: {student.timezone}<br />
+                                {t('students.current_juz')}: {student.current_juz} , {t('students.current_surah')}: {student.current_surah} , {t('students.current_ayah')}: {student.current_ayah} <br />
+                                {t('students.lessons_rate')}: {student.lesson_rate} , {t('students.lessons_per_week')}: {student.lessons_per_week} <br />
+                                {t('students.billing_cycle')}: {student.billing_cycle}    ,    <br /><br />
+                                {t('students.private_notes')}: {student.private_notes} <br />
+                                {t('students.special_notes')}: {student.special_notes} <br />
                             </AccordionContent>
                             </AccordionItem>
                         </Accordion>
@@ -156,10 +175,10 @@ export default function Students() {
                     {student.registration_status === openApi.RegistrationStatus.Pending ? (
                         <ItemActions>
                             <Button onClick={() => void handleApproveStudent(student.id)} size="sm" variant="outline" className="transition duration-300 border-green-500 border text-green-500 bg-transparent hover:bg-green-500 hover:text-white">
-                                Invite
+                                {t('students.approve')}
                             </Button>
                             <Button onClick={() => void handleRejectStudent(student.id)} size="sm" variant="outline" className="transition duration-300 border-red-500 border text-red-500 bg-transparent hover:bg-red-500 hover:text-white">
-                                Reject
+                                {t('students.reject')}
                             </Button>
                         </ItemActions>
                     ) : null}
@@ -168,75 +187,75 @@ export default function Students() {
                         <AlertDialogTrigger asChild>
                             <ItemActions>
                                 <Button onClick={() => (student.id, {})} size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white">
-                                    Update
+                                    {t('common.update')}
                                 </Button>
                             </ItemActions>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <form action={updateStudentAction} id={`update-${student.id}`}>
                             <AlertDialogHeader>
-                            <AlertDialogTitle>Update Student</AlertDialogTitle>
+                            <AlertDialogTitle>{t('students.update_student')}</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                 <div className="flex flex-row justify-between gap-3">
                                     <input type="number" name="id" id="id" hidden value={Number(student.id)} readOnly />
                                     <div className='flex flex-col'>
-                                        {fieldInput("Name in Arabic","ar-name", student.full_name_arabic, "text")}
+                                        {fieldInput(t('students.name_arabic'),"ar-name", student.full_name_arabic, "text")}
                                         {updateStudentState?.error?.arname && <p className="text-red-500 text-sm">{updateStudentState.error.arname}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Name in English","en-name", student.full_name_english, "text")}
+                                        {fieldInput(t('students.name_english'),"en-name", student.full_name_english, "text")}
                                         {updateStudentState?.error?.enname && <p className="text-red-500 text-sm">{updateStudentState.error.enname}</p>}
                                     </div>
                                 </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput("Phone","phone", String(student.phone), "text")}
+                                    {fieldInput(t('students.phone'),"phone", String(student.phone), "text")}
                                     {updateStudentState?.error?.phone && <p className="text-red-500 text-sm">{updateStudentState.error.phone}</p>}
                                 </div>
                                 <div className="flex flex-row justify-between gap-3">
                                     <div className='flex flex-col'>
-                                        {fieldInput("Date of Birth","date-of-birth", String(student.date_of_birth), "date")}
+                                        {fieldInput(t('students.date_of_birth'),"date-of-birth", String(student.date_of_birth), "date")}
                                         {updateStudentState?.error?.dateOfBirth && <p className="text-red-500 text-sm">{updateStudentState.error.dateOfBirth}</p>}
                                     </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput("Timezone","time-zone", String(student.timezone), "text")}
+                                    {fieldInput(t('students.timezone'),"time-zone", String(student.timezone), "text")}
                                     {updateStudentState?.error?.timeZone && <p className="text-red-500 text-sm">{updateStudentState.error.timeZone}</p>}
                                 </div>
                                 </div>
                                 <div className="flex flex-row justify-between gap-3">
                                     <div className='flex flex-col'>
-                                        {fieldInput("Current juz","current-juz", String(student.current_juz), "number")}
+                                        {fieldInput(t('students.current_juz'),"current-juz", String(student.current_juz), "number")}
                                         {updateStudentState?.error?.currjuz && <p className="text-red-500 text-sm">{updateStudentState.error.currjuz}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Current surah","current-surah", String(student.current_surah), "text")}
+                                        {fieldInput(t('students.current_surah'),"current-surah", String(student.current_surah), "text")}
                                         {updateStudentState?.error?.currsurah && <p className="text-red-500 text-sm">{updateStudentState.error.currsurah}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Current ayah","current-ayah", String(student.current_ayah), "number")}
+                                        {fieldInput(t('students.current_ayah'),"current-ayah", String(student.current_ayah), "number")}
                                         {updateStudentState?.error?.currayah && <p className="text-red-500 text-sm">{updateStudentState.error.currayah}</p>}
                                     </div>
                                 </div>
                                 <div className="flex flex-row justify-between gap-3 items-center">
                                     <div className='flex flex-col'>
-                                        {fieldInput("Lessons per week","lessons-per-week", String(student.lessons_per_week), "text")}
+                                        {fieldInput(t('students.lessons_per_week'),"lessons-per-week", String(student.lessons_per_week), "text")}
                                         {updateStudentState?.error?.lessonsPerWeek && <p className="text-red-500 text-sm">{updateStudentState.error.lessonsPerWeek}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Lesson rate","lesson-rate", String(student.lesson_rate), "number")}
+                                        {fieldInput(t('students.lessons_rate'),"lesson-rate", String(student.lesson_rate), "number")}
                                         {updateStudentState?.error?.lessonRate && <p className="text-red-500 text-sm">{updateStudentState.error.lessonRate}</p>}
                                     </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="billing-cycle" className="text-sm font-medium">Billing Cycle</label>
+                                            <label htmlFor="billing-cycle" className="text-sm font-medium">{t('students.billing_cycle')}</label>
                                             <Select name="billing-cycle" defaultValue={student.billing_cycle}>
                                                 <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder="Select a type" />
+                                                    <SelectValue placeholder={t('common.submit')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
-                                                        <SelectLabel>Billing Cycle</SelectLabel>
-                                                        <SelectItem value={openApi.BillingCycle.Monthly}>Monthly</SelectItem>
-                                                        <SelectItem value={openApi.BillingCycle.Weekly}>Weekly</SelectItem>
+                                                        <SelectLabel>{t('students.billing_cycle')}</SelectLabel>
+                                                        <SelectItem value={openApi.BillingCycle.Monthly}>{t('students.monthly')}</SelectItem>
+                                                        <SelectItem value={openApi.BillingCycle.Weekly}>{t('students.weekly')}</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
@@ -247,17 +266,17 @@ export default function Students() {
                                 <div className="flex flex-row justify-between gap-3 items-center">
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="registeration-status" className="text-sm font-medium">Registration Status</label>
+                                            <label htmlFor="registeration-status" className="text-sm font-medium">{t('students.registration_status')}</label>
                                             <Select name="registeration-status" defaultValue={student.registration_status}>
                                                 <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder="Select a type" />
+                                                    <SelectValue placeholder={t('common.submit')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
-                                                        <SelectLabel>Registration Status</SelectLabel>
-                                                        <SelectItem value={openApi.RegistrationStatus.Approved}>Approved</SelectItem>
-                                                        <SelectItem value={openApi.RegistrationStatus.Pending}>Pending</SelectItem>
-                                                        <SelectItem value={openApi.RegistrationStatus.Rejected}>Rejected</SelectItem>
+                                                        <SelectLabel>{t('students.registration_status')}</SelectLabel>
+                                                        <SelectItem value={openApi.RegistrationStatus.Approved}>{t('common.yes')}</SelectItem>
+                                                        <SelectItem value={openApi.RegistrationStatus.Pending}>{t('common.no')}</SelectItem>
+                                                        <SelectItem value={openApi.RegistrationStatus.Rejected}>{t('students.reject')}</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
@@ -266,18 +285,18 @@ export default function Students() {
                                     </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="status" className="text-sm font-medium">Student Status</label>
+                                            <label htmlFor="status" className="text-sm font-medium">{t('students.status')}</label>
                                             <Select name="status" defaultValue={student.status}>
                                                 <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder="Select a type" />
+                                                    <SelectValue placeholder={t('common.submit')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
-                                                        <SelectLabel>Student Status</SelectLabel>
-                                                        <SelectItem value={openApi.StudentStatus.Active}>Evaluation</SelectItem>
-                                                        <SelectItem value={openApi.StudentStatus.Graduated}>Graduated</SelectItem>
-                                                        <SelectItem value={openApi.StudentStatus.Inactive}>Inactive</SelectItem>
-                                                        <SelectItem value={openApi.StudentStatus.OnHold}>OnHold</SelectItem>
+                                                        <SelectLabel>{t('students.status')}</SelectLabel>
+                                                        <SelectItem value={openApi.StudentStatus.Active}>{t('common.yes')}</SelectItem>
+                                                        <SelectItem value={openApi.StudentStatus.Graduated}>{t('students.reject')}</SelectItem>
+                                                        <SelectItem value={openApi.StudentStatus.Inactive}>{t('schedules.inactive')}</SelectItem>
+                                                        <SelectItem value={openApi.StudentStatus.OnHold}>{t('common.no')}</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
@@ -286,18 +305,18 @@ export default function Students() {
                                     </div>
                                 </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput("Private notes","private-notes", String(student.private_notes), "text")}
+                                    {fieldInput(t('students.private_notes'),"private-notes", String(student.private_notes), "text")}
                                     {updateStudentState?.error?.privateNotes && <p className="text-red-500 text-sm">{updateStudentState.error.privateNotes}</p>}
                                 </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput("Special notes","special-notes", String(student.special_notes), "text")}
+                                    {fieldInput(t('students.special_notes'),"special-notes", String(student.special_notes), "text")}
                                     {updateStudentState?.error?.specialNotes && <p className="text-red-500 text-sm">{updateStudentState.error.specialNotes}</p>}
                                 </div>
                                 </div>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
-                                <AlertDialogCancel type="reset" disabled={updateStudentPending}>Cancel</AlertDialogCancel>
-                                <Button type="submit" disabled={updateStudentPending} >{updateStudentPending ? 'Updating...' : 'Update'}</Button>
+                                <AlertDialogCancel type="reset" disabled={updateStudentPending}>{t('common.cancel')}</AlertDialogCancel>
+                                <Button type="submit" disabled={updateStudentPending} >{updateStudentPending ? t('common.updating') : t('common.update')}</Button>
                             </AlertDialogFooter>
                             </form>
                         </AlertDialogContent>
@@ -309,7 +328,7 @@ export default function Students() {
 
     const title = (
         <TitleElement
-            title="My Students"
+            title={t('students.title')}
             createAction={createStudentAction}
             createState={createStudentState}
             createPending={createStudentPending}
@@ -324,9 +343,9 @@ export default function Students() {
         />
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading students...</p>, title: title})
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('common.loading')}</p>, title: title})
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
-    if (!students || students.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No students found.</p>, title: title})
+    if (!students || students.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('students.no_students_found')}</p>, title: title})
 
     const pendingStudents = students?.filter((student) => {
         return student.registration_status === openApi.RegistrationStatus.Pending;
@@ -350,44 +369,44 @@ export default function Students() {
                             : 'border-emerald-200 bg-emerald-50 text-emerald-800'
                 }`}>
                     {createStudentState?.message === 'queued' || updateStudentState?.message === 'queued' || approvalStatus === 'queued'
-                        ? 'Saved offline. This change will sync automatically when connection is restored.'
+                        ? t('schedules.offline_sync')
                         : createStudentState?.message === 'fail' || updateStudentState?.message === 'fail' || approvalStatus === 'fail'
-                            ? 'Action failed. Please review your input and try again.'
-                            : 'Action completed successfully.'}
+                            ? t('schedules.offline_error')
+                            : t('messages.success')}
                 </div>
             )}
             <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">Pending Students</p>
+                <p className="text-2xl text-slate-700 font-semibold">{t('students.pending_students')}</p>
                 {pendingStudents && pendingStudents.length > 0 ? pendingStudents.map((student) => (
                     <div key={student.id}>
                         {studentElement(student, '')}
                     </div>
-                )) : <p className="text-slate-700 text-xl">No pending students.</p>}
+                )) : <p className="text-slate-700 text-xl">{t('students.no_pending_students')}</p>}
             </div>
             <div className="w-full h-1 bg-gray-400"></div>
             <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">Approved Students</p>
+                <p className="text-2xl text-slate-700 font-semibold">{t('students.approved_students')}</p>
                 {approvedStudents && approvedStudents.length > 0 ? approvedStudents.map((student) => (
                     <div key={student.id}>
                         {studentElement(student, '#6a7282')}
                     </div>
-                )) : <p className="text-slate-700 text-xl">No approved students.</p>}
+                )) : <p className="text-slate-700 text-xl">{t('students.no_approved_students')}</p>}
             </div>
             <div className="w-full h-1 bg-gray-400"></div>
             <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">Rejected Students</p>
+                <p className="text-2xl text-slate-700 font-semibold">{t('students.rejected_students')}</p>
                 {rejectedStudents && rejectedStudents.length > 0 ? rejectedStudents.map((student) => (
                     <div key={student.id}>
                         {studentElement(student, 'rgba(242,70,70,0.95)')}
                     </div>
-                )) : <p className="text-slate-700 text-xl">No rejected students.</p>}
+                )) : <p className="text-slate-700 text-xl">{t('students.no_rejected_students')}</p>}
             </div>
         </div>
     )
 
     return dashboardPage({children: <div className="flex flex-col gap-4 w-full">{content}</div>, title: (
         <TitleElement
-            title="My Students"
+            title={t('students.title')}
             createAction={createStudentAction}
             createState={createStudentState}
             createPending={createStudentPending}

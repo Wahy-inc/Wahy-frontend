@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import React, { JSX, useState } from "react";
 import { CreateInvoiceFormState, GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
+import { useLocalization } from "@/lib/localization-context";
 
 
 export default function TitleElement({
@@ -44,6 +45,7 @@ export default function TitleElement({
         isAdmin: boolean,
         disableGenerate?: boolean
     }) {
+    const { t } = useLocalization()
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
@@ -90,59 +92,59 @@ export default function TitleElement({
                     <div>
                     <AlertDialog open={createInvoicesDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
-                            <Button disabled={disableGenerate} className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Generate Invoice</Button>
+                            <Button disabled={disableGenerate} className="transition duration-300 col-start-1 col-end-2 cursor-pointer">{t('invoices.generate_invoice')}</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
-                            <AlertDialogTitle>Generate Invoice</AlertDialogTitle>
+                            <AlertDialogTitle>{t('invoices.generate_invoice')}</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                 <div className="flex flex-col">
-                                    {fieldInput("Student ID","student_id", "", "number")}
+                                    {fieldInput(t('students.student_id'),"student_id", "", "number")}
                                     {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                 </div>
                                 <div className="flex flex-col">
-                                    {fieldInput("Period from","period_from", "", "date")}
+                                    {fieldInput(t('invoices.period_from'),"period_from", "", "date")}
                                     {createFormSubmitted && createState?.error?.period_from && <p className="text-red-500 text-sm">{createState.error.period_from}</p>}
                                 </div>
                                 <div className="flex flex-col">
-                                    {fieldInput("Period to","period_to", "", "date")}
+                                    {fieldInput(t('invoices.period_to'),"period_to", "", "date")}
                                     {createFormSubmitted && createState?.error?.period_to && <p className="text-red-500 text-sm">{createState.error.period_to}</p>}
                                 </div>
                                 <div className="flex flex-col">
-                                    {fieldInput("Due date","due_date", "", "date")}
+                                    {fieldInput(t('invoices.due_date'),"due_date", "", "date")}
                                     {createFormSubmitted && createState?.error?.due_date && <p className="text-red-500 text-sm">{createState.error.due_date}</p>}
                                 </div>
                                 </div>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
-                                <AlertDialogCancel type="reset" disabled={createPending}>Cancel</AlertDialogCancel>
-                                <Button type="submit" disabled={createPending || disableGenerate}>{createPending ? 'Generating...' : 'Generate'}</Button>
+                                <AlertDialogCancel type="reset" disabled={createPending}>{t('common.cancel')}</AlertDialogCancel>
+                                <Button type="submit" disabled={createPending || disableGenerate}>{createPending ? t('invoices.generating') : t('invoices.generate')}</Button>
                             </AlertDialogFooter>
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
-                    {disableGenerate ? <p className="text-amber-700 text-xs mt-2">Invoice generation is online-only.</p> : null}
+                    {disableGenerate ? <p className="text-amber-700 text-xs mt-2">{t('invoices.offline_only')}</p> : null}
                     </div> : <div></div>}
                     <AlertDialog open={getInvoicesDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
-                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Invoice</Button>
+                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('invoices.get_invoice')}</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <form action={handleGetSubmit}>
                         <AlertDialogHeader>
-                        <AlertDialogTitle>Get Invoice</AlertDialogTitle>
+                        <AlertDialogTitle>{t('invoices.get_invoice')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Enter the ID of the Invoice you want to retrieve. Make sure to enter a valid ID to get the correct information.
+                            {t('invoices.get_invoice_description')}
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
-                            {fieldInput("Invoice ID", "invoice-id", "", "text")}
-                            {getFormSubmitted && getInvoiceState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch invoice. Please check the ID and try again.</p> : null}
+                            {fieldInput(t('invoices.invoice_id'), "invoice-id", "", "text")}
+                            {getFormSubmitted && getInvoiceState?.message == 'fail'? <p className="text-red-500 text-sm">{t('invoices.get_invoice_failed')}</p> : null}
                         </div>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="mt-4">
-                            <AlertDialogCancel type="reset" disabled={getInvoicePending}>Cancel</AlertDialogCancel>
-                            <Button type="submit" disabled={getInvoicePending}>{getInvoicePending? 'Loading...' : 'Get'}</Button>
+                            <AlertDialogCancel type="reset" disabled={getInvoicePending}>{t('common.cancel')}</AlertDialogCancel>
+                            <Button type="submit" disabled={getInvoicePending}>{getInvoicePending? t('common.loading') : t('invoices.get')}</Button>
                         </AlertDialogFooter>
                         </form>
                     </AlertDialogContent>

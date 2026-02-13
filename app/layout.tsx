@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./style/globals.css";
 import { TokenRefresher } from "@/components/TokenRefresher";
 import { PwaBootstrap } from "@/components/PwaBootstrap";
+import { LocalizationProvider } from "@/lib/localization-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,9 +36,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         style={{ backgroundColor: "#F1F5F9", color: "#1E293B" , display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', flexDirection: 'column'}}
       >
-        <PwaBootstrap />
-        <TokenRefresher />
-        {children}
+        <LocalizationProvider>
+          <PwaBootstrap />
+          <TokenRefresher />
+          {children}
+        </LocalizationProvider>
       <footer className="w-full bg-slate-950 text-slate-100 text-md p-8">
         <p className="text-slate-100 pt-12 pb-2 text-5xl font-bold">Wahy.</p>
         <p className="w-[300px] opacity-70 pb-15">An islamic platform that specializes in helping sheikhs and eases their work.</p>

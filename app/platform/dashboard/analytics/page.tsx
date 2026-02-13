@@ -11,6 +11,7 @@ import React from "react";
 import { attendanceAnalytics, financialAnalytics, getLocalStudent, operationalAnalytics, performanceAnalytics } from "../../actions/dashboard";
 import { Button } from "@/components/ui/button";
 import { useToastListener } from "@/lib/toastListener";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function Home() {
     const [attendance, setattendance] = React.useState<openApi.AttendanceAnalytics | null>(null);
@@ -21,11 +22,12 @@ export default function Home() {
     const [performanceState, performanceAction, performancePending] = React.useActionState(performanceAnalytics, undefined);
     const [financialState, financialAction, financialPending] = React.useActionState(financialAnalytics, undefined);
     const [operationalState, operationalAction, operationalPending] = React.useActionState(operationalAnalytics, undefined);
+    const { t } = useLocalization()
 
-    useToastListener(attendanceState, { functionName: "Attendance Analytics", successMessage: "Attendance analytics retrieved successfully", errorMessage: "Failed to retrieve attendance analytics" })
-    useToastListener(performanceState, { functionName: "Performance Analytics", successMessage: "Performance analytics retrieved successfully", errorMessage: "Failed to retrieve performance analytics" })
-    useToastListener(financialState, { functionName: "Financial Analytics", successMessage: "Financial analytics retrieved successfully", errorMessage: "Failed to retrieve financial analytics" })
-    useToastListener(operationalState, { functionName: "Operational Analytics", successMessage: "Operational analytics retrieved successfully", errorMessage: "Failed to retrieve operational analytics" })
+    useToastListener(attendanceState, { functionName: "Attendance Analytics", successMessage: t('messages.success'), errorMessage: t('messages.error') })
+    useToastListener(performanceState, { functionName: "Performance Analytics", successMessage: t('messages.success'), errorMessage: t('messages.error') })
+    useToastListener(financialState, { functionName: "Financial Analytics", successMessage: t('messages.success'), errorMessage: t('messages.error') })
+    useToastListener(operationalState, { functionName: "Operational Analytics", successMessage: t('messages.success'), errorMessage: t('messages.error') })
 
     React.useEffect(() => {
         if (attendanceState?.message === 'success' && attendanceState.data) {

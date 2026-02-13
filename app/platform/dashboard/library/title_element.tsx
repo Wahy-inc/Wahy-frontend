@@ -14,6 +14,7 @@ import * as openApi from "../../../../lib/openApi"
 import { CreateLibraryItemFormState, GetLibraryItemByIDFormState } from "@/app/platform/lib/definitions";
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SelectItem } from "@/components/ui/select";
+import { useLocalization } from "@/lib/localization-context";
 
 export default function TitleElement({
     title,
@@ -46,6 +47,7 @@ export default function TitleElement({
         isAdmin: boolean,
         disableCreate?: boolean
     }) {
+    const { t } = useLocalization()
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
@@ -92,49 +94,49 @@ export default function TitleElement({
                     <div>
                     <AlertDialog open={createLibraryDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
-                            <Button disabled={disableCreate} className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Library Item</Button>
+                            <Button disabled={disableCreate} className="transition duration-300 col-start-1 col-end-2 cursor-pointer">{t('library.create_item')}</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
-                            <AlertDialogTitle>Create Library Item</AlertDialogTitle>
+                            <AlertDialogTitle>{t('library.create_item')}</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                     <div className='flex flex-col'>
-                                        {fieldInput("Title","title", "", "text")}
+                                        {fieldInput(t('library.item_title'),"title", "", "text")}
                                         {createFormSubmitted && createState?.error?.title && <p className="text-red-500 text-sm">{createState.error.title}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Description","description", "", "text")}
+                                        {fieldInput(t('library.description'),"description", "", "text")}
                                         {createFormSubmitted && createState?.error?.description && <p className="text-red-500 text-sm">{createState.error.description}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("URL","url", "", "text")}
+                                        {fieldInput(t('library.url'),"url", "", "text")}
                                         {createFormSubmitted && createState?.error?.url && <p className="text-red-500 text-sm">{createState.error.url}</p>}
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className='flex flex-col'>
-                                            {fieldInput("Category","category", "", "text")}
+                                            {fieldInput(t('library.category'),"category", "", "text")}
                                             {createFormSubmitted && createState?.error?.category && <p className="text-red-500 text-sm">{createState.error.category}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("Tags", "tags", "separated by commas", "text")}
+                                            {fieldInput(t('library.tags'), "tags", t('library.tags_placeholder'), "text")}
                                             {createFormSubmitted && createState?.error?.tags && <p className="text-red-500 text-sm">{createState.error.tags}</p>}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="access_level" className="text-sm font-medium">Access</label>
+                                            <label htmlFor="access_level" className="text-sm font-medium">{t('library.access')}</label>
                                             <Select name="access_level">
                                                 <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder="Select Access Level" />
+                                                    <SelectValue placeholder={t('library.select_access_level')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
-                                                        <SelectLabel>Access Level</SelectLabel>
-                                                        <SelectItem value={openApi.LibraryAccessLevel.AllStudents}>All Students</SelectItem>
-                                                        <SelectItem value={openApi.LibraryAccessLevel.Groups}>Groups</SelectItem>
-                                                        <SelectItem value={openApi.LibraryAccessLevel.SpecificStudents}>Specific Students</SelectItem>
+                                                        <SelectLabel>{t('library.access_level')}</SelectLabel>
+                                                        <SelectItem value={openApi.LibraryAccessLevel.AllStudents}>{t('library.all_students')}</SelectItem>
+                                                        <SelectItem value={openApi.LibraryAccessLevel.Groups}>{t('library.groups')}</SelectItem>
+                                                        <SelectItem value={openApi.LibraryAccessLevel.SpecificStudents}>{t('library.specific_students')}</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
@@ -142,45 +144,45 @@ export default function TitleElement({
                                         {createFormSubmitted && createState?.error?.access_level && <p className="text-red-500 text-sm">{createState.error.access_level}</p>}
                                     </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("Thumbnail URL", "thumbnail", "Enter thumbnail URL...", "text")}
+                                            {fieldInput(t('library.thumbnail'), "thumbnail", t('library.enter_thumbnail_url'), "text")}
                                             {createFormSubmitted && createState?.error?.thumbnail && <p className="text-red-500 text-sm">{createState.error.thumbnail}</p>}
                                         </div>
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Student ID", "students_ids", "", "text")}
+                                        {fieldInput(t('library.student_ids'), "students_ids", "", "text")}
                                         {createFormSubmitted && createState?.error?.student_ids && <p className="text-red-500 text-sm">{createState.error.student_ids}</p>}
                                     </div>
-                                    {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create schedule. Please check the data and try again.</p> : null}
+                                    {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">{t('library.create_failed')}</p> : null}
                                 </div>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
-                                <AlertDialogCancel type="reset" disabled={createPending}>Cancel</AlertDialogCancel>
-                                <Button type="submit" disabled={createPending}>{createPending ? 'Creating...' : 'Create'}</Button>
+                                <AlertDialogCancel type="reset" disabled={createPending}>{t('common.cancel')}</AlertDialogCancel>
+                                <Button type="submit" disabled={createPending}>{createPending ? t('common.creating') : t('common.create')}</Button>
                             </AlertDialogFooter>
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
-                    {disableCreate ? <p className="text-amber-700 text-xs mt-2">Library create/upload is online-only.</p> : null}
+                    {disableCreate ? <p className="text-amber-700 text-xs mt-2">{t('library.offline_only')}</p> : null}
                     </div> : <div></div>}
                     <AlertDialog open={getLibraryDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
-                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Library Item</Button>
+                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('library.get_item')}</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <form action={handleGetSubmit}>
                         <AlertDialogHeader>
-                        <AlertDialogTitle>Get Library Item</AlertDialogTitle>
+                        <AlertDialogTitle>{t('library.get_item')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Enter the ID of the Item you want to retrieve. Make sure to enter a valid ID to get the correct information.
+                            {t('library.get_item_description')}
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
-                            {fieldInput("Item ID", "item-id", "Enter item ID...", "number")}
-                            {getFormSubmitted && getLibraryState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch item. Please check the ID and try again.</p> : null}
+                            {fieldInput(t('library.item_id'), "item-id", t('library.enter_item_id'), "number")}
+                            {getFormSubmitted && getLibraryState?.message == 'fail'? <p className="text-red-500 text-sm">{t('library.get_item_failed')}</p> : null}
                         </div>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="mt-4">
-                            <AlertDialogCancel type="reset" disabled={getLibraryPending}>Cancel</AlertDialogCancel>
-                            <Button type="submit" disabled={getLibraryPending}>{getLibraryPending? 'Loading...' : 'Get'}</Button>
+                            <AlertDialogCancel type="reset" disabled={getLibraryPending}>{t('common.cancel')}</AlertDialogCancel>
+                            <Button type="submit" disabled={getLibraryPending}>{getLibraryPending? t('common.loading') : t('library.get')}</Button>
                         </AlertDialogFooter>
                         </form>
                     </AlertDialogContent>

@@ -21,6 +21,7 @@ import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import * as openApi from "@/lib/openApi";
+import { useLocalization } from "@/lib/localization-context";
 import React, { JSX, useState } from "react";
 import { CreateLessonFormState, GetLessonByIDFormState } from "../../lib/definitions";
 
@@ -62,6 +63,7 @@ export default function TitleElement({
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
+    const { t } = useLocalization()
 
     const handleCreateDialogOpenChange = (open: boolean) => {
         if (!open) {
@@ -102,8 +104,8 @@ export default function TitleElement({
                     {isAdmin ?
                     <div className='flex flex-row gap-2 items-center'>
                         <Field orientation="horizontal" className='w-80'>
-                            <Input onChange={handleSearchStudentId} id="student-id-search" name="student-id-search" type="search" placeholder="Enter student id..." className='border-slate-950'/>
-                            <div className="bg-slate-950 text-slate-100 border-slate-950 px-2 py-2 rounded-xl text-sm">{searchStudentId ? 'Filtered' : 'Search'}</div>
+                            <Input onChange={handleSearchStudentId} id="student-id-search" name="student-id-search" type="search" placeholder={t('lessons.enter_student_id')} className='border-slate-950'/>
+                            <div className="bg-slate-950 text-slate-100 border-slate-950 px-2 py-2 rounded-xl text-sm">{searchStudentId ? t('common.filtered') : t('common.search')}</div>
                         </Field>
                         {searchStudentId && (
                             <Button 
@@ -111,7 +113,7 @@ export default function TitleElement({
                                 variant="outline" 
                                 className='transition duration-300 border border-red-500 rounded-xl text-red-500 bg-slate-100 hover:bg-red-500 hover:text-slate-100 cursor-pointer'
                             >
-                                Clear
+                                {t('common.clear')}
                             </Button>
                         )}
                     </div> : <div></div>}
@@ -121,32 +123,32 @@ export default function TitleElement({
                     <div>
                     <AlertDialog open={createLessonDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
-                            <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Lesson</Button>
+                            <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">{t('lessons.create_lesson')}</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
-                            <AlertDialogTitle>Create Lesson</AlertDialogTitle>
+                            <AlertDialogTitle>{t('lessons.create_lesson')}</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                     <div className='flex flex-col'>
-                                        {fieldInput("Student ID","student_id", "Enter student id...", "number")}
+                                        {fieldInput(t('lessons.student_id'),"student_id", t('lessons.enter_student_id'), "number")}
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Schedule ID", "schedule_id", "Enter schedule id...", "number")}
+                                        {fieldInput(t('lessons.schedule_id'), "schedule_id", t('lessons.enter_schedule_id'), "number")}
                                         {createFormSubmitted && createState?.error?.schedule_id && <p className="text-red-500 text-sm">{createState.error.schedule_id}</p>}
                                     </div>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className='flex flex-col'>
-                                            {fieldInput("Date", "date", "Select date...", "date")}
+                                            {fieldInput(t('lessons.date'), "date", t('lessons.select_date'), "date")}
                                             {createFormSubmitted && createState?.error?.date && <p className="text-red-500 text-sm">{createState.error.date}</p>}
                                         </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="type" className="text-sm font-medium">Type</label>
+                                            <label htmlFor="type" className="text-sm font-medium">{t('lessons.type')}</label>
                                             <Select name="type">
                                                 <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder="Select a type" />
+                                                    <SelectValue placeholder={t('lessons.select_a_type')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
@@ -163,7 +165,7 @@ export default function TitleElement({
                                     </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="attendance" className="text-sm font-medium">Attendance</label>
+                                            <label htmlFor="attendance" className="text-sm font-medium">{t('lessons.attendance')}</label>
                                             <Select name="attendance">
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder="Attendance" />
@@ -184,29 +186,29 @@ export default function TitleElement({
                                     </div>
                                     <div className="grid grid-cols-4 gap-4">
                                         <div className='flex flex-col'>
-                                            {fieldInput("Juz","juz", "juz", "number")}
+                                            {fieldInput(t('lessons.juz'),"juz", "juz", "number")}
                                             {createFormSubmitted && createState?.error?.juz && <p className="text-red-500 text-sm">{createState.error.juz}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("Surah", "surah", "", "text")}
+                                            {fieldInput(t('lessons.surah'), "surah", "", "text")}
                                             {createFormSubmitted && createState?.error?.surah && <p className="text-red-500 text-sm">{createState.error.surah}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("Ayah from", "ayah_from", "ayah from", "number")}
+                                            {fieldInput(t('lessons.ayah_from'), "ayah_from", "ayah from", "number")}
                                             {createFormSubmitted && createState?.error?.ayah_from && <p className="text-red-500 text-sm">{createState.error.ayah_from}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput("To", "ayah_to", "to", "number")}
+                                            {fieldInput(t('lessons.ayah_to'), "ayah_to", "to", "number")}
                                             {createFormSubmitted && createState?.error?.ayah_to && <p className="text-red-500 text-sm">{createState.error.ayah_to}</p>}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="quality" className="text-sm font-medium">Quality</label>
+                                            <label htmlFor="quality" className="text-sm font-medium">{t('lessons.quality')}</label>
                                             <Select name="quality">
                                                 <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder="Quality" />
+                                                    <SelectValue placeholder={t('lessons.quality')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
@@ -224,10 +226,10 @@ export default function TitleElement({
                                     </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="pass_fail" className="text-sm font-medium">Pass/Fail</label>
+                                            <label htmlFor="pass_fail" className="text-sm font-medium">{t('lessons.pass_fail')}</label>
                                             <Select name="pass_fail">
                                                 <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder="Select Pass or Fail" />
+                                                    <SelectValue placeholder={t('lessons.select_pass_fail')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
@@ -242,28 +244,28 @@ export default function TitleElement({
                                     </div>
 
                                         <div className='flex flex-col'>
-                                            {fieldInput("Attempts", "attempts", "attempts", "number")}
+                                            {fieldInput(t('lessons.attempts'), "attempts", "attempts", "number")}
                                             {createFormSubmitted && createState?.error?.attempts && <p className="text-red-500 text-sm">{createState.error.attempts}</p>}
                                         </div>
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Absence Reason", "absence_reason", "Enter reason for absence...", "text")}
+                                        {fieldInput(t('lessons.absence_reason'), "absence_reason", t('lessons.enter_reason'), "text")}
                                         {createFormSubmitted && createState?.error?.absence_reason && <p className="text-red-500 text-sm">{createState.error.absence_reason}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Sheikh Notes", "sheikh_notes", "Enter sheikh notes...", "text")}
+                                        {fieldInput(t('lessons.sheikh_notes'), "sheikh_notes", t('lessons.enter_sheikh_notes'), "text")}
                                         {createFormSubmitted && createState?.error?.sheikh_notes && <p className="text-red-500 text-sm">{createState.error.sheikh_notes}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput("Student Notes", "student_notes", "Enter student notes...", "text")}
+                                        {fieldInput(t('lessons.student_notes'), "student_notes", t('lessons.enter_student_notes'), "text")}
                                         {createFormSubmitted && createState?.error?.student_notes && <p className="text-red-500 text-sm">{createState.error.student_notes}</p>}
                                     </div>
-                                    {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to create lesson. Please check the data and try again.</p> : null}
+                                    {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.create_failed')}</p> : null}
                                 </div>
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
-                                <AlertDialogCancel type="reset" disabled={createPending}>Cancel</AlertDialogCancel>
-                                <Button type="submit" disabled={createPending}>{createPending ? 'Creating...' : 'Create'}</Button>
+                                <AlertDialogCancel type="reset" disabled={createPending}>{t('common.cancel')}</AlertDialogCancel>
+                                <Button type="submit" disabled={createPending}>{createPending ? t('common.creating') : t('common.create')}</Button>
                             </AlertDialogFooter>
                             </form>
                         </AlertDialogContent>
@@ -271,23 +273,23 @@ export default function TitleElement({
                     </div> : <div></div>}
                     <AlertDialog open={getLessonDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
-                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Lesson</Button>
+                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('lessons.get_lesson')}</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                         <form action={handleGetSubmit}>
                         <AlertDialogHeader>
-                        <AlertDialogTitle>Get lesson using ID</AlertDialogTitle>
+                        <AlertDialogTitle>{t('lessons.get_lesson_title')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Enter the ID of the lesson you want to retrieve. Make sure to enter a valid lesson ID to get the correct information.
+                            {t('lessons.get_lesson_desc')}
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
-                            {fieldInput("Lesson ID", "lesson-id", "Enter lesson ID...", "number")}
-                            {getFormSubmitted && getLessonState?.message == 'fail'? <p className="text-red-500 text-sm">Failed to fetch lesson. Please check the ID and try again.</p> : null}
+                            {fieldInput(t('lessons.student_id'), "lesson-id", t('lessons.enter_lesson_id'), "number")}
+                            {getFormSubmitted && getLessonState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.get_failed')}</p> : null}
                         </div>
                         </AlertDialogHeader>
                         <AlertDialogFooter className="mt-4">
-                            <AlertDialogCancel type="reset" disabled={getLessonPending}>Cancel</AlertDialogCancel>
-                            <Button type="submit" disabled={getLessonPending}>{getLessonPending? 'Loading...' : 'Get'}</Button>
+                            <AlertDialogCancel type="reset" disabled={getLessonPending}>{t('common.cancel')}</AlertDialogCancel>
+                            <Button type="submit" disabled={getLessonPending}>{getLessonPending? t('common.loading') : t('lessons.get_lesson')}</Button>
                         </AlertDialogFooter>
                         </form>
                     </AlertDialogContent>

@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
+import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 import { isClientOnline } from "@/lib/offlineSync";
@@ -35,9 +36,10 @@ export default function Schedules() {
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
     const [isOffline, setIsOffline] = React.useState(false)
     const { isAdmin, isLoading: authLoading } = useAuth()
+    const { t } = useLocalization()
 
-    useToastListener(createLibraryItemState, {functionName: "Create Library Item", successMessage: "Library item created successfully", errorMessage: "Failed to create library item"})
-    useToastListener(getLibraryItemState, {functionName: "Get Library Item", successMessage: "Library item fetched successfully", errorMessage: "Failed to fetch library item"})
+    useToastListener(createLibraryItemState, {functionName: "Create Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
+    useToastListener(getLibraryItemState, {functionName: "Get Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
     React.useEffect(() => {
         const refreshOffline = () => setIsOffline(!isClientOnline())
         refreshOffline()
@@ -157,7 +159,7 @@ export default function Schedules() {
 
     const title = (
         <TitleElement
-            title="Library"
+            title={t('library.title')}
             createAction={createLibraryItemAction}
             createState={createLibraryItemState}
             createPending={createLibraryItemPending}
@@ -174,9 +176,9 @@ export default function Schedules() {
         />
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading library items...</p>, title: title})
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('common.loading')}</p>, title: title})
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
-    if (!libraryItems || libraryItems.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No library items found.</p>, title: title})
+    if (!libraryItems || libraryItems.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('library.no_books_found')}</p>, title: title})
 
     const content = libraryItems?.map((item) => (
         <div key={item.id} className="w-full">
@@ -185,7 +187,7 @@ export default function Schedules() {
     ))
 
     return dashboardPage({children: <div className="flex flex-col gap-4 w-full">
-        {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Library create/upload and delete are online-only.</p> : null}
+        {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{t('library.offline_only')}</p> : null}
         <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-4 md:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>
     </div>, title: title})
 }

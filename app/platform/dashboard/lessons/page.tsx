@@ -9,15 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UpdateLessonFormState, GetLessonByIDFormState } from "@/app/platform/lib/definitions";
-import lessonElement from "./lesson_element";
+import LessonElement from "./lesson_element";
 import TitleElement from "./title_element";
 import { useAuth } from "@/lib/auth-context";
+import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 
 
 export default function Lessons() {
     const { isAdmin, isLoading: authLoading } = useAuth()
+    const { t } = useLocalization()
     const [lessons, setLessons] = React.useState<openApi.LessonRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
@@ -35,9 +37,9 @@ export default function Lessons() {
     const [searchStudentId, setSearchStudentId] = React.useState<string>("")
     const [filteredLessons, setFilteredLessons] = React.useState<openApi.LessonRead[] | null>(null)
 
-    useToastListener(createState, {functionName: "Create Lesson", successMessage: "Lesson created successfully", errorMessage: "Failed to create lesson"})
-    useToastListener(updateState, {functionName: "Update Lesson", successMessage: "Lesson updated successfully", errorMessage: "Failed to update lesson"})
-    useToastListener(getLessonState, {functionName: "Get Lesson", successMessage: "Lesson fetched successfully", errorMessage: "Failed to fetch lesson"})
+    useToastListener(createState, {functionName: "Create Lesson", successMessage: t('lessons.create_success'), errorMessage: t('lessons.create_error')})
+    useToastListener(updateState, {functionName: "Update Lesson", successMessage: t('lessons.update_success'), errorMessage: t('lessons.update_error')})
+    useToastListener(getLessonState, {functionName: "Get Lesson", successMessage: t('lessons.get_success'), errorMessage: t('lessons.get_error')})
     
     React.useEffect(() => {
         if (authLoading) return
@@ -57,7 +59,7 @@ export default function Lessons() {
                 setLessons(data)
                 setError(null)
             } catch (err) {
-                setError('Failed to load Lessons')
+                setError(t('lessons.loading_lessons'))
                 setLessons(null)
             } finally {
                 setLoading(false)
@@ -83,7 +85,7 @@ export default function Lessons() {
                     setLessons(data)
                     setError(null)
                 } catch (err) {
-                    setError('Failed to load Lessons')
+                    setError(t('lessons.loading_lessons'))
                     setLessons(null)
                 } finally {
                     setLoading(false)
@@ -125,24 +127,24 @@ export default function Lessons() {
 
     const content = lessons?.map((lesson) => (
         <div key={lesson.id}>
-            {lessonElement({lesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput})}
+            <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
         </div>
     ))
 
     let displayContent = content
-    let displayTitle = "Lessons"
+    let displayTitle = t('lessons.title')
 
     if (searchStudentId && filteredLessons) {
         if (filteredLessons.length === 0) {
-            displayContent = [<p key="no-lessons" className="text-slate-700 text-xl">No lessons found for student ID: {searchStudentId}</p>]
-            displayTitle = `Lessons - Student ${searchStudentId}`
+            displayContent = [<p key="no-lessons" className="text-slate-700 text-xl">{t('lessons.no_lessons_found')} {searchStudentId}</p>]
+            displayTitle = `${t('lessons.title')} - Student ${searchStudentId}`
         } else {
             displayContent = filteredLessons.map((lesson) => (
                 <div key={lesson.id}>
-                    {lessonElement({lesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput})}
+                    <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
                 </div>
             ))
-            displayTitle = `Lessons - Student ${searchStudentId} (${filteredLessons.length})`
+            displayTitle = `${t('lessons.title')} - Student ${searchStudentId} (${filteredLessons.length})`
         }
     }
 
@@ -168,9 +170,9 @@ export default function Lessons() {
     )
 
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">Loading lessons...</p>, title: title})
+    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('lessons.loading_lessons')}</p>, title: title})
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
-    if (!lessons || lessons.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No lessons found.</p>, title: title})
+    if (!lessons || lessons.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('common.no_data_found')}</p>, title: title})
 
     const actionStatusBanner = (createState?.message || updateState?.message) ? (
         <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
@@ -181,10 +183,10 @@ export default function Lessons() {
                     : 'border-emerald-200 bg-emerald-50 text-emerald-800'
         }`}>
             {createState?.message === 'queued' || updateState?.message === 'queued'
-                ? 'Saved offline. Lesson changes will sync automatically when connection is restored.'
+                ? t('lessons.offline_sync')
                 : createState?.message === 'fail' || updateState?.message === 'fail'
-                    ? 'Action failed. Please review your input and try again.'
-                    : 'Action completed successfully.'}
+                    ? t('lessons.offline_error')
+                    : t('messages.success')}
         </div>
     ) : null
 
@@ -192,11 +194,11 @@ export default function Lessons() {
         return dashboardPage({children: [
             <div key="status-banner" className='mx-10'>{actionStatusBanner}</div>,
             <div key="clear-filter" className='flex flex-row justify-end'>
-                <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLesson(null)}}>Clear Filter</Button>
+                <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLesson(null)}}>{t('common.clear')}</Button>
             </div>
-            ,<div key={fetchedLesson.id}>{lessonElement({lesson: fetchedLesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput})}</div>], title: (
+            ,<div key={fetchedLesson.id}><LessonElement lesson={fetchedLesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} /></div>], title: (
             <TitleElement
-                title={`Lesson Details - ID ${fetchedLesson.id}`}
+                title={`${t('lessons.lesson_details')} ${fetchedLesson.id}`}
                 createAction={createAction}
                 createState={createState}
                 createPending={createPending}
