@@ -6,7 +6,18 @@ type PendingSyncItem = openApi.SyncItemRequest & {
   last_error?: string;
 };
 
+export type SyncIssue = {
+  idempotency_key: string;
+  entity_type: string;
+  entity_id?: number | null;
+  status: openApi.SyncStatus;
+  message: string;
+  conflict?: Record<string, unknown> | null;
+  updated_at: string;
+};
+
 const STORAGE_KEY = "wahy:offline:sync-queue:v1";
+const ISSUES_KEY = "wahy:offline:sync-issues:v1";
 
 const api = new openApi.Api({
   baseUrl: "",
@@ -49,6 +60,60 @@ function errorMessage(error: unknown): string {
     return error.message;
   }
   return "Unknown network error";
+}
+
+function readIssues(): SyncIssue[] {
+  if (!isBrowser()) {
+    return [];
+  }
+
+  const raw = window.localStorage.getItem(ISSUES_KEY);
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as SyncIssue[];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed;
+  } catch {
+    return [];
+  }
+}
+
+function writeIssues(issues: SyncIssue[]): void {
+  if (!isBrowser()) {
+    return;
+  }
+
+  window.localStorage.setItem(ISSUES_KEY, JSON.stringify(issues));
+}
+
+function upsertIssues(incoming: SyncIssue[]): void {
+  if (incoming.length === 0) {
+    return;
+  }
+
+  const existing = readIssues();
+  const byKey = new Map(existing.map((item) => [item.idempotency_key, item]));
+
+  for (const issue of incoming) {
+    byKey.set(issue.idempotency_key, issue);
+  }
+
+  writeIssues(Array.from(byKey.values()));
+}
+
+function removeIssuesByKeys(keys: string[]): void {
+  if (keys.length === 0) {
+    return;
+  }
+
+  const keySet = new Set(keys);
+  const existing = readIssues();
+  writeIssues(existing.filter((item) => !keySet.has(item.idempotency_key)));
 }
 
 export function isClientOnline(): boolean {
@@ -95,6 +160,14 @@ export function getOfflineQueueSize(): number {
   return readQueue().length;
 }
 
+export function getSyncIssues(): SyncIssue[] {
+  return readIssues();
+}
+
+export function clearSyncIssues(): void {
+  writeIssues([]);
+}
+
 export async function flushOfflineMutations(): Promise<void> {
   if (!isBrowser() || !isClientOnline()) {
     return;
@@ -126,6 +199,8 @@ export async function flushOfflineMutations(): Promise<void> {
 
     const remaining: PendingSyncItem[] = [];
     const ackIds: number[] = [];
+    const resolvedKeys: string[] = [];
+    const issues: SyncIssue[] = [];
 
     for (const item of queue) {
       const result = resultByKey.get(item.idempotency_key);
@@ -140,11 +215,22 @@ export async function flushOfflineMutations(): Promise<void> {
       }
 
       if (result.status === "applied") {
+        resolvedKeys.push(item.idempotency_key);
         if (typeof result.entity_id === "number") {
           ackIds.push(result.entity_id);
         }
         continue;
       }
+
+      issues.push({
+        idempotency_key: item.idempotency_key,
+        entity_type: item.entity_type,
+        entity_id: item.entity_id,
+        status: result.status,
+        message: result.error_message ?? "Sync conflict or error",
+        conflict: (result.conflict ?? null) as Record<string, unknown> | null,
+        updated_at: new Date().toISOString(),
+      });
 
       remaining.push({
         ...item,
@@ -154,6 +240,8 @@ export async function flushOfflineMutations(): Promise<void> {
     }
 
     writeQueue(remaining);
+    removeIssuesByKeys(resolvedKeys);
+    upsertIssues(issues);
 
     if (ackIds.length > 0) {
       await api.api.ackApiV1SyncAckPost({ ids: ackIds });

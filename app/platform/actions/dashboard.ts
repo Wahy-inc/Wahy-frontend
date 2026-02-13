@@ -1,6 +1,7 @@
 import * as openApi from "@/lib/openApi"
-import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
+import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
 import { createIdempotencyKey, enqueueOfflineMutation, isClientOnline, shouldQueueMutation } from "@/lib/offlineSync"
+import { getCachedData, offlineCacheKeys, setCachedData } from "@/lib/offlineCache"
 
 const api = new openApi.Api({
     baseUrl: '',
@@ -22,10 +23,15 @@ export async function getStudentMe(): Promise<openApi.StudentSelfRead | null> {
     try {
         const response = await api.api.getMeApiV1StudentsMeGet()
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.studentProfileMe, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.StudentSelfRead>(offlineCacheKeys.studentProfileMe)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -35,6 +41,7 @@ export async function listStudents(): Promise<openApi.StudentRead[] | null> {
         const response = await api.api.listAllApiV1StudentsGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.studentsList, response.data)
             const Students = response.data.map((student) => {
                 return {
                     student_id: student.id,
@@ -47,6 +54,10 @@ export async function listStudents(): Promise<openApi.StudentRead[] | null> {
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.StudentRead[]>(offlineCacheKeys.studentsList)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -260,37 +271,69 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
     }
 }
 
-export async function approveStudent(id:number, note: openApi.StudentApprovalRequest): Promise<boolean> {
+export async function approveStudent(id:number, note: openApi.StudentApprovalRequest): Promise<'success' | 'queued' | 'fail'> {
     const studentId = Number(id)
     if (isNaN(studentId)) {
-        return false
+        return 'fail'
     }
+
+    const payload = {
+        action: 'approve',
+        notes: note.notes ?? null,
+    }
+
     try {
         const response = await api.api.approveApiV1StudentsStudentIdApprovePost(id, note)
         if (response.status === 200) {
             window.location.reload() // Refresh the page after approving a student
-            return true
+            return 'success'
         }
-        return false
+        return 'fail'
     } catch (error) {
-        return false
+        if (shouldQueueMutation(error)) {
+            enqueueOfflineMutation({
+                entity_type: 'students_approval',
+                entity_id: studentId,
+                operation: openApi.SyncOperation.Update,
+                payload,
+                idempotency_key: createIdempotencyKey(),
+            })
+            return 'queued'
+        }
+        return 'fail'
     }
 }
 
-export async function rejectStudent(id:number, note: openApi.StudentApprovalRequest): Promise<boolean> {
+export async function rejectStudent(id:number, note: openApi.StudentApprovalRequest): Promise<'success' | 'queued' | 'fail'> {
     const studentId = Number(id)
     if (isNaN(studentId)) {
-        return false
+        return 'fail'
     }
+
+    const payload = {
+        action: 'reject',
+        notes: note.notes ?? null,
+    }
+
     try {
         const response = await api.api.rejectApiV1StudentsStudentIdRejectPost(id, note)
         if (response.status === 200) {
             window.location.reload() // Refresh the page after rejecting a student
-            return true
+            return 'success'
         }
-        return false
+        return 'fail'
     } catch (error) {
-        return false
+        if (shouldQueueMutation(error)) {
+            enqueueOfflineMutation({
+                entity_type: 'students_approval',
+                entity_id: studentId,
+                operation: openApi.SyncOperation.Update,
+                payload,
+                idempotency_key: createIdempotencyKey(),
+            })
+            return 'queued'
+        }
+        return 'fail'
     }
 }
 
@@ -299,10 +342,15 @@ export async function listSchedules(): Promise<openApi.ScheduleRead[] | null> {
         const response = await api.api.listAllApiV1SchedulesGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.schedulesListAdmin, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.ScheduleRead[]>(offlineCacheKeys.schedulesListAdmin)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -312,10 +360,15 @@ export async function listSchedulesMe(): Promise<openApi.ScheduleRead[] | null> 
         const response = await api.api.listMyScheduleApiV1SchedulesMeGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.schedulesListMe, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.ScheduleRead[]>(offlineCacheKeys.schedulesListMe)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -494,23 +547,38 @@ export async function listLessons(stu_id:number | null = null): Promise<openApi.
         const response = await api.api.listAllApiV1LessonsGet({student_id: stu_id})
 
         if (response.status === 200) {
+            if (stu_id === null) {
+                setCachedData(offlineCacheKeys.lessonsListAdmin, response.data)
+            } else {
+                setCachedData(offlineCacheKeys.lessonsListByStudent(stu_id), response.data)
+            }
             return response.data
         }
         return null
     } catch (error) {
+        const cacheKey = stu_id === null ? offlineCacheKeys.lessonsListAdmin : offlineCacheKeys.lessonsListByStudent(stu_id)
+        const cached = getCachedData<openApi.LessonRead[]>(cacheKey)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
 
-export async function listLessonsMe(stu_id:number | null = null): Promise<openApi.LessonRead[] | null> {
+export async function listLessonsMe(): Promise<openApi.LessonRead[] | null> {
     try {
         const response = await api.api.listMyLessonsApiV1LessonsMeGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.lessonsListMe, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.LessonRead[]>(offlineCacheKeys.lessonsListMe)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -520,10 +588,15 @@ export async function listLibrary(): Promise<openApi.LibraryItemRead[] | null> {
         const response = await api.api.listAllApiV1LibraryGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.libraryListAdmin, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.LibraryItemRead[]>(offlineCacheKeys.libraryListAdmin)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -533,10 +606,15 @@ export async function listLibraryMe(): Promise<openApi.LibraryItemRead[] | null>
         const response = await api.api.listMyLibraryApiV1LibraryMeGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.libraryListMe, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.LibraryItemRead[]>(offlineCacheKeys.libraryListMe)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -633,10 +711,15 @@ export async function listInvoices(): Promise<openApi.InvoiceRead[]> {
         const response = await api.api.listAllApiV1InvoicesGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.invoicesListAdmin, response.data)
             return response.data
         }
         return []
     } catch (error) {
+        const cached = getCachedData<openApi.InvoiceRead[]>(offlineCacheKeys.invoicesListAdmin)
+        if (cached) {
+            return cached
+        }
         return []
     }
 }
@@ -646,10 +729,15 @@ export async function listInvoicesMe(): Promise<openApi.InvoiceRead[]> {
         const response = await api.api.listMyInvoicesApiV1InvoicesMeGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.invoicesListMe, response.data)
             return response.data
         }
         return []
     } catch (error) {
+        const cached = getCachedData<openApi.InvoiceRead[]>(offlineCacheKeys.invoicesListMe)
+        if (cached) {
+            return cached
+        }
         return []
     }
 }
