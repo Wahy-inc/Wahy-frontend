@@ -1,6 +1,6 @@
 'use client'
 
-import React from "react";
+import React, { use } from "react";
 import * as openApi from "@/lib/openApi"
 import { approveStudent, createStudent, getStudent, listStudents, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
@@ -22,6 +22,7 @@ import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, 
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/lib/auth-context";
+import { useToastListener } from "@/lib/toastListener";
 
 export default function Students() {
     const [students, setStudents] = React.useState<openApi.StudentRead[] | null>(null)
@@ -36,6 +37,9 @@ export default function Students() {
     const [updateStudentDialogOpen, setUpdateStudentDialogOpen] = React.useState(false)
     const { isAdmin, isLoading: authLoading } = useAuth()
 
+    useToastListener(createStudentState, {functionName: "Create Student", successMessage: "Student created successfully", errorMessage: "Failed to create student"})
+    useToastListener(updateStudentState, {functionName: "Update Student", successMessage: "Student updated successfully", errorMessage: "Failed to update student"})
+    useToastListener(getStudentState, {functionName: "Get Student", successMessage: "Student fetched successfully", errorMessage: "Failed to fetch student"})
     
     React.useEffect(() => {
         if (getStudentState?.message === 'success' && getStudentState.data) {

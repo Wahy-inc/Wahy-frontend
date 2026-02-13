@@ -1,6 +1,6 @@
 'use client'
 
-import React from "react";
+import React, { use } from "react";
 import * as openApi from "@/lib/openApi"
 import { createInvoices, downloadInvoicePDF, downloadInvoicePDFMe, getInvoice, getInvoiceMe, getLocalStudent, listInvoices, listInvoicesMe, markInvoiceAsPaid, overrideInvoice } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
@@ -26,6 +26,7 @@ import {DollarSign} from 'lucide-react'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/lib/auth-context";
 import { GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
+import { useToastListener } from "@/lib/toastListener";
 
 export default function Invoices() {
     const { isAdmin, isLoading: authLoading } = useAuth()
@@ -43,6 +44,11 @@ export default function Invoices() {
     const [getInvoiceDialogOpen, setGetInvoiceDialogOpen] = React.useState(false)
     const [overrideInvoiceDialogOpen, setOverrideInvoiceDialogOpen] = React.useState(false)
     const [paidInvoiceDialogOpen, setPaidInvoiceDialogOpen] = React.useState(false)
+
+    useToastListener(createInvoiceState, {functionName: 'Create Invoice', successMessage: 'Invoice created successfully', errorMessage: 'Failed to create invoice'})
+    useToastListener(overrideInvoiceState, {functionName: 'Override Invoice', successMessage: 'Invoice overridden successfully', errorMessage: 'Failed to override invoice'})
+    useToastListener(payInvoiceState, {functionName: 'Mark Invoice As Paid', successMessage: 'Invoice marked as paid successfully', errorMessage: 'Failed to mark invoice as paid'})
+    useToastListener(getInvoiceState, {functionName: 'Get Invoice', successMessage: 'Invoice retrieved successfully', errorMessage: 'Failed to retrieve invoice'})
 
     React.useEffect(() => {
         if (getInvoiceState?.message === 'success' && getInvoiceState.data) {

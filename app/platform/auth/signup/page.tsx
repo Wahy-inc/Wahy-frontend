@@ -12,10 +12,13 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import {Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useToastListener } from "@/lib/toastListener"
 
 export default function SignUp() {
     const [state, action, pending] = useActionState(signup, undefined)
     const router = useRouter()
+
+    useToastListener(state, {functionName: "Sign Up", successMessage: "Signup successful", errorMessage: "Failed to sign up"})
 
     React.useEffect(() => {
         if (state?.message === 'Signup successful') {

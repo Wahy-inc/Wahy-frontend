@@ -12,6 +12,7 @@ import { UpdateLessonFormState, GetLessonByIDFormState } from "@/app/platform/li
 import lessonElement from "./lesson_element";
 import TitleElement from "./title_element";
 import { useAuth } from "@/lib/auth-context";
+import { useToastListener } from "@/lib/toastListener";
 
 
 export default function Lessons() {
@@ -33,6 +34,10 @@ export default function Lessons() {
     const [searchStudentId, setSearchStudentId] = React.useState<string>("")
     const [filteredLessons, setFilteredLessons] = React.useState<openApi.LessonRead[] | null>(null)
 
+    useToastListener(createState, {functionName: "Create Lesson", successMessage: "Lesson created successfully", errorMessage: "Failed to create lesson"})
+    useToastListener(updateState, {functionName: "Update Lesson", successMessage: "Lesson updated successfully", errorMessage: "Failed to update lesson"})
+    useToastListener(getLessonState, {functionName: "Get Lesson", successMessage: "Lesson fetched successfully", errorMessage: "Failed to fetch lesson"})
+    
     React.useEffect(() => {
         if (authLoading) return
         
