@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator"
 import { User, Phone, Calendar, Clock, BookOpen, DollarSign, FileText } from 'lucide-react'
 import { dummyProfile } from "@/lib/dummyData"
 import { useAuth } from "@/lib/auth-context"
+import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache"
 
 // Set to true to use dummy data for testing
 const USE_DUMMY_DATA = false
@@ -20,7 +21,15 @@ export default function Profile() {
     const [error, setError] = React.useState<string | null>(null)
     const { isLoading: authLoading } = useAuth()
 
-    React.useEffect(() => {        
+    React.useEffect(() => {
+        if (authLoading) return
+
+        const cachedProfile = getCachedData<openApi.StudentSelfRead>(offlineCacheKeys.studentProfileMe)
+        if (cachedProfile) {
+            setProfile(cachedProfile)
+            setLoading(false)
+        }
+
         const fetchProfile = async () => {
             try {
                 setLoading(true)
@@ -40,7 +49,7 @@ export default function Profile() {
             }
         }
         fetchProfile()
-    }, [])
+    }, [authLoading])
 
     const getStatusBadgeVariant = (status: openApi.StudentStatus): "default" | "secondary" | "destructive" | "outline" => {
         switch (status) {

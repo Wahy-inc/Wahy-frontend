@@ -7,13 +7,11 @@ import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import dashboardPage from "../page";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import React, { useState } from "react";
+import React from "react";
 import { attendanceAnalytics, financialAnalytics, getLocalStudent, operationalAnalytics, performanceAnalytics } from "../../actions/dashboard";
-import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
-    const { isAdmin, isLoading: authLoading } = useAuth()
     const [attendance, setattendance] = React.useState<openApi.AttendanceAnalytics | null>(null);
     const [performance, setPerformance] = React.useState<openApi.PerformanceAnalytics | null>(null);
     const [financial, setFinancial] = React.useState<openApi.FinancialAnalytics | null>(null);

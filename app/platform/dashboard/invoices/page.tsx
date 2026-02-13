@@ -26,6 +26,8 @@ import {DollarSign} from 'lucide-react'
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/lib/auth-context";
 import { GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
+import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
+import { isClientOnline } from "@/lib/offlineSync";
 
 export default function Invoices() {
     const { isAdmin, isLoading: authLoading } = useAuth()
@@ -43,6 +45,19 @@ export default function Invoices() {
     const [getInvoiceDialogOpen, setGetInvoiceDialogOpen] = React.useState(false)
     const [overrideInvoiceDialogOpen, setOverrideInvoiceDialogOpen] = React.useState(false)
     const [paidInvoiceDialogOpen, setPaidInvoiceDialogOpen] = React.useState(false)
+    const [isOffline, setIsOffline] = React.useState(false)
+
+    React.useEffect(() => {
+        const refreshOffline = () => setIsOffline(!isClientOnline())
+        refreshOffline()
+        window.addEventListener('online', refreshOffline)
+        window.addEventListener('offline', refreshOffline)
+
+        return () => {
+            window.removeEventListener('online', refreshOffline)
+            window.removeEventListener('offline', refreshOffline)
+        }
+    }, [])
 
     React.useEffect(() => {
         if (getInvoiceState?.message === 'success' && getInvoiceState.data) {
@@ -73,6 +88,14 @@ export default function Invoices() {
 
     React.useEffect(() => {
         if (authLoading) return
+
+        const cachedInvoices = getCachedData<openApi.InvoiceRead[]>(
+            isAdmin ? offlineCacheKeys.invoicesListAdmin : offlineCacheKeys.invoicesListMe,
+        )
+        if (cachedInvoices && cachedInvoices.length > 0) {
+            setInvoices(cachedInvoices)
+            setLoading(false)
+        }
         
         const fetchInvoices = async () => {
             try {
@@ -130,7 +153,10 @@ export default function Invoices() {
                     </div>
                 </ItemContent>
                 <ItemActions>
-                    <Button size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white" onClick={() => {
+                    <Button disabled={isOffline} size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => {
+                        if (isOffline) {
+                            return
+                        }
                         if (isAdmin) {
                             downloadInvoicePDF(invoice.id)
                         } else {
@@ -243,6 +269,7 @@ export default function Invoices() {
             getInvoicesDialogOpen={getInvoiceDialogOpen}
             setgetInvoicesDialogOpen={setGetInvoiceDialogOpen}
             isAdmin={isAdmin}
+            disableGenerate={isOffline}
         />
     )
 
@@ -268,6 +295,7 @@ export default function Invoices() {
 
     const content = (
         <div className="flex flex-col gap-12 w-full">
+            {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Invoice PDF download and invoice generation are online-only.</p> : null}
             <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">Generated Invoices</p>
                 {generatedInvoices && generatedInvoices.length > 0 ? generatedInvoices.map((invoice) => (

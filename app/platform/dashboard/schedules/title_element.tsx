@@ -216,7 +216,7 @@ export default function TitleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     </div> : <div></div> }
-                    <AlertDialog open={getStudentScheduleDialogOpen} onOpenChange={setgetStudentScheduleDialogOpen}>
+                    <AlertDialog open={getStudentScheduleDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">Get Schedules for student</Button>
                     </AlertDialogTrigger>

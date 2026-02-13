@@ -27,6 +27,7 @@ export default function TitleElement({
     getInvoicesDialogOpen,
     setgetInvoicesDialogOpen,
     isAdmin,
+    disableGenerate,
 }: {
     title: string,
     getInvoiceState: GetInvoiceByIDFormState,
@@ -40,7 +41,8 @@ export default function TitleElement({
         setcreateInvoicesDialogOpen: (open: boolean) => void,
         getInvoicesDialogOpen: boolean,
         setgetInvoicesDialogOpen: (open: boolean) => void,
-        isAdmin: boolean
+        isAdmin: boolean,
+        disableGenerate?: boolean
     }) {
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
@@ -88,7 +90,7 @@ export default function TitleElement({
                     <div>
                     <AlertDialog open={createInvoicesDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
-                            <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Generate Invoice</Button>
+                            <Button disabled={disableGenerate} className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Generate Invoice</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <form action={handleCreateSubmit}>
@@ -115,11 +117,12 @@ export default function TitleElement({
                             </AlertDialogHeader>
                             <AlertDialogFooter className="mt-4">
                                 <AlertDialogCancel type="reset" disabled={createPending}>Cancel</AlertDialogCancel>
-                                <Button type="submit" disabled={createPending}>{createPending ? 'Generating...' : 'Generate'}</Button>
+                                <Button type="submit" disabled={createPending || disableGenerate}>{createPending ? 'Generating...' : 'Generate'}</Button>
                             </AlertDialogFooter>
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
+                    {disableGenerate ? <p className="text-amber-700 text-xs mt-2">Invoice generation is online-only.</p> : null}
                     </div> : <div></div>}
                     <AlertDialog open={getInvoicesDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>

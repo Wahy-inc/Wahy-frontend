@@ -18,6 +18,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 
 enum weekDays {
     saturday = 0,
@@ -49,7 +50,12 @@ export default function Schedules() {
         if (getScheduleState?.message == 'success' && getScheduleState.data) {
             setFilteredSchedules(getScheduleState.data)
         }
-        if (createScheduleState?.message == 'success' || updateScheduleState?.message == 'success') {
+        if (
+            createScheduleState?.message == 'success' ||
+            createScheduleState?.message == 'queued' ||
+            updateScheduleState?.message == 'success' ||
+            updateScheduleState?.message == 'queued'
+        ) {
             const fetchSchedules = async () => {
                 try {
                     setLoading(true)
@@ -71,6 +77,14 @@ export default function Schedules() {
 
     React.useEffect(() => {
         if (authLoading) return
+
+            const cachedSchedules = getCachedData<openApi.ScheduleRead[]>(
+                isAdmin ? offlineCacheKeys.schedulesListAdmin : offlineCacheKeys.schedulesListMe,
+            )
+            if (cachedSchedules && cachedSchedules.length > 0) {
+                setSchedules(cachedSchedules)
+                setLoading(false)
+            }
 
             const fetchSchedules = async () => {
                 try {
@@ -412,11 +426,30 @@ export default function Schedules() {
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
     if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No schedules found.</p>, title: title})
     const displaySchedules = filteredSchedules || schedules
-    const content = displaySchedules?.map((schedule) => (
-        <div key={schedule.id}>
-            {schedulesElement(schedule)}
+    const content = (
+        <div className='flex flex-col gap-4'>
+            {(createScheduleState?.message || updateScheduleState?.message) && (
+                <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
+                    createScheduleState?.message === 'queued' || updateScheduleState?.message === 'queued'
+                        ? 'border-amber-200 bg-amber-50 text-amber-800'
+                        : createScheduleState?.message === 'fail' || updateScheduleState?.message === 'fail'
+                            ? 'border-red-200 bg-red-50 text-red-800'
+                            : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                }`}>
+                    {createScheduleState?.message === 'queued' || updateScheduleState?.message === 'queued'
+                        ? 'Saved offline. Schedule changes will sync automatically when connection is restored.'
+                        : createScheduleState?.message === 'fail' || updateScheduleState?.message === 'fail'
+                            ? 'Action failed. Please review your input and try again.'
+                            : 'Action completed successfully.'}
+                </div>
+            )}
+            {displaySchedules?.map((schedule) => (
+                <div key={schedule.id}>
+                    {schedulesElement(schedule)}
+                </div>
+            ))}
         </div>
-    ))
+    )
 
     return dashboardPage({children: content, title: title})
 }
