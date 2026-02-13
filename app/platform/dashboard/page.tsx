@@ -33,7 +33,7 @@ export default function DashboardPage({children: children, title: title}: {child
             ) : null}
             <div
                 id="sidebar"
-                className={`fixed lg:sticky z-40 lg:z-auto top-0 left-0 flex flex-col justify-between pt-16 lg:pt-4 pb-10 lg:pb-20 overflow-x-hidden bg-slate-900 text-slate-100 w-[85vw] max-w-sm lg:w-sm min-h-screen max-h-screen rounded-r-xl lg:mr-4 shadow-[0px_4px_30px_rgba(0,0,0,0.3)] backdrop-blur-sm transition-transform duration-300 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+                className={`fixed lg:sticky z-40 lg:z-auto top-0 left-0 flex flex-col justify-between pt-16 lg:pt-4 pb-10 lg:pb-20 overflow-x-hidden bg-slate-900 text-slate-100 w-[85vw] max-w-sm lg:w-sm min-h-screen max-h-screen rounded-r-xl shadow-[0px_4px_30px_rgba(0,0,0,0.3)] backdrop-blur-sm transition-transform duration-300 ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
             >
                 <div id='services'>
                     <div className='absolute -left-10 top-10 -z-20 w-40 h-40 rounded-full bg-slate-950 blur-[5px]'></div>

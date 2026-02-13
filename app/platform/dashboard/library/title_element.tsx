@@ -100,7 +100,7 @@ export default function TitleElement({
                             <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('library.create_item')}</AlertDialogTitle>
-                                <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4 rtl:text-right">
                                     <div className='flex flex-col'>
                                         {fieldInput(t('library.item_title'),"title", "", "text")}
                                         {createFormSubmitted && createState?.error?.title && <p className="text-red-500 text-sm">{createState.error.title}</p>}

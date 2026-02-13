@@ -129,7 +129,7 @@ export default function TitleElement({
                             <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('lessons.create_lesson')}</AlertDialogTitle>
-                                <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4 rtl:text-right">
                                     <div className='flex flex-col'>
                                         {fieldInput(t('lessons.student_id'),"student_id", t('lessons.enter_student_id'), "number")}
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}

@@ -137,13 +137,13 @@ export default function TitleElement({
                             <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('schedules.create_title')}</AlertDialogTitle>
-                                <div className="flex flex-col gap-4">
-                                    <div className='flex flex-col'>
+                                <div className="grid grid-cols-3 grid-rows-5 gap-4 rtl:text-right">
+                                    <div className='flex flex-col col-start-1 col-end-4 row-start-1 row-end-2'>
                                         {fieldInput(t('schedules.student_id'),"student-id", t('schedules.enter_student_id'), "number")}
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div className='flex flex-col'>
+                                    <div className="grid grid-cols-3 gap-4 col-start-1 col-end-4 row-start-2 row-end-3">
+                                        <div className='flex flex-col col-start-1 col-end-2'>
                                             <div className="flex flex-col">
                                                 <label htmlFor="day-of-week" className="text-sm font-medium">{t('schedules.day_of_week')}</label>
                                                 <Select name="day-of-week">
@@ -166,26 +166,26 @@ export default function TitleElement({
                                             </div>
                                             {createFormSubmitted && createState?.error?.day_of_week && <p className="text-red-500 text-sm">{createState.error.day_of_week}</p>}
                                         </div>
-                                        <div className='flex flex-col'>
+                                        <div className='flex flex-col col-start-2 col-end-3'>
                                             {fieldInput(t('schedules.start_time'), "start-time", t('schedules.select_start_time'), "time")}
                                             {createFormSubmitted && createState?.error?.start_time && <p className="text-red-500 text-sm">{createState.error.start_time}</p>}
                                         </div>
-                                        <div className='flex flex-col'>
+                                        <div className='flex flex-col col-start-3 col-end-4'>
                                             {fieldInput(t('schedules.end_time'), "end-time", t('schedules.select_end_time'), "time")}
                                             {createFormSubmitted && createState?.error?.end_time && <p className="text-red-500 text-sm">{createState.error.end_time}</p>}
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className='flex flex-col'>
+                                    <div className="grid grid-cols-2 gap-4 col-start-1 col-end-3 row-start-3 row-end-4">
+                                        <div className='flex flex-col col-start-1 col-end-2'>
                                             {fieldInput(t('schedules.effective_from'),"effective-from", "date", "date")}
                                             {createFormSubmitted && createState?.error?.effective_from && <p className="text-red-500 text-sm">{createState.error.effective_from}</p>}
                                         </div>
-                                        <div className='flex flex-col'>
+                                        <div className='flex flex-col col-start-2 col-end-3'>
                                             {fieldInput(t('schedules.effective_until'), "effective-until", "date", "date")}
                                             {createFormSubmitted && createState?.error?.effective_until && <p className="text-red-500 text-sm">{createState.error.effective_until}</p>}
                                         </div>
                                     </div>
-                                    <div className='flex flex-col'>
+                                    <div className='flex flex-col col-start-1 col-end-4 row-start-4 row-end-5'>
                                         <div className="flex flex-col">
                                             <label htmlFor="is-recurring" className="text-sm font-medium">{t('schedules.recurring')}</label>
                                             <Select name="is-recurring">
@@ -203,7 +203,7 @@ export default function TitleElement({
                                         </div>
                                         {createFormSubmitted && createState?.error?.is_recurring && <p className="text-red-500 text-sm">{createState.error.is_recurring}</p>}
                                     </div>
-                                    <div className='flex flex-col'>
+                                    <div className='flex flex-col col-start-1 col-end-4 row-start-5 row-end-6'>
                                         {fieldInput(t('schedules.notes'), "notes", t('schedules.enter_notes'), "text")}
                                         {createFormSubmitted && createState?.error?.notes && <p className="text-red-500 text-sm">{createState.error.notes}</p>}
                                     </div>

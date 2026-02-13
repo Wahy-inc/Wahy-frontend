@@ -195,7 +195,7 @@ export default function Students() {
                             <form action={updateStudentAction} id={`update-${student.id}`}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('students.update_student')}</AlertDialogTitle>
-                                <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4 rtl:text-right">
                                 <div className="flex flex-row justify-between gap-3">
                                     <input type="number" name="id" id="id" hidden value={Number(student.id)} readOnly />
                                     <div className='flex flex-col'>

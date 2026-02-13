@@ -95,7 +95,7 @@ export default function TitleElement({
                             <form action={handleCreateSubmit} id={`create-student-form-${date.getTime()}`}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('students.create_student')}</AlertDialogTitle>
-                                <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4 rtl:text-right">
                                 <div className="flex flex-col">
                                     {fieldInput(t('students.student_id'),"id", "", "number")}
                                     {createFormSubmitted && createState?.error?.id && <p className="text-red-500 text-sm">{createState.error.id}</p>}

@@ -190,7 +190,7 @@ export default function Invoices() {
                                     <form action={payInvoiceAction} id={`pay-${invoice.id.toString()}`}>
                                     <AlertDialogHeader>
                                     <AlertDialogTitle>{t('invoices.mark_invoice_as_paid')}</AlertDialogTitle>
-                                        <div className="flex flex-col gap-4 w-full">
+                                        <div className="flex flex-col gap-4 w-full rtl:text-right">
                                             <input hidden name="invoice_id" value={invoice.id} type="text" />
                                             <div className='flex flex-col'>
                                                 {fieldInput(t('invoices.date'),"paid_date", '', "date")}
@@ -236,7 +236,7 @@ export default function Invoices() {
                                     <form action={overrideInvoiceAction} id={`override-${invoice.id.toString()}`}>
                                     <AlertDialogHeader>
                                     <AlertDialogTitle>{t('invoices.override_invoice')}</AlertDialogTitle>
-                                        <div className="flex flex-col gap-4 w-full">
+                                        <div className="flex flex-col gap-4 w-full rtl:text-right">
                                             <input hidden value={invoice.id} name="invoice_id" type="text" />
                                             <div className='flex flex-col'>
                                                 {fieldInput(t('invoices.billable'),"billable", t('invoices.yes_or_no'), "text")}

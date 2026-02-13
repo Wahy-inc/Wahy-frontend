@@ -57,7 +57,7 @@ export default function LessonElement({lesson, updateAction, updateState, update
                             <form action={updateAction} className="w-full bg-background">
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('lessons.update_lesson')}</AlertDialogTitle>
-                                <div className="flex flex-col gap-4">
+                                <div className="flex flex-col gap-4 rtl:text-right">
                                     <input type="hidden" name="lesson-id" value={lesson.id} />
                                     <div className='flex flex-col'>
                                         {fieldInput(t('lessons.schedule_id'), "schedule-id", String(lesson.schedule_id), "number")}
