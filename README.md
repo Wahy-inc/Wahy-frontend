@@ -164,25 +164,6 @@ Built with [Radix UI](https://www.radix-ui.com) primitives and styled with Tailw
 - Item (custom list item component)
 - Field (form field wrapper)
 
-## Deployment
-
-### Vercel (Recommended)
-
-The easiest way to deploy is using [Vercel](https://vercel.com):
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme)
-
-### Other Platforms
-
-For other deployment options, refer to the [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying).
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 
