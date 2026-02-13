@@ -10,6 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import React from "react";
 import { attendanceAnalytics, financialAnalytics, getLocalStudent, operationalAnalytics, performanceAnalytics } from "../../actions/dashboard";
 import { Button } from "@/components/ui/button";
+import { useToastListener } from "@/lib/toastListener";
 
 export default function Home() {
     const [attendance, setattendance] = React.useState<openApi.AttendanceAnalytics | null>(null);
@@ -20,6 +21,11 @@ export default function Home() {
     const [performanceState, performanceAction, performancePending] = React.useActionState(performanceAnalytics, undefined);
     const [financialState, financialAction, financialPending] = React.useActionState(financialAnalytics, undefined);
     const [operationalState, operationalAction, operationalPending] = React.useActionState(operationalAnalytics, undefined);
+
+    useToastListener(attendanceState, { functionName: "Attendance Analytics", successMessage: "Attendance analytics retrieved successfully", errorMessage: "Failed to retrieve attendance analytics" })
+    useToastListener(performanceState, { functionName: "Performance Analytics", successMessage: "Performance analytics retrieved successfully", errorMessage: "Failed to retrieve performance analytics" })
+    useToastListener(financialState, { functionName: "Financial Analytics", successMessage: "Financial analytics retrieved successfully", errorMessage: "Failed to retrieve financial analytics" })
+    useToastListener(operationalState, { functionName: "Operational Analytics", successMessage: "Operational analytics retrieved successfully", errorMessage: "Failed to retrieve operational analytics" })
 
     React.useEffect(() => {
         if (attendanceState?.message === 'success' && attendanceState.data) {

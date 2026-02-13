@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/card"
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
+import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 import { isClientOnline } from "@/lib/offlineSync";
 import Image from "next/image";
@@ -35,6 +36,8 @@ export default function Schedules() {
     const [isOffline, setIsOffline] = React.useState(false)
     const { isAdmin, isLoading: authLoading } = useAuth()
 
+    useToastListener(createLibraryItemState, {functionName: "Create Library Item", successMessage: "Library item created successfully", errorMessage: "Failed to create library item"})
+    useToastListener(getLibraryItemState, {functionName: "Get Library Item", successMessage: "Library item fetched successfully", errorMessage: "Failed to fetch library item"})
     React.useEffect(() => {
         const refreshOffline = () => setIsOffline(!isClientOnline())
         refreshOffline()

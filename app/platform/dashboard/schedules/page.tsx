@@ -18,6 +18,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 
 enum weekDays {
@@ -45,6 +46,9 @@ export default function Schedules() {
     const [editingScheduleId, setEditingScheduleId] = React.useState<number | null>(null)
     const { isAdmin, isLoading: authLoading } = useAuth()
 
+    useToastListener(createScheduleState, {functionName: "Create Schedule", successMessage: "Schedule created successfully", errorMessage: "Failed to create schedule"})
+    useToastListener(updateScheduleState, {functionName: "Update Schedule", successMessage: "Schedule updated successfully", errorMessage: "Failed to update schedule"})
+    useToastListener(getScheduleState, {functionName: "Get Schedules for Student", successMessage: "Schedules fetched successfully", errorMessage: "Failed to fetch schedules for student"})
     
     React.useEffect(() => {
         if (getScheduleState?.message == 'success' && getScheduleState.data) {

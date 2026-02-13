@@ -11,12 +11,16 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/lib/auth-context"
+import { useToastListener } from "@/lib/toastListener"
 
 export default function SignIn() {
     const { isAdmin } = useAuth()
     const [state, action, pending] = useActionState(signinAdmin, undefined)
     const [Studentstate, Studentaction, Studentpending] = useActionState(signinStudent, undefined)
     const router = useRouter()
+
+    useToastListener(state, {functionName: "Admin Sign In", successMessage: "Admin signed in successfully", errorMessage: "Failed to sign in as admin"})
+    useToastListener(Studentstate, {functionName: "Student Sign In", successMessage: "Student signed in successfully", errorMessage: "Failed to sign in as student"})
 
     React.useEffect(() => {
         if ((isAdmin ? state?.message : Studentstate?.message) === 'Signin successful') {
