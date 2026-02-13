@@ -28,7 +28,8 @@ export default function TitleElement({
     setcreateLibraryDialogOpen,
     getLibraryDialogOpen,
     setgetLibraryDialogOpen,
-    isAdmin
+    isAdmin,
+    disableCreate
 }: {
         title: string,
         getLibraryState: GetLibraryItemByIDFormState,
@@ -42,7 +43,8 @@ export default function TitleElement({
         setcreateLibraryDialogOpen: (open: boolean) => void,
         getLibraryDialogOpen: boolean,
         setgetLibraryDialogOpen: (open: boolean) => void,
-        isAdmin: boolean
+        isAdmin: boolean,
+        disableCreate?: boolean
     }) {
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
@@ -90,7 +92,7 @@ export default function TitleElement({
                     <div>
                     <AlertDialog open={createLibraryDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
-                            <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Library Item</Button>
+                            <Button disabled={disableCreate} className="transition duration-300 col-start-1 col-end-2 cursor-pointer">Create Library Item</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <form action={handleCreateSubmit}>
@@ -158,6 +160,7 @@ export default function TitleElement({
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
+                    {disableCreate ? <p className="text-amber-700 text-xs mt-2">Library create/upload is online-only.</p> : null}
                     </div> : <div></div>}
                     <AlertDialog open={getLibraryDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>

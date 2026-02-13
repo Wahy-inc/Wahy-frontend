@@ -1,5 +1,7 @@
 import * as openApi from "@/lib/openApi"
-import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, SignInFormState, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
+import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
+import { createIdempotencyKey, enqueueOfflineMutation, isClientOnline, shouldQueueMutation } from "@/lib/offlineSync"
+import { getCachedData, offlineCacheKeys, setCachedData } from "@/lib/offlineCache"
 
 const api = new openApi.Api({
     baseUrl: '',
@@ -21,10 +23,15 @@ export async function getStudentMe(): Promise<openApi.StudentSelfRead | null> {
     try {
         const response = await api.api.getMeApiV1StudentsMeGet()
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.studentProfileMe, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.StudentSelfRead>(offlineCacheKeys.studentProfileMe)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -34,6 +41,7 @@ export async function listStudents(): Promise<openApi.StudentRead[] | null> {
         const response = await api.api.listAllApiV1StudentsGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.studentsList, response.data)
             const Students = response.data.map((student) => {
                 return {
                     student_id: student.id,
@@ -46,6 +54,10 @@ export async function listStudents(): Promise<openApi.StudentRead[] | null> {
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.StudentRead[]>(offlineCacheKeys.studentsList)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -107,6 +119,17 @@ export async function createStudent(state: CreateStudentFormState, formData: For
             special_notes: validation.data.specialNotes,
             private_notes: validation.data.privateNotes,
         }
+
+        if (!isClientOnline()) {
+            enqueueOfflineMutation({
+                entity_type: 'students',
+                operation: openApi.SyncOperation.Create,
+                payload: data as unknown as Record<string, unknown>,
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
+
         const response = await api.api.createApiV1StudentsPost(data)
 
         if (response.status === 201) {
@@ -115,6 +138,30 @@ export async function createStudent(state: CreateStudentFormState, formData: For
         }
         return {message: 'fail' }
     } catch (error) {
+        if (shouldQueueMutation(error)) {
+            enqueueOfflineMutation({
+                entity_type: 'students',
+                operation: openApi.SyncOperation.Create,
+                payload: {
+                    user_id: Number(validation.data.id),
+                    full_name_arabic: validation.data.arname,
+                    full_name_english: validation.data.enname,
+                    phone: validation.data.phone,
+                    date_of_birth: validation.data.dateOfBirth,
+                    timezone: validation.data.timeZone,
+                    current_juz: Number(validation.data.currjuz),
+                    current_surah: validation.data.currsurah,
+                    current_ayah: Number(validation.data.currayah),
+                    lessons_per_week: Number(validation.data.lessonsPerWeek),
+                    lesson_rate: Number(validation.data.lessonRate),
+                    billing_cycle: validation.data.billingCycle,
+                    special_notes: validation.data.specialNotes,
+                    private_notes: validation.data.privateNotes,
+                },
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
         return { message: 'fail' }
     }
 }
@@ -176,6 +223,18 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
             special_notes: validation.data.specialNotes,
             private_notes: validation.data.privateNotes,
         }
+
+        if (!isClientOnline()) {
+            enqueueOfflineMutation({
+                entity_type: 'students',
+                entity_id: studentId,
+                operation: openApi.SyncOperation.Update,
+                payload: data as unknown as Record<string, unknown>,
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
+
         const response = await api.api.updateApiV1StudentsStudentIdPatch(studentId, data)
 
         if (response.status === 200) {
@@ -184,41 +243,97 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
         }
         return {message: 'fail' }
     } catch (error) {
+        if (shouldQueueMutation(error)) {
+            enqueueOfflineMutation({
+                entity_type: 'students',
+                entity_id: studentId,
+                operation: openApi.SyncOperation.Update,
+                payload: {
+                    full_name_arabic: validation.data.arname,
+                    full_name_english: validation.data.enname,
+                    phone: validation.data.phone,
+                    date_of_birth: validation.data.dateOfBirth,
+                    timezone: validation.data.timeZone,
+                    current_juz: Number(validation.data.currjuz),
+                    current_surah: validation.data.currsurah,
+                    current_ayah: Number(validation.data.currayah),
+                    lessons_per_week: Number(validation.data.lessonsPerWeek),
+                    lesson_rate: Number(validation.data.lessonRate),
+                    billing_cycle: validation.data.billingCycle,
+                    special_notes: validation.data.specialNotes,
+                    private_notes: validation.data.privateNotes,
+                },
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
         return { message: 'fail' }
     }
 }
 
-export async function approveStudent(id:number, note: openApi.StudentApprovalRequest): Promise<boolean> {
+export async function approveStudent(id:number, note: openApi.StudentApprovalRequest): Promise<'success' | 'queued' | 'fail'> {
     const studentId = Number(id)
     if (isNaN(studentId)) {
-        return false
+        return 'fail'
     }
+
+    const payload = {
+        action: 'approve',
+        notes: note.notes ?? null,
+    }
+
     try {
         const response = await api.api.approveApiV1StudentsStudentIdApprovePost(id, note)
         if (response.status === 200) {
             window.location.reload() // Refresh the page after approving a student
-            return true
+            return 'success'
         }
-        return false
+        return 'fail'
     } catch (error) {
-        return false
+        if (shouldQueueMutation(error)) {
+            enqueueOfflineMutation({
+                entity_type: 'students_approval',
+                entity_id: studentId,
+                operation: openApi.SyncOperation.Update,
+                payload,
+                idempotency_key: createIdempotencyKey(),
+            })
+            return 'queued'
+        }
+        return 'fail'
     }
 }
 
-export async function rejectStudent(id:number, note: openApi.StudentApprovalRequest): Promise<boolean> {
+export async function rejectStudent(id:number, note: openApi.StudentApprovalRequest): Promise<'success' | 'queued' | 'fail'> {
     const studentId = Number(id)
     if (isNaN(studentId)) {
-        return false
+        return 'fail'
     }
+
+    const payload = {
+        action: 'reject',
+        notes: note.notes ?? null,
+    }
+
     try {
         const response = await api.api.rejectApiV1StudentsStudentIdRejectPost(id, note)
         if (response.status === 200) {
             window.location.reload() // Refresh the page after rejecting a student
-            return true
+            return 'success'
         }
-        return false
+        return 'fail'
     } catch (error) {
-        return false
+        if (shouldQueueMutation(error)) {
+            enqueueOfflineMutation({
+                entity_type: 'students_approval',
+                entity_id: studentId,
+                operation: openApi.SyncOperation.Update,
+                payload,
+                idempotency_key: createIdempotencyKey(),
+            })
+            return 'queued'
+        }
+        return 'fail'
     }
 }
 
@@ -227,10 +342,15 @@ export async function listSchedules(): Promise<openApi.ScheduleRead[] | null> {
         const response = await api.api.listAllApiV1SchedulesGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.schedulesListAdmin, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.ScheduleRead[]>(offlineCacheKeys.schedulesListAdmin)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -240,10 +360,15 @@ export async function listSchedulesMe(): Promise<openApi.ScheduleRead[] | null> 
         const response = await api.api.listMyScheduleApiV1SchedulesMeGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.schedulesListMe, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.ScheduleRead[]>(offlineCacheKeys.schedulesListMe)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -274,6 +399,17 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
             is_recurring: validation.data.is_recurring === 'true',
             notes: validation.data.notes,
         }
+
+        if (!isClientOnline()) {
+            enqueueOfflineMutation({
+                entity_type: 'schedules',
+                operation: openApi.SyncOperation.Create,
+                payload: data as unknown as Record<string, unknown>,
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
+
         const response = await api.api.createApiV1SchedulesPost(data)
 
         if (response.status === 201) {
@@ -281,6 +417,24 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
         }
         return {message: 'fail' }
     } catch (error) {
+        if (shouldQueueMutation(error)) {
+            enqueueOfflineMutation({
+                entity_type: 'schedules',
+                operation: openApi.SyncOperation.Create,
+                payload: {
+                    student_id: Number(validation.data.student_id),
+                    day_of_week: Number(validation.data.day_of_week),
+                    start_time: validation.data.start_time,
+                    end_time: validation.data.end_time,
+                    effective_from: validation.data.effective_from,
+                    effective_until: validation.data.effective_until,
+                    is_recurring: validation.data.is_recurring === 'true',
+                    notes: validation.data.notes,
+                },
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
         return { message: 'fail' }
     }
 }
@@ -313,6 +467,18 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
             cancellation_reason: validation.data.cancellation_reason,
             notes: validation.data.notes,
         }
+
+        if (!isClientOnline()) {
+            enqueueOfflineMutation({
+                entity_type: 'schedules',
+                entity_id: scheduleId,
+                operation: openApi.SyncOperation.Update,
+                payload: data as unknown as Record<string, unknown>,
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
+
         const response = await api.api.updateApiV1SchedulesScheduleIdPatch(scheduleId, data)
 
         if (response.status === 200) {
@@ -321,6 +487,26 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
         }
         return {message: 'fail' }
     } catch (error) {
+        if (shouldQueueMutation(error)) {
+            enqueueOfflineMutation({
+                entity_type: 'schedules',
+                entity_id: scheduleId,
+                operation: openApi.SyncOperation.Update,
+                payload: {
+                    day_of_week: Number(validation.data.day_of_week),
+                    start_time: validation.data.start_time,
+                    end_time: validation.data.end_time,
+                    effective_from: validation.data.effective_from,
+                    effective_until: validation.data.effective_until,
+                    is_recurring: validation.data.is_recurring === 'true',
+                    is_active: validation.data.is_active === 'true',
+                    cancellation_reason: validation.data.cancellation_reason,
+                    notes: validation.data.notes,
+                },
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
         return { message: 'fail' }
     }
 }
@@ -361,23 +547,38 @@ export async function listLessons(stu_id:number | null = null): Promise<openApi.
         const response = await api.api.listAllApiV1LessonsGet({student_id: stu_id})
 
         if (response.status === 200) {
+            if (stu_id === null) {
+                setCachedData(offlineCacheKeys.lessonsListAdmin, response.data)
+            } else {
+                setCachedData(offlineCacheKeys.lessonsListByStudent(stu_id), response.data)
+            }
             return response.data
         }
         return null
     } catch (error) {
+        const cacheKey = stu_id === null ? offlineCacheKeys.lessonsListAdmin : offlineCacheKeys.lessonsListByStudent(stu_id)
+        const cached = getCachedData<openApi.LessonRead[]>(cacheKey)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
 
-export async function listLessonsMe(stu_id:number | null = null): Promise<openApi.LessonRead[] | null> {
+export async function listLessonsMe(): Promise<openApi.LessonRead[] | null> {
     try {
         const response = await api.api.listMyLessonsApiV1LessonsMeGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.lessonsListMe, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.LessonRead[]>(offlineCacheKeys.lessonsListMe)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -387,10 +588,15 @@ export async function listLibrary(): Promise<openApi.LibraryItemRead[] | null> {
         const response = await api.api.listAllApiV1LibraryGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.libraryListAdmin, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.LibraryItemRead[]>(offlineCacheKeys.libraryListAdmin)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -400,10 +606,15 @@ export async function listLibraryMe(): Promise<openApi.LibraryItemRead[] | null>
         const response = await api.api.listMyLibraryApiV1LibraryMeGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.libraryListMe, response.data)
             return response.data
         }
         return null
     } catch (error) {
+        const cached = getCachedData<openApi.LibraryItemRead[]>(offlineCacheKeys.libraryListMe)
+        if (cached) {
+            return cached
+        }
         return null
     }
 }
@@ -500,10 +711,15 @@ export async function listInvoices(): Promise<openApi.InvoiceRead[]> {
         const response = await api.api.listAllApiV1InvoicesGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.invoicesListAdmin, response.data)
             return response.data
         }
         return []
     } catch (error) {
+        const cached = getCachedData<openApi.InvoiceRead[]>(offlineCacheKeys.invoicesListAdmin)
+        if (cached) {
+            return cached
+        }
         return []
     }
 }
@@ -513,10 +729,15 @@ export async function listInvoicesMe(): Promise<openApi.InvoiceRead[]> {
         const response = await api.api.listMyInvoicesApiV1InvoicesMeGet()
 
         if (response.status === 200) {
+            setCachedData(offlineCacheKeys.invoicesListMe, response.data)
             return response.data
         }
         return []
     } catch (error) {
+        const cached = getCachedData<openApi.InvoiceRead[]>(offlineCacheKeys.invoicesListMe)
+        if (cached) {
+            return cached
+        }
         return []
     }
 }
@@ -735,7 +956,17 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         absence_reason: validation.data.absence_reason,
         pass_fail: validation.data.pass_fail === 'true'? true : false,
         }
-        console.log(data);
+
+        if (!isClientOnline()) {
+            enqueueOfflineMutation({
+                entity_type: 'lessons',
+                operation: openApi.SyncOperation.Create,
+                payload: data as unknown as Record<string, unknown>,
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
+
         const response = await api.api.createApiV1LessonsPost(data)
 
         if (response.status === 201) {
@@ -744,6 +975,31 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         }
         return {message: 'fail' }
     } catch (error) {
+        if (shouldQueueMutation(error)) {
+            enqueueOfflineMutation({
+                entity_type: 'lessons',
+                operation: openApi.SyncOperation.Create,
+                payload: {
+                    student_id: String(validation.data.student_id),
+                    schedule_id: String(validation.data.schedule_id),
+                    sheikh_notes: validation.data.sheikh_notes,
+                    student_notes: validation.data.student_notes,
+                    date: validation.data.date,
+                    type: validation.data.type,
+                    attendance: validation.data.attendance,
+                    juz_number: String(validation.data.juz),
+                    surah_name: validation.data.surah,
+                    ayah_from: String(validation.data.ayah_from),
+                    ayah_to: String(validation.data.ayah_to),
+                    quality: validation.data.quality,
+                    attempts: String(validation.data.attempts),
+                    absence_reason: validation.data.absence_reason,
+                    pass_fail: validation.data.pass_fail === 'true' ? true : false,
+                },
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
         return { message: 'fail' }
     }
 }
@@ -784,6 +1040,18 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
         attempts: Number(validation.data.attempts),
         absence_reason: validation.data.absence_reason
         }
+
+        if (!isClientOnline()) {
+            enqueueOfflineMutation({
+                entity_type: 'lessons',
+                entity_id: lessonId,
+                operation: openApi.SyncOperation.Update,
+                payload: data as unknown as Record<string, unknown>,
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
+
         const response = await api.api.updateApiV1LessonsLessonIdPatch(lessonId, data)
 
         if (response.status === 200) {
@@ -792,6 +1060,30 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
         }
         return {message: 'fail' }
     } catch (error) {
+        if (shouldQueueMutation(error)) {
+            enqueueOfflineMutation({
+                entity_type: 'lessons',
+                entity_id: lessonId,
+                operation: openApi.SyncOperation.Update,
+                payload: {
+                    schedule_id: Number(validation.data.schedule_id),
+                    sheikh_notes: validation.data.sheikh_notes,
+                    student_notes: validation.data.student_notes,
+                    date: validation.data.date,
+                    type: validation.data.type,
+                    attendance: validation.data.attendance,
+                    juz_number: Number(validation.data.juz),
+                    surah_name: validation.data.surah,
+                    ayah_from: Number(validation.data.ayah_from),
+                    ayah_to: Number(validation.data.ayah_to),
+                    quality: validation.data.quality,
+                    attempts: Number(validation.data.attempts),
+                    absence_reason: validation.data.absence_reason,
+                },
+                idempotency_key: createIdempotencyKey(),
+            })
+            return { message: 'queued' }
+        }
         return { message: 'fail' }
     }
 }

@@ -23,6 +23,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useAuth } from "@/lib/auth-context";
 import { useToastListener } from "@/lib/toastListener";
+import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 
 export default function Students() {
     const [students, setStudents] = React.useState<openApi.StudentRead[] | null>(null)
@@ -35,6 +36,7 @@ export default function Students() {
     const [createStudentDialogOpen, setCreateStudentDialogOpen] = React.useState(false)
     const [getStudentDialogOpen, setGetStudentDialogOpen] = React.useState(false)
     const [updateStudentDialogOpen, setUpdateStudentDialogOpen] = React.useState(false)
+    const [approvalStatus, setApprovalStatus] = React.useState<'success' | 'queued' | 'fail' | null>(null)
     const { isAdmin, isLoading: authLoading } = useAuth()
 
     useToastListener(createStudentState, {functionName: "Create Student", successMessage: "Student created successfully", errorMessage: "Failed to create student"})
@@ -45,7 +47,12 @@ export default function Students() {
         if (getStudentState?.message === 'success' && getStudentState.data) {
             setStudents([getStudentState.data])
         }
-        if (createStudentState?.message === 'success' || updateStudentState?.message === 'success') {
+        if (
+            createStudentState?.message === 'success' ||
+            createStudentState?.message === 'queued' ||
+            updateStudentState?.message === 'success' ||
+            updateStudentState?.message === 'queued'
+        ) {
             const fetchStudents = async () => {
                 try {
                     setLoading(true)
@@ -66,6 +73,12 @@ export default function Students() {
 
     React.useEffect(() => {
         if (authLoading) return
+
+        const cachedStudents = getCachedData<openApi.StudentRead[]>(offlineCacheKeys.studentsList)
+        if (cachedStudents && cachedStudents.length > 0) {
+            setStudents(cachedStudents)
+            setLoading(false)
+        }
 
         const fetchStudents = async () => {
                 try {
@@ -89,6 +102,26 @@ export default function Students() {
             <Input id={name} name={name} type={type} placeholder={holder} defaultValue={holder}></Input>
         </Field>
     )
+
+    const handleApproveStudent = async (studentId: number) => {
+        const status = await approveStudent(studentId, {})
+        setApprovalStatus(status)
+
+        if (status !== 'success') {
+            const data = await listStudents()
+            setStudents(data)
+        }
+    }
+
+    const handleRejectStudent = async (studentId: number) => {
+        const status = await rejectStudent(studentId, {})
+        setApprovalStatus(status)
+
+        if (status !== 'success') {
+            const data = await listStudents()
+            setStudents(data)
+        }
+    }
 
     const studentElement = (student: openApi.StudentRead, color: string) => (
         <div className="flex w-full flex-col gap-6">
@@ -122,10 +155,10 @@ export default function Students() {
                 </ItemContent>
                     {student.registration_status === openApi.RegistrationStatus.Pending ? (
                         <ItemActions>
-                            <Button onClick={() => approveStudent(student.id, {})} size="sm" variant="outline" className="transition duration-300 border-green-500 border text-green-500 bg-transparent hover:bg-green-500 hover:text-white">
+                            <Button onClick={() => void handleApproveStudent(student.id)} size="sm" variant="outline" className="transition duration-300 border-green-500 border text-green-500 bg-transparent hover:bg-green-500 hover:text-white">
                                 Invite
                             </Button>
-                            <Button onClick={() => rejectStudent(student.id, {})} size="sm" variant="outline" className="transition duration-300 border-red-500 border text-red-500 bg-transparent hover:bg-red-500 hover:text-white">
+                            <Button onClick={() => void handleRejectStudent(student.id)} size="sm" variant="outline" className="transition duration-300 border-red-500 border text-red-500 bg-transparent hover:bg-red-500 hover:text-white">
                                 Reject
                             </Button>
                         </ItemActions>
@@ -308,6 +341,21 @@ export default function Students() {
 
     const content = (
         <div className="flex flex-col gap-12 w-full">
+            {(createStudentState?.message || updateStudentState?.message || approvalStatus) && (
+                <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
+                    createStudentState?.message === 'queued' || updateStudentState?.message === 'queued' || approvalStatus === 'queued'
+                        ? 'border-amber-200 bg-amber-50 text-amber-800'
+                        : createStudentState?.message === 'fail' || updateStudentState?.message === 'fail' || approvalStatus === 'fail'
+                            ? 'border-red-200 bg-red-50 text-red-800'
+                            : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                }`}>
+                    {createStudentState?.message === 'queued' || updateStudentState?.message === 'queued' || approvalStatus === 'queued'
+                        ? 'Saved offline. This change will sync automatically when connection is restored.'
+                        : createStudentState?.message === 'fail' || updateStudentState?.message === 'fail' || approvalStatus === 'fail'
+                            ? 'Action failed. Please review your input and try again.'
+                            : 'Action completed successfully.'}
+                </div>
+            )}
             <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">Pending Students</p>
                 {pendingStudents && pendingStudents.length > 0 ? pendingStudents.map((student) => (

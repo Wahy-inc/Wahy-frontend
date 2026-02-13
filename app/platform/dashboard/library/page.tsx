@@ -20,6 +20,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { useToastListener } from "@/lib/toastListener";
+import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
+import { isClientOnline } from "@/lib/offlineSync";
+import Image from "next/image";
 
 
 export default function Schedules() {
@@ -30,10 +33,22 @@ export default function Schedules() {
     const [getLibraryItemState, getLibraryItemAction, getLibraryItemPending] = React.useActionState(getLibraryItem, undefined)
     const [createLibraryDialogOpen, setCreateLibraryDialogOpen] = React.useState(false)
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
+    const [isOffline, setIsOffline] = React.useState(false)
     const { isAdmin, isLoading: authLoading } = useAuth()
 
     useToastListener(createLibraryItemState, {functionName: "Create Library Item", successMessage: "Library item created successfully", errorMessage: "Failed to create library item"})
     useToastListener(getLibraryItemState, {functionName: "Get Library Item", successMessage: "Library item fetched successfully", errorMessage: "Failed to fetch library item"})
+    React.useEffect(() => {
+        const refreshOffline = () => setIsOffline(!isClientOnline())
+        refreshOffline()
+        window.addEventListener('online', refreshOffline)
+        window.addEventListener('offline', refreshOffline)
+
+        return () => {
+            window.removeEventListener('online', refreshOffline)
+            window.removeEventListener('offline', refreshOffline)
+        }
+    }, [])
 
     React.useEffect(() => {        
         if (getLibraryItemState?.message === 'success' && getLibraryItemState.data) {
@@ -59,6 +74,14 @@ export default function Schedules() {
 
     React.useEffect(() => {
         if (authLoading) return // Wait until auth is loaded
+
+        const cachedLibraryItems = getCachedData<openApi.LibraryItemRead[]>(
+            isAdmin ? offlineCacheKeys.libraryListAdmin : offlineCacheKeys.libraryListMe,
+        )
+        if (cachedLibraryItems && cachedLibraryItems.length > 0) {
+            setLibraryItems(cachedLibraryItems)
+            setLoading(false)
+        }
         
         const fetchLibraryItems = async () => {
             try {
@@ -87,9 +110,11 @@ export default function Schedules() {
             <Card className="relative mx-auto w-full max-w-sm pt-0 overflow-hidden pb-2 min-h-full flex flex-col justify-between">
             <div onClick={() => window.location.href=item.external_url} className="cursor-pointer">
                 <div className="absolute inset-0 z-10 aspect-video bg-black/35" />
-                <img
+                <Image
                     src={item.thumbnail_image_path || 'https://via.placeholder.com/400x200?text=No+Image'}
                     alt="Event cover"
+                    width={400}
+                    height={200}
                     className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale dark:brightness-40"
                 />
                 <CardHeader>
@@ -119,7 +144,12 @@ export default function Schedules() {
                             })() : null}
                 </CardFooter>
                 </div>
-                <Button onClick={() => deleteLibraryItem(item.id)} variant='destructive' className="transition duration-300 hover:bg-red-800 mx-2">
+                <Button disabled={isOffline} onClick={() => {
+                    if (isOffline) {
+                        return
+                    }
+                    deleteLibraryItem(item.id)
+                }} variant='destructive' className="transition duration-300 hover:bg-red-800 mx-2 disabled:opacity-50 disabled:cursor-not-allowed">
                     <icon.Trash className="text-white cursor-pointer" size={16}/>
                 </Button>
             </Card>
@@ -140,6 +170,7 @@ export default function Schedules() {
             getLibraryDialogOpen={getLibraryDialogOpen}
             setgetLibraryDialogOpen={setGetLibraryDialogOpen}
             isAdmin={isAdmin}
+            disableCreate={isOffline}
         />
     )
 
@@ -153,5 +184,8 @@ export default function Schedules() {
         </div>
     ))
 
-    return dashboardPage({children: <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-4 md:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>, title: title})
+    return dashboardPage({children: <div className="flex flex-col gap-4 w-full">
+        {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">Library create/upload and delete are online-only.</p> : null}
+        <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-4 md:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>
+    </div>, title: title})
 }

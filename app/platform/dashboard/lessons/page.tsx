@@ -13,6 +13,7 @@ import lessonElement from "./lesson_element";
 import TitleElement from "./title_element";
 import { useAuth } from "@/lib/auth-context";
 import { useToastListener } from "@/lib/toastListener";
+import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 
 
 export default function Lessons() {
@@ -40,6 +41,14 @@ export default function Lessons() {
     
     React.useEffect(() => {
         if (authLoading) return
+
+        const cachedLessons = getCachedData<openApi.LessonRead[]>(
+            isAdmin ? offlineCacheKeys.lessonsListAdmin : offlineCacheKeys.lessonsListMe,
+        )
+        if (cachedLessons && cachedLessons.length > 0) {
+            setLessons(cachedLessons)
+            setLoading(false)
+        }
         
         const fetchLessons = async () => {
             try {
@@ -61,7 +70,12 @@ export default function Lessons() {
         if (getLessonState?.message == 'success' && getLessonState.data) {
             setFetchedLesson(getLessonState.data)
         }
-        if (createState?.message === 'success' || updateState?.message === 'success') {
+        if (
+            createState?.message === 'success' ||
+            createState?.message === 'queued' ||
+            updateState?.message === 'success' ||
+            updateState?.message === 'queued'
+        ) {
             const fetchLessons = async () => {
                 try {
                     setLoading(true)
@@ -158,8 +172,25 @@ export default function Lessons() {
     if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
     if (!lessons || lessons.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">No lessons found.</p>, title: title})
 
+    const actionStatusBanner = (createState?.message || updateState?.message) ? (
+        <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
+            createState?.message === 'queued' || updateState?.message === 'queued'
+                ? 'border-amber-200 bg-amber-50 text-amber-800'
+                : createState?.message === 'fail' || updateState?.message === 'fail'
+                    ? 'border-red-200 bg-red-50 text-red-800'
+                    : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+        }`}>
+            {createState?.message === 'queued' || updateState?.message === 'queued'
+                ? 'Saved offline. Lesson changes will sync automatically when connection is restored.'
+                : createState?.message === 'fail' || updateState?.message === 'fail'
+                    ? 'Action failed. Please review your input and try again.'
+                    : 'Action completed successfully.'}
+        </div>
+    ) : null
+
     if (fetchedLesson && getLessonState?.message == 'success') {
         return dashboardPage({children: [
+            <div key="status-banner" className='mx-10'>{actionStatusBanner}</div>,
             <div key="clear-filter" className='flex flex-row justify-end'>
                 <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLesson(null)}}>Clear Filter</Button>
             </div>
@@ -184,7 +215,10 @@ export default function Lessons() {
             />
         )})
     } else {
-        return dashboardPage({children: displayContent, title: title})
+        return dashboardPage({children: [
+            <div key="status-banner">{actionStatusBanner}</div>,
+            <div key="content">{displayContent}</div>
+        ], title: title})
     }
 
 }

@@ -5,18 +5,6 @@ const api = new openApi.Api({
     baseUrl: '',
 })
 
-const formatDate = (isoDate: string): string | undefined => {
-    return new Date(isoDate).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false,
-    })
-}
-
 export async function signup(state: SignupFormState, formData: FormData): Promise<SignupFormState> {
     const validation = SignUpSchema.safeParse({
         arname: formData.get('ar-name'),
