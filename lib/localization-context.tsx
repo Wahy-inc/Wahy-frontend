@@ -20,23 +20,27 @@ const translations: Record<Language, any> = {
 }
 
 export function LocalizationProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(() => {
-    if (typeof window !== 'undefined') {
-      const savedLanguage = localStorage.getItem('language') as Language | null
-      if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ar')) {
-        return savedLanguage
-      }
+  const [language, setLanguageState] = useState<Language>('en')
+  const [isHydrated, setIsHydrated] = useState(false)
+
+  // Sync with localStorage after hydration to avoid mismatch
+  useEffect(() => {
+    const savedLanguage = localStorage.getItem('language') as Language | null
+    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ar')) {
+      setLanguageState(savedLanguage)
     }
-    return 'en'
-  })
+    document.documentElement.lang = savedLanguage || 'en'
+    document.documentElement.dir = (savedLanguage || 'en') === 'ar' ? 'rtl' : 'ltr'
+    setIsHydrated(true)
+  }, [])
 
   // Update DOM when language changes
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (isHydrated) {
       document.documentElement.lang = language
       document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'
     }
-  }, [language])
+  }, [language, isHydrated])
 
   const setLanguage = (newLanguage: Language) => {
     setLanguageState(newLanguage)
