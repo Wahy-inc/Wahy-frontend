@@ -735,6 +735,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         absence_reason: validation.data.absence_reason,
         pass_fail: validation.data.pass_fail === 'true'? true : false,
         }
+        console.log(data);
         const response = await api.api.createApiV1LessonsPost(data)
 
         if (response.status === 201) {
