@@ -544,7 +544,7 @@ export async function deleteSchedule(scheduleId: number): Promise<boolean> {
 
 export async function listLessons(stu_id:number | null = null): Promise<openApi.LessonRead[] | null> {
     try {
-        const response = await api.api.listAllApiV1LessonsGet({student_id: stu_id})
+        const response = await api.api.listAllApiV1LessonsGet(stu_id? {student_id: stu_id} : {student_id: undefined})
 
         if (response.status === 200) {
             if (stu_id === null) {
@@ -957,6 +957,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         pass_fail: validation.data.pass_fail === 'true'? true : false,
         }
 
+        console.log('Created lesson data:', data);
         if (!isClientOnline()) {
             enqueueOfflineMutation({
                 entity_type: 'lessons',
@@ -970,8 +971,11 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         const response = await api.api.createApiV1LessonsPost(data)
 
         if (response.status === 201) {
-            listLessons() // Refresh the lessons list after creating a new lesson
+            console.log('created lesson');
             return {message: 'success' }
+        }
+        if (response.status === 422) {
+            return {message: 'fail'}
         }
         return {message: 'fail' }
     } catch (error) {

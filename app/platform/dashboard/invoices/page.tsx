@@ -138,7 +138,7 @@ export default function Invoices() {
                     <ItemMedia variant="icon">
                         <DollarSign />
                     </ItemMedia>
-                <ItemTitle>Invoice ID: {invoice.invoice_number} , Student: {getLocalStudent(invoice.student_id)?.full_name_english}</ItemTitle>
+                <ItemTitle>Invoice ID: {invoice.invoice_number} , Student: {isAdmin? getLocalStudent(invoice.student_id)?.full_name_english : 'Me'}</ItemTitle>
                     Amount: {invoice.total_amount} {invoice.currency} , Status: {invoice.status} <br />
                     <div id="accordion-data" className="text-sm">
                         <Accordion

@@ -29,6 +29,11 @@ export function useToastListener(actionState: ActionState, config: ToastConfig =
             return
         }
 
+        if (actionState.message === 'fail') {
+            toast.error(errorMessage || `${functionName || 'Action'} failed`)
+            return
+        }
+
         if (actionState.message == 'success' || actionState.message == 'Signin successful' || actionState.message == 'Signup successful') {
             toast.success(successMessage || `${functionName || 'Action'} completed successfully`)
             return
