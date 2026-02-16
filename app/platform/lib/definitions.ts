@@ -61,14 +61,12 @@ export const CreatLessonSchema = zod.object({
     schedule_id: zod.string().min(1, { error: 'Schedule ID is required' }),
     date: zod.string().min(1, { error: 'Date is required' }).trim(),
     type: zod.enum(LessonType, { error: 'Invalid lesson type' }),
-    pass_fail: zod.string({ error: 'Pass/Fail is required' }).trim(),
     attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }),
     juz: zod.string({ error: 'Juz must be a number' }).min(1, { error: 'Juz is required' }),
     surah: zod.string().min(1, { error: 'Surah is required' }).trim(),
     ayah_from: zod.string({ error: 'Ayah from must be a number' }).min(1, { error: 'Ayah from is required' }),
     ayah_to: zod.string({ error: 'Ayah to must be a number' }).min(1, { error: 'Ayah to is required' }),
     quality: zod.enum(LessonQuality, { error: 'Invalid lesson quality' }),
-    attempts: zod.string({ error: 'Attempts must be a number' }).min(1, { error: 'Attempts is required' }),
     absence_reason: zod.string().min(0).trim(),
     sheikh_notes: zod.string().min(0).trim(),
     student_notes: zod.string().min(0).trim(),
@@ -86,7 +84,6 @@ export type CreateLessonFormState =
     ayah_from?: string[];
     ayah_to?: string[];
     quality?: string[];
-    attempts?: string[];
     absence_reason?: string[];
     sheikh_notes?: string[];
     student_notes?: string[];
@@ -106,7 +103,6 @@ export const UpdateLessonSchema = zod.object({
     ayah_from: zod.string({ error: 'Ayah from must be a number' }).min(1, { error: 'Ayah from is required' }),
     ayah_to: zod.string({ error: 'Ayah to must be a number' }).min(1, { error: 'Ayah to is required' }),
     quality: zod.enum(LessonQuality, { error: 'Invalid lesson quality' }),
-    attempts: zod.string({ error: 'Attempts must be a number' }).min(1, { error: 'Attempts is required' }),
     absence_reason: zod.string().min(0, { error: 'Absence reason is required' }).trim(),
     sheikh_notes: zod.string().min(0, { error: 'Sheikh notes is required' }).trim(),
     student_notes: zod.string().min(0, { error: 'Student notes is required' }).trim(),
@@ -123,7 +119,6 @@ export type UpdateLessonFormState =
     ayah_from?: string[];
     ayah_to?: string[];
     quality?: string[];
-    attempts?: string[];
     absence_reason?: string[];
     sheikh_notes?: string[];
     student_notes?: string[];

@@ -2,10 +2,12 @@
 
 import {ColumnDef} from "@tanstack/react-table";
 import * as openApi from "@/lib/openApi"
+import * as ar from '../../../../lib/localization/ar.json'
+import * as en from '../../../../lib/localization/en.json'
 
 export const columns: ColumnDef<openApi.LessonRead>[] = [
     {
-        accessorKey: 'type',
+        accessorKey: 'Type',
         header: 'Type',
     },
     {
@@ -27,10 +29,6 @@ export const columns: ColumnDef<openApi.LessonRead>[] = [
     {
         accessorKey: 'quality',
         header: 'Quality',
-    },
-    {
-        accessorKey: 'attempts',
-        header: 'Attempts',
     },
 ]
 

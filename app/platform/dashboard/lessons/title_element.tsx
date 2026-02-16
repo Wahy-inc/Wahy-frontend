@@ -24,6 +24,7 @@ import * as openApi from "@/lib/openApi";
 import { useLocalization } from "@/lib/localization-context";
 import React, { JSX, useState } from "react";
 import { CreateLessonFormState, GetLessonByIDFormState } from "../../lib/definitions";
+import StudentMenu from "@/components/studentsMenu";
 
 export default function TitleElement({
     title,
@@ -131,7 +132,7 @@ export default function TitleElement({
                             <AlertDialogTitle>{t('lessons.create_lesson')}</AlertDialogTitle>
                                 <div className="flex flex-col gap-4 rtl:text-right">
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.student_id'),"student_id", t('lessons.enter_student_id'), "number")}
+                                        <StudentMenu></StudentMenu>
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
                                     <div className='flex flex-col'>
@@ -224,29 +225,6 @@ export default function TitleElement({
                                         </div>
                                         {createFormSubmitted && createState?.error?.quality && <p className="text-red-500 text-sm">{createState.error.quality}</p>}
                                     </div>
-                                    <div className='flex flex-col'>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="pass_fail" className="text-sm font-medium">{t('lessons.pass_fail')}</label>
-                                            <Select name="pass_fail">
-                                                <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder={t('lessons.select_pass_fail')} />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectLabel>Pass/Fail</SelectLabel>
-                                                        <SelectItem value="true">Pass</SelectItem>
-                                                        <SelectItem value="false">Fail</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        {createFormSubmitted && createState?.error?.pass_fail && <p className="text-red-500 text-sm">{createState.error.pass_fail}</p>}
-                                    </div>
-
-                                        <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.attempts'), "attempts", "attempts", "number")}
-                                            {createFormSubmitted && createState?.error?.attempts && <p className="text-red-500 text-sm">{createState.error.attempts}</p>}
-                                        </div>
                                     </div>
                                     <div className='flex flex-col'>
                                         {fieldInput(t('lessons.absence_reason'), "absence_reason", t('lessons.enter_reason'), "text")}

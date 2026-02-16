@@ -930,9 +930,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         ayah_from: formData.get('ayah_from'),
         ayah_to: formData.get('ayah_to'),
         quality: formData.get('quality'),
-        attempts: formData.get('attempts'),
         absence_reason: formData.get('absence_reason'),
-        pass_fail: formData.get('pass_fail'),
     })
 
     if (!validation.success) {
@@ -952,9 +950,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         ayah_from: String(validation.data.ayah_from),
         ayah_to: String(validation.data.ayah_to),
         quality: validation.data.quality,
-        attempts: String(validation.data.attempts),
         absence_reason: validation.data.absence_reason,
-        pass_fail: validation.data.pass_fail === 'true'? true : false,
         }
 
         console.log('Created lesson data:', data);
@@ -996,9 +992,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
                     ayah_from: String(validation.data.ayah_from),
                     ayah_to: String(validation.data.ayah_to),
                     quality: validation.data.quality,
-                    attempts: String(validation.data.attempts),
                     absence_reason: validation.data.absence_reason,
-                    pass_fail: validation.data.pass_fail === 'true' ? true : false,
                 },
                 idempotency_key: createIdempotencyKey(),
             })
@@ -1021,7 +1015,6 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
         ayah_from: formData.get('ayah-from'),
         ayah_to: formData.get('ayah-to'),
         quality: formData.get('quality'),
-        attempts: formData.get('attempts'),
         absence_reason: formData.get('absence-reason'),
     })
 
@@ -1041,7 +1034,6 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
         ayah_from: Number(validation.data.ayah_from),
         ayah_to: Number(validation.data.ayah_to),
         quality: validation.data.quality,
-        attempts: Number(validation.data.attempts),
         absence_reason: validation.data.absence_reason
         }
 
@@ -1081,7 +1073,6 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
                     ayah_from: Number(validation.data.ayah_from),
                     ayah_to: Number(validation.data.ayah_to),
                     quality: validation.data.quality,
-                    attempts: Number(validation.data.attempts),
                     absence_reason: validation.data.absence_reason,
                 },
                 idempotency_key: createIdempotencyKey(),
