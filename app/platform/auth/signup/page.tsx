@@ -155,11 +155,11 @@ export default function SignUp() {
       </div>
       <div className="flex flex-row justify-between gap-3 items-center">
       <Field>
-      <FieldLabel htmlFor="lessons-per-week" style={{minHeight: '3rem'}}>Lessons per week</FieldLabel>
+      <FieldLabel htmlFor="lessons-per-week" style={{minHeight: '3rem'}}>Classes per week</FieldLabel>
         <Input 
           id="lessons-per-week" 
           name="lessons-per-week"
-          placeholder="Enter your lessons per week" 
+          placeholder="" 
           className="bg-slate-100 text-slate-800"
           disabled={pending}
           type="number"
@@ -167,11 +167,11 @@ export default function SignUp() {
         {state?.error?.lessonsPerWeek && <p className="text-red-500 text-sm">{state.error.lessonsPerWeek}</p>}
       </Field>
       <Field>
-      <FieldLabel htmlFor="lessons-rate" style={{minHeight: '3rem'}}>Lessons rate</FieldLabel>
+      <FieldLabel htmlFor="lessons-rate" style={{minHeight: '3rem'}}>Classes rate</FieldLabel>
         <Input 
           id="lessons-rate" 
           name="lessons-rate"
-          placeholder="Enter your lessons rate" 
+          placeholder="" 
           className="bg-slate-100 text-slate-800"
           disabled={pending}
           type="number"
