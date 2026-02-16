@@ -160,13 +160,91 @@ export default function Students() {
                             <AccordionItem key={student.id} value={student.id.toString()}>
                             <AccordionTrigger>{t('common.edit')}</AccordionTrigger>
                             <AccordionContent>
-                                {t('students.phone')}: {student.phone}    ,    {t('students.status')}: {getStudentStatusLabel(student.status)}<br />
-                                {t('students.date_of_birth')}: {student.date_of_birth}   ,   {t('students.timezone')}: {student.timezone}<br />
-                                {t('students.current_juz')}: {student.current_juz} , {t('students.current_surah')}: {student.current_surah} , {t('students.current_ayah')}: {student.current_ayah} <br />
-                                {t('students.lessons_rate')}: {student.lesson_rate} , {t('students.lessons_per_week')}: {student.lessons_per_week} <br />
-                                {t('students.billing_cycle')}: {student.billing_cycle}    ,    <br /><br />
-                                {t('students.private_notes')}: {student.private_notes} <br />
-                                {t('students.special_notes')}: {student.special_notes} <br />
+                                <div className={`space-y-6 pt-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
+                                  {/* Contact Information */}
+                                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
+                                    <h3 className="font-semibold text-blue-900 mb-3 text-sm">{t('students.phone')} • {t('students.status')}</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="flex flex-col">
+                                        <span className="text-xs text-blue-700 font-medium">{t('students.phone')}</span>
+                                        <span className="text-sm text-slate-800 font-semibold">{student.phone}</span>
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <span className="text-xs text-blue-700 font-medium">{t('students.status')}</span>
+                                        <span className="inline-block bg-blue-200 text-blue-800 px-2 py-1 rounded text-xs font-semibold w-fit">{getStudentStatusLabel(student.status)}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Personal Information */}
+                                  <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg">
+                                    <h3 className="font-semibold text-purple-900 mb-3 text-sm">{t('students.date_of_birth')} • {t('students.timezone')}</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div className="flex flex-col">
+                                        <span className="text-xs text-purple-700 font-medium">{t('students.date_of_birth')}</span>
+                                        <span className="text-sm text-slate-800 font-semibold">{student.date_of_birth}</span>
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <span className="text-xs text-purple-700 font-medium">{t('students.timezone')}</span>
+                                        <span className="text-sm text-slate-800 font-semibold">{student.timezone}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Memorization Progress */}
+                                  <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg">
+                                    <h3 className="font-semibold text-green-900 mb-3 text-sm">{t('students.current_juz')} • {t('students.current_surah')} • {t('students.current_ayah')}</h3>
+                                    <div className="grid grid-cols-3 gap-4">
+                                      <div className="flex flex-col">
+                                        <span className="text-xs text-green-700 font-medium">{t('students.current_juz')}</span>
+                                        <span className="text-sm text-slate-800 font-semibold">{student.current_juz}</span>
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <span className="text-xs text-green-700 font-medium">{t('students.current_surah')}</span>
+                                        <span className="text-sm text-slate-800 font-semibold">{student.current_surah}</span>
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <span className="text-xs text-green-700 font-medium">{t('students.current_ayah')}</span>
+                                        <span className="text-sm text-slate-800 font-semibold">{student.current_ayah}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Lessons & Billing */}
+                                  <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-lg">
+                                    <h3 className="font-semibold text-amber-900 mb-3 text-sm">{t('students.lessons_rate')} • {t('students.lessons_per_week')} • {t('students.billing_cycle')}</h3>
+                                    <div className="grid grid-cols-3 gap-4">
+                                      <div className="flex flex-col">
+                                        <span className="text-xs text-amber-700 font-medium">{t('students.lessons_rate')}</span>
+                                        <span className="text-sm text-slate-800 font-semibold">{student.lesson_rate}</span>
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <span className="text-xs text-amber-700 font-medium">{t('students.lessons_per_week')}</span>
+                                        <span className="text-sm text-slate-800 font-semibold">{student.lessons_per_week}</span>
+                                      </div>
+                                      <div className="flex flex-col">
+                                        <span className="text-xs text-amber-700 font-medium">{t('students.billing_cycle')}</span>
+                                        <span className="inline-block bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-semibold w-fit">{student.billing_cycle}</span>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  {/* Notes */}
+                                  <div className="space-y-3">
+                                    {student.private_notes && (
+                                      <div className="bg-gray-50 border-l-4 border-gray-400 p-3 rounded">
+                                        <span className="text-xs text-gray-700 font-medium">{t('students.private_notes')}</span>
+                                        <p className="text-sm text-slate-700 mt-1">{student.private_notes}</p>
+                                      </div>
+                                    )}
+                                    {student.special_notes && (
+                                      <div className="bg-gray-50 border-l-4 border-gray-400 p-3 rounded">
+                                        <span className="text-xs text-gray-700 font-medium">{t('students.special_notes')}</span>
+                                        <p className="text-sm text-slate-700 mt-1">{student.special_notes}</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
                             </AccordionContent>
                             </AccordionItem>
                         </Accordion>
