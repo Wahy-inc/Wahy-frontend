@@ -96,7 +96,8 @@
     "no_lessons_found": "No Classes found for student ID:",
     "recited": "Recited",
     "new_memorization": "New Memorization",
-    "id": "ID"
+    "id": "ID",
+    "due_date": "Due Date"
   },
   "schedules": {
     "title": "Schedules",
@@ -207,8 +208,8 @@
     "invoice_id_label": "Invoice ID",
     "period_from": "Period from",
     "period_from_label": "Period From",
-    "period_to": "Period to",
-    "period_to_label": "Period To",
+    "period_to": "to",
+    "period_to_label": "To",
     "to": "To",
     "due_date": "Due date",
     "due_label": "Due",
@@ -295,6 +296,14 @@
   },
   "analytics": {
     "title": "Analytics",
+    "attendance_analytics": "Attendance Analytics",
+    "performance_analytics": "Performance Analytics",
+    "financial_analytics": "Financial Analytics",
+    "operational_analytics": "Operational Analytics",
+    "start_time": "Start Time",
+    "end_time": "End Time",
+    "period_from": "Period From",
+    "period_to": "To",
     "total_lessons": "Total Lessons",
     "present": "Present",
     "late": "Late",
@@ -305,7 +314,17 @@
     "passed_count": "Passed Count",
     "pass_rate": "Pass Rate",
     "homework_rate": "Homework Rate",
-    "timeliness_rate": "Timeliness Rate"
+    "timeliness_rate": "Timeliness Rate",
+    "determination_score": "Determination Score",
+    "total_revenue": "Total Revenue",
+    "invoice_count": "Invoice Count",
+    "overdue_count": "Overdue Count",
+    "revenue_per_student": "Revenue per Student",
+    "new_registrations": "New Registrations",
+    "active_students": "Active Students",
+    "lessons_recorded": "Lessons Recorded",
+    "show_students_revenue": "Show Students Revenue",
+    "invoice_count_label": "Invoices Count"
   },
   "library": {
     "title": "Library",

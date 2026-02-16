@@ -155,11 +155,11 @@ export default function TitleElement({
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
-                                                        <SelectLabel>Type</SelectLabel>
-                                                        <SelectItem value={openApi.LessonType.Evaluation}>Evaluation</SelectItem>
-                                                        <SelectItem value={openApi.LessonType.NewMemorization}>New Memorization</SelectItem>
-                                                        <SelectItem value={openApi.LessonType.Revision}>Revision</SelectItem>
-                                                        <SelectItem value={openApi.LessonType.Makeup}>Makeup</SelectItem>
+                                                        <SelectLabel>{t('lessons.type')}</SelectLabel>
+                                                        <SelectItem value={openApi.LessonType.Evaluation}>{t('lessons.evaluation')}</SelectItem>
+                                                        <SelectItem value={openApi.LessonType.NewMemorization}>{t('lessons.new_memorization')}</SelectItem>
+                                                        <SelectItem value={openApi.LessonType.Revision}>{t('lessons.revision')}</SelectItem>
+                                                        <SelectItem value={openApi.LessonType.Makeup}>{t('lessons.makeup')}</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
@@ -171,15 +171,15 @@ export default function TitleElement({
                                             <label htmlFor="attendance" className="text-sm font-medium">{t('lessons.attendance')}</label>
                                             <Select name="attendance">
                                                 <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder="Attendance" />
+                                                    <SelectValue placeholder={t('lessons.attendance')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
-                                                        <SelectLabel>Attendance</SelectLabel>
-                                                        <SelectItem value={openApi.AttendanceStatus.Present}>Present</SelectItem>
-                                                        <SelectItem value={openApi.AttendanceStatus.Absent}>Absent</SelectItem>
-                                                        <SelectItem value={openApi.AttendanceStatus.Excused}>Excused</SelectItem>
-                                                        <SelectItem value={openApi.AttendanceStatus.Late}>Late</SelectItem>
+                                                        <SelectLabel>{t('lessons.attendance')}</SelectLabel>
+                                                        <SelectItem value={openApi.AttendanceStatus.Present}>{t('lessons.present')}</SelectItem>
+                                                        <SelectItem value={openApi.AttendanceStatus.Absent}>{t('lessons.absent')}</SelectItem>
+                                                        <SelectItem value={openApi.AttendanceStatus.Excused}>{t('lessons.excused')}</SelectItem>
+                                                        <SelectItem value={openApi.AttendanceStatus.Late}>{t('lessons.late')}</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
@@ -215,12 +215,12 @@ export default function TitleElement({
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
-                                                        <SelectLabel>Quality</SelectLabel>
-                                                        <SelectItem value={openApi.LessonQuality.Excellent}>Excellent</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.VeryGood}>Very Good</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.Good}>Good</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.Fair}>Fair</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.NeedsImprovement}>Needs Improvement</SelectItem>
+                                                        <SelectLabel>{t('lessons.quality')}</SelectLabel>
+                                                        <SelectItem value={openApi.LessonQuality.Excellent}>{t('lessons.excellent')}</SelectItem>
+                                                        <SelectItem value={openApi.LessonQuality.VeryGood}>{t('lessons.very_good')}</SelectItem>
+                                                        <SelectItem value={openApi.LessonQuality.Good}>{t('lessons.good')}</SelectItem>
+                                                        <SelectItem value={openApi.LessonQuality.Fair}>{t('lessons.fair')}</SelectItem>
+                                                        <SelectItem value={openApi.LessonQuality.NeedsImprovement}>{t('lessons.needs_improvement')}</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>

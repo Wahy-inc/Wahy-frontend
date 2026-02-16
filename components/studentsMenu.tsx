@@ -4,6 +4,7 @@ import * as React from "react"
 import { Field } from "./ui/field";
 import { Label } from "./ui/label";
 import Select from "react-select";
+import { useLocalization } from "@/lib/localization-context";
 
 interface studentData { student_id: number, full_name_arabic: string, full_name_english: string }
 
@@ -16,6 +17,7 @@ export default function StudentMenu({onStudentSelect}: StudentMenuProps) {
     const [studentName, setStudentName] = React.useState<StudentOption | null>(null)
     const studentsArray = localStorage.getItem('students') ? JSON.parse(localStorage.getItem('students') as string) as Array<studentData> : [];
     const [filteredArray, setFilteredArray] = React.useState<Array<{id: number, name: string}>>([]);
+    const { language } = useLocalization()
     
     React.useEffect(() => {
         const en = studentsArray.map((stu) => ({
@@ -39,7 +41,7 @@ export default function StudentMenu({onStudentSelect}: StudentMenuProps) {
     return (
         <div>
             <Field orientation="vertical" className='w-full inline'>
-                <Label htmlFor='stu_name'>Student Name</Label>
+                <Label htmlFor='stu_name'>{language === 'ar' ? 'اسم الطالب' : 'Student Name'}</Label>
                 <Select<StudentOption>
                     options={filteredArray.map((e)=>({value: e.id, label: e.name}))}
                     isSearchable

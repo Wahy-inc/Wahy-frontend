@@ -96,7 +96,8 @@
     "no_lessons_found": "لم يتم العثور على دروس لرقم الهوية للطالب:",
     "recited": "المحفوظ",
     "new_memorization": "حفظ جديد",
-    "id": "رقم الهوية"
+    "id": "رقم الهوية",
+    "due_date": "تاريخ الاستحقاق"
   },
   "schedules": {
     "title": "الجداول الزمنية",
@@ -207,8 +208,8 @@
     "invoice_id_label": "رقم هوية الفاتورة",
     "period_from": "الفترة من",
     "period_from_label": "الفترة من",
-    "period_to": "الفترة إلى",
-    "period_to_label": "الفترة إلى",
+    "period_to": "إلى",
+    "period_to_label": "إلى",
     "to": "إلى",
     "due_date": "تاريخ الاستحقاق",
     "due_label": "الاستحقاق",
@@ -294,7 +295,15 @@
     "special_notes_desc": "ملاحظات إضافية من شيخك"
   },
   "analytics": {
-    "title": "التحليلات",
+    "title": "الاحصائيات",
+    "attendance_analytics": "احصائيات الحضور",
+    "performance_analytics": "احصائيات الأداء",
+    "financial_analytics": "الاحصائيات المالية",
+    "operational_analytics": "الاحصائيات التشغيلية",
+    "start_time": "وقت البداية",
+    "end_time": "وقت النهاية",
+    "period_from": "الفترة من",
+    "period_to": "إلى",
     "total_lessons": "إجمالي الدروس",
     "present": "حاضر",
     "late": "متأخر",
@@ -305,7 +314,15 @@
     "passed_count": "عدد الناجحين",
     "pass_rate": "نسبة النجاح",
     "homework_rate": "نسبة الواجب",
-    "timeliness_rate": "نسبة الالتزام بالوقت"
+    "timeliness_rate": "نسبة الالتزام بالوقت",
+    "determination_score": "درجة التصميم",
+    "total_revenue": "إجمالي الإيرادات",
+    "invoice_count": "عدد الفواتير",
+    "overdue_count": "عدد المتأخرة",
+    "revenue_per_student": "الإيرادات لكل طالب",
+    "new_registrations": "التسجيلات الجديدة",
+    "active_students": "الطلاب النشطون",
+    "lessons_recorded": "الدروس المسجلة"
   },
   "library": {
     "title": "المكتبة",

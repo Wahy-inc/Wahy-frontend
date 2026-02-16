@@ -2,59 +2,60 @@
 
 import {ColumnDef} from "@tanstack/react-table";
 import * as openApi from "@/lib/openApi"
-import * as ar from '../../../../lib/localization/ar.json'
-import * as en from '../../../../lib/localization/en.json'
+import { useLocalization } from "@/lib/localization-context";
 
-export const columns: ColumnDef<openApi.LessonRead>[] = [
-    {
-        accessorKey: 'Type',
-        header: 'Type',
-    },
-    {
-        accessorKey: 'juz_number',
-        header: 'Juz',
-    },
-    {
-        accessorKey: 'surah_name',
-        header: 'Surah',
-    },
-    {
-        accessorKey: 'ayah_from',
-        header: 'From Ayah',
-    },
-    {
-        accessorKey: 'ayah_to',
-        header: 'To Ayah',
-    },
-    {
-        accessorKey: 'quality',
-        header: 'Quality',
-    },
-]
+export function useColumnsWithLocalization() {
+    const { t, language } = useLocalization();
 
-export const HWcolumns: ColumnDef<openApi.LessonRead>[] = [
-    {
-        accessorKey: 'next_homework_type',
-        header: 'Type',
-    },
-    {
-        accessorKey: 'juz_number',
-        header: 'Juz',
-    },
-    {
-        accessorKey: 'next_homework_surah',
-        header: 'Surah',
-    },
-    {
-        accessorKey: 'next_homework_ayah_from',
-        header: 'From Ayah',
-    },
-    {
-        accessorKey: 'next_homework_ayah_to',
-        header: 'To Ayah',
-    },
-    {
-        accessorKey: 'next_homework_due_date',
-        header: 'Due Date',
-    }
-]
+    const columns: ColumnDef<openApi.LessonRead>[] = [
+        {
+            accessorKey: 'juz_number',
+            header: t('lessons.juz'),
+        },
+        {
+            accessorKey: 'surah_name',
+            header: t('lessons.surah'),
+        },
+        {
+            accessorKey: 'ayah_from',
+            header: t('lessons.ayah_from'),
+        },
+        {
+            accessorKey: 'ayah_to',
+            header: t('lessons.ayah_to'),
+        },
+        {
+            accessorKey: 'quality',
+            header: t('lessons.quality'),
+        },
+    ]
+
+    const HWcolumns: ColumnDef<openApi.LessonRead>[] = [
+        {
+            accessorKey: 'next_homework_type',
+            header: t('lessons.type'),
+        },
+        {
+            accessorKey: 'juz_number',
+            header: t('lessons.juz'),
+        },
+        {
+            accessorKey: 'next_homework_surah',
+            header: t('lessons.surah'),
+        },
+        {
+            accessorKey: 'next_homework_ayah_from',
+            header: t('lessons.ayah_from'),
+        },
+        {
+            accessorKey: 'next_homework_ayah_to',
+            header: t('lessons.ayah_to'),
+        },
+        {
+            accessorKey: 'next_homework_due_date',
+            header: t('lessons.due_date'),
+        }
+    ]
+
+    return { columns, HWcolumns, language, isRTL: language === 'ar' }
+}

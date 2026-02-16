@@ -22,12 +22,12 @@ export default function Home() {
     const [performanceState, performanceAction, performancePending] = React.useActionState(performanceAnalytics, undefined);
     const [financialState, financialAction, financialPending] = React.useActionState(financialAnalytics, undefined);
     const [operationalState, operationalAction, operationalPending] = React.useActionState(operationalAnalytics, undefined);
-    const { t } = useLocalization()
+    const { t, language } = useLocalization()
 
-    useToastListener(attendanceState, { functionName: "Attendance Analytics", successMessage: t('messages.success'), errorMessage: t('messages.error') })
-    useToastListener(performanceState, { functionName: "Performance Analytics", successMessage: t('messages.success'), errorMessage: t('messages.error') })
-    useToastListener(financialState, { functionName: "Financial Analytics", successMessage: t('messages.success'), errorMessage: t('messages.error') })
-    useToastListener(operationalState, { functionName: "Operational Analytics", successMessage: t('messages.success'), errorMessage: t('messages.error') })
+    useToastListener(attendanceState, { functionName: t('analytics.attendance_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
+    useToastListener(performanceState, { functionName: t('analytics.performance_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
+    useToastListener(financialState, { functionName: t('analytics.financial_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
+    useToastListener(operationalState, { functionName: t('analytics.operational_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
 
     React.useEffect(() => {
         if (attendanceState?.message === 'success' && attendanceState.data) {
@@ -52,19 +52,19 @@ export default function Home() {
                 <div className="bg-linear-to-r from-slate-50 to-slate-100 rounded-xl">
                     <div className="flex items-center justify-center gap-8">
                         <div className="text-center">
-                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">Start Time</p>
+                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('analytics.start_time')}</p>
                             <div className="flex items-center gap-2">
                                 <Clock className="w-5 h-5 text-green-500" />
                                 <span className="text-2xl font-bold text-slate-800">{analytic.period_start}</span>
                             </div>
                         </div>
-                        <div className="flex items-center">
+                        <div className={`flex items-center ${language === 'ar' ? 'rotate-180' : 'rotate-0'}`}>
                             <div className="w-12 h-0.5 bg-slate-300" />
                             <icon.ChevronRight className="w-5 h-5 text-slate-400" />
                             <div className="w-12 h-0.5 bg-slate-300" />
                         </div>
                         <div className="text-center">
-                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">End Time</p>
+                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('analytics.end_time')}</p>
                             <div className="flex items-center gap-2">
                                 <Clock className="w-5 h-5 text-red-500" />
                                 <span className="text-2xl font-bold text-slate-800">{analytic.period_end}</span>
@@ -83,11 +83,11 @@ export default function Home() {
                 </div>
                 <div id="period" className="flex flex-row items-center">
                     <form action={action}>
-                        <p className="inline px-1">Period From</p>
+                        <p className="inline px-1">{t('analytics.period_from')}</p>
                         <Input className="w-32" type="date" name="period_start" id="period_start"></Input>
-                        <p className="inline px-1">To</p>
+                        <p className="inline px-1">{t('analytics.period_to')}</p>
                         <Input className="w-32 mr-2" type="date" name="period_end" id="period_end"></Input>
-                        <Button disabled={pending} id="submit" type="submit" className="bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800 hover:border-slate-800 border-2">Submit</Button>
+                        <Button disabled={pending} id="submit" type="submit" className="bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800 hover:border-slate-800 border-2">{t('common.submit')}</Button>
                     </form>
                 </div>
             </div>
@@ -97,7 +97,7 @@ export default function Home() {
     const attendanceAnalyticsElement =  (analytic: openApi.AttendanceAnalytics) => {
         return (
             <div className="w-full my-6">
-                {titleElement("Attendance Analytics", attendanceAction, attendancePending)}
+                {titleElement(t('analytics.attendance_analytics'), attendanceAction, attendancePending)}
                 <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
                     {timeElement({
                         period_start: analytic.period_start,
@@ -107,7 +107,7 @@ export default function Home() {
                 <div className="grid grid-cols-1 xl:grid-cols-5 justify-between gap-2">
                     <Card className="col-start-1 col-end-2 xl:col-start-1 xl:col-end-2 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">Total Lessons</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.total_lessons')}</p>
                         </CardHeader>
                         <CardDescription className="flex flex-col items-center justify-center">
                             <p className="text-gray-300 text-4xl font-bold text-center">{analytic.total_lessons}</p>
@@ -115,10 +115,10 @@ export default function Home() {
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 grid grid-cols-4 w-full p-0">
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">Present</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">Late</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-3 col-end-4">Absent</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-4 col-end-5">Excused</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">{t('analytics.present')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.late')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-3 col-end-4">{t('analytics.absent')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-4 col-end-5">{t('analytics.excused')}</p>
                         </CardHeader>
                         <CardDescription className="grid grid-cols-4">
                             <p className="text-gray-300 text-4xl font-bold col-start-1 col-end-2 text-center">{analytic.present_count}</p>
@@ -129,7 +129,7 @@ export default function Home() {
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">Attendance Rate</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.attendance_rate')}</p>
                         </CardHeader>
                         <CardDescription className="flex flex-col items-center justify-center">
                             <p className="text-gray-300 text-4xl font-bold">{analytic.attendance_rate}</p>
@@ -143,7 +143,7 @@ export default function Home() {
     const performanceAnalyticsElement =  (analytic: openApi.PerformanceAnalytics) => {
         return (
             <div className="w-full my-6">
-                {titleElement("Performance Analytics", performanceAction, performancePending)}
+                {titleElement(t('analytics.performance_analytics'), performanceAction, performancePending)}
                 <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
                     {timeElement({
                         period_start: analytic.period_start,
@@ -153,8 +153,8 @@ export default function Home() {
                 <div className="grid grid-cols-1 xl:grid-cols-5 justify-between gap-2">
                     <Card className="col-start-1 col-end-2 xl:col-start-1 xl:col-end-2 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 grid grid-cols-2 w-full p-0">
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">Attended Count</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">Passed Count</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">{t('analytics.attended_count')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.passed_count')}</p>
                         </CardHeader>
                         <CardDescription className="grid grid-cols-2">
                             <p className="text-gray-300 text-4xl font-bold text-center col-start-1 col-end-2">{analytic.attended_count}</p>
@@ -163,10 +163,10 @@ export default function Home() {
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 grid grid-cols-4 w-full p-0">
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">Pass Rate</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">Attendance Rate</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-3 col-end-4">Homework Rate</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-4 col-end-5">Timeliness Rate</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">{t('analytics.pass_rate')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.attendance_rate')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-3 col-end-4">{t('analytics.homework_rate')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-4 col-end-5">{t('analytics.timeliness_rate')}</p>
                         </CardHeader>
                         <CardDescription className="grid grid-cols-4">
                             <p className="text-gray-300 text-4xl font-bold col-start-1 col-end-2 text-center">{analytic.pass_rate}</p>
@@ -177,7 +177,7 @@ export default function Home() {
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">Determination Score</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.determination_score')}</p>
                         </CardHeader>
                         <CardDescription className="flex flex-col items-center justify-center">
                             <p className="text-gray-300 text-4xl font-bold">{analytic.determination_score}</p>
@@ -191,7 +191,7 @@ export default function Home() {
     const financialAnalyticsElement =  (analytic: openApi.FinancialAnalytics) => {
         return (
             <div className="w-full my-6">
-                {titleElement("Financial Analytics", financialAction, financialPending)}
+                {titleElement(t('analytics.financial_analytics'), financialAction, financialPending)}
                 <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
                     {timeElement({
                         period_start: analytic.period_start,
@@ -201,7 +201,7 @@ export default function Home() {
                 <div className="grid grid-cols-1 xl:grid-cols-5 justify-between gap-2">
                     <Card className="col-start-1 col-end-2 xl:col-start-1 xl:col-end-2 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">Total Revenue</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.total_revenue')}</p>
                         </CardHeader>
                         <CardDescription className="flex flex-col items-center justify-center">
                             <p className="text-gray-300 text-4xl font-bold text-center">{analytic.total_revenue}</p>
@@ -209,7 +209,7 @@ export default function Home() {
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col justify-center items-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">Invoices Count</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.invoice_count_label')}</p>
                         </CardHeader>
                         <CardDescription className="flex flex-col justify-center items-center">
                             <p className="text-gray-300 text-4xl font-bold text-center">{analytic.invoice_count}</p>
@@ -217,7 +217,7 @@ export default function Home() {
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">Overdue Count</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.overdue_count')}</p>
                         </CardHeader>
                         <CardDescription className="flex flex-col items-center justify-center">
                             <p className="text-gray-300 text-4xl font-bold text-center">{analytic.overdue_count}</p>
@@ -225,7 +225,7 @@ export default function Home() {
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-1 xl:col-end-6">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">Revenue per Student</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.revenue_per_student')}</p>
                         </CardHeader>
                         <div id="accordion-data">
                             <Accordion
@@ -234,7 +234,7 @@ export default function Home() {
                                 className="w-full px-4 py-2 max-h-100 overflow-y-auto"
                             >
                             <AccordionItem key='accordion-item-1' value="item-1">
-                            <AccordionTrigger className="text-gray-300 text-xl font-bold text-start">Show Students Revenue</AccordionTrigger>
+                            <AccordionTrigger className="text-gray-300 text-xl font-bold text-start">{t('analytics.show_students_revenue')}</AccordionTrigger>
                             {analytic.revenue_per_student.map((item) => {
                                 return (
                                         <AccordionContent key={item.student_id} className="bg-slate-50 rounded-xl p-2 text-gray-500 text-lg my-1">
@@ -255,7 +255,7 @@ export default function Home() {
     const operationalAnalyticsElement =  (analytic: openApi.OperationalAnalytics) => {
         return (
             <div className="w-full my-6">
-                {titleElement("Operational Analytics", operationalAction, operationalPending)}
+                {titleElement(t('analytics.operational_analytics'), operationalAction, operationalPending)}
                 <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
                     {timeElement({
                         period_start: analytic.period_start,
@@ -265,7 +265,7 @@ export default function Home() {
                 <div className="grid grid-cols-1 xl:grid-cols-5 justify-between gap-2">
                     <Card className="col-start-1 col-end-2 xl:col-start-1 xl:col-end-2 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">New Registerations</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.new_registrations')}</p>
                         </CardHeader>
                         <CardDescription className="flex flex-col items-center justify-center">
                             <p className="text-gray-300 text-4xl font-bold text-center">{analytic.new_registrations}</p>
@@ -273,7 +273,7 @@ export default function Home() {
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col justify-center items-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">Active Students</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.active_students')}</p>
                         </CardHeader>
                         <CardDescription className="flex flex-col justify-center items-center">
                             <p className="text-gray-300 text-4xl font-bold text-center">{analytic.active_students}</p>
@@ -281,7 +281,7 @@ export default function Home() {
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">Lessons Recorded</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.lessons_recorded')}</p>
                         </CardHeader>
                         <CardDescription className="flex flex-col items-center justify-center">
                             <p className="text-gray-300 text-4xl font-bold text-center">{analytic.lessons_recorded}</p>
@@ -293,7 +293,7 @@ export default function Home() {
     }
 
     const title = (
-        <p className='text-5xl text-slate-950 font-bold mb-5'>Analytics</p>
+        <p className='text-5xl text-slate-950 font-bold mb-5'>{t('analytics.title')}</p>
     )
 
     const content =  (
