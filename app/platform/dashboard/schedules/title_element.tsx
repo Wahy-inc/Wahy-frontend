@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import React, { JSX, useState } from "react";
 import { useLocalization } from "@/lib/localization-context";
 import { CreateScheduleFormState, GetSchedualesForStudentFormState } from "@/app/platform/lib/definitions";
+import StudentMenu from "@/components/studentsMenu";
 
 enum weekDays {
     saturday = '0',
@@ -72,6 +73,7 @@ export default function TitleElement({
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
+    const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
     const { t } = useLocalization()
 
     const handleCreateDialogOpenChange = (open: boolean) => {
@@ -98,6 +100,7 @@ export default function TitleElement({
 
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
+        formData.append("student_id", selectedStudentId?.toString() || "")
         createAction(formData)
     }
 
@@ -139,7 +142,7 @@ export default function TitleElement({
                             <AlertDialogTitle>{t('schedules.create_title')}</AlertDialogTitle>
                                 <div className="grid grid-cols-3 grid-rows-5 gap-4 rtl:text-right">
                                     <div className='flex flex-col col-start-1 col-end-4 row-start-1 row-end-2'>
-                                        {fieldInput(t('schedules.student_id'),"student-id", t('schedules.enter_student_id'), "number")}
+                                        <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
                                     <div className="grid grid-cols-3 gap-4 col-start-1 col-end-4 row-start-2 row-end-3">

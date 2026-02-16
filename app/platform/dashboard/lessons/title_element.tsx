@@ -64,6 +64,7 @@ export default function TitleElement({
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
+    const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
     const { t } = useLocalization()
 
     const handleCreateDialogOpenChange = (open: boolean) => {
@@ -90,6 +91,7 @@ export default function TitleElement({
 
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
+        formData.append("student_id", selectedStudentId?.toString() || "")
         createAction(formData)
     }
 
@@ -132,7 +134,7 @@ export default function TitleElement({
                             <AlertDialogTitle>{t('lessons.create_lesson')}</AlertDialogTitle>
                                 <div className="flex flex-col gap-4 rtl:text-right">
                                     <div className='flex flex-col'>
-                                        <StudentMenu></StudentMenu>
+                                        <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
                                     <div className='flex flex-col'>

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import React, { JSX, useState } from "react";
 import { CreateInvoiceFormState, GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
 import { useLocalization } from "@/lib/localization-context";
+import StudentMenu from "@/components/studentsMenu";
 
 
 export default function TitleElement({
@@ -49,6 +50,7 @@ export default function TitleElement({
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
+    const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
 
     const handleCreateDialogOpenChange = (open: boolean) => {
         if (!open) {
@@ -74,6 +76,7 @@ export default function TitleElement({
 
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
+        formData.append("student_id", selectedStudentId?.toString() || "")
         createAction(formData)
     }
 
@@ -98,9 +101,9 @@ export default function TitleElement({
                             <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('invoices.generate_invoice')}</AlertDialogTitle>
-                                <div className="flex flex-col gap-4 rtl:text-right">
+                                <div className="w-full flex flex-col gap-4 rtl:text-right">
                                 <div className="flex flex-col">
-                                    {fieldInput(t('students.student_id'),"student_id", "", "number")}
+                                    <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
                                     {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                 </div>
                                 <div className="flex flex-col">
