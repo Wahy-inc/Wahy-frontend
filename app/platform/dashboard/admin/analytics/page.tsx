@@ -2,13 +2,13 @@
 
 import { Clock } from "lucide-react"
 import * as icon from "@deemlol/next-icons"
-import * as openApi from "../../../../lib/openApi"
+import * as openApi from "../../../../../lib/openApi"
 import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import dashboardPage from "../page";
+import dashboardPage from "../../page";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import React from "react";
-import { attendanceAnalytics, financialAnalytics, getLocalStudent, operationalAnalytics, performanceAnalytics } from "../../actions/dashboard";
+import { attendanceAnalytics, financialAnalytics, getLocalStudent, operationalAnalytics, performanceAnalytics } from "../../../actions/dashboard";
 import { Button } from "@/components/ui/button";
 import { useToastListener } from "@/lib/toastListener";
 import { useLocalization } from "@/lib/localization-context";

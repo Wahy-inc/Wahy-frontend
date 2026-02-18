@@ -2,8 +2,8 @@
 
 import React, { useActionState } from "react";
 import * as openApi from "@/lib/openApi"
-import { createLesson, getLessonByID, getLessonByIDMe, listLessons, listLessonsMe, updateLesson } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../page";
+import { createLesson, getLessonByID, getLessonByIDMe, listLessons, updateLesson } from "@/app/platform/actions/dashboard";
+import dashboardPage from "../../page";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +18,7 @@ import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 
 
 export default function Lessons() {
-    const { isAdmin, isLoading: authLoading } = useAuth()
+    const {isAdmin, isLoading: authLoading } = useAuth()
     const { t } = useLocalization()
     const [lessons, setLessons] = React.useState<openApi.LessonRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
@@ -45,7 +45,7 @@ export default function Lessons() {
         if (authLoading) return
 
         const cachedLessons = getCachedData<openApi.LessonRead[]>(
-            isAdmin ? offlineCacheKeys.lessonsListAdmin : offlineCacheKeys.lessonsListMe,
+            offlineCacheKeys.lessonsListAdmin,
         )
         if (cachedLessons && cachedLessons.length > 0) {
             setLessons(cachedLessons)
@@ -55,7 +55,7 @@ export default function Lessons() {
         const fetchLessons = async () => {
             try {
                 setLoading(true)
-                const data = await (isAdmin ? listLessons() : listLessonsMe())
+                const data = await listLessons()
                 setLessons(data)
                 setError(null)
             } catch (err) {
@@ -66,7 +66,7 @@ export default function Lessons() {
             }
         }
         fetchLessons()
-    }, [authLoading, isAdmin, t])
+    }, [authLoading, t])
 
     React.useEffect(() => {
         if (getLessonState?.message == 'success' && getLessonState.data) {
@@ -81,7 +81,7 @@ export default function Lessons() {
             const fetchLessons = async () => {
                 try {
                     setLoading(true)
-                    const data = await (isAdmin ? listLessons() : listLessonsMe())
+                    const data = await listLessons()
                     setLessons(data)
                     setError(null)
                 } catch (err) {
@@ -93,7 +93,18 @@ export default function Lessons() {
             }
             fetchLessons()
         }
-    }, [getLessonState, createState, updateState, isAdmin, t])
+    }, [getLessonState, createState, updateState, t])
+
+    if (!isAdmin) {
+            return (
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                        <h1 className="text-2xl font-bold">Access Denied</h1>
+                        <p className="text-lg">You do not have permission to view this page.</p>
+                    </div>
+                </div>
+            )
+        }
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
         <Field orientation="vertical" className='w-full inline'>
@@ -165,7 +176,6 @@ export default function Lessons() {
             setCreateLessonDialogOpen={setCreateLessonDialogOpen}
             getLessonDialogOpen={getLessonDialogOpen}
             setGetLessonDialogOpen={setGetLessonDialogOpen}
-            isAdmin={isAdmin}
         />
     )
 
@@ -213,7 +223,6 @@ export default function Lessons() {
                 getLessonState={getLessonState}
                 getLessonAction={getLessonFormAction}
                 getLessonPending={getLessonPending}
-                isAdmin={isAdmin}
             />
         )})
     } else {

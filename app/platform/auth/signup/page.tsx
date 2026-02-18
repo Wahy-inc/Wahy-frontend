@@ -22,7 +22,7 @@ export default function SignUp() {
 
     React.useEffect(() => {
         if (state?.message === 'Signup successful') {
-            router.replace('/platform/dashboard')
+            router.replace('/platform/dashboard/student/schedules')
         }
     }, [state, router])
 

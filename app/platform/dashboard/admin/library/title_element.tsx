@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button";
 import { JSX, useState } from "react";
-import * as openApi from "../../../../lib/openApi"
+import * as openApi from "../../../../../lib/openApi"
 import { CreateLibraryItemFormState, GetLibraryItemByIDFormState } from "@/app/platform/lib/definitions";
 import { Select, SelectContent, SelectGroup, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SelectItem } from "@/components/ui/select";
@@ -30,7 +30,6 @@ export default function TitleElement({
     setcreateLibraryDialogOpen,
     getLibraryDialogOpen,
     setgetLibraryDialogOpen,
-    isAdmin,
     disableCreate
 }: {
         title: string,
@@ -45,7 +44,6 @@ export default function TitleElement({
         setcreateLibraryDialogOpen: (open: boolean) => void,
         getLibraryDialogOpen: boolean,
         setgetLibraryDialogOpen: (open: boolean) => void,
-        isAdmin: boolean,
         disableCreate?: boolean
     }) {
     const { t } = useLocalization()
@@ -93,7 +91,6 @@ export default function TitleElement({
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
-                    {isAdmin ? 
                     <div>
                     <AlertDialog open={createLibraryDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
@@ -166,7 +163,7 @@ export default function TitleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     {disableCreate ? <p className="text-amber-700 text-xs mt-2">{t('library.offline_only')}</p> : null}
-                    </div> : <div></div>}
+                    </div>
                     <AlertDialog open={getLibraryDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('library.get_item')}</Button>

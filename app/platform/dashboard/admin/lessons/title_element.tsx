@@ -23,7 +23,7 @@ import { Input } from "@/components/ui/input";
 import * as openApi from "@/lib/openApi";
 import { useLocalization } from "@/lib/localization-context";
 import React, { JSX, useState } from "react";
-import { CreateLessonFormState, GetLessonByIDFormState } from "../../lib/definitions";
+import { CreateLessonFormState, GetLessonByIDFormState } from "../../../lib/definitions";
 import StudentMenu from "@/components/studentsMenu";
 
 export default function TitleElement({
@@ -42,7 +42,6 @@ export default function TitleElement({
     setCreateLessonDialogOpen,
     getLessonDialogOpen,
     setGetLessonDialogOpen,
-    isAdmin
 }: {
         title: string,
         handleSearchStudentId: (e: React.ChangeEvent<HTMLInputElement>) => void,
@@ -59,7 +58,6 @@ export default function TitleElement({
         setCreateLessonDialogOpen: (open: boolean) => void,
         getLessonDialogOpen: boolean,
         setGetLessonDialogOpen: (open: boolean) => void,
-        isAdmin: boolean
     }) {
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
@@ -104,7 +102,6 @@ export default function TitleElement({
             <div className="flex flex-col justify-center">
                 <div className='flex flex-row justify-between items-center'>
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
-                    {isAdmin ?
                     <div className='flex flex-row gap-2 items-center'>
                         <Field orientation="horizontal" className='w-80'>
                             <Input onChange={handleSearchStudentId} id="student-id-search" name="student-id-search" type="search" placeholder={t('lessons.enter_student_id')} className='border-slate-950'/>
@@ -119,10 +116,9 @@ export default function TitleElement({
                                 {t('common.clear')}
                             </Button>
                         )}
-                    </div> : <div></div>}
+                    </div>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
-                    {isAdmin ?
                     <div>
                     <AlertDialog open={createLessonDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
@@ -250,7 +246,7 @@ export default function TitleElement({
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
-                    </div> : <div></div>}
+                    </div>
                     <AlertDialog open={getLessonDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('lessons.get_lesson')}</Button>

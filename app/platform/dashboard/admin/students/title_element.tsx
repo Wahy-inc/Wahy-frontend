@@ -8,7 +8,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import * as openApi from "../../../../lib/openApi"
+import * as openApi from "../../../../../lib/openApi"
 import { Button } from "@/components/ui/button";
 import { JSX, useState } from "react";
 import { CreateStudentFormState, GetStudentFormState } from "@/app/platform/lib/definitions";

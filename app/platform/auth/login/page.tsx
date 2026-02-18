@@ -23,8 +23,12 @@ export default function SignIn() {
     useToastListener(Studentstate, {functionName: "Student Sign In", successMessage: "Student signed in successfully", errorMessage: "Failed to sign in as student"})
 
     React.useEffect(() => {
-        if ((isAdmin ? state?.message : Studentstate?.message) === 'Signin successful') {
-            router.replace('/platform/dashboard')
+        if (state?.message === 'Signin successful' || Studentstate?.message === 'Signin successful') {
+          if (isAdmin) {
+            router.replace('/platform/dashboard/admin/analytics')
+          } else {
+            router.replace('/platform/dashboard/student/schedules')
+          }
         }
     }, [state, Studentstate, router, isAdmin])
     

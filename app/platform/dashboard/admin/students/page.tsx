@@ -3,7 +3,7 @@
 import React, { use } from "react";
 import * as openApi from "@/lib/openApi"
 import { approveStudent, createStudent, getStudent, listStudents, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../page";
+import dashboardPage from "../../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,7 @@ import {
   ItemTitle,
 } from "@/components/ui/item"
 import {User} from 'lucide-react'
-import { UpdateStudentFormState } from "../../lib/definitions";
+import { UpdateStudentFormState } from "../../../lib/definitions";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";

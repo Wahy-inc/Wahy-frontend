@@ -2,8 +2,8 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createSchedule, deleteSchedule, getLocalStudent, getSchedulesForStudent, listSchedules, listSchedulesMe, updateSchedule } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../page";
+import { createSchedule, deleteSchedule, getLocalStudent, getSchedulesForStudent, listSchedules, updateSchedule } from "@/app/platform/actions/dashboard";
+import dashboardPage from "../../page";
 import * as icon from '@deemlol/next-icons'
 import TitleElement from "./title_element";
 import { UpdateScheduleFormState } from "@/app/platform/lib/definitions";
@@ -45,7 +45,7 @@ export default function Schedules() {
     const [createScheduleDialogOpen, setCreateScheduleDialogOpen] = React.useState(false)
     const [getScheduleDialogOpen, setGetScheduleDialogOpen] = React.useState(false)
     const [editingScheduleId, setEditingScheduleId] = React.useState<number | null>(null)
-    const { isAdmin, isLoading: authLoading } = useAuth()
+    const {isAdmin, isLoading: authLoading } = useAuth()
     const { t, language } = useLocalization()
 
     useToastListener(createScheduleState, {functionName: "Create Schedule", successMessage: t('schedules.create_success'), errorMessage: t('schedules.create_error')})
@@ -65,7 +65,7 @@ export default function Schedules() {
             const fetchSchedules = async () => {
                 try {
                     setLoading(true)
-                    const data = await (isAdmin? listSchedules() : listSchedulesMe())
+                    const data = await (listSchedules())
                     console.log('Fetched schedules data:', data);
                     setSchedules(data)
                     console.log(data);
@@ -79,13 +79,13 @@ export default function Schedules() {
             }
             fetchSchedules()
         }
-    }, [getScheduleState, createScheduleState, updateScheduleState, isAdmin])
+    }, [getScheduleState, createScheduleState, updateScheduleState])
 
     React.useEffect(() => {
         if (authLoading) return
 
             const cachedSchedules = getCachedData<openApi.ScheduleRead[]>(
-                isAdmin ? offlineCacheKeys.schedulesListAdmin : offlineCacheKeys.schedulesListMe,
+                offlineCacheKeys.schedulesListAdmin,
             )
             if (cachedSchedules && cachedSchedules.length > 0) {
                 setSchedules(cachedSchedules)
@@ -95,7 +95,7 @@ export default function Schedules() {
             const fetchSchedules = async () => {
                 try {
                     setLoading(true)
-                    const data = await (isAdmin? listSchedules() : listSchedulesMe())
+                    const data = await listSchedules()
                     console.log('Fetched schedules data:', data);
                     setSchedules(data)
                     console.log(data);
@@ -108,7 +108,18 @@ export default function Schedules() {
                 }
             }
         fetchSchedules()
-    }, [isAdmin, authLoading])
+    }, [authLoading])
+
+    if (!isAdmin) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold">Access Denied</h1>
+                    <p className="text-lg">You do not have permission to view this page.</p>
+                </div>
+            </div>
+        )
+    }
 
     const handleSearchStudentId = (e: React.ChangeEvent<HTMLInputElement>) => {
         const studentId = e.target.value.trim()
@@ -265,8 +276,6 @@ export default function Schedules() {
                 )}
 
                 {/* Actions */}
-                {isAdmin && (
-                    <>
                         <Separator className="my-4" />
                         <div className="flex justify-end gap-3">
                     <AlertDialog open={editingScheduleId === schedule.id} onOpenChange={(open) => setEditingScheduleId(open ? schedule.id : null)}>
@@ -399,8 +408,6 @@ export default function Schedules() {
                         </AlertDialog>
                         ) : <div></div> }
                         </div>
-                    </>
-                )}
             </CardContent>
         </Card>
     )
@@ -422,7 +429,6 @@ export default function Schedules() {
             setcreateScheduleDialogOpen={setCreateScheduleDialogOpen}
             getStudentScheduleDialogOpen={getScheduleDialogOpen}
             setgetStudentScheduleDialogOpen={setGetScheduleDialogOpen}
-            isAdmin={isAdmin}
         />
     )
 

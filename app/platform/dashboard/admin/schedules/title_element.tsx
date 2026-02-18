@@ -51,7 +51,6 @@ export default function TitleElement({
     setcreateScheduleDialogOpen,
     getStudentScheduleDialogOpen,
     setgetStudentScheduleDialogOpen,
-    isAdmin
 }: {
         title: string,
         handleSearchStudentId: (e: React.ChangeEvent<HTMLInputElement>) => void,
@@ -68,7 +67,6 @@ export default function TitleElement({
         setcreateScheduleDialogOpen: (open: boolean) => void,
         getStudentScheduleDialogOpen: boolean,
         setgetStudentScheduleDialogOpen: (open: boolean) => void,
-        isAdmin: boolean
     }) {
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
@@ -130,7 +128,6 @@ export default function TitleElement({
                     </div>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
-                    {isAdmin? 
                     <div>
                     <AlertDialog open={createScheduleDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
@@ -220,7 +217,7 @@ export default function TitleElement({
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
-                    </div> : <div></div> }
+                    </div>
                     <AlertDialog open={getStudentScheduleDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('schedules.get_schedules')}</Button>

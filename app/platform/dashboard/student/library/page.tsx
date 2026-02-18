@@ -2,8 +2,8 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createLibraryItem, deleteLibraryItem, getLibraryItem, listLibrary, listLibraryMe } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../page";
+import { deleteLibraryItem, getLibraryItem, listLibraryMe } from "@/app/platform/actions/dashboard";
+import dashboardPage from "../../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -30,15 +30,12 @@ export default function Schedules() {
     const [libraryItems, setLibraryItems] = React.useState<openApi.LibraryItemRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
-    const [createLibraryItemState, createLibraryItemAction, createLibraryItemPending] = React.useActionState(createLibraryItem, undefined)
     const [getLibraryItemState, getLibraryItemAction, getLibraryItemPending] = React.useActionState(getLibraryItem, undefined)
-    const [createLibraryDialogOpen, setCreateLibraryDialogOpen] = React.useState(false)
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
     const [isOffline, setIsOffline] = React.useState(false)
-    const { isAdmin, isLoading: authLoading } = useAuth()
+    const { isLoading: authLoading } = useAuth()
     const { t } = useLocalization()
 
-    useToastListener(createLibraryItemState, {functionName: "Create Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
     useToastListener(getLibraryItemState, {functionName: "Get Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
     React.useEffect(() => {
         const refreshOffline = () => setIsOffline(!isClientOnline())
@@ -56,29 +53,13 @@ export default function Schedules() {
         if (getLibraryItemState?.message === 'success' && getLibraryItemState.data) {
             setLibraryItems([getLibraryItemState.data])
         }
-        if (createLibraryItemState?.message === 'success') {
-            const fetchLibraryItems = async () => {
-                try {
-                    setLoading(true)
-                    const data = await (isAdmin ? listLibrary() : listLibraryMe())
-                    setLibraryItems(data)
-                    setError(null)
-                } catch (err) {
-                    setError('Failed to load library items')
-                    setLibraryItems(null)
-                } finally {
-                    setLoading(false)
-                }
-            }
-            fetchLibraryItems()
-        }
-    }, [getLibraryItemState, createLibraryItemState, isAdmin])
+    }, [getLibraryItemState])
 
     React.useEffect(() => {
         if (authLoading) return // Wait until auth is loaded
 
         const cachedLibraryItems = getCachedData<openApi.LibraryItemRead[]>(
-            isAdmin ? offlineCacheKeys.libraryListAdmin : offlineCacheKeys.libraryListMe,
+            offlineCacheKeys.libraryListMe,
         )
         if (cachedLibraryItems && cachedLibraryItems.length > 0) {
             setLibraryItems(cachedLibraryItems)
@@ -88,7 +69,7 @@ export default function Schedules() {
         const fetchLibraryItems = async () => {
             try {
                 setLoading(true)
-                const data = await (isAdmin ? listLibrary() : listLibraryMe())
+                const data = await listLibraryMe()
                 setLibraryItems(data)
                 setError(null)
             } catch (err) {
@@ -99,7 +80,7 @@ export default function Schedules() {
             }
         }
         fetchLibraryItems()
-    }, [isAdmin, authLoading])
+    }, [authLoading])
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
         <Field orientation="vertical" className='w-full inline'>
@@ -160,19 +141,12 @@ export default function Schedules() {
     const title = (
         <TitleElement
             title={t('library.title')}
-            createAction={createLibraryItemAction}
-            createState={createLibraryItemState}
-            createPending={createLibraryItemPending}
             getLibraryAction={getLibraryItemAction}
             getLibraryState={getLibraryItemState}
             getLibraryPending={getLibraryItemPending}
             fieldInput={fieldInput}
-            createLibraryDialogOpen={createLibraryDialogOpen}
-            setcreateLibraryDialogOpen={setCreateLibraryDialogOpen}
             getLibraryDialogOpen={getLibraryDialogOpen}
             setgetLibraryDialogOpen={setGetLibraryDialogOpen}
-            isAdmin={isAdmin}
-            disableCreate={isOffline}
         />
     )
 

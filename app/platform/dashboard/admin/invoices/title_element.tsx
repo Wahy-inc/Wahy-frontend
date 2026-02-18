@@ -28,22 +28,20 @@ export default function TitleElement({
     setcreateInvoicesDialogOpen,
     getInvoicesDialogOpen,
     setgetInvoicesDialogOpen,
-    isAdmin,
     disableGenerate,
 }: {
-    title: string,
-    getInvoiceState: GetInvoiceByIDFormState,
-    getInvoiceAction: (formData: FormData) => void,
-    getInvoicePending: boolean,
-    createState: CreateInvoiceFormState,
-    createAction: (formData: FormData) => void,
+        title: string,
+        getInvoiceState: GetInvoiceByIDFormState,
+        getInvoiceAction: (formData: FormData) => void,
+        getInvoicePending: boolean,
+        createState: CreateInvoiceFormState,
+        createAction: (formData: FormData) => void,
         createPending: boolean,
         fieldInput: (label: string, name: string, holder: string, type: string) => JSX.Element,
         createInvoicesDialogOpen: boolean,
         setcreateInvoicesDialogOpen: (open: boolean) => void,
         getInvoicesDialogOpen: boolean,
         setgetInvoicesDialogOpen: (open: boolean) => void,
-        isAdmin: boolean,
         disableGenerate?: boolean
     }) {
     const { t } = useLocalization()
@@ -91,7 +89,6 @@ export default function TitleElement({
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
-                    {isAdmin ?
                     <div>
                     <AlertDialog open={createInvoicesDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
@@ -128,7 +125,7 @@ export default function TitleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     {disableGenerate ? <p className="text-amber-700 text-xs mt-2">{t('invoices.offline_only')}</p> : null}
-                    </div> : <div></div>}
+                    </div>
                     <AlertDialog open={getInvoicesDialogOpen} onOpenChange={handleGetDialogOpenChange}>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('invoices.get_invoice')}</Button>

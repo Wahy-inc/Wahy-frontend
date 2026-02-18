@@ -1,9 +1,9 @@
 'use client'
 
-import React, { use } from "react";
+import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createInvoices, downloadInvoicePDF, downloadInvoicePDFMe, getInvoice, getInvoiceMe, getLocalStudent, listInvoices, listInvoicesMe, markInvoiceAsPaid, overrideInvoice } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../page";
+import { createInvoices, downloadInvoicePDF, getInvoice, getLocalStudent, listInvoices, markInvoiceAsPaid, overrideInvoice } from "@/app/platform/actions/dashboard";
+import dashboardPage from "../../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -39,7 +39,7 @@ export default function Invoices() {
     const [overrideInvoiceState, overrideInvoiceAction, overrideInvoicePending] = React.useActionState(overrideInvoice, undefined)
     const [createInvoiceState, createInvoiceAction, createInvoicePending] = React.useActionState(createInvoices, undefined)
     const getInvoiceAction = async (state: GetInvoiceByIDFormState, formData: FormData) => {
-        return isAdmin ? getInvoice(state, formData) : getInvoiceMe(state, formData)
+        return getInvoice(state, formData)
     }
     const [getInvoiceState, getInvoiceFormAction, getInvoicePending] = React.useActionState(getInvoiceAction, undefined)
     const [payInvoiceState, payInvoiceAction, payInvoicePending] = React.useActionState(markInvoiceAsPaid, undefined)
@@ -63,8 +63,8 @@ export default function Invoices() {
     }, [])
 
     useToastListener(createInvoiceState, {functionName: 'Create Invoice', successMessage: t('invoices.create_success'), errorMessage: t('invoices.create_error')})
-    useToastListener(overrideInvoiceState, {functionName: 'Override Invoice', successMessage: t('invoices.create_success'), errorMessage: t('invoices.create_error')})
-    useToastListener(payInvoiceState, {functionName: 'Mark Invoice As Paid', successMessage: t('invoices.create_success'), errorMessage: t('invoices.create_error')})
+    useToastListener(overrideInvoiceState, {functionName: 'Override Invoice', successMessage: t('invoices.override_success'), errorMessage: t('invoices.override_error')})
+    useToastListener(payInvoiceState, {functionName: 'Mark Invoice As Paid', successMessage: t('invoices.mark_paid_success'), errorMessage: t('invoices.mark_paid_error')})
     useToastListener(getInvoiceState, {functionName: 'Get Invoice', successMessage: t('invoices.get_success'), errorMessage: t('invoices.get_error')})
 
     React.useEffect(() => {
@@ -75,13 +75,8 @@ export default function Invoices() {
         const fetchInvoices = async () => {
             try {
                 setLoading(true)
-                if (isAdmin) {
-                    const data = await listInvoices()
-                    setInvoices(data)
-                } else {
-                    const data = await listInvoicesMe()
-                    setInvoices(data)
-                }
+                const data = await listInvoices()
+                setInvoices(data)
                 setError(null)
             } catch (err) {
                 setError(t('invoices.get_error'))
@@ -92,13 +87,13 @@ export default function Invoices() {
         }
         fetchInvoices()
         }
-    }, [getInvoiceState, createInvoiceState, overrideInvoiceState, payInvoiceState, isAdmin])
+    }, [getInvoiceState, createInvoiceState, overrideInvoiceState, payInvoiceState,t])
 
     React.useEffect(() => {
         if (authLoading) return
 
         const cachedInvoices = getCachedData<openApi.InvoiceRead[]>(
-            isAdmin ? offlineCacheKeys.invoicesListAdmin : offlineCacheKeys.invoicesListMe,
+            offlineCacheKeys.invoicesListAdmin,
         )
         if (cachedInvoices && cachedInvoices.length > 0) {
             setInvoices(cachedInvoices)
@@ -108,13 +103,8 @@ export default function Invoices() {
         const fetchInvoices = async () => {
             try {
                 setLoading(true)
-                if (isAdmin) {
-                    const data = await listInvoices()
-                    setInvoices(data)
-                } else {
-                    const data = await listInvoicesMe()
-                    setInvoices(data)
-                }
+                const data = await listInvoices()
+                setInvoices(data)
                 setError(null)
             } catch (err) {
                 setError(t('invoices.get_error'))
@@ -124,7 +114,18 @@ export default function Invoices() {
             }
         }
         fetchInvoices()
-    }, [authLoading, isAdmin])
+    }, [authLoading,t])
+
+    if (!isAdmin) {
+            return (
+                <div className="flex items-center justify-center min-h-screen">
+                    <div className="text-center">
+                        <h1 className="text-2xl font-bold">Access Denied</h1>
+                        <p className="text-lg">You do not have permission to view this page.</p>
+                    </div>
+                </div>
+            )
+        }
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
         <Field orientation="vertical" className='w-full inline'>
@@ -140,7 +141,7 @@ export default function Invoices() {
                     <ItemMedia variant="icon">
                         <DollarSign />
                     </ItemMedia>
-                <ItemTitle>{t('invoices.invoice_id_label')}: {invoice.invoice_number} , {t('students.student_id')}: {isAdmin? getLocalStudent(invoice.student_id)?.full_name_english : t('invoices.me')}</ItemTitle>
+                <ItemTitle>{t('invoices.invoice_id_label')}: {invoice.invoice_number} , {t('students.student_id')}: {getLocalStudent(invoice.student_id)?.full_name_english}</ItemTitle>
                     {t('invoices.amount')}: {invoice.total_amount} {invoice.currency} , {t('invoices.status')}: {invoice.status} <br />
                     <div id="accordion-data" className="text-sm">
                         <Accordion
@@ -165,16 +166,11 @@ export default function Invoices() {
                         if (isOffline) {
                             return
                         }
-                        if (isAdmin) {
-                            downloadInvoicePDF(invoice.id)
-                        } else {
-                            downloadInvoicePDFMe(invoice.id)
-                        }
+                        downloadInvoicePDF(invoice.id)
                     }}>
                         {t('invoices.download_pdf')}
                     </Button>
                 </ItemActions>
-                {isAdmin ? (
                     <div>
                     {invoice.status === openApi.InvoiceStatus.Generated? (
                         <ItemActions>
@@ -257,7 +253,7 @@ export default function Invoices() {
                                 {t('invoices.paid')}
                             </Button>
                         </ItemActions>
-                    ) : null}</div>) : null}
+                    ) : null}</div>
             </Item>
         </div>
     )
@@ -276,7 +272,6 @@ export default function Invoices() {
             setcreateInvoicesDialogOpen={setCreateInvoiceDialogOpen}
             getInvoicesDialogOpen={getInvoiceDialogOpen}
             setgetInvoicesDialogOpen={setGetInvoiceDialogOpen}
-            isAdmin={isAdmin}
             disableGenerate={isOffline}
         />
     )
@@ -313,7 +308,7 @@ export default function Invoices() {
                 )) : <p className="text-slate-700 text-xl">{t('invoices.no_generated_invoices')}</p>}
             </div>
             <div className="w-full h-1 bg-gray-400"></div>
-                {sentInvoices && sentInvoices.length > 0 && isAdmin ? (
+                {sentInvoices && sentInvoices.length > 0 ? (
                     <div className="flex flex-col gap-4">
                         <p className="text-2xl text-slate-700 font-semibold">{t('invoices.sent_invoices_title')}</p>
                         {sentInvoices.map((invoice) => (
