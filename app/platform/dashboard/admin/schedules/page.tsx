@@ -3,7 +3,7 @@
 import React from "react";
 import * as openApi from "@/lib/openApi"
 import { createSchedule, deleteSchedule, getLocalStudent, getSchedulesForStudent, listSchedules, updateSchedule } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../../page";
+import dashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
 import TitleElement from "./title_element";
 import { UpdateScheduleFormState } from "@/app/platform/lib/definitions";

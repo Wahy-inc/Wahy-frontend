@@ -3,7 +3,7 @@
 import React, { use } from "react";
 import * as openApi from "@/lib/openApi"
 import { approveStudent, createStudent, getStudent, listStudents, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../../page";
+import dashboardPage from "../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -97,6 +97,17 @@ export default function Students() {
             }
         fetchStudents()
     }, [isAdmin, authLoading])
+
+    if (!isAdmin) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold">Access Denied</h1>
+                    <p className="text-lg">You do not have permission to view this page.</p>
+                </div>
+            </div>
+        )
+    }
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
         <Field orientation="vertical" className='w-full inline'>

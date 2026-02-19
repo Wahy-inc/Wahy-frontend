@@ -2,26 +2,16 @@
 
 import * as icon from '@deemlol/next-icons'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
-import { signout } from '../actions/auth'
-import { listStudents } from '../actions/dashboard'
-import { useAuth } from '@/lib/auth-context'
+import { useState } from 'react'
+import { signout } from '../../actions/auth'
 import { useLocalization } from '@/lib/localization-context'
 import { OfflineStatusBar } from '@/components/OfflineStatusBar'
 
 export default function DashboardPage({children: children, title: title}: {children: React.ReactNode, title: React.ReactNode}  ) {
     const router = useRouter()
-    const { isAdmin, isStudent } = useAuth()
     const { t } = useLocalization()
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
     
-    useEffect(() => {
-        localStorage.setItem('students', JSON.stringify([]))
-        if (isAdmin) {
-            listStudents()
-        }
-    }, [isAdmin])
-
     return (
         <div className="flex flex-row justify-between w-full mt-14 lg:mt-15 min-h-[90vh]">
             {mobileSidebarOpen ? (
@@ -39,13 +29,11 @@ export default function DashboardPage({children: children, title: title}: {child
                     <div className='absolute -left-10 top-10 -z-20 w-40 h-40 rounded-full bg-slate-950 blur-[5px]'></div>
                     <div className='absolute -right-10 top-100 -z-20 w-60 h-60 rounded-full bg-slate-700 blur-[5px] opacity-50'></div>
                     <div className='absolute left-5 top-150 -z-10 w-60 h-60 rounded-full bg-slate-800 blur-[5px] opacity-50'></div>
-                    {isAdmin? <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/analytics')}}> <icon.Users className='inline mr-4'/>{t('analytics.title')}</h2> : null}
-                    <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/schedules')}}> <icon.Clock className='inline mr-4'/>{t('schedules.title')}</h2>
-                    <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/lessons')}}> <icon.Layers className='inline mr-4'/>{t('lessons.title')}</h2>
-                    <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/library')}}> <icon.Book className='inline mr-4'/>{t('library.title')}</h2>
-                    {isAdmin? <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/students')}}> <icon.Users className='inline mr-4'/>{t('students.title')}</h2> : null}
-                    {isStudent? <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/profile')}}> <icon.Users className='inline mr-4'/>{t('profile.title')}</h2> : null}
-                    <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/invoices')}}> <icon.DollarSign className='inline mr-4'/>{t('invoices.title')}</h2>
+            <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/student/schedules')}}> <icon.Clock className='inline mr-4'/>{t('schedules.title')}</h2>
+                    <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/student/lessons')}}> <icon.Layers className='inline mr-4'/>{t('lessons.title')}</h2>
+                    <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/student/library')}}> <icon.Book className='inline mr-4'/>{t('library.title')}</h2>
+             <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/student/profile')}}> <icon.Users className='inline mr-4'/>{t('profile.title')}</h2>
+                    <h2 className="text-xl lg:text-2xl font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-slate-500 hover:text-slate-950 hover:border-l-4 hover:border-slate-200" onClick={() => {setMobileSidebarOpen(false); router.push('/platform/dashboard/student/invoices')}}> <icon.DollarSign className='inline mr-4'/>{t('invoices.title')}</h2>
                 </div>
                 <div id='logout'>
                     <h2 className="text-xl lg:text-2xl text-red-500 font-bold p-5 pr-0 cursor-pointer transition duration-300 ease-in-out hover:translate-x-2 hover:bg-red-500 hover:text-slate-200 hover:border-l-4 hover:border-slate-200" onClick={() => signout()}> <icon.LogOut className='inline mr-4'/>{t('auth.logout')}</h2>
