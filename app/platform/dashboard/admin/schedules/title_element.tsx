@@ -45,6 +45,8 @@ const weekDaysMap: Record<string, string> = {
     '6': 'friday'
 }
 
+const monthDays = Array.from({ length: 31 }, (_, i) => i + 1)
+
 export default function TitleElement({
     title,
     handleClearFilter,
@@ -86,10 +88,17 @@ export default function TitleElement({
     const [isRecurring, setIsRecurring] = useState<string>('')
     const [isRecurringPeriod, setIsRecurringPeriod] = useState<string>('')
     const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<string>('')
+    const [selectedDaysOfWeek, setSelectedDaysOfWeek] = useState<string[]>([])
+    const [selectedDayOfMonth, setSelectedDayOfMonth] = useState<string>('')
+    const [selectedDaysOfMonth, setSelectedDaysOfMonth] = useState<string[]>([])
 
     const handleCreateDialogOpenChange = (open: boolean) => {
         if (!open) {
             setCreateFormSubmitted(false)
+            setSelectedDayOfWeek('')     
+            setSelectedDaysOfWeek([])    
+            setIsRecurring('')            
+            setIsRecurringPeriod('')     
         }
         if (createState?.message === 'success') {
             setcreateScheduleDialogOpen(false)
@@ -120,15 +129,53 @@ export default function TitleElement({
         getSchedualesForStudentAction(formData)
     }
 
-    const weekElement = (
-        <div className="flex flex-row border-2 border-slate-800 rounded-xl">
-            {weekDaysMap && Object.entries(weekDaysMap).map(([key, value]) => (
-                <div key={key} className={`flex-1 text-center py-2 cursor-pointer ${selectedDayOfWeek === key ? 'bg-slate-800 text-slate-100' : 'bg-slate-100 text-slate-800'}`} onClick={() => setSelectedDayOfWeek(key as unknown as string)}>
-                    {t(`schedules.${value}`)}
-                </div>
-            ))}
+    const weekElement = (type: string) => weekDaysMap && Object.entries(weekDaysMap).map(([key, value]) => (
+        <div key={key} className={`flex text-center items-center justify-center text-sm py-2 px-2 rounded-xl transition duration-300 cursor-pointer border border-slate-800 ${(selectedDayOfWeek === key || selectedDaysOfWeek.includes(key)) ? 'bg-slate-800 text-slate-100' : 'bg-white text-slate-800'}`} onClick={() => {
+            if (type === 'weekly') {
+                if (selectedDayOfWeek === key) {
+                    setSelectedDayOfWeek('')
+                } else {
+                    setSelectedDayOfWeek(key)
+                }
+            } else if (type === 'customWeekly') {
+                if (selectedDaysOfWeek.includes(key)) {
+                    if (selectedDaysOfWeek.length === 1) {
+                        setSelectedDaysOfWeek([])
+                    } else {
+                    setSelectedDaysOfWeek(selectedDaysOfWeek.filter(day => day !== key))
+                    }
+                } else {
+                    setSelectedDaysOfWeek([...selectedDaysOfWeek, key])
+                }
+            }
+        }}>
+            {t(`schedules.${value}`)}
         </div>
-    )
+    ))
+
+    const monthElement = (type:string) => monthDays.map((day) => (
+        <div key={day} className={`flex text-center items-center justify-center text-sm h-8 w-8 rounded-xl transition duration-300 cursor-pointer border border-slate-800 ${(selectedDayOfMonth === day.toString() || selectedDaysOfMonth.includes(day.toString())) ? 'bg-slate-800 text-slate-100' : 'bg-white text-slate-800'}`} onClick={() => {
+            if (type === 'monthly') {
+                if (selectedDayOfMonth === day.toString()) {
+                    setSelectedDayOfMonth('')
+                } else {
+                    setSelectedDayOfMonth(day.toString())
+                }
+            } else if (type === 'customMonthly') {
+                if (selectedDaysOfMonth.includes(day.toString())) {
+                    if (selectedDaysOfMonth.length === 1) {
+                        setSelectedDaysOfMonth([])
+                    } else {
+                    setSelectedDaysOfMonth(selectedDaysOfMonth.filter(d => d !== day.toString()))
+                    }
+                } else {
+                    setSelectedDaysOfMonth([...selectedDaysOfMonth, day.toString()])
+                }
+            }
+        }}>
+            {day}
+        </div>
+    ))
 
     return (
             <div className="flex flex-col justify-center">
@@ -160,7 +207,7 @@ export default function TitleElement({
                             <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('schedules.create_title')}</AlertDialogTitle>
-                                <div className="grid grid-cols-3 grid-rows-6 gap-4 rtl:text-right">
+                                <div className="grid grid-cols-3 gap-4 rtl:text-right">
                                     <div className='flex flex-col col-start-1 col-end-4 row-start-1 row-end-2'>
                                         <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
@@ -230,7 +277,13 @@ export default function TitleElement({
                                     <div className='flex flex-col col-start-3 col-end-4 row-start-4 row-end-5'>
                                         <div className="flex flex-col">
                                             <label htmlFor="is-recurring-period" className="text-sm font-medium">Period</label>
-                                            <Select name="is-recurring-period" onValueChange={(value) => setIsRecurringPeriod(value)}>
+                                            <Select name="is-recurring-period" onValueChange={(value) => {
+                                                setIsRecurringPeriod(value)
+                                                setSelectedDayOfWeek('')
+                                                setSelectedDaysOfWeek([])
+                                                setSelectedDayOfMonth('')
+                                                setSelectedDaysOfMonth([])
+                                            }}>
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue id="selected-recurr-value" placeholder={t('schedules.recurring')} />
                                                 </SelectTrigger>
@@ -240,15 +293,22 @@ export default function TitleElement({
                                                         <SelectItem value='daily'>Daily</SelectItem>
                                                         <SelectItem value='weekly'>Weekly</SelectItem>
                                                         <SelectItem value='monthly'>Monthly</SelectItem>
+                                                        <SelectItem value='customWeekly'>Custom Weekly</SelectItem>
+                                                        <SelectItem value='customMonthly'>Custom Monthly</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
                                         </div>
                                         {createFormSubmitted && createState?.error?.is_recurring && <p className="text-red-500 text-sm">{createState.error.is_recurring}</p>}
                                     </div>)}
-                                    {isRecurring === 'true' && isRecurringPeriod === 'weekly' && (
-                                        weekElement
-                                    )}
+                                    <div className="col-start-1 col-end-4 row-start-5 row-end-6 flex-wrap flex flex-row gap-1 rounded-xl justify-start">
+                                        {isRecurring === 'true' && (isRecurringPeriod === 'weekly' || isRecurringPeriod === 'customWeekly') && (
+                                                weekElement(isRecurringPeriod)
+                                            )}
+                                        {isRecurring === 'true' && (isRecurringPeriod === 'monthly' || isRecurringPeriod === 'customMonthly') && (
+                                                monthElement(isRecurringPeriod)
+                                            )}
+                                    </div>
                                     <div className='flex flex-col col-start-1 col-end-4 row-start-6 row-end-7'>
                                         {fieldInput(t('schedules.notes'), "notes", t('schedules.enter_notes'), "text")}
                                         {createFormSubmitted && createState?.error?.notes && <p className="text-red-500 text-sm">{createState.error.notes}</p>}
