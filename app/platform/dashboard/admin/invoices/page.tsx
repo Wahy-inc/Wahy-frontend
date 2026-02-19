@@ -3,7 +3,7 @@
 import React from "react";
 import * as openApi from "@/lib/openApi"
 import { createInvoices, downloadInvoicePDF, getInvoice, getLocalStudent, listInvoices, markInvoiceAsPaid, overrideInvoice } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../page";
+import DashboardPage from "../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -276,9 +276,9 @@ export default function Invoices() {
         />
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('common.loading')}</p>, title: title})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
-    if (!invoices || invoices.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('invoices.no_invoices_found')}</p>, title: title})
+    if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.loading')}</p></DashboardPage>
+    if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
+    if (!invoices || invoices.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('invoices.no_invoices_found')}</p></DashboardPage>
 
     const paidInvoices = invoices?.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Paid;
@@ -348,5 +348,5 @@ export default function Invoices() {
         </div>
     )
 
-    return dashboardPage({children: <div className="flex flex-col gap-4 w-full">{content}</div>, title: title})
+    return <DashboardPage title={title}><div className="flex flex-col gap-4 w-full">{content}</div></DashboardPage>
 }

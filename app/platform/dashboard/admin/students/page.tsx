@@ -3,7 +3,7 @@
 import React from "react";
 import * as openApi from "@/lib/openApi"
 import { approveStudent, createStudent, getStudent, listStudents, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../page";
+import DashboardPage from "../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -432,9 +432,9 @@ export default function Students() {
         />
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('common.loading')}</p>, title: title})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
-    if (!students || students.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('students.no_students_found')}</p>, title: title})
+    if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.loading')}</p></DashboardPage>
+    if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
+    if (!students || students.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('students.no_students_found')}</p></DashboardPage>
 
     const pendingStudents = students?.filter((student) => {
         return student.registration_status === openApi.RegistrationStatus.Pending;
@@ -493,7 +493,7 @@ export default function Students() {
         </div>
     )
 
-    return dashboardPage({children: <div className="flex flex-col gap-4 w-full">{content}</div>, title: (
+    return <DashboardPage title={(
         <TitleElement
             title={t('students.title')}
             createAction={createStudentAction}
@@ -508,5 +508,5 @@ export default function Students() {
             getStudentDialogOpen={getStudentDialogOpen}
             setgetStudentDialogOpen={setGetStudentDialogOpen}
         />
-    )})
+    )}><div className="flex flex-col gap-4 w-full">{content}</div></DashboardPage>
 }

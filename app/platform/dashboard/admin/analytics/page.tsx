@@ -12,6 +12,7 @@ import { attendanceAnalytics, financialAnalytics, getLocalStudent, operationalAn
 import { Button } from "@/components/ui/button";
 import { useToastListener } from "@/lib/toastListener";
 import { useLocalization } from "@/lib/localization-context";
+import DashboardPage from "../page";
 
 export default function Home() {
     const [attendance, setattendance] = React.useState<openApi.AttendanceAnalytics | null>(null);
@@ -338,5 +339,5 @@ export default function Home() {
 )
             
 
-    return dashboardPage({children: content, title: title});
+    return <DashboardPage title={title}>{content}</DashboardPage>
 }

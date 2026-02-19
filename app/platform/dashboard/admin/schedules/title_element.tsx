@@ -35,6 +35,16 @@ enum weekDays {
     friday = '6'
 }
 
+const weekDaysMap: Record<string, string> = {
+    '0': 'saturday',
+    '1': 'sunday',
+    '2': 'monday',
+    '3': 'tuesday',
+    '4': 'wednesday',
+    '5': 'thursday',
+    '6': 'friday'
+}
+
 export default function TitleElement({
     title,
     handleClearFilter,
@@ -73,6 +83,9 @@ export default function TitleElement({
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
     const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
     const { t } = useLocalization()
+    const [isRecurring, setIsRecurring] = useState<string>('')
+    const [isRecurringPeriod, setIsRecurringPeriod] = useState<string>('')
+    const [selectedDayOfWeek, setSelectedDayOfWeek] = useState<string>('')
 
     const handleCreateDialogOpenChange = (open: boolean) => {
         if (!open) {
@@ -107,6 +120,16 @@ export default function TitleElement({
         getSchedualesForStudentAction(formData)
     }
 
+    const weekElement = (
+        <div className="flex flex-row border-2 border-slate-800 rounded-xl">
+            {weekDaysMap && Object.entries(weekDaysMap).map(([key, value]) => (
+                <div key={key} className={`flex-1 text-center py-2 cursor-pointer ${selectedDayOfWeek === key ? 'bg-slate-800 text-slate-100' : 'bg-slate-100 text-slate-800'}`} onClick={() => setSelectedDayOfWeek(key as unknown as string)}>
+                    {t(`schedules.${value}`)}
+                </div>
+            ))}
+        </div>
+    )
+
     return (
             <div className="flex flex-col justify-center">
                 <div className='flex flex-row justify-between items-center'>
@@ -137,7 +160,7 @@ export default function TitleElement({
                             <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('schedules.create_title')}</AlertDialogTitle>
-                                <div className="grid grid-cols-3 grid-rows-5 gap-4 rtl:text-right">
+                                <div className="grid grid-cols-3 grid-rows-6 gap-4 rtl:text-right">
                                     <div className='flex flex-col col-start-1 col-end-4 row-start-1 row-end-2'>
                                         <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
@@ -185,12 +208,12 @@ export default function TitleElement({
                                             {createFormSubmitted && createState?.error?.effective_until && <p className="text-red-500 text-sm">{createState.error.effective_until}</p>}
                                         </div>
                                     </div>
-                                    <div className='flex flex-col col-start-1 col-end-4 row-start-4 row-end-5'>
+                                    <div className='flex flex-col col-start-1 col-end-3 row-start-4 row-end-5'>
                                         <div className="flex flex-col">
                                             <label htmlFor="is-recurring" className="text-sm font-medium">{t('schedules.recurring')}</label>
-                                            <Select name="is-recurring">
+                                            <Select name="is-recurring" onValueChange={(value) => setIsRecurring(value)}>
                                                 <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder={t('schedules.recurring')} />
+                                                    <SelectValue id="selected-recurr-value" placeholder={t('schedules.recurring')} />
                                                 </SelectTrigger>
                                                 <SelectContent>
                                                     <SelectGroup>
@@ -203,7 +226,30 @@ export default function TitleElement({
                                         </div>
                                         {createFormSubmitted && createState?.error?.is_recurring && <p className="text-red-500 text-sm">{createState.error.is_recurring}</p>}
                                     </div>
-                                    <div className='flex flex-col col-start-1 col-end-4 row-start-5 row-end-6'>
+                                    {isRecurring === 'true' && (
+                                    <div className='flex flex-col col-start-3 col-end-4 row-start-4 row-end-5'>
+                                        <div className="flex flex-col">
+                                            <label htmlFor="is-recurring-period" className="text-sm font-medium">Period</label>
+                                            <Select name="is-recurring-period" onValueChange={(value) => setIsRecurringPeriod(value)}>
+                                                <SelectTrigger className="w-full max-w-48">
+                                                    <SelectValue id="selected-recurr-value" placeholder={t('schedules.recurring')} />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectGroup>
+                                                        <SelectLabel>Period</SelectLabel>
+                                                        <SelectItem value='daily'>Daily</SelectItem>
+                                                        <SelectItem value='weekly'>Weekly</SelectItem>
+                                                        <SelectItem value='monthly'>Monthly</SelectItem>
+                                                    </SelectGroup>
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+                                        {createFormSubmitted && createState?.error?.is_recurring && <p className="text-red-500 text-sm">{createState.error.is_recurring}</p>}
+                                    </div>)}
+                                    {isRecurring === 'true' && isRecurringPeriod === 'weekly' && (
+                                        weekElement
+                                    )}
+                                    <div className='flex flex-col col-start-1 col-end-4 row-start-6 row-end-7'>
                                         {fieldInput(t('schedules.notes'), "notes", t('schedules.enter_notes'), "text")}
                                         {createFormSubmitted && createState?.error?.notes && <p className="text-red-500 text-sm">{createState.error.notes}</p>}
                                     </div>

@@ -3,7 +3,7 @@
 import React from "react";
 import * as openApi from "@/lib/openApi"
 import { getLocalStudent, getSchedulesForStudent, listSchedulesMe } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../../admin/page";
+import DashboardPage from "../../admin/page";
 import * as icon from '@deemlol/next-icons'
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
@@ -212,9 +212,9 @@ export default function Schedules() {
         />
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('schedules.loading_schedules')}</p>, title: title})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
-    if (!schedules || schedules.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('schedules.no_schedules_found')}</p>, title: title})
+    if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('schedules.loading_schedules')}</p></DashboardPage>
+    if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
+    if (!schedules || schedules.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('schedules.no_schedules_found')}</p></DashboardPage>
     const displaySchedules = filteredSchedules || schedules
     const content = (
         <div className='flex flex-col gap-4'>
@@ -226,5 +226,5 @@ export default function Schedules() {
         </div>
     )
 
-    return dashboardPage({children: content, title: title})
+    return <DashboardPage title={title}>{content}</DashboardPage>
 }

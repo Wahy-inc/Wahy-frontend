@@ -3,7 +3,7 @@
 import React from "react";
 import * as openApi from "@/lib/openApi"
 import { deleteLibraryItem, getLibraryItem, listLibraryMe } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../../admin/page";
+import DashboardPage from "../../admin/page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
@@ -150,9 +150,9 @@ export default function Schedules() {
         />
     )
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('common.loading')}</p>, title: title})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
-    if (!libraryItems || libraryItems.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('library.no_books_found')}</p>, title: title})
+    if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.loading')}</p></DashboardPage>
+    if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
+    if (!libraryItems || libraryItems.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('library.no_books_found')}</p></DashboardPage>
 
     const content = libraryItems?.map((item) => (
         <div key={item.id} className="w-full">
@@ -160,8 +160,8 @@ export default function Schedules() {
         </div>
     ))
 
-    return dashboardPage({children: <div className="flex flex-col gap-4 w-full">
+    return <DashboardPage title={title}><div className="flex flex-col gap-4 w-full">
         {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{t('library.offline_only')}</p> : null}
         <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-4 md:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>
-    </div>, title: title})
+    </div></DashboardPage>
 }

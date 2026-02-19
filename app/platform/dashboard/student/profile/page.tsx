@@ -93,24 +93,15 @@ export default function Profile() {
     )
 
     if (loading) {
-        return dashboardPage({
-            children: <p className="text-slate-700 text-xl">{t('profile.loading_profile')}</p>,
-            title: title
-        })
+        return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('profile.loading_profile')}</p></DashboardPage>
     }
 
     if (error) {
-        return dashboardPage({
-            children: <p className="text-red-500 text-xl">{error}</p>,
-            title: title
-        })
+        return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
     }
 
     if (!profile) {
-        return dashboardPage({
-            children: <p className="text-slate-700 text-xl">{t('profile.no_profile_found')}</p>,
-            title: title
-        })
+        return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('profile.no_profile_found')}</p></DashboardPage>
     }
 
     const content = (
@@ -262,5 +253,5 @@ export default function Profile() {
         </div>
     )
 
-    return dashboardPage({ children: content, title: title })
+    return <DashboardPage title={title}>{content}</DashboardPage>
 }

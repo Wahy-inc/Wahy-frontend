@@ -3,7 +3,7 @@
 import React, { useActionState } from "react";
 import * as openApi from "@/lib/openApi"
 import { getLessonByIDMe, listLessonsMe } from "@/app/platform/actions/dashboard";
-import dashboardPage from "../../admin/page";
+import DashboardPage from "../../admin/page";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -95,16 +95,12 @@ export default function Lessons() {
     )
 
 
-    if (loading) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('lessons.loading_lessons')}</p>, title: title})
-    if (error) return dashboardPage({children: <p className="text-red-500 text-xl">{error}</p>, title: title})
-    if (!lessons || lessons.length === 0) return dashboardPage({children: <p className="text-slate-700 text-xl">{t('common.no_data_found')}</p>, title: title})
+    if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('lessons.loading_lessons')}</p></DashboardPage>
+    if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
+    if (!lessons || lessons.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.no_data_found')}</p></DashboardPage>
 
     if (fetchedLesson && getLessonState?.message == 'success') {
-        return dashboardPage({children: [
-            <div key="clear-filter" className='flex flex-row justify-end'>
-                <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLesson(null)}}>{t('common.clear')}</Button>
-            </div>
-            ,<div key={fetchedLesson.id}><LessonElement lesson={fetchedLesson}/></div>], title: (
+        return <DashboardPage title={(
             <TitleElement
                 title={`${t('lessons.lesson_details')} ${fetchedLesson.id}`}
                 fieldInput={fieldInput}
@@ -114,11 +110,14 @@ export default function Lessons() {
                 getLessonAction={getLessonFormAction}
                 getLessonPending={getLessonPending}
             />
-        )})
+        )}>
+            <div className='flex flex-row justify-end'>
+                <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLesson(null)}}>{t('common.clear')}</Button>
+            </div>
+            <div><LessonElement lesson={fetchedLesson}/></div>
+        </DashboardPage>
     } else {
-        return dashboardPage({children: [
-            <div key="content">{displayContent}</div>
-        ], title: title})
+        return <DashboardPage title={title}>{displayContent}</DashboardPage>
     }
 
 }
