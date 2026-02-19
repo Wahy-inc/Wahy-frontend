@@ -1,6 +1,6 @@
 'use client'
 
-import React, { use } from "react";
+import React from "react";
 import * as openApi from "@/lib/openApi"
 import { approveStudent, createStudent, getStudent, listStudents, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
 import dashboardPage from "../page";
@@ -173,7 +173,7 @@ export default function Students() {
                             <AccordionContent>
                                 <div className={`space-y-6 pt-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
                                   {/* Contact Information */}
-                                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
+                                  <div className="bg-linear-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
                                     <h3 className="font-semibold text-blue-900 mb-3 text-sm">{t('students.phone')} • {t('students.status')}</h3>
                                     <div className="grid grid-cols-2 gap-4">
                                       <div className="flex flex-col">
@@ -188,7 +188,7 @@ export default function Students() {
                                   </div>
 
                                   {/* Personal Information */}
-                                  <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg">
+                                  <div className="bg-linear-to-r from-purple-50 to-purple-100 p-4 rounded-lg">
                                     <h3 className="font-semibold text-purple-900 mb-3 text-sm">{t('students.date_of_birth')} • {t('students.timezone')}</h3>
                                     <div className="grid grid-cols-2 gap-4">
                                       <div className="flex flex-col">
@@ -203,7 +203,7 @@ export default function Students() {
                                   </div>
 
                                   {/* Memorization Progress */}
-                                  <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg">
+                                  <div className="bg-linear-to-r from-green-50 to-green-100 p-4 rounded-lg">
                                     <h3 className="font-semibold text-green-900 mb-3 text-sm">{t('students.current_juz')} • {t('students.current_surah')} • {t('students.current_ayah')}</h3>
                                     <div className="grid grid-cols-3 gap-4">
                                       <div className="flex flex-col">
@@ -222,7 +222,7 @@ export default function Students() {
                                   </div>
 
                                   {/* Lessons & Billing */}
-                                  <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-lg">
+                                  <div className="bg-linear-to-r from-amber-50 to-amber-100 p-4 rounded-lg">
                                     <h3 className="font-semibold text-amber-900 mb-3 text-sm">{t('students.lessons_rate')} • {t('students.lessons_per_week')} • {t('students.billing_cycle')}</h3>
                                     <div className="grid grid-cols-3 gap-4">
                                       <div className="flex flex-col">

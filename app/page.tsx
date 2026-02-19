@@ -4,11 +4,9 @@ import logo from "../public/quran.png";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useLocalization } from "@/lib/localization-context";
 
 export default function Home() {
   const router = useRouter();
-  const { t } = useLocalization();
 
   useEffect(() => {
     const accessToken = localStorage.getItem('access_token');
@@ -42,10 +40,10 @@ export default function Home() {
         />
         <div className="flex flex-col items-center gap-6 text-start sm:items-start sm:text-left">
           <h1 className="max-w-xs lg:text-[100px] text-5xl font-semibold leading-10 tracking-tight text-slate-900 dark:text-zinc-50">
-            {t('home.title')}
+            Wahy
           </h1>
           <p className="max-w-md mt-4 text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            {t('home.description')}
+            An islamic platform to help sheikhs supervise and monitor their students and their progress.
           </p>
         </div>
         <div className="flex flex-col justify-between gap-4 text-base font-medium lg:flex-row">
@@ -57,7 +55,7 @@ export default function Home() {
               window.location.href = './platform/auth/login';
             }}
           >
-            {t('home.admin_login')}
+            Admin Login
           </Button>
           <Button
             variant="outline"
@@ -67,7 +65,7 @@ export default function Home() {
               window.location.href = './platform/auth/signup';
             }}
           >
-            {t('home.student_signup')}
+            Student Signup
           </Button>
           <Button
             variant="outline"
@@ -77,7 +75,7 @@ export default function Home() {
               window.location.href = './platform/auth/login';
             }}
           >
-            {t('home.student_login')}
+            Student Login
           </Button>
         </div>
       </main>
