@@ -70,6 +70,7 @@ export const CreatLessonSchema = zod.object({
     absence_reason: zod.string().min(0).trim(),
     sheikh_notes: zod.string().min(0).trim(),
     student_notes: zod.string().min(0).trim(),
+    recurrence: zod.string().min(0).trim().optional(),
 })
 
 export type CreateLessonFormState = 
@@ -88,6 +89,7 @@ export type CreateLessonFormState =
     sheikh_notes?: string[];
     student_notes?: string[];
     pass_fail?: string[];
+    recurrence?: string[];
 }
 message?: string;
 }
@@ -142,24 +144,22 @@ data?: openApi.LessonRead;
 
 export const createScheduleSchema = zod.object({
     student_id: zod.string({ error: 'Student ID must be a number' }),
-    day_of_week: zod.enum(['0', '1', '2', '3', '4', '5', '6'], { error: 'Invalid day of week' }),
     start_time: zod.string().min(1, { error: 'Start time is required' }).trim(),
     end_time: zod.string().min(1, { error: 'End time is required' }).trim(),
     effective_from: zod.string().min(1, { error: 'Effective from is required' }).trim(),
     effective_until: zod.string().min(0, { error: 'Effective until is required' }).trim(),
-    is_recurring: zod.enum(['true', 'false'], { error: 'Is recurring must be yes or no' }),
+    rrule_string: zod.string().min(0).trim().optional(),
     notes: zod.string().min(0, { error: 'Notes is required' }).trim(),
 })
 
 export type CreateScheduleFormState = 
 | {error?: {
     student_id?: string[];
-    day_of_week?: string[];
     start_time?: string[];
     end_time?: string[];
     effective_from?: string[];
     effective_until?: string[];
-    is_recurring?: string[];
+    rrule_string?: string[];
     notes?: string[];
 }
 message?: string;
@@ -167,12 +167,11 @@ message?: string;
 | undefined;
 
 export const UpdateScheduleSchema = zod.object({
-    day_of_week: zod.enum(['0', '1', '2', '3', '4', '5', '6'], { error: 'Invalid day of week' }),
     start_time: zod.string().min(1, { error: 'Start time is required' }).trim(),
     end_time: zod.string().min(1, { error: 'End time is required' }).trim(),
     effective_from: zod.string().min(1, { error: 'Effective from is required' }).trim(),
     effective_until: zod.string().min(0, { error: 'Effective until is required' }).trim(),
-    is_recurring: zod.enum(['true', 'false'], { error: 'Is recurring must be yes or no' }),
+    rrule_string: zod.string().min(0).trim().optional(),
     is_active: zod.enum(['true', 'false'], { error: 'Is active must be yes or no' }),
     cancellation_reason: zod.string().min(0, { error: 'Cancellation reason is required' }).trim(),
     notes: zod.string().min(0, { error: 'Notes is required' }).trim(),
@@ -180,12 +179,11 @@ export const UpdateScheduleSchema = zod.object({
 
 export type UpdateScheduleFormState = 
 | {error?: {
-    day_of_week?: string[];
     start_time?: string[];
     end_time?: string[];
     effective_from?: string[];
     effective_until?: string[];
-    is_recurring?: string[];
+    rrule_string?: string[];
     is_active?: string[];
     cancellation_reason?: string[];
     notes?: string[];
@@ -261,6 +259,7 @@ export const createStudentSchema = zod.object({
     billingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }),
     specialNotes: zod.string().min(0, { error: 'Special notes is required' }).trim(),
     privateNotes: zod.string().min(0, { error: 'Private notes is required' }).trim(),
+    recurrence: zod.string().min(0).trim().optional(),
 })
 
 export type CreateStudentFormState = 
@@ -279,6 +278,7 @@ export type CreateStudentFormState =
     billingCycle?: string[];
     specialNotes?: string[];
     privateNotes?: string[];
+    recurrence?: string[];
 }
 message?: string;
 }

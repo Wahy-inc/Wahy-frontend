@@ -25,17 +25,7 @@ import { useLocalization } from "@/lib/localization-context";
 import { CreateScheduleFormState, GetSchedualesForStudentFormState } from "@/app/platform/lib/definitions";
 import StudentMenu from "@/components/studentsMenu";
 
-enum weekDays {
-    saturday = '0',
-    sunday = '1',
-    monday = '2',
-    tuesday = '3',
-    wednesday = '4',
-    thursday = '5',
-    friday = '6'
-}
-
-const weekDaysMap: Record<string, string> = {
+export const weekDaysMap: Record<string, string> = {
     '0': 'saturday',
     '1': 'sunday',
     '2': 'monday',
@@ -45,7 +35,59 @@ const weekDaysMap: Record<string, string> = {
     '6': 'friday'
 }
 
-const monthDays = Array.from({ length: 31 }, (_, i) => i + 1)
+export const dayToRRuleMap: Record<string, string> = {
+    '0': 'SA',
+    '1': 'SU',
+    '2': 'MO',
+    '3': 'TU',
+    '4': 'WE',
+    '5': 'TH',
+    '6': 'FR'
+}
+
+export const monthDays = Array.from({ length: 31 }, (_, i) => i + 1)
+
+export const generateRRule = (period: string, selectedDay: string, selectedDays: string[], selectedDayOfMonth: string, selectedDaysOfMonth: string[], effectiveUntil: string | null): string | null => {
+    if (!period) return null
+    
+    let rrule = ''
+    
+    switch(period) {
+        case 'daily':
+            rrule = 'FREQ=DAILY'
+            break
+        case 'weekly':
+            if (!selectedDay) return null
+            const dayAbbr = dayToRRuleMap[selectedDay]
+            rrule = `FREQ=WEEKLY;BYDAY=${dayAbbr}`
+            break
+        case 'customWeekly':
+            if (selectedDays.length === 0) return null
+            const dayAbbrs = selectedDays.map(day => dayToRRuleMap[day]).join(',')
+            rrule = `FREQ=WEEKLY;BYDAY=${dayAbbrs}`
+            break
+        case 'monthly':
+            if (!selectedDayOfMonth) return null
+            rrule = `FREQ=MONTHLY;BYMONTHDAY=${selectedDayOfMonth}`
+            break
+        case 'customMonthly':
+            if (selectedDaysOfMonth.length === 0) return null
+            const monthDaysList = selectedDaysOfMonth.join(',')
+            rrule = `FREQ=MONTHLY;BYMONTHDAY=${monthDaysList}`
+            break
+        default:
+            return null
+    }
+    
+    if (effectiveUntil) {
+        // Convert date to RRULE format (YYYYMMDD)
+        const dateParts = effectiveUntil.split('-')
+        const rruleDate = dateParts.join('')
+        rrule += `;UNTIL=${rruleDate}`
+    }
+    
+    return rrule
+}
 
 export default function TitleElement({
     title,
@@ -121,6 +163,16 @@ export default function TitleElement({
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
         formData.append("student_id", selectedStudentId?.toString() || "")
+        
+        // Generate RRULE if recurring
+        if (isRecurring === 'true') {
+            const effectiveUntil = formData.get('effective-until') as string | null
+            const rrule = generateRRule(isRecurringPeriod, selectedDayOfWeek, selectedDaysOfWeek, selectedDayOfMonth, selectedDaysOfMonth, effectiveUntil)
+            if (rrule) {
+                formData.append("rrule_string", rrule)
+            }
+        }
+        
         createAction(formData)
     }
 
@@ -212,40 +264,17 @@ export default function TitleElement({
                                         <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
-                                    <div className="grid grid-cols-3 gap-4 col-start-1 col-end-4 row-start-2 row-end-3">
+                                    <div className="grid grid-cols-2 gap-4 col-start-1 col-end-4 row-start-2 row-end-3">
                                         <div className='flex flex-col col-start-1 col-end-2'>
-                                            <div className="flex flex-col">
-                                                <label htmlFor="day-of-week" className="text-sm font-medium">{t('schedules.day_of_week')}</label>
-                                                <Select name="day-of-week">
-                                                    <SelectTrigger className="w-full max-w-48">
-                                                        <SelectValue placeholder={t('schedules.day_of_week')} />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            <SelectLabel>{t('schedules.day_of_week')}</SelectLabel>
-                                                            <SelectItem value={weekDays.saturday}>{t('schedules.saturday')}</SelectItem>
-                                                            <SelectItem value={weekDays.sunday}>{t('schedules.sunday')}</SelectItem>
-                                                            <SelectItem value={weekDays.monday}>{t('schedules.monday')}</SelectItem>
-                                                            <SelectItem value={weekDays.tuesday}>{t('schedules.tuesday')}</SelectItem>
-                                                            <SelectItem value={weekDays.wednesday}>{t('schedules.wednesday')}</SelectItem>
-                                                            <SelectItem value={weekDays.thursday}>{t('schedules.thursday')}</SelectItem>
-                                                            <SelectItem value={weekDays.friday}>{t('schedules.friday')}</SelectItem>
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            {createFormSubmitted && createState?.error?.day_of_week && <p className="text-red-500 text-sm">{createState.error.day_of_week}</p>}
-                                        </div>
-                                        <div className='flex flex-col col-start-2 col-end-3'>
                                             {fieldInput(t('schedules.start_time'), "start-time", t('schedules.select_start_time'), "time")}
                                             {createFormSubmitted && createState?.error?.start_time && <p className="text-red-500 text-sm">{createState.error.start_time}</p>}
                                         </div>
-                                        <div className='flex flex-col col-start-3 col-end-4'>
+                                        <div className='flex flex-col col-start-2 col-end-3'>
                                             {fieldInput(t('schedules.end_time'), "end-time", t('schedules.select_end_time'), "time")}
                                             {createFormSubmitted && createState?.error?.end_time && <p className="text-red-500 text-sm">{createState.error.end_time}</p>}
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4 col-start-1 col-end-3 row-start-3 row-end-4">
+                                    <div className="grid grid-cols-2 gap-4 col-start-1 col-end-4 row-start-3 row-end-4">
                                         <div className='flex flex-col col-start-1 col-end-2'>
                                             {fieldInput(t('schedules.effective_from'),"effective-from", "date", "date")}
                                             {createFormSubmitted && createState?.error?.effective_from && <p className="text-red-500 text-sm">{createState.error.effective_from}</p>}
@@ -271,7 +300,6 @@ export default function TitleElement({
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {createFormSubmitted && createState?.error?.is_recurring && <p className="text-red-500 text-sm">{createState.error.is_recurring}</p>}
                                     </div>
                                     {isRecurring === 'true' && (
                                     <div className='flex flex-col col-start-3 col-end-4 row-start-4 row-end-5'>
@@ -299,7 +327,6 @@ export default function TitleElement({
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {createFormSubmitted && createState?.error?.is_recurring && <p className="text-red-500 text-sm">{createState.error.is_recurring}</p>}
                                     </div>)}
                                     <div className="col-start-1 col-end-4 row-start-5 row-end-6 flex-wrap flex flex-row gap-1 rounded-xl justify-start">
                                         {isRecurring === 'true' && (isRecurringPeriod === 'weekly' || isRecurringPeriod === 'customWeekly') && (

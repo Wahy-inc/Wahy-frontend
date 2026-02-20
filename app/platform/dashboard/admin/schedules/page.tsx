@@ -5,8 +5,7 @@ import * as openApi from "@/lib/openApi"
 import { createSchedule, deleteSchedule, getLocalStudent, getSchedulesForStudent, listSchedules, updateSchedule } from "@/app/platform/actions/dashboard";
 import DashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
-import TitleElement from "./title_element";
-import { UpdateScheduleFormState } from "@/app/platform/lib/definitions";
+import TitleElement, { generateRRule, monthDays, weekDaysMap } from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -22,16 +21,6 @@ import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 import { useLocalization } from "@/lib/localization-context";
 
-enum weekDays {
-    saturday = 0,
-    sunday = 1,
-    monday = 2,
-    tuesday = 3,
-    wednesday = 4,
-    thursday = 5,
-    friday = 6
-}
-
 export default function Schedules() {
     const [schedules, setSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
@@ -39,14 +28,20 @@ export default function Schedules() {
     const [searchStudentId, setSearchStudentId] = React.useState<string>("")
     const [filteredSchedules, setFilteredSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
     const [createScheduleState, createScheduleAction, createSchedulePending] = React.useActionState(createSchedule, undefined)
-    const updateScheduleAction = (state: UpdateScheduleFormState, formData: FormData) => updateSchedule(state, formData, Number(formData.get('schedule-id')))
-    const [updateScheduleState, updateScheduleActionState, updateSchedulePending] = React.useActionState(updateScheduleAction, undefined)
+    const [updateScheduleState, updateScheduleAction, updateSchedulePending] = React.useActionState(updateSchedule, undefined)
     const [getScheduleState, getScheduleAction, getSchedulePending] = React.useActionState(getSchedulesForStudent, undefined)
     const [createScheduleDialogOpen, setCreateScheduleDialogOpen] = React.useState(false)
     const [getScheduleDialogOpen, setGetScheduleDialogOpen] = React.useState(false)
     const [editingScheduleId, setEditingScheduleId] = React.useState<number | null>(null)
     const {isAdmin, isLoading: authLoading } = useAuth()
     const { t, language } = useLocalization()
+    const [isRecurring, setIsRecurring] = React.useState<string>('')
+    const [isRecurringPeriod, setIsRecurringPeriod] = React.useState<string>('')
+    const [selectedDayOfWeek, setSelectedDayOfWeek] = React.useState<string>('')
+    const [selectedDaysOfWeek, setSelectedDaysOfWeek] = React.useState<string[]>([])
+    const [selectedDayOfMonth, setSelectedDayOfMonth] = React.useState<string>('')
+    const [selectedDaysOfMonth, setSelectedDaysOfMonth] = React.useState<string[]>([])
+
 
     useToastListener(createScheduleState, {functionName: "Create Schedule", successMessage: t('schedules.create_success'), errorMessage: t('schedules.create_error')})
     useToastListener(updateScheduleState, {functionName: "Update Schedule", successMessage: t('schedules.update_success'), errorMessage: t('schedules.update_error')})
@@ -121,6 +116,19 @@ export default function Schedules() {
         )
     }
 
+    const handleCreateSubmit = (formData: FormData) => {        
+        // Generate RRULE if recurring
+        if (isRecurring === 'true') {
+            const effectiveUntil = formData.get('effective-until') as string | null
+            const rrule = generateRRule(isRecurringPeriod, selectedDayOfWeek, selectedDaysOfWeek, selectedDayOfMonth, selectedDaysOfMonth, effectiveUntil)
+            if (rrule) {
+                formData.append("rrule_string", rrule)
+            }
+        }
+        
+        updateScheduleAction(formData)
+    }
+
     const handleSearchStudentId = (e: React.ChangeEvent<HTMLInputElement>) => {
         const studentId = e.target.value.trim()
         setSearchStudentId(studentId)
@@ -143,6 +151,54 @@ export default function Schedules() {
             searchInput.value = ""
         }
     }
+
+    const weekElement = (type: string) => weekDaysMap && Object.entries(weekDaysMap).map(([key, value]) => (
+        <div key={key} className={`flex text-center items-center justify-center text-sm py-2 px-2 rounded-xl transition duration-300 cursor-pointer border border-slate-800 ${(selectedDayOfWeek === key || selectedDaysOfWeek.includes(key)) ? 'bg-slate-800 text-slate-100' : 'bg-white text-slate-800'}`} onClick={() => {
+            if (type === 'weekly') {
+                if (selectedDayOfWeek === key) {
+                    setSelectedDayOfWeek('')
+                } else {
+                    setSelectedDayOfWeek(key)
+                }
+            } else if (type === 'customWeekly') {
+                if (selectedDaysOfWeek.includes(key)) {
+                    if (selectedDaysOfWeek.length === 1) {
+                        setSelectedDaysOfWeek([])
+                    } else {
+                    setSelectedDaysOfWeek(selectedDaysOfWeek.filter(day => day !== key))
+                    }
+                } else {
+                    setSelectedDaysOfWeek([...selectedDaysOfWeek, key])
+                }
+            }
+        }}>
+            {t(`schedules.${value}`)}
+        </div>
+    ))
+
+    const monthElement = (type:string) => monthDays.map((day) => (
+        <div key={day} className={`flex text-center items-center justify-center text-sm h-8 w-8 rounded-xl transition duration-300 cursor-pointer border border-slate-800 ${(selectedDayOfMonth === day.toString() || selectedDaysOfMonth.includes(day.toString())) ? 'bg-slate-800 text-slate-100' : 'bg-white text-slate-800'}`} onClick={() => {
+            if (type === 'monthly') {
+                if (selectedDayOfMonth === day.toString()) {
+                    setSelectedDayOfMonth('')
+                } else {
+                    setSelectedDayOfMonth(day.toString())
+                }
+            } else if (type === 'customMonthly') {
+                if (selectedDaysOfMonth.includes(day.toString())) {
+                    if (selectedDaysOfMonth.length === 1) {
+                        setSelectedDaysOfMonth([])
+                    } else {
+                    setSelectedDaysOfMonth(selectedDaysOfMonth.filter(d => d !== day.toString()))
+                    }
+                } else {
+                    setSelectedDaysOfMonth([...selectedDaysOfMonth, day.toString()])
+                }
+            }
+        }}>
+            {day}
+        </div>
+    ))
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
         <Field orientation="vertical" className='w-full inline'>
@@ -283,35 +339,12 @@ export default function Schedules() {
                             <Button className="transition duration-300 cursor-pointer bg-slate-400 hover:bg-slate-600">{t('schedules.update_schedule')}</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
-                            <form action={updateScheduleActionState}>
+                            <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('schedules.update_schedule')}</AlertDialogTitle>
                                 <div className="flex flex-col gap-4">
                                     <input type="hidden" name="schedule-id" value={schedule.id} />
                                     <div className="grid grid-cols-3 gap-4">
-                                        <div className='flex flex-col'>
-                                            <div className="flex flex-col">
-                                                <label htmlFor="day-of-week" className="text-sm font-medium">{t('schedules.day_of_week')}</label>
-                                                <Select name="day-of-week" defaultValue={schedule.day_of_week.toString()}>
-                                                    <SelectTrigger className="w-full max-w-48">
-                                                        <SelectValue placeholder={t('schedules.day_of_week')}  />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            <SelectLabel>{t('schedules.day_of_week')}</SelectLabel>
-                                                            <SelectItem value={String(weekDays.saturday)}>{t('schedules.saturday')}</SelectItem>
-                                                            <SelectItem value={String(weekDays.sunday)}>{t('schedules.sunday')}</SelectItem>
-                                                            <SelectItem value={String(weekDays.monday)}>{t('schedules.monday')}</SelectItem>
-                                                            <SelectItem value={String(weekDays.tuesday)}>{t('schedules.tuesday')}</SelectItem>
-                                                            <SelectItem value={String(weekDays.wednesday)}>{t('schedules.wednesday')}</SelectItem>
-                                                            <SelectItem value={String(weekDays.thursday)}>{t('schedules.thursday')}</SelectItem>
-                                                            <SelectItem value={String(weekDays.friday)}>{t('schedules.friday')}</SelectItem>
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            {updateScheduleState?.error?.day_of_week && <p className="text-red-500 text-sm">{updateScheduleState.error.day_of_week}</p>}
-                                        </div>
                                         <div className='flex flex-col'>
                                             {fieldInput(t('schedules.start_time'), "start-time", schedule.start_time, "time")}
                                             {updateScheduleState?.error?.start_time && <p className="text-red-500 text-sm">{updateScheduleState.error.start_time}</p>}
@@ -331,8 +364,8 @@ export default function Schedules() {
                                             {updateScheduleState?.error?.effective_until && <p className="text-red-500 text-sm">{updateScheduleState.error.effective_until}</p>}
                                         </div>
                                     </div>
-                                    <div className='flex flex-col'>
-                                        <div className="flex flex-col">
+                                    <div className='grid grid-cols-2 gap-4'>
+                                        <div className="flex flex-col col-start-1 col-end-2">
                                             <label htmlFor="is-recurring" className="text-sm font-medium">{t('schedules.recurring')}</label>
                                             <Select name="is-recurring" defaultValue={schedule.is_recurring.toString() === 'true' ? 'true' : 'false'}>
                                                 <SelectTrigger className="w-full max-w-48">
@@ -347,12 +380,45 @@ export default function Schedules() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {updateScheduleState?.error?.is_recurring && <p className="text-red-500 text-sm">{updateScheduleState.error.is_recurring}</p>}
+                                        {isRecurring === 'true' && (<div className='flex flex-col col-start-2 col-end-3'>
+                                            <div className="flex flex-col">
+                                                <label htmlFor="is-recurring-period" className="text-sm font-medium">Period</label>
+                                                <Select name="is-recurring-period" onValueChange={(value) => {
+                                                    setIsRecurringPeriod(value)
+                                                    setSelectedDayOfWeek('')
+                                                    setSelectedDaysOfWeek([])
+                                                    setSelectedDayOfMonth('')
+                                                    setSelectedDaysOfMonth([])
+                                                }}>
+                                                    <SelectTrigger className="w-full max-w-48">
+                                                        <SelectValue id="selected-recurr-value" placeholder={t('schedules.recurring')} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>Period</SelectLabel>
+                                                            <SelectItem value='daily'>Daily</SelectItem>
+                                                            <SelectItem value='weekly'>Weekly</SelectItem>
+                                                            <SelectItem value='monthly'>Monthly</SelectItem>
+                                                            <SelectItem value='customWeekly'>Custom Weekly</SelectItem>
+                                                            <SelectItem value='customMonthly'>Custom Monthly</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>)}
+                                    </div>
+                                    <div className="col-start-1 col-end-4 row-start-5 row-end-6 flex-wrap flex flex-row gap-1 rounded-xl justify-start">
+                                        {isRecurring === 'true' && (isRecurringPeriod === 'weekly' || isRecurringPeriod === 'customWeekly') && (
+                                                weekElement(isRecurringPeriod)
+                                            )}
+                                        {isRecurring === 'true' && (isRecurringPeriod === 'monthly' || isRecurringPeriod === 'customMonthly') && (
+                                                monthElement(isRecurringPeriod)
+                                            )}
                                     </div>
                                         <div className='flex flex-col'>
                                         <div className="flex flex-col">
                                             <label htmlFor="is-active" className="text-sm font-medium">{t('schedules.active')}</label>
-                                            <Select name="is-active" defaultValue={schedule.is_active.toString() === 'true' ? 'true' : 'false'}>
+                                            <Select name="is-active" defaultValue={schedule.is_active.toString() === 'true' ? 'true' : 'false'} onValueChange={(value) => setIsRecurring(value)}>
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder={t('schedules.active')} />
                                                 </SelectTrigger>

@@ -376,12 +376,11 @@ export async function listSchedulesMe(): Promise<openApi.ScheduleRead[] | null> 
 export async function createSchedule(state: CreateScheduleFormState, formData: FormData): Promise<CreateScheduleFormState> {
     const validation = createScheduleSchema.safeParse({
         student_id: formData.get('student-id'),
-        day_of_week: formData.get('day-of-week'),
         start_time: formData.get('start-time'),
         end_time: formData.get('end-time'),
         effective_from: formData.get('effective-from'),
         effective_until: formData.get('effective-until'),
-        is_recurring: formData.get('is-recurring'),
+        rrule_string: formData.get('rrule_string'),
         notes: formData.get('notes'),
     })
 
@@ -391,12 +390,11 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
     try {
         const data:openApi.ScheduleCreate = {
             student_id: Number(validation.data.student_id),
-            day_of_week: Number(validation.data.day_of_week),
             start_time: validation.data.start_time,
             end_time: validation.data.end_time,
             effective_from: validation.data.effective_from,
             effective_until: validation.data.effective_until,
-            is_recurring: validation.data.is_recurring === 'true',
+            rrule_string: validation.data.rrule_string,
             notes: validation.data.notes,
         }
 
@@ -423,12 +421,11 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
                 operation: openApi.SyncOperation.Create,
                 payload: {
                     student_id: Number(validation.data.student_id),
-                    day_of_week: Number(validation.data.day_of_week),
                     start_time: validation.data.start_time,
                     end_time: validation.data.end_time,
                     effective_from: validation.data.effective_from,
                     effective_until: validation.data.effective_until,
-                    is_recurring: validation.data.is_recurring === 'true',
+                    rrule_string: validation.data.rrule_string,
                     notes: validation.data.notes,
                 },
                 idempotency_key: createIdempotencyKey(),
@@ -439,14 +436,15 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
     }
 }
 
-export async function updateSchedule(state: UpdateScheduleFormState, formData: FormData, scheduleId: number): Promise<UpdateScheduleFormState> {
+export async function updateSchedule(state: UpdateScheduleFormState, formData: FormData): Promise<UpdateScheduleFormState> {
+    const scheduleId = Number(formData.get('schedule-id'))
+
     const validation = UpdateScheduleSchema.safeParse({
-        day_of_week: formData.get('day-of-week'),
         start_time: formData.get('start-time'),
         end_time: formData.get('end-time'),
         effective_from: formData.get('effective-from'),
         effective_until: formData.get('effective-until'),
-        is_recurring: formData.get('is-recurring'),
+        rrule_string: formData.get('rrule_string'),
         is_active: formData.get('is-active'),
         cancellation_reason: formData.get('cancellation-reason'),
         notes: formData.get('notes'),
@@ -457,12 +455,11 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
     }
     try {
         const data:openApi.ScheduleUpdate = {
-            day_of_week: Number(validation.data.day_of_week),
             start_time: validation.data.start_time,
             end_time: validation.data.end_time,
             effective_from: validation.data.effective_from,
             effective_until: validation.data.effective_until,
-            is_recurring: validation.data.is_recurring === 'true',
+            rrule_string: validation.data.rrule_string,
             is_active: validation.data.is_active === 'true',
             cancellation_reason: validation.data.cancellation_reason,
             notes: validation.data.notes,
@@ -493,12 +490,11 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
                 entity_id: scheduleId,
                 operation: openApi.SyncOperation.Update,
                 payload: {
-                    day_of_week: Number(validation.data.day_of_week),
                     start_time: validation.data.start_time,
                     end_time: validation.data.end_time,
                     effective_from: validation.data.effective_from,
                     effective_until: validation.data.effective_until,
-                    is_recurring: validation.data.is_recurring === 'true',
+                    rrule_string: validation.data.rrule_string,
                     is_active: validation.data.is_active === 'true',
                     cancellation_reason: validation.data.cancellation_reason,
                     notes: validation.data.notes,
@@ -919,18 +915,18 @@ export async function markInvoiceAsPaid(state: PayInvoiceFormState, formData: Fo
 export async function createLesson(state: CreateLessonFormState, formData: FormData): Promise<CreateLessonFormState> {
     const validation = CreatLessonSchema.safeParse({
         student_id: formData.get('student_id'),
-        schedule_id: formData.get('schedule_id'),
         sheikh_notes: formData.get('sheikh_notes'),
         student_notes: formData.get('student_notes'),
         date: formData.get('date'),
         type: formData.get('type'),
         attendance: formData.get('attendance'),
-        juz: formData.get('juz'),
-        surah: formData.get('surah'),
+        juz: formData.get('juz_number'),
+        surah: formData.get('surah_name'),
         ayah_from: formData.get('ayah_from'),
         ayah_to: formData.get('ayah_to'),
         quality: formData.get('quality'),
         absence_reason: formData.get('absence_reason'),
+        recurrence: formData.get('rrule_string'),
     })
 
     if (!validation.success) {
@@ -938,19 +934,19 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
     }
     try {
         const data:openApi.LessonCreate = {
-        student_id: String(validation.data.student_id),
-        schedule_id: String(validation.data.schedule_id),
-        sheikh_notes: validation.data.sheikh_notes,
-        student_notes: validation.data.student_notes,
-        date: validation.data.date,
-        type: validation.data.type,
-        attendance: validation.data.attendance,
-        juz_number: String(validation.data.juz),
-        surah_name: validation.data.surah,
-        ayah_from: String(validation.data.ayah_from),
-        ayah_to: String(validation.data.ayah_to),
-        quality: validation.data.quality,
-        absence_reason: validation.data.absence_reason,
+            student_id: String(validation.data.student_id),
+            sheikh_notes: validation.data.sheikh_notes,
+            student_notes: validation.data.student_notes,
+            date: validation.data.date,
+            type: validation.data.type,
+            attendance: validation.data.attendance,
+            juz_number: validation.data.juz ? String(validation.data.juz) : undefined,
+            surah_name: validation.data.surah,
+            ayah_from: validation.data.ayah_from ? String(validation.data.ayah_from) : undefined,
+            ayah_to: validation.data.ayah_to ? String(validation.data.ayah_to) : undefined,
+            quality: validation.data.quality,
+            absence_reason: validation.data.absence_reason,
+            recurrence: validation.data.recurrence ? {rrule: validation.data.recurrence} : undefined,
         }
 
         console.log('Created lesson data:', data);
@@ -993,6 +989,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
                     ayah_to: String(validation.data.ayah_to),
                     quality: validation.data.quality,
                     absence_reason: validation.data.absence_reason,
+                    recurrence: validation.data.recurrence ? {rrule: validation.data.recurrence} : undefined,
                 },
                 idempotency_key: createIdempotencyKey(),
             })

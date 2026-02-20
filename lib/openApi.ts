@@ -352,40 +352,35 @@ export interface InvoiceWithItemsRead {
 
 /** LessonCreate */
 export interface LessonCreate {
-  /** Student Id */
+  /** Student Id - Required */
   student_id: string;
-  /** Schedule Id */
-  schedule_id?: string | null;
   /**
-   * Date
+   * Date - Required
    * @format date
    */
   date: string;
+  /** Type - Required */
   type: LessonType;
-  /** Surah Name */
-  surah_name?: string | null;
-  /** Juz Number */
-  juz_number?: string | null;
-  /** Ayah From */
-  ayah_from?: string | null;
-  /** Ayah To */
-  ayah_to?: string | null;
-  quality?: LessonQuality | null;
-  /** Pass Fail */
-  pass_fail?: boolean | null;
-  /**
-   * Attempts
-   * @default 1
-   */
-  attempts?: string;
-  /** @default "present" */
+  /** Attendance - Defaults to "present" */
   attendance?: AttendanceStatus;
-  /** Absence Reason */
+  /** Surah Name - Optional */
+  surah_name?: string | null;
+  /** Juz Number - Optional */
+  juz_number?: string | null;
+  /** Ayah From - Optional */
+  ayah_from?: string | null;
+  /** Ayah To - Optional */
+  ayah_to?: string | null;
+  /** Quality - Optional */
+  quality?: LessonQuality | null;
+  /** Absence Reason - Required when attendance is not "present" */
   absence_reason?: string | null;
-  /** Student Notes */
+  /** Student Notes - Optional */
   student_notes?: string | null;
-  /** Sheikh Notes */
+  /** Sheikh Notes - Optional */
   sheikh_notes?: string | null;
+  /** Recurrence - RFC 5545 RRULE for bulk lesson creation */
+  recurrence?: { rrule: string } | null;
 }
 
 /** LessonRead */
@@ -413,10 +408,6 @@ export interface LessonRead {
   /** Ayah To */
   ayah_to: number | null;
   quality: LessonQuality | null;
-  /** Pass Fail */
-  pass_fail: boolean | null;
-  /** Attempts */
-  attempts: number;
   attendance: AttendanceStatus;
   /** Absence Reason */
   absence_reason: string | null;
@@ -583,8 +574,6 @@ export interface RevenuePerStudent {
 export interface ScheduleCreate {
   /** Student Id */
   student_id: number;
-  /** Day Of Week */
-  day_of_week: number;
   /**
    * Start Time
    * @format time
@@ -596,15 +585,12 @@ export interface ScheduleCreate {
    */
   end_time: string;
   /**
-   * Is Recurring
-   * @default true
-   */
-  is_recurring?: boolean;
-  /**
    * Effective From
    * @format date
    */
   effective_from: string;
+  /** RRULE String - RFC 5545 format (omit or null for one-off session) */
+  rrule_string?: string | null;
   /** Effective Until */
   effective_until?: string | null;
   /** Notes */
@@ -650,14 +636,12 @@ export interface ScheduleRead {
 
 /** ScheduleUpdate */
 export interface ScheduleUpdate {
-  /** Day Of Week */
-  day_of_week?: number | null;
+  /** RRULE String - pass null to convert recurring to one-off */
+  rrule_string?: string | null;
   /** Start Time */
   start_time?: string | null;
   /** End Time */
   end_time?: string | null;
-  /** Is Recurring */
-  is_recurring?: boolean | null;
   /** Effective From */
   effective_from?: string | null;
   /** Effective Until */
@@ -1461,6 +1445,57 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Get attendance hours for the current student.
+     *
+     * @tags students, Students
+     * @name GetMyAttendanceHoursApiV1StudentsMeAttendanceHoursGet
+     * @summary Get my attendance hours
+     * @request GET:/api/v1/students/me/attendance-hours
+     */
+    getMyAttendanceHoursApiV1StudentsMeAttendanceHoursGet: (
+      query?: {
+        /** Start Date (YYYY-MM-DD) */
+        start_date?: string | null;
+        /** End Date (YYYY-MM-DD) */
+        end_date?: string | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<AttendanceAnalytics, HTTPValidationError>({
+        path: `/api/v1/students/me/attendance-hours`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Get attendance hours for a specific student.
+     *
+     * @tags students, Students
+     * @name GetAttendanceHoursApiV1StudentsStudentIdAttendanceHoursGet
+     * @summary Get student attendance hours
+     * @request GET:/api/v1/students/{student_id}/attendance-hours
+     */
+    getAttendanceHoursApiV1StudentsStudentIdAttendanceHoursGet: (
+      studentId: number,
+      query?: {
+        /** Start Date (YYYY-MM-DD) */
+        start_date?: string | null;
+        /** End Date (YYYY-MM-DD) */
+        end_date?: string | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<AttendanceAnalytics, HTTPValidationError>({
+        path: `/api/v1/students/${studentId}/attendance-hours`,
+        method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
