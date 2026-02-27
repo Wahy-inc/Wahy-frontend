@@ -3,7 +3,7 @@
 import React from "react"
 import * as openApi from "@/lib/openApi"
 import { getStudentMe } from "@/app/platform/actions/dashboard"
-import Dashboard from "../page"
+import DashboardPage from "../page"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
