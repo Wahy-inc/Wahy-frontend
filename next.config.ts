@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         {
           source: '/api/:path*',
-          destination: 'http://3.64.63.73:8000/api/:path*',
+          destination: 'http://localhost:8000/api/:path*',
         },
       ],
     }
