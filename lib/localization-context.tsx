@@ -3,8 +3,9 @@
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 import en from '@/lib/localization/en.json'
 import ar from '@/lib/localization/ar.json'
+import ru from '@/lib/localization/ru.json'
 
-type Language = 'en' | 'ar'
+type Language = 'en' | 'ar' | 'ru'
 
 interface LocalizationContextType {
   language: Language
@@ -16,7 +17,8 @@ const LocalizationContext = createContext<LocalizationContextType | undefined>(u
 
 const translations: Record<Language, any> = {
   en,
-  ar
+  ar,
+  ru
 }
 
 export function LocalizationProvider({ children }: { children: ReactNode }) {
