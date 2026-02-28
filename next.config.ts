@@ -56,7 +56,7 @@ const nextConfig: NextConfig = {
       beforeFiles: [
         {
           source: '/api/:path*',
-          destination: 'http://localhost:8000/api/:path*',
+          destination: 'https://mac-imitative-janae.ngrok-free.dev/api/:path*',
         },
       ],
     }

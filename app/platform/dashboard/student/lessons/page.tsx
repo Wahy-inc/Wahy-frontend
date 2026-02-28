@@ -3,7 +3,7 @@
 import React, { useActionState } from "react";
 import * as openApi from "@/lib/openApi"
 import { getLessonByIDMe, listLessonsMe } from "@/app/platform/actions/dashboard";
-import DashboardPage from "../../admin/page";
+import DashboardPage from "../page";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

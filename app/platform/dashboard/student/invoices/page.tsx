@@ -3,7 +3,7 @@
 import React from "react";
 import * as openApi from "@/lib/openApi"
 import { downloadInvoicePDFMe, getInvoiceMe, listInvoicesMe } from "@/app/platform/actions/dashboard";
-import DashboardPage from "../../admin/page";
+import DashboardPage from "../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
