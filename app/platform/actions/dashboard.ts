@@ -22,6 +22,7 @@ export async function studentData(id: number): Promise<openApi.StudentRead | nul
 export async function getStudentMe(): Promise<openApi.StudentSelfRead | null> {
     try {
         const response = await api.api.getMeApiV1StudentsMeGet()
+        console.log(response);
         if (response.status === 200) {
             setCachedData(offlineCacheKeys.studentProfileMe, response.data)
             return response.data
@@ -658,7 +659,7 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
         tags: formData.get('tags'),
         access_level: formData.get('access_level'),
         thumbnail: formData.get('thumbnail'),
-        student_ids: formData.get('students_ids'),
+        student_ids: formData.get('student_ids'),
     })
 
     if (!validation.success) {
@@ -673,7 +674,7 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
             tags: validation.data.tags.split(',').map(tag => tag.trim()),
             access_level: validation.data.access_level,
             thumbnail_image_path: validation.data.thumbnail,
-            student_ids: validation.data.student_ids,
+            student_ids: validation.data.student_ids == '' ? null : validation.data.student_ids,
         }
         const response = await api.api.createApiV1LibraryPost(data)
 
@@ -977,7 +978,6 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
                 operation: openApi.SyncOperation.Create,
                 payload: {
                     student_id: String(validation.data.student_id),
-                    schedule_id: String(validation.data.schedule_id),
                     sheikh_notes: validation.data.sheikh_notes,
                     student_notes: validation.data.student_notes,
                     date: validation.data.date,

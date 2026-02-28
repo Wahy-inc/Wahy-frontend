@@ -8,13 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { User, Phone, Calendar, Clock, BookOpen, DollarSign, FileText } from 'lucide-react'
-import { dummyProfile } from "@/lib/dummyData"
 import { useAuth } from "@/lib/auth-context"
 import { useLocalization } from "@/lib/localization-context"
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache"
-
-// Set to true to use dummy data for testing
-const USE_DUMMY_DATA = false
 
 export default function Profile() {
     const [profile, setProfile] = React.useState<openApi.StudentSelfRead | null>(null)
@@ -35,16 +31,13 @@ export default function Profile() {
         const fetchProfile = async () => {
             try {
                 setLoading(true)
-                if (USE_DUMMY_DATA) {
-                    // Use dummy data for testing
-                    setProfile(dummyProfile)
-                } else {
-                    const data = await getStudentMe()
-                    setProfile(data)
-                }
+                const data = await getStudentMe()
+                setProfile(data)
+                console.log(data);
                 setError(null)
-            } catch {
+            } catch (err) {
                 setError(t('profile.loading_profile'))
+                console.log(err);
                 setProfile(null)
             } finally {
                 setLoading(false)

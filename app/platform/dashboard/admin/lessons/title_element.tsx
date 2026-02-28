@@ -195,10 +195,6 @@ export default function TitleElement({
                                         <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.schedule_id'), "schedule_id", t('lessons.enter_schedule_id'), "number")}
-                                        {createFormSubmitted && createState?.error?.schedule_id && <p className="text-red-500 text-sm">{createState.error.schedule_id}</p>}
-                                    </div>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className='flex flex-col'>
                                             {fieldInput(t('lessons.date'), "date", t('lessons.select_date'), "date")}
@@ -264,7 +260,6 @@ export default function TitleElement({
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
-                                    <div className='flex flex-col'>
                                         <div className="flex flex-col">
                                             <label htmlFor="quality" className="text-sm font-medium">{t('lessons.quality')}</label>
                                             <Select name="quality">
@@ -282,34 +277,32 @@ export default function TitleElement({
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
-                                        </div>
                                         {createFormSubmitted && createState?.error?.quality && <p className="text-red-500 text-sm">{createState.error.quality}</p>}
-                                    </div>
-                                    <div className='flex flex-col col-start-3 col-end-4 row-start-4 row-end-5'>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="is-recurring-period" className="text-sm font-medium">Period</label>
-                                            <Select name="is-recurring-period" onValueChange={(value) => {
-                                                setIsRecurringPeriod(value)
-                                                setSelectedDayOfWeek('')
-                                                setSelectedDaysOfWeek([])
-                                                setSelectedDayOfMonth('')
-                                                setSelectedDaysOfMonth([])
-                                            }}>
-                                                <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue id="selected-recurr-value" placeholder={t('schedules.recurring')} />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectLabel>Period</SelectLabel>
-                                                        <SelectItem value='daily'>Daily</SelectItem>
-                                                        <SelectItem value='weekly'>Weekly</SelectItem>
-                                                        <SelectItem value='monthly'>Monthly</SelectItem>
-                                                        <SelectItem value='customWeekly'>Custom Weekly</SelectItem>
-                                                        <SelectItem value='customMonthly'>Custom Monthly</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
                                         </div>
+                                            <div className="flex flex-col col-start-2 col-end-3">
+                                                <label htmlFor="is-recurring-period" className="text-sm font-medium">Period</label>
+                                                <Select name="is-recurring-period" onValueChange={(value) => {
+                                                    setIsRecurringPeriod(value)
+                                                    setSelectedDayOfWeek('')
+                                                    setSelectedDaysOfWeek([])
+                                                    setSelectedDayOfMonth('')
+                                                    setSelectedDaysOfMonth([])
+                                                }}>
+                                                    <SelectTrigger className="w-full max-w-48">
+                                                        <SelectValue id="selected-recurr-value" placeholder={t('schedules.recurring')} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>Period</SelectLabel>
+                                                            <SelectItem value='daily'>Daily</SelectItem>
+                                                            <SelectItem value='weekly'>Weekly</SelectItem>
+                                                            <SelectItem value='monthly'>Monthly</SelectItem>
+                                                            <SelectItem value='customWeekly'>Custom Weekly</SelectItem>
+                                                            <SelectItem value='customMonthly'>Custom Monthly</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                     </div>
                                     <div className="col-start-1 col-end-4 row-start-5 row-end-6 flex-wrap flex flex-row gap-1 rounded-xl justify-start">
                                         {(isRecurringPeriod === 'weekly' || isRecurringPeriod === 'customWeekly') && (
@@ -318,7 +311,6 @@ export default function TitleElement({
                                         {(isRecurringPeriod === 'monthly' || isRecurringPeriod === 'customMonthly') && (
                                                 monthElement(isRecurringPeriod)
                                             )}
-                                    </div>
                                     </div>
                                     <div className='flex flex-col'>
                                         {fieldInput(t('lessons.absence_reason'), "absence_reason", t('lessons.enter_reason'), "text")}

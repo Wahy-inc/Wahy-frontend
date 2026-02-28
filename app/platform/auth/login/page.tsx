@@ -25,9 +25,9 @@ export default function SignIn() {
     React.useEffect(() => {
         if (state?.message === 'Signin successful' || Studentstate?.message === 'Signin successful') {
           if (isAdmin) {
-            router.replace('/platform/dashboard/admin/analytics')
+            router.replace('/platform/dashboard/admin')
           } else {
-            router.replace('/platform/dashboard/student/schedules')
+            router.replace('/platform/dashboard/student')
           }
         }
     }, [state, Studentstate, router, isAdmin])

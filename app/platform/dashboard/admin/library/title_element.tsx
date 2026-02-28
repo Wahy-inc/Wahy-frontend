@@ -148,9 +148,8 @@ export default function TitleElement({
                                             {createFormSubmitted && createState?.error?.thumbnail && <p className="text-red-500 text-sm">{createState.error.thumbnail}</p>}
                                         </div>
                                     </div>
-                                    <div className='flex flex-col'>
+                                    <div id="student_ids" className='flex flex-col'>
                                         <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
-                                        {createFormSubmitted && createState?.error?.student_ids && <p className="text-red-500 text-sm">{createState.error.student_ids}</p>}
                                     </div>
                                     {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">{t('library.create_failed')}</p> : null}
                                 </div>

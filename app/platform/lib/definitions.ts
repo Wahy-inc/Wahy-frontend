@@ -58,7 +58,6 @@ export type SignInFormState =
 
 export const CreatLessonSchema = zod.object({
     student_id: zod.string().min(1, { error: 'Student ID is required' }),
-    schedule_id: zod.string().min(1, { error: 'Schedule ID is required' }),
     date: zod.string().min(1, { error: 'Date is required' }).trim(),
     type: zod.enum(LessonType, { error: 'Invalid lesson type' }),
     attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }),
@@ -76,7 +75,6 @@ export const CreatLessonSchema = zod.object({
 export type CreateLessonFormState = 
 | {error?: {
     student_id?: string[];
-    schedule_id?: string[];
     date?: string[];
     type?: string[];
     attendance?: string[];
