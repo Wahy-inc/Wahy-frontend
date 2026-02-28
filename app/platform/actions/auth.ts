@@ -1,9 +1,8 @@
 import { SignupFormState, SignInFormState, SignUpSchema, SignInSchema } from "@/app/platform/lib/definitions"
+import { getApi } from "@/lib/apiClient"
 import * as openApi from "@/lib/openApi"
 
-const api = new openApi.Api({
-    baseUrl: '',
-})
+const api = getApi()
 
 export async function signup(state: SignupFormState, formData: FormData): Promise<SignupFormState> {
     const validation = SignUpSchema.safeParse({

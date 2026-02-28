@@ -1,4 +1,5 @@
 import * as openApi from "@/lib/openApi";
+import { getApi } from "@/lib/apiClient";
 
 type PendingSyncItem = openApi.SyncItemRequest & {
   created_at: string;
@@ -19,9 +20,7 @@ export type SyncIssue = {
 const STORAGE_KEY = "wahy:offline:sync-queue:v1";
 const ISSUES_KEY = "wahy:offline:sync-issues:v1";
 
-const api = new openApi.Api({
-  baseUrl: "",
-});
+const api = getApi();
 
 function isBrowser(): boolean {
   return typeof window !== "undefined";
