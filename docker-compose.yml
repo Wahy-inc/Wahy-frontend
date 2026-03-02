@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # ============================================================================
+  # Wahy Frontend Service
+  # ============================================================================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        # Build-time arguments can be passed here
+        NODE_ENV: production
+
+    container_name: wahy-frontend
+
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+
+    environment:
+      # Core Application
+      NODE_ENV: ${NODE_ENV:-production}
+      NEXT_TELEMETRY_DISABLED: ${NEXT_TELEMETRY_DISABLED:-1}
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+
+      # API Configuration - Update these for your deployment
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:9000}
+      NEXT_PUBLIC_API_TIMEOUT: ${NEXT_PUBLIC_API_TIMEOUT:-30000}
+
+      # Authentication
+      NEXT_PUBLIC_TOKEN_REFRESH_INTERVAL: ${NEXT_PUBLIC_TOKEN_REFRESH_INTERVAL:-300000}
+      NEXT_PUBLIC_SESSION_STORAGE: ${NEXT_PUBLIC_SESSION_STORAGE:-localStorage}
+
+      # Features
+      NEXT_PUBLIC_OFFLINE_MODE_ENABLED: ${NEXT_PUBLIC_OFFLINE_MODE_ENABLED:-true}
+      NEXT_PUBLIC_OFFLINE_CACHE_ENABLED: ${NEXT_PUBLIC_OFFLINE_CACHE_ENABLED:-true}
+      NEXT_PUBLIC_SERVICE_WORKER_ENABLED: ${NEXT_PUBLIC_SERVICE_WORKER_ENABLED:-true}
+      NEXT_PUBLIC_ANALYTICS_ENABLED: ${NEXT_PUBLIC_ANALYTICS_ENABLED:-false}
+
+      # UI/UX
+      NEXT_PUBLIC_DEFAULT_THEME: ${NEXT_PUBLIC_DEFAULT_THEME:-system}
+      NEXT_PUBLIC_DEFAULT_LANGUAGE: ${NEXT_PUBLIC_DEFAULT_LANGUAGE:-en}
+      NEXT_PUBLIC_DATE_FORMAT: ${NEXT_PUBLIC_DATE_FORMAT:-DD/MM/YYYY}
+      NEXT_PUBLIC_TIMEZONE: ${NEXT_PUBLIC_TIMEZONE:-UTC}
+
+      # Images
+      NEXT_PUBLIC_IMAGE_DOMAINS: ${NEXT_PUBLIC_IMAGE_DOMAINS:-images.wahy.dev,cdn.wahy.dev}
+      NEXT_PUBLIC_MAX_IMAGE_SIZE: ${NEXT_PUBLIC_MAX_IMAGE_SIZE:-5}
+
+      # Security
+      NEXT_PUBLIC_STRICT_CSP_ENABLED: ${NEXT_PUBLIC_STRICT_CSP_ENABLED:-true}
+      NEXT_PUBLIC_ALLOWED_DOMAINS: ${NEXT_PUBLIC_ALLOWED_DOMAINS:-}
+
+      # Logging
+      NEXT_PUBLIC_LOG_LEVEL: ${NEXT_PUBLIC_LOG_LEVEL:-info}
+      NEXT_PUBLIC_DEBUG: ${NEXT_PUBLIC_DEBUG:-false}
+      NEXT_PUBLIC_API_DEBUG: ${NEXT_PUBLIC_API_DEBUG:-false}
+
+      # Monitoring
+      NEXT_PUBLIC_APP_VERSION: ${NEXT_PUBLIC_APP_VERSION:-0.1.0}
+      NEXT_PUBLIC_BUILD_TIME: ${NEXT_PUBLIC_BUILD_TIME:-}
+
+    # Health check configuration
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    # Resource limits (adjust based on your infrastructure)
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Networks
+    networks:
+      - wahy-network
+
+# ============================================================================
+# Networks
+# ============================================================================
+networks:
+  wahy-network:
+    driver: bridge
+
+# ============================================================================
+# Volumes (uncomment if using persistent storage)
+# ============================================================================
+# volumes:
+#   postgres_data:
+#     driver: local
