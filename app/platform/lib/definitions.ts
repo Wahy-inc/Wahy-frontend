@@ -7,8 +7,8 @@ export const SignUpSchema = zod.object({
     enname: zod.string().min(1, { error: 'Name is required' }).trim(),
     email: zod.email({ error: 'Invalid email address' }).trim(),
     password: zod.string().min(6, { error: 'Password must be at least 6 characters long' })
-    .regex(/[a-zA-Z]/, { error: 'Password must contain at least one letter' })
-    .regex(/[0-9]/, { error: 'Password must contain at least one number' }).trim(),
+        .regex(/[a-zA-Z]/, { error: 'Password must contain at least one letter' })
+        .regex(/[0-9]/, { error: 'Password must contain at least one number' }).trim(),
     phone: zod.string().min(1, { error: 'Phone number is required' }).trim(),
     dateOfBirth: zod.string().min(1, { error: 'Date of birth is required' }).trim(),
     timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
@@ -21,40 +21,42 @@ export const SignUpSchema = zod.object({
     specialNotes: zod.string().min(0, { error: 'Special notes is required' }).trim(),
 })
 
-export type SignupFormState = 
-| {error?: {
-    arname?: string[];
-    enname?: string[];
-    email?: string[];
-    password?: string[];
-    phone?: string[];
-    dateOfBirth?: string[];
-    timeZone?: string[];
-    currjuz?: string[];
-    currsurah?: string[];
-    currayah?: string[];
-    lessonsPerWeek?: string[];
-    lessonRate?: string[];
-    billingCycle?: string[];
-    specialNotes?: string[];
+export type SignupFormState =
+    | {
+        error?: {
+            arname?: string[];
+            enname?: string[];
+            email?: string[];
+            password?: string[];
+            phone?: string[];
+            dateOfBirth?: string[];
+            timeZone?: string[];
+            currjuz?: string[];
+            currsurah?: string[];
+            currayah?: string[];
+            lessonsPerWeek?: string[];
+            lessonRate?: string[];
+            billingCycle?: string[];
+            specialNotes?: string[];
+        }
+        message?: string;
     }
-    message?: string;
-}
-| undefined;
+    | undefined;
 
 export const SignInSchema = zod.object({
     email: zod.string().email({ error: 'Invalid email address' }).trim(),
     password: zod.string().min(6, { error: 'Password invalid' }).trim(),
 })
 
-export type SignInFormState = 
-| {error?: {
-    email?: string[];
-    password?: string[];
+export type SignInFormState =
+    | {
+        error?: {
+            email?: string[];
+            password?: string[];
+        }
+        message?: string;
     }
-    message?: string;
-}
-| undefined;
+    | undefined;
 
 export const CreatLessonSchema = zod.object({
     student_id: zod.string().min(1, { error: 'Student ID is required' }),
@@ -72,26 +74,27 @@ export const CreatLessonSchema = zod.object({
     recurrence: zod.string().min(0).trim().optional(),
 })
 
-export type CreateLessonFormState = 
-| {error?: {
-    student_id?: string[];
-    date?: string[];
-    type?: string[];
-    attendance?: string[];
-    juz?: string[];
-    surah?: string[];
-    ayah_from?: string[];
-    ayah_to?: string[];
-    quality?: string[];
-    absence_reason?: string[];
-    sheikh_notes?: string[];
-    student_notes?: string[];
-    pass_fail?: string[];
-    recurrence?: string[];
-}
-message?: string;
-}
-| undefined;
+export type CreateLessonFormState =
+    | {
+        error?: {
+            student_id?: string[];
+            date?: string[];
+            type?: string[];
+            attendance?: string[];
+            juz?: string[];
+            surah?: string[];
+            ayah_from?: string[];
+            ayah_to?: string[];
+            quality?: string[];
+            absence_reason?: string[];
+            sheikh_notes?: string[];
+            student_notes?: string[];
+            pass_fail?: string[];
+            recurrence?: string[];
+        }
+        message?: string;
+    }
+    | undefined;
 
 export const UpdateLessonSchema = zod.object({
     schedule_id: zod.string({ error: 'Schedule ID must be a number' }),
@@ -108,37 +111,39 @@ export const UpdateLessonSchema = zod.object({
     student_notes: zod.string().min(0, { error: 'Student notes is required' }).trim(),
 })
 
-export type UpdateLessonFormState = 
-| {error?: {
-    schedule_id?: string[];
-    date?: string[];
-    type?: string[];
-    attendance?: string[];
-    juz?: string[];
-    surah?: string[];
-    ayah_from?: string[];
-    ayah_to?: string[];
-    quality?: string[];
-    absence_reason?: string[];
-    sheikh_notes?: string[];
-    student_notes?: string[];
-}
-message?: string;
-}
-| undefined;
+export type UpdateLessonFormState =
+    | {
+        error?: {
+            schedule_id?: string[];
+            date?: string[];
+            type?: string[];
+            attendance?: string[];
+            juz?: string[];
+            surah?: string[];
+            ayah_from?: string[];
+            ayah_to?: string[];
+            quality?: string[];
+            absence_reason?: string[];
+            sheikh_notes?: string[];
+            student_notes?: string[];
+        }
+        message?: string;
+    }
+    | undefined;
 
 export const GetLessonByID = zod.object({
     lesson_id: zod.string({ error: 'Lesson ID must be a number' }),
 })
 
-export type GetLessonByIDFormState = 
-| {error?: {
-    lesson_id?: string[];
-}
-message?: string;
-data?: openApi.LessonRead;
-}
-| undefined;
+export type GetLessonByIDFormState =
+    | {
+        error?: {
+            lesson_id?: string[];
+        }
+        message?: string;
+        data?: openApi.LessonRead;
+    }
+    | undefined;
 
 export const createScheduleSchema = zod.object({
     student_id: zod.string({ error: 'Student ID must be a number' }),
@@ -150,19 +155,20 @@ export const createScheduleSchema = zod.object({
     notes: zod.string().min(0, { error: 'Notes is required' }).trim(),
 })
 
-export type CreateScheduleFormState = 
-| {error?: {
-    student_id?: string[];
-    start_time?: string[];
-    end_time?: string[];
-    effective_from?: string[];
-    effective_until?: string[];
-    rrule_string?: string[];
-    notes?: string[];
-}
-message?: string;
-}
-| undefined;
+export type CreateScheduleFormState =
+    | {
+        error?: {
+            student_id?: string[];
+            start_time?: string[];
+            end_time?: string[];
+            effective_from?: string[];
+            effective_until?: string[];
+            rrule_string?: string[];
+            notes?: string[];
+        }
+        message?: string;
+    }
+    | undefined;
 
 export const UpdateScheduleSchema = zod.object({
     start_time: zod.string().min(1, { error: 'Start time is required' }).trim(),
@@ -175,33 +181,35 @@ export const UpdateScheduleSchema = zod.object({
     notes: zod.string().min(0, { error: 'Notes is required' }).trim(),
 })
 
-export type UpdateScheduleFormState = 
-| {error?: {
-    start_time?: string[];
-    end_time?: string[];
-    effective_from?: string[];
-    effective_until?: string[];
-    rrule_string?: string[];
-    is_active?: string[];
-    cancellation_reason?: string[];
-    notes?: string[];
-}
-message?: string;
-}
-| undefined;
+export type UpdateScheduleFormState =
+    | {
+        error?: {
+            start_time?: string[];
+            end_time?: string[];
+            effective_from?: string[];
+            effective_until?: string[];
+            rrule_string?: string[];
+            is_active?: string[];
+            cancellation_reason?: string[];
+            notes?: string[];
+        }
+        message?: string;
+    }
+    | undefined;
 
 export const getSchedualesForStudentSchema = zod.object({
     student_id: zod.string({ error: 'Student ID must be a number' }),
 })
 
-export type GetSchedualesForStudentFormState = 
-| {error?: {
-    student_id?: string[];
-}
-message?: string;
-data?: openApi.ScheduleRead[];
-}
-| undefined;
+export type GetSchedualesForStudentFormState =
+    | {
+        error?: {
+            student_id?: string[];
+        }
+        message?: string;
+        data?: openApi.ScheduleRead[];
+    }
+    | undefined;
 
 export const createLibraryItemSchema = zod.object({
     title: zod.string().min(1, { error: 'Title is required' }).trim(),
@@ -214,33 +222,35 @@ export const createLibraryItemSchema = zod.object({
     student_ids: zod.string().min(0, { error: 'Student IDs is required' }).trim(),
 })
 
-export type CreateLibraryItemFormState = 
-| {error?: {
-    title?: string[];
-    url?: string[];
-    description?: string[];
-    category?: string[];
-    tags?: string[];
-    access_level?: string[];
-    thumbnail?: string[];
-    student_ids?: string[];
-}
-message?: string;
-}
-| undefined;
+export type CreateLibraryItemFormState =
+    | {
+        error?: {
+            title?: string[];
+            url?: string[];
+            description?: string[];
+            category?: string[];
+            tags?: string[];
+            access_level?: string[];
+            thumbnail?: string[];
+            student_ids?: string[];
+        }
+        message?: string;
+    }
+    | undefined;
 
 export const getLibraryItemByIDSchema = zod.object({
     item_id: zod.string({ error: 'Item ID must be a number' }),
 })
 
-export type GetLibraryItemByIDFormState = 
-| {error?: {
-    item_id?: string[];
-}
-message?: string;
-data?: openApi.LibraryItemRead;
-}
-| undefined;
+export type GetLibraryItemByIDFormState =
+    | {
+        error?: {
+            item_id?: string[];
+        }
+        message?: string;
+        data?: openApi.LibraryItemRead;
+    }
+    | undefined;
 
 export const createStudentSchema = zod.object({
     id: zod.string({ error: 'ID must be a number' }),
@@ -260,40 +270,42 @@ export const createStudentSchema = zod.object({
     recurrence: zod.string().min(0).trim().optional(),
 })
 
-export type CreateStudentFormState = 
-| {error?: {
-    id?: string[];
-    arname?: string[];
-    enname?: string[];
-    phone?: string[];
-    dateOfBirth?: string[];
-    timeZone?: string[];
-    currjuz?: string[];
-    currsurah?: string[];
-    currayah?: string[];
-    lessonsPerWeek?: string[];
-    lessonRate?: string[];
-    billingCycle?: string[];
-    specialNotes?: string[];
-    privateNotes?: string[];
-    recurrence?: string[];
-}
-message?: string;
-}
-| undefined;
+export type CreateStudentFormState =
+    | {
+        error?: {
+            id?: string[];
+            arname?: string[];
+            enname?: string[];
+            phone?: string[];
+            dateOfBirth?: string[];
+            timeZone?: string[];
+            currjuz?: string[];
+            currsurah?: string[];
+            currayah?: string[];
+            lessonsPerWeek?: string[];
+            lessonRate?: string[];
+            billingCycle?: string[];
+            specialNotes?: string[];
+            privateNotes?: string[];
+            recurrence?: string[];
+        }
+        message?: string;
+    }
+    | undefined;
 
 export const getStudentSchema = zod.object({
     id: zod.string({ error: 'ID must be a number' }),
 })
 
-export type GetStudentFormState = 
-| {error?: {
-    id?: string[];
-}
-message?: string;
-data?: openApi.StudentRead;
-}
-| undefined;
+export type GetStudentFormState =
+    | {
+        error?: {
+            id?: string[];
+        }
+        message?: string;
+        data?: openApi.StudentRead;
+    }
+    | undefined;
 
 export const updateStudentSchema = zod.object({
     arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
@@ -313,70 +325,76 @@ export const updateStudentSchema = zod.object({
     privateNotes: zod.string().min(0, { error: 'Private notes is required' }).trim(),
 })
 
-export type UpdateStudentFormState = 
-| {error?: {
-    arname?: string[];
-    enname?: string[];
-    phone?: string[];
-    dateOfBirth?: string[];
-    timeZone?: string[];
-    registerationStatus?: string[];
-    status?: string[];
-    currjuz?: string[];
-    currsurah?: string[];
-    currayah?: string[];
-    lessonsPerWeek?: string[];
-    lessonRate?: string[];
-    billingCycle?: string[];
-    specialNotes?: string[];
-    privateNotes?: string[];
-}
-message?: string;
-}
-| undefined;
+export type UpdateStudentFormState =
+    | {
+        error?: {
+            arname?: string[];
+            enname?: string[];
+            phone?: string[];
+            dateOfBirth?: string[];
+            timeZone?: string[];
+            registerationStatus?: string[];
+            status?: string[];
+            currjuz?: string[];
+            currsurah?: string[];
+            currayah?: string[];
+            lessonsPerWeek?: string[];
+            lessonRate?: string[];
+            billingCycle?: string[];
+            specialNotes?: string[];
+            privateNotes?: string[];
+        }
+        message?: string;
+    }
+    | undefined;
 
 export const createInvoiceSchema = zod.object({
-    student_id: zod.string({ error: 'Student ID must be a number' }),
+    student_id: zod.string().optional(),
+    student_ids: zod.string().optional(),
     period_from: zod.string().min(1, { error: 'Period from is required' }).trim(),
     period_to: zod.string().min(1, { error: 'Period to is required' }).trim(),
     due_date: zod.string().min(1, { error: 'Due date is required' }).trim(),
 })
- 
-export type CreateInvoiceFormState = 
-| {error?: {
-    student_id?: string[];
-    period_from?: string[];
-    period_to?: string[];
-    due_date?: string[];
-}
-message?: string;
-}
-| undefined;
+
+export type CreateInvoiceFormState =
+    | {
+        error?: {
+            student_id?: string[];
+            student_ids?: string[];
+            period_from?: string[];
+            period_to?: string[];
+            due_date?: string[];
+        }
+        message?: string;
+    }
+    | undefined;
 
 export const getInvoiceByIDSchema = zod.object({
     invoice_id: zod.string({ error: 'Invoice ID must be a number' }),
 })
 
-export type GetInvoiceByIDFormState = 
-| {error?: {
-    invoice_id?: string[];
-}
-message?: string;
-data?: openApi.InvoiceRead;
-}
-| undefined;
+export type GetInvoiceByIDFormState =
+    | {
+        error?: {
+            invoice_id?: string[];
+        }
+        message?: string;
+        data?: openApi.InvoiceRead;
+    }
+    | undefined;
 
 export const overrideInvoiceSchema = zod.object({
-    invoice_id: zod.string(),
-    billable: zod.string(),
-    override_reason: zod.string().trim(),
+    invoice_id: zod.string().min(1),
+    invoice_item_id: zod.string().min(1),
+    billable: zod.string().min(1),
+    override_reason: zod.string().trim().min(3),
 })
 
-export type OverrideInvoiceFormState = 
-| {
-message?: string;
-}
-| undefined;
+export type OverrideInvoiceFormState =
+    | {
+        message?: string;
+    }
+    | undefined;
 
 export const payInvoiceSchema = zod.object({
     invoice_id: zod.string(),
@@ -386,62 +404,63 @@ export const payInvoiceSchema = zod.object({
     payment_notes: zod.string().trim(),
 })
 
-export type PayInvoiceFormState = 
-| { error?: {
-    invoice_id?: string[];
-    paid_date?: string[];
-    payment_method?: string[];
-    payment_reference?: string[];
-    payment_notes?: string[];
-}
-message?: string;
-}
-| undefined;
+export type PayInvoiceFormState =
+    | {
+        error?: {
+            invoice_id?: string[];
+            paid_date?: string[];
+            payment_method?: string[];
+            payment_reference?: string[];
+            payment_notes?: string[];
+        }
+        message?: string;
+    }
+    | undefined;
 
 export const getOperationalAnalyticsSchema = zod.object({
     period_start: zod.string().min(1).trim(),
     period_end: zod.string().min(1).trim(),
 })
 
-export type GetOperationalAnalyticsFormState = 
-| { 
-message?: string;
-data?: openApi.OperationalAnalytics;
-}
-| undefined;
+export type GetOperationalAnalyticsFormState =
+    | {
+        message?: string;
+        data?: openApi.OperationalAnalytics;
+    }
+    | undefined;
 
 export const getAttendanceAnalyticsSchema = zod.object({
     period_start: zod.string().min(1).trim(),
     period_end: zod.string().min(1).trim(),
 })
 
-export type GetAttendanceAnalyticsFormState = 
-| { 
-message?: string;
-data?: openApi.AttendanceAnalytics;
-}
-| undefined;
+export type GetAttendanceAnalyticsFormState =
+    | {
+        message?: string;
+        data?: openApi.AttendanceAnalytics;
+    }
+    | undefined;
 
 export const getPerformanceAnalyticsSchema = zod.object({
     period_start: zod.string().min(1).trim(),
     period_end: zod.string().min(1).trim(),
 })
 
-export type GetPerformanceAnalyticsFormState = 
-| { 
-message?: string;
-data?: openApi.PerformanceAnalytics;
-}
-| undefined;
+export type GetPerformanceAnalyticsFormState =
+    | {
+        message?: string;
+        data?: openApi.PerformanceAnalytics;
+    }
+    | undefined;
 
 export const getFinancialAnalyticsSchema = zod.object({
     period_start: zod.string().min(1).trim(),
     period_end: zod.string().min(1).trim(),
 })
 
-export type GetFinancialAnalyticsFormState = 
-| { 
-message?: string;
-data?: openApi.FinancialAnalytics;
-}
-| undefined;
+export type GetFinancialAnalyticsFormState =
+    | {
+        message?: string;
+        data?: openApi.FinancialAnalytics;
+    }
+    | undefined;

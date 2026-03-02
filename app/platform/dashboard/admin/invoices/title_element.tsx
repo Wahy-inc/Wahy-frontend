@@ -104,6 +104,10 @@ export default function TitleElement({
                                     {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                 </div>
                                 <div className="flex flex-col">
+                                    {fieldInput(t('invoices.student_ids_optional'),"student_ids", "e.g. 12, 14, 18", "text")}
+                                    {createFormSubmitted && createState?.error?.student_ids && <p className="text-red-500 text-sm">{createState.error.student_ids}</p>}
+                                </div>
+                                <div className="flex flex-col">
                                     {fieldInput(t('invoices.period_from'),"period_from", "", "date")}
                                     {createFormSubmitted && createState?.error?.period_from && <p className="text-red-500 text-sm">{createState.error.period_from}</p>}
                                 </div>

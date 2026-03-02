@@ -181,7 +181,9 @@ export interface HTTPValidationError {
 /** InvoiceGenerateRequest */
 export interface InvoiceGenerateRequest {
   /** Student Id */
-  student_id: number;
+  student_id?: number | null;
+  /** Student Ids */
+  student_ids?: number[] | null;
   /**
    * Period From
    * @format date
@@ -202,7 +204,7 @@ export interface InvoiceGenerateRequest {
 /** InvoiceItemOverrideRequest */
 export interface InvoiceItemOverrideRequest {
   /** Item Id */
-  item_id: String;
+  item_id: number;
   /** Billable */
   billable: boolean;
   /**
@@ -219,6 +221,8 @@ export interface InvoiceItemRead {
   id: number;
   /** Invoice Id */
   invoice_id: number;
+  /** Student Id */
+  student_id: number | null;
   /** Lesson Id */
   lesson_id: number | null;
   /** Description */
@@ -348,6 +352,8 @@ export interface InvoiceWithItemsRead {
   pdf_generated_at: string | null;
   /** Items */
   items: InvoiceItemRead[];
+  /** Recipient Student Ids */
+  recipient_student_ids: number[];
 }
 
 /** LessonCreate */
@@ -879,6 +885,8 @@ export interface SyncItemRequest {
 
 /** SyncItemResponse */
 export interface SyncItemResponse {
+  /** Sync Id */
+  sync_id: number;
   /** Idempotency Key */
   idempotency_key: string;
   status: SyncStatus;
@@ -1165,18 +1173,18 @@ export class HttpClient<SecurityDataType = unknown> {
       const data = !responseFormat
         ? r
         : await responseToParse[responseFormat]()
-            .then((data) => {
-              if (r.ok) {
-                r.data = data;
-              } else {
-                r.error = data;
-              }
-              return r;
-            })
-            .catch((e) => {
-              r.error = e;
-              return r;
-            });
+          .then((data) => {
+            if (r.ok) {
+              r.data = data;
+            } else {
+              r.error = data;
+            }
+            return r;
+          })
+          .catch((e) => {
+            r.error = e;
+            return r;
+          });
 
       if (cancelToken) {
         this.abortControllers.delete(cancelToken);
@@ -1679,7 +1687,7 @@ export class Api<
      * @request POST:/api/v1/lessons
      */
     createApiV1LessonsPost: (data: LessonCreate, params: RequestParams = {}) =>
-      this.request<LessonRead, HTTPValidationError>({
+      this.request<LessonRead[], HTTPValidationError>({
         path: `/api/v1/lessons`,
         method: "POST",
         body: data,

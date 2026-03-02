@@ -2,14 +2,13 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { deleteLibraryItem, getLibraryItem, listLibraryMe } from "@/app/platform/actions/dashboard";
+import { getLibraryItemMe, listLibraryMe } from "@/app/platform/actions/dashboard";
 import DashboardPage from "../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge"
-import * as icon from "lucide-react"
 import {
   Card,
   CardDescription,
@@ -17,7 +16,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
@@ -25,12 +23,12 @@ import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 import { isClientOnline } from "@/lib/offlineSync";
 import Image from "next/image";
 
-
 export default function Schedules() {
+
     const [libraryItems, setLibraryItems] = React.useState<openApi.LibraryItemRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
-    const [getLibraryItemState, getLibraryItemAction, getLibraryItemPending] = React.useActionState(getLibraryItem, undefined)
+    const [getLibraryItemState, getLibraryItemAction, getLibraryItemPending] = React.useActionState(getLibraryItemMe, undefined)
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
     const [isOffline, setIsOffline] = React.useState(false)
     const { isLoading: authLoading } = useAuth()
@@ -127,14 +125,6 @@ export default function Schedules() {
                             })() : null}
                 </CardFooter>
                 </div>
-                <Button disabled={isOffline} onClick={() => {
-                    if (isOffline) {
-                        return
-                    }
-                    deleteLibraryItem(item.id)
-                }} variant='destructive' className="transition duration-300 hover:bg-red-800 mx-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                    <icon.Trash className="text-white cursor-pointer" size={16}/>
-                </Button>
             </Card>
     )
 
