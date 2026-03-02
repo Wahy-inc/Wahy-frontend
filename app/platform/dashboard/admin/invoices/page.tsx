@@ -235,6 +235,9 @@ export default function Invoices() {
                                         <div className="flex flex-col gap-4 w-full rtl:text-right">
                                             <input hidden value={invoice.id} name="invoice_id" type="text" />
                                             <div className='flex flex-col'>
+                                                {fieldInput(t('invoices.item_id'),"invoice_item_id", '', "number")}
+                                            </div>
+                                            <div className='flex flex-col'>
                                                 {fieldInput(t('invoices.billable'),"billable", t('invoices.yes_or_no'), "text")}
                                             </div>
                                             <div className='flex flex-col'>

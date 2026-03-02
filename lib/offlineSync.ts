@@ -22,6 +22,27 @@ const ISSUES_KEY = "wahy:offline:sync-issues:v1";
 
 const api = getApi();
 
+type SyncQueueResult = {
+  sync_id?: number;
+  idempotency_key: string;
+  status: openApi.SyncStatus;
+  entity_id?: number | null;
+  error_message?: string | null;
+  conflict?: Record<string, unknown> | null;
+};
+
+function extractSyncResults(error: unknown): SyncQueueResult[] | null {
+  if (!error || typeof error !== "object") {
+    return null;
+  }
+  const status = (error as { status?: number }).status;
+  const payload = (error as { error?: { results?: SyncQueueResult[] } }).error;
+  if (status === 409 && payload && Array.isArray(payload.results)) {
+    return payload.results;
+  }
+  return null;
+}
+
 function isBrowser(): boolean {
   return typeof window !== "undefined";
 }
@@ -177,6 +198,7 @@ export async function flushOfflineMutations(): Promise<void> {
     return;
   }
 
+  let results: SyncQueueResult[] | null = null;
   try {
     const response = await api.api.queueApiV1SyncQueuePost({
       items: queue.map((item) => ({
@@ -187,13 +209,23 @@ export async function flushOfflineMutations(): Promise<void> {
         idempotency_key: item.idempotency_key,
       })),
     });
-
-    if (response.status !== 200) {
+    if (response.status === 200) {
+      results = response.data.results;
+    }
+  } catch (error) {
+    results = extractSyncResults(error);
+    if (!results) {
       return;
     }
+  }
 
+  if (!results) {
+    return;
+  }
+
+  try {
     const resultByKey = new Map(
-      response.data.results.map((result) => [result.idempotency_key, result]),
+      results.map((result) => [result.idempotency_key, result]),
     );
 
     const remaining: PendingSyncItem[] = [];
@@ -215,8 +247,8 @@ export async function flushOfflineMutations(): Promise<void> {
 
       if (result.status === "applied") {
         resolvedKeys.push(item.idempotency_key);
-        if (typeof result.entity_id === "number") {
-          ackIds.push(result.entity_id);
+        if (typeof result.sync_id === "number") {
+          ackIds.push(result.sync_id);
         }
         continue;
       }

@@ -122,7 +122,7 @@ export async function createStudent(state: CreateStudentFormState, formData: For
 
         if (!isClientOnline()) {
             enqueueOfflineMutation({
-                entity_type: 'students',
+                entity_type: 'student',
                 operation: openApi.SyncOperation.Create,
                 payload: data as unknown as Record<string, unknown>,
                 idempotency_key: createIdempotencyKey(),
@@ -134,13 +134,13 @@ export async function createStudent(state: CreateStudentFormState, formData: For
 
         if (response.status === 201) {
             listStudents() // Refresh the students list after creating a new student
-            return {message: 'success' }
+            return { message: 'success' }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         if (shouldQueueMutation(error)) {
             enqueueOfflineMutation({
-                entity_type: 'students',
+                entity_type: 'student',
                 operation: openApi.SyncOperation.Create,
                 payload: {
                     user_id: Number(validation.data.id),
@@ -226,7 +226,7 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
 
         if (!isClientOnline()) {
             enqueueOfflineMutation({
-                entity_type: 'students',
+                entity_type: 'student',
                 entity_id: studentId,
                 operation: openApi.SyncOperation.Update,
                 payload: data as unknown as Record<string, unknown>,
@@ -239,13 +239,13 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
 
         if (response.status === 200) {
             listStudents() // Refresh the students list after updating a student
-            return {message: 'success' }
+            return { message: 'success' }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         if (shouldQueueMutation(error)) {
             enqueueOfflineMutation({
-                entity_type: 'students',
+                entity_type: 'student',
                 entity_id: studentId,
                 operation: openApi.SyncOperation.Update,
                 payload: {
@@ -271,7 +271,7 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
     }
 }
 
-export async function approveStudent(id:number, note: openApi.StudentApprovalRequest): Promise<'success' | 'queued' | 'fail'> {
+export async function approveStudent(id: number, note: openApi.StudentApprovalRequest): Promise<'success' | 'queued' | 'fail'> {
     const studentId = Number(id)
     if (isNaN(studentId)) {
         return 'fail'
@@ -290,21 +290,12 @@ export async function approveStudent(id:number, note: openApi.StudentApprovalReq
         }
         return 'fail'
     } catch (error) {
-        if (shouldQueueMutation(error)) {
-            enqueueOfflineMutation({
-                entity_type: 'students_approval',
-                entity_id: studentId,
-                operation: openApi.SyncOperation.Update,
-                payload,
-                idempotency_key: createIdempotencyKey(),
-            })
-            return 'queued'
-        }
+        void payload
         return 'fail'
     }
 }
 
-export async function rejectStudent(id:number, note: openApi.StudentApprovalRequest): Promise<'success' | 'queued' | 'fail'> {
+export async function rejectStudent(id: number, note: openApi.StudentApprovalRequest): Promise<'success' | 'queued' | 'fail'> {
     const studentId = Number(id)
     if (isNaN(studentId)) {
         return 'fail'
@@ -323,16 +314,7 @@ export async function rejectStudent(id:number, note: openApi.StudentApprovalRequ
         }
         return 'fail'
     } catch (error) {
-        if (shouldQueueMutation(error)) {
-            enqueueOfflineMutation({
-                entity_type: 'students_approval',
-                entity_id: studentId,
-                operation: openApi.SyncOperation.Update,
-                payload,
-                idempotency_key: createIdempotencyKey(),
-            })
-            return 'queued'
-        }
+        void payload
         return 'fail'
     }
 }
@@ -388,7 +370,7 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
         return { error: validation.error.flatten().fieldErrors }
     }
     try {
-        const data:openApi.ScheduleCreate = {
+        const data: openApi.ScheduleCreate = {
             student_id: Number(validation.data.student_id),
             start_time: validation.data.start_time,
             end_time: validation.data.end_time,
@@ -400,7 +382,7 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
 
         if (!isClientOnline()) {
             enqueueOfflineMutation({
-                entity_type: 'schedules',
+                entity_type: 'schedule',
                 operation: openApi.SyncOperation.Create,
                 payload: data as unknown as Record<string, unknown>,
                 idempotency_key: createIdempotencyKey(),
@@ -411,13 +393,13 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
         const response = await api.api.createApiV1SchedulesPost(data)
 
         if (response.status === 201) {
-            return {message: 'success' }
+            return { message: 'success' }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         if (shouldQueueMutation(error)) {
             enqueueOfflineMutation({
-                entity_type: 'schedules',
+                entity_type: 'schedule',
                 operation: openApi.SyncOperation.Create,
                 payload: {
                     student_id: Number(validation.data.student_id),
@@ -454,7 +436,7 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
         return { error: validation.error.flatten().fieldErrors }
     }
     try {
-        const data:openApi.ScheduleUpdate = {
+        const data: openApi.ScheduleUpdate = {
             start_time: validation.data.start_time,
             end_time: validation.data.end_time,
             effective_from: validation.data.effective_from,
@@ -467,7 +449,7 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
 
         if (!isClientOnline()) {
             enqueueOfflineMutation({
-                entity_type: 'schedules',
+                entity_type: 'schedule',
                 entity_id: scheduleId,
                 operation: openApi.SyncOperation.Update,
                 payload: data as unknown as Record<string, unknown>,
@@ -480,13 +462,13 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
 
         if (response.status === 200) {
             listSchedules() // Refresh the schedules list after updating a schedule
-            return {message: 'success' }
+            return { message: 'success' }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         if (shouldQueueMutation(error)) {
             enqueueOfflineMutation({
-                entity_type: 'schedules',
+                entity_type: 'schedule',
                 entity_id: scheduleId,
                 operation: openApi.SyncOperation.Update,
                 payload: {
@@ -508,17 +490,14 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
 }
 
 export async function getSchedulesForStudent(state: GetSchedualesForStudentFormState, formData: FormData): Promise<GetSchedualesForStudentFormState> {
-    const studentId = Number(formData.get('student-id'))
-    if (isNaN(studentId)) {
-        return { error: { student_id: ['Student ID must be a number'] } }
-    }
+    void formData
     try {
-        const response = await api.api.listForStudentApiV1SchedulesStudentStudentIdGet(studentId)
+        const response = await api.api.listMyScheduleApiV1SchedulesMeGet()
 
         if (response.status === 200) {
-            return {message: 'success' , data: response.data }
+            return { message: 'success', data: response.data }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
@@ -533,14 +512,14 @@ export async function deleteSchedule(scheduleId: number): Promise<boolean> {
             return true
         }
         return false
-    }   catch (error) {
+    } catch (error) {
         return false
     }
 }
 
-export async function listLessons(stu_id:number | null = null): Promise<openApi.LessonRead[] | null> {
+export async function listLessons(stu_id: number | null = null): Promise<openApi.LessonRead[] | null> {
     try {
-        const response = await api.api.listAllApiV1LessonsGet(stu_id? {student_id: stu_id} : {student_id: undefined})
+        const response = await api.api.listAllApiV1LessonsGet(stu_id ? { student_id: stu_id } : { student_id: undefined })
 
         if (response.status === 200) {
             if (stu_id === null) {
@@ -624,9 +603,9 @@ export async function getLibraryItem(state: GetLibraryItemByIDFormState, formDat
         const response = await api.api.getOneApiV1LibraryItemIdGet(id)
 
         if (response.status === 200) {
-            return {message: 'success', data: response.data }
+            return { message: 'success', data: response.data }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
@@ -641,9 +620,9 @@ export async function getLibraryItemMe(state: GetLibraryItemByIDFormState, formD
         const response = await api.api.getMyItemApiV1LibraryMeItemIdGet(id)
 
         if (response.status === 200) {
-            return {message: 'success', data: response.data }
+            return { message: 'success', data: response.data }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
@@ -679,9 +658,9 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
 
         if (response.status === 201) {
             listLibrary() // Refresh the library list after creating a new library item
-            return {message: 'success' }
+            return { message: 'success' }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
@@ -696,7 +675,7 @@ export async function deleteLibraryItem(id: number): Promise<boolean> {
             return true
         }
         return false
-    }   catch (error) {
+    } catch (error) {
         return false
     }
 
@@ -747,11 +726,11 @@ export async function getInvoice(state: GetInvoiceByIDFormState, formData: FormD
         const response = await api.api.getOneApiV1InvoicesInvoiceIdGet(id)
 
         if (response.status === 200) {
-            return {message: 'success', data: response.data }
+            return { message: 'success', data: response.data }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
-        return {message: 'fail' }
+        return { message: 'fail' }
     }
 }
 
@@ -764,17 +743,18 @@ export async function getInvoiceMe(state: GetInvoiceByIDFormState, formData: For
         const response = await api.api.getMyInvoiceApiV1InvoicesMeInvoiceIdGet(id)
 
         if (response.status === 200) {
-            return {message: 'success', data: response.data }
+            return { message: 'success', data: response.data }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
-        return {message: 'fail' }
+        return { message: 'fail' }
     }
 }
 
 export async function createInvoices(state: CreateInvoiceFormState, formData: FormData): Promise<CreateInvoiceFormState> {
     const validation = createInvoiceSchema.safeParse({
         student_id: formData.get('student_id'),
+        student_ids: formData.get('student_ids'),
         period_from: formData.get('period_from'),
         period_to: formData.get('period_to'),
         due_date: formData.get('due_date'),
@@ -785,8 +765,22 @@ export async function createInvoices(state: CreateInvoiceFormState, formData: Fo
     }
 
     try {
+        const selectedIds = (validation.data.student_ids || '')
+            .split(',')
+            .map((value) => Number(value.trim()))
+            .filter((value) => !Number.isNaN(value))
+        const singleId = Number(validation.data.student_id)
+        if (!Number.isNaN(singleId) && singleId > 0) {
+            selectedIds.unshift(singleId)
+        }
+        const uniqueIds = Array.from(new Set(selectedIds))
+        if (uniqueIds.length === 0) {
+            return { error: { student_id: ['At least one student is required'] } }
+        }
+
         const data: openApi.InvoiceGenerateRequest = {
-            student_id: Number(validation.data.student_id),
+            student_id: uniqueIds[0],
+            student_ids: uniqueIds,
             period_from: validation.data.period_from,
             period_to: validation.data.period_to,
             due_date: validation.data.due_date,
@@ -794,9 +788,9 @@ export async function createInvoices(state: CreateInvoiceFormState, formData: Fo
         const response = await api.api.generateApiV1InvoicesGeneratePost(data)
 
         if (response.status === 201) {
-            return {message: 'success' }
+            return { message: 'success' }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
@@ -805,29 +799,34 @@ export async function createInvoices(state: CreateInvoiceFormState, formData: Fo
 export async function overrideInvoice(state: OverrideInvoiceFormState, formData: FormData): Promise<OverrideInvoiceFormState> {
     const validation = overrideInvoiceSchema.safeParse({
         invoice_id: formData.get('invoice_id'),
+        invoice_item_id: formData.get('invoice_item_id'),
         billable: formData.get('billable'),
         override_reason: formData.get('override_reason'),
     })
 
     if (!validation.success) {
         console.log('override invoice Validation failed:', validation.error.flatten().fieldErrors);
-        return {message: 'faile'}
+        return { message: 'faile' }
     }
 
     try {
+        const invoiceId = Number(validation.data.invoice_id)
+        const invoiceItemId = Number(validation.data.invoice_item_id)
+        if (Number.isNaN(invoiceId) || Number.isNaN(invoiceItemId)) {
+            return { message: 'fail' }
+        }
         const data: openApi.InvoiceItemOverrideRequest = {
-            item_id: validation.data.invoice_id,
+            item_id: invoiceItemId,
             billable: validation.data.billable === 'true',
             override_reason: validation.data.override_reason,
         }
-        const id = Number(validation.data.invoice_id)
-        const response = await api.api.overrideItemApiV1InvoicesInvoiceIdOverridesPost(id, data)
+        const response = await api.api.overrideItemApiV1InvoicesInvoiceIdOverridesPost(invoiceId, data)
 
         if (response.status === 200) {
             listInvoices() // Refresh the invoices list after overriding an invoice item
-            return {message: 'success' }
+            return { message: 'success' }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
@@ -904,9 +903,9 @@ export async function markInvoiceAsPaid(state: PayInvoiceFormState, formData: Fo
 
         if (response.status === 200) {
             listInvoices() // Refresh the invoices list after marking an invoice as paid
-            return {message: 'success' }
+            return { message: 'success' }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
@@ -933,7 +932,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         return { error: validation.error.flatten().fieldErrors }
     }
     try {
-        const data:openApi.LessonCreate = {
+        const data: openApi.LessonCreate = {
             student_id: String(validation.data.student_id),
             sheikh_notes: validation.data.sheikh_notes,
             student_notes: validation.data.student_notes,
@@ -946,13 +945,13 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
             ayah_to: validation.data.ayah_to ? String(validation.data.ayah_to) : undefined,
             quality: validation.data.quality,
             absence_reason: validation.data.absence_reason,
-            recurrence: validation.data.recurrence ? {rrule: validation.data.recurrence} : undefined,
+            recurrence: validation.data.recurrence ? { rrule: validation.data.recurrence } : undefined,
         }
 
         console.log('Created lesson data:', data);
         if (!isClientOnline()) {
             enqueueOfflineMutation({
-                entity_type: 'lessons',
+                entity_type: 'lesson',
                 operation: openApi.SyncOperation.Create,
                 payload: data as unknown as Record<string, unknown>,
                 idempotency_key: createIdempotencyKey(),
@@ -964,16 +963,16 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
 
         if (response.status === 201) {
             console.log('created lesson');
-            return {message: 'success' }
+            return { message: 'success' }
         }
         if (response.status === 422) {
-            return {message: 'fail'}
+            return { message: 'fail' }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         if (shouldQueueMutation(error)) {
             enqueueOfflineMutation({
-                entity_type: 'lessons',
+                entity_type: 'lesson',
                 operation: openApi.SyncOperation.Create,
                 payload: {
                     student_id: String(validation.data.student_id),
@@ -988,7 +987,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
                     ayah_to: String(validation.data.ayah_to),
                     quality: validation.data.quality,
                     absence_reason: validation.data.absence_reason,
-                    recurrence: validation.data.recurrence ? {rrule: validation.data.recurrence} : undefined,
+                    recurrence: validation.data.recurrence ? { rrule: validation.data.recurrence } : undefined,
                 },
                 idempotency_key: createIdempotencyKey(),
             })
@@ -1018,24 +1017,24 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
         return { error: validation.error.flatten().fieldErrors }
     }
     try {
-        const data:openApi.LessonUpdate = {
-        schedule_id: Number(validation.data.schedule_id),
-        sheikh_notes: validation.data.sheikh_notes,
-        student_notes: validation.data.student_notes,
-        date: validation.data.date,
-        type: validation.data.type,
-        attendance: validation.data.attendance,
-        juz_number: Number(validation.data.juz),
-        surah_name: validation.data.surah,
-        ayah_from: Number(validation.data.ayah_from),
-        ayah_to: Number(validation.data.ayah_to),
-        quality: validation.data.quality,
-        absence_reason: validation.data.absence_reason
+        const data: openApi.LessonUpdate = {
+            schedule_id: Number(validation.data.schedule_id),
+            sheikh_notes: validation.data.sheikh_notes,
+            student_notes: validation.data.student_notes,
+            date: validation.data.date,
+            type: validation.data.type,
+            attendance: validation.data.attendance,
+            juz_number: Number(validation.data.juz),
+            surah_name: validation.data.surah,
+            ayah_from: Number(validation.data.ayah_from),
+            ayah_to: Number(validation.data.ayah_to),
+            quality: validation.data.quality,
+            absence_reason: validation.data.absence_reason
         }
 
         if (!isClientOnline()) {
             enqueueOfflineMutation({
-                entity_type: 'lessons',
+                entity_type: 'lesson',
                 entity_id: lessonId,
                 operation: openApi.SyncOperation.Update,
                 payload: data as unknown as Record<string, unknown>,
@@ -1048,13 +1047,13 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
 
         if (response.status === 200) {
             listLessons() // Refresh the lessons list after creating a new lesson
-            return {message: 'success' }
+            return { message: 'success' }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         if (shouldQueueMutation(error)) {
             enqueueOfflineMutation({
-                entity_type: 'lessons',
+                entity_type: 'lesson',
                 entity_id: lessonId,
                 operation: openApi.SyncOperation.Update,
                 payload: {
@@ -1079,7 +1078,7 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
     }
 }
 
-export async function getLessonByID(state:GetLessonByIDFormState, formData: FormData): Promise<GetLessonByIDFormState> {
+export async function getLessonByID(state: GetLessonByIDFormState, formData: FormData): Promise<GetLessonByIDFormState> {
     const lessonId = Number(formData.get('lesson-id'))
     if (isNaN(lessonId)) {
         return { error: { lesson_id: ['Lesson ID must be a number'] } }
@@ -1088,15 +1087,15 @@ export async function getLessonByID(state:GetLessonByIDFormState, formData: Form
         const response = await api.api.getOneApiV1LessonsLessonIdGet(lessonId)
 
         if (response.status === 200) {
-            return {message: 'success' , data: response.data }
+            return { message: 'success', data: response.data }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
 }
 
-export async function getLessonByIDMe(state:GetLessonByIDFormState, formData: FormData): Promise<GetLessonByIDFormState> {
+export async function getLessonByIDMe(state: GetLessonByIDFormState, formData: FormData): Promise<GetLessonByIDFormState> {
     const lessonId = Number(formData.get('lesson-id'))
     if (isNaN(lessonId)) {
         return { error: { lesson_id: ['Lesson ID must be a number'] } }
@@ -1105,15 +1104,15 @@ export async function getLessonByIDMe(state:GetLessonByIDFormState, formData: Fo
         const response = await api.api.getMyLessonApiV1LessonsMeLessonIdGet(lessonId)
 
         if (response.status === 200) {
-            return {message: 'success' , data: response.data }
+            return { message: 'success', data: response.data }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
 }
 
-export async function attendanceAnalytics(state:GetAttendanceAnalyticsFormState, formData: FormData): Promise<GetAttendanceAnalyticsFormState> {
+export async function attendanceAnalytics(state: GetAttendanceAnalyticsFormState, formData: FormData): Promise<GetAttendanceAnalyticsFormState> {
     const validation = getAttendanceAnalyticsSchema.safeParse({
         period_start: formData.get('period_start'),
         period_end: formData.get('period_end'),
@@ -1131,15 +1130,15 @@ export async function attendanceAnalytics(state:GetAttendanceAnalyticsFormState,
         const response = await api.api.attendanceApiV1AnalyticsAttendanceGet(data)
 
         if (response.status === 200) {
-            return {message: 'success' , data: response.data }
+            return { message: 'success', data: response.data }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
 }
 
-export async function financialAnalytics(state:GetFinancialAnalyticsFormState, formData: FormData): Promise<GetFinancialAnalyticsFormState> {
+export async function financialAnalytics(state: GetFinancialAnalyticsFormState, formData: FormData): Promise<GetFinancialAnalyticsFormState> {
     const validation = getFinancialAnalyticsSchema.safeParse({
         period_start: formData.get('period_start'),
         period_end: formData.get('period_end'),
@@ -1156,15 +1155,15 @@ export async function financialAnalytics(state:GetFinancialAnalyticsFormState, f
         const response = await api.api.financialApiV1AnalyticsFinancialGet(data)
 
         if (response.status === 200) {
-            return {message: 'success' , data: response.data }
+            return { message: 'success', data: response.data }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
 }
 
-export async function performanceAnalytics(state:GetPerformanceAnalyticsFormState, formData: FormData): Promise<GetPerformanceAnalyticsFormState> {
+export async function performanceAnalytics(state: GetPerformanceAnalyticsFormState, formData: FormData): Promise<GetPerformanceAnalyticsFormState> {
     const validation = getPerformanceAnalyticsSchema.safeParse({
         period_start: formData.get('period_start'),
         period_end: formData.get('period_end'),
@@ -1181,15 +1180,15 @@ export async function performanceAnalytics(state:GetPerformanceAnalyticsFormStat
         const response = await api.api.performanceApiV1AnalyticsPerformanceGet(data)
 
         if (response.status === 200) {
-            return {message: 'success' , data: response.data }
+            return { message: 'success', data: response.data }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
 }
 
-export async function operationalAnalytics(state:GetOperationalAnalyticsFormState, formData: FormData): Promise<GetOperationalAnalyticsFormState> {
+export async function operationalAnalytics(state: GetOperationalAnalyticsFormState, formData: FormData): Promise<GetOperationalAnalyticsFormState> {
     const validation = getOperationalAnalyticsSchema.safeParse({
         period_start: formData.get('period_start'),
         period_end: formData.get('period_end'),
@@ -1206,9 +1205,9 @@ export async function operationalAnalytics(state:GetOperationalAnalyticsFormStat
         const response = await api.api.operationalApiV1AnalyticsOperationalGet(data)
 
         if (response.status === 200) {
-            return {message: 'success' , data: response.data }
+            return { message: 'success', data: response.data }
         }
-        return {message: 'fail' }
+        return { message: 'fail' }
     } catch (error) {
         return { message: 'fail' }
     }
