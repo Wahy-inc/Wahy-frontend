@@ -52,11 +52,12 @@ const nextConfig: NextConfig = {
     ]
   },
   async rewrites() {
+    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
     return {
       beforeFiles: [
         {
           source: '/api/:path*',
-          destination: `${process.env.BACKEND_URL}/api/:path*`,
+          destination: `${backendUrl}/api/:path*`,
         },
       ],
     }
