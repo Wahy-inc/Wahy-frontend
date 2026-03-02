@@ -6,8 +6,7 @@
 import { Api, RequestParams } from './openApi';
 import { requestManager } from './requestManager';
 
-type MethodNames = keyof Api['api'];
-
+type MethodNames = keyof Api<unknown>['api'];
 /**
  * Wraps API methods to automatically cancel duplicate pending requests
  */
@@ -15,7 +14,7 @@ export function createDeduplicatedApiClient(apiInstance: Api<unknown>) {
   const originalRequest = apiInstance.request.bind(apiInstance);
 
   // Override the request method to handle deduplication
-  apiInstance.request = async function (config) {
+  apiInstance.request = async function (config: {path: string; method?: string; query?: any}) {
     const { path, method = 'GET', query } = config;
 
     // Register request and get cancel token
