@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "engines": {
+    "node": ">=20.9.0"
+  },
   "dependencies": {
     "@deemlol/next-icons": "^0.1.9",
     "@tanstack/react-table": "^8.21.3",
