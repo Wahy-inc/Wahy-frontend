@@ -146,7 +146,7 @@ export type GetLessonByIDFormState =
     | undefined;
 
 export const createScheduleSchema = zod.object({
-    student_id: zod.string({ error: 'Student ID must be a number' }),
+    student_id: zod.string(),
     start_time: zod.string().min(1, { error: 'Start time is required' }).trim(),
     end_time: zod.string().min(1, { error: 'End time is required' }).trim(),
     effective_from: zod.string().min(1, { error: 'Effective from is required' }).trim(),
@@ -158,7 +158,6 @@ export const createScheduleSchema = zod.object({
 export type CreateScheduleFormState =
     | {
         error?: {
-            student_id?: string[];
             start_time?: string[];
             end_time?: string[];
             effective_from?: string[];

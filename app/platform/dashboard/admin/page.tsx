@@ -2,9 +2,8 @@
 
 import * as icon from '@deemlol/next-icons'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { signout } from '../../actions/auth'
-import { listStudents } from '../../actions/dashboard'
 import { useAuth } from '@/lib/auth-context'
 import { useLocalization } from '@/lib/localization-context'
 import { OfflineStatusBar } from '@/components/OfflineStatusBar'
@@ -15,13 +14,6 @@ export default function DashboardPage({children: children, title: title}: {child
     const { t } = useLocalization()
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
     
-    useEffect(() => {
-        localStorage.setItem('students', JSON.stringify([]))
-        if (isAdmin) {
-            listStudents()
-        }
-    }, [isAdmin])
-
     if (!isAdmin) {
         return (
             <div className="flex items-center justify-center min-h-screen">

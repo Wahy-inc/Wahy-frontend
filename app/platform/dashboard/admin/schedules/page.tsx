@@ -20,6 +20,7 @@ import { Separator } from "@/components/ui/separator";
 import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 import { useLocalization } from "@/lib/localization-context";
+import { RRule } from "rrule";
 
 export default function Schedules() {
     const [schedules, setSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
@@ -136,7 +137,7 @@ export default function Schedules() {
         if (studentId === "") {
             setFilteredSchedules(null)
         } else if (schedules) {
-            const filtered = schedules.filter(schedule => 
+            const filtered = schedules.filter((schedule: openApi.ScheduleRead) => 
                 schedule.student_id.toString().startsWith(studentId)
             )
             setFilteredSchedules(filtered)
@@ -207,38 +208,36 @@ export default function Schedules() {
         </Field>
     )
 
-    const getDayColor = (day: number): string => {
-        const colors = [
-            'bg-purple-700', // Saturday
-            'bg-blue-700',   // Sunday
-            'bg-green-700',  // Monday
-            'bg-yellow-700', // Tuesday
-            'bg-orange-700', // Wednesday
-            'bg-red-700',    // Thursday
-            'bg-pink-700',   // Friday
-        ]
-        return colors[day] || 'bg-slate-500'
-    }
-
-    const getDayName = (day: number): string => {
+    const getDate = (rrule: string | null, short: boolean): string => {
         const dayKeys = ['schedules.saturday', 'schedules.sunday', 'schedules.monday', 'schedules.tuesday', 'schedules.wednesday', 'schedules.thursday', 'schedules.friday']
-        return t(dayKeys[day] || 'schedules.saturday')
+        const shortDayKeys = ['schedules.sat', 'schedules.sun', 'schedules.mon', 'schedules.tue', 'schedules.wed', 'schedules.thu', 'schedules.fri']
+        const days = rrule ? RRule.fromString(rrule).options.byweekday.map((d: number) => (d + 2) % 7).sort() : null
+        let date = ''
+        if (days) {
+            for (let i = 0; i < days.length; i++) {
+                const weekday = days[i]
+                if (weekday !== undefined) {
+                    date = date + t(short ? shortDayKeys[weekday] : dayKeys[weekday]) + (i < days.length - 1 ? ", " : "")
+                }
+            }
+        }
+        return date
     }
 
     const schedulesElement = (schedule: openApi.ScheduleRead) => (
         <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
             {/* Day Header Bar */}
-            <div className={`${getDayColor(schedule.day_of_week)} h-2`} />
+            <div className={`bg-blue-900 h-2`} />
             
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
                         {/* Day Circle */}
-                        <div className={`${getDayColor(schedule.day_of_week)} w-14 h-14 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md`}>
-                            {getDayName(schedule.day_of_week).slice(0, 3)}
+                        <div className={`bg-blue-900 min-w-14 h-14 px-2 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md`}>
+                            {getDate(schedule.rrule_string, true)}
                         </div>
                         <div>
-                            <h3 className="text-2xl font-bold text-slate-800">{getDayName(schedule.day_of_week)}</h3>
+                            <h3 className="text-2xl font-bold text-slate-800">{getDate(schedule.rrule_string, false)}</h3>
                             <div className="flex items-center gap-2 mt-1">
                                 <Badge variant="outline" className="text-xs">
                                     <User className="w-3 h-3 mr-1" />
@@ -334,7 +333,7 @@ export default function Schedules() {
                 {/* Actions */}
                         <Separator className="my-4" />
                         <div className="flex justify-end gap-3">
-                    <AlertDialog open={editingScheduleId === schedule.id} onOpenChange={(open) => setEditingScheduleId(open ? schedule.id : null)}>
+                    <AlertDialog open={editingScheduleId === schedule.id} onOpenChange={(open: boolean) => setEditingScheduleId(open ? schedule.id : null)}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 cursor-pointer bg-slate-400 hover:bg-slate-600">{t('schedules.update_schedule')}</Button>
                         </AlertDialogTrigger>
@@ -367,7 +366,7 @@ export default function Schedules() {
                                     <div className='grid grid-cols-2 gap-4'>
                                         <div className="flex flex-col col-start-1 col-end-2">
                                             <label htmlFor="is-recurring" className="text-sm font-medium">{t('schedules.recurring')}</label>
-                                            <Select name="is-recurring" defaultValue={schedule.is_recurring.toString() === 'true' ? 'true' : 'false'}>
+                                            <Select name="is-recurring" defaultValue={schedule.rrule_string ? 'true' : 'false'}>
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder={t('schedules.recurring')} />
                                                 </SelectTrigger>
@@ -383,7 +382,7 @@ export default function Schedules() {
                                         {isRecurring === 'true' && (<div className='flex flex-col col-start-2 col-end-3'>
                                             <div className="flex flex-col">
                                                 <label htmlFor="is-recurring-period" className="text-sm font-medium">Period</label>
-                                                <Select name="is-recurring-period" onValueChange={(value) => {
+                                                <Select name="is-recurring-period" onValueChange={(value: string) => {
                                                     setIsRecurringPeriod(value)
                                                     setSelectedDayOfWeek('')
                                                     setSelectedDaysOfWeek([])
@@ -418,7 +417,7 @@ export default function Schedules() {
                                         <div className='flex flex-col'>
                                         <div className="flex flex-col">
                                             <label htmlFor="is-active" className="text-sm font-medium">{t('schedules.active')}</label>
-                                            <Select name="is-active" defaultValue={schedule.is_active.toString() === 'true' ? 'true' : 'false'} onValueChange={(value) => setIsRecurring(value)}>
+                                            <Select name="is-active" defaultValue={schedule.is_active.toString() === 'true' ? 'true' : 'false'}>
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder={t('schedules.active')} />
                                                 </SelectTrigger>
@@ -519,7 +518,7 @@ export default function Schedules() {
                             : t('messages.success')}
                 </div>
             )}
-            {displaySchedules?.map((schedule) => (
+            {displaySchedules?.map((schedule: openApi.ScheduleRead) => (
                 <div key={schedule.id}>
                     {schedulesElement(schedule)}
                 </div>

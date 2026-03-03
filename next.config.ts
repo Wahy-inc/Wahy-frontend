@@ -52,7 +52,7 @@ const nextConfig: NextConfig = {
     ]
   },
   async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || 'http://localhost:8000';
+    const backendUrl = 'http://n80gocswo4w0ocw004gcckso.46.225.235.0.sslip.io';
     return {
       beforeFiles: [
         {

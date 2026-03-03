@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { useAuth } from "@/lib/auth-context"
 import { useToastListener } from "@/lib/toastListener"
+import { listStudents } from "../../actions/dashboard"
 
 export default function SignIn() {
     const { isAdmin } = useAuth()
@@ -26,6 +27,8 @@ export default function SignIn() {
         if (state?.message === 'Signin successful' || Studentstate?.message === 'Signin successful') {
           if (isAdmin) {
             router.replace('/platform/dashboard/admin')
+            localStorage.setItem('students', JSON.stringify([]))
+            listStudents()
           } else {
             router.replace('/platform/dashboard/student')
           }

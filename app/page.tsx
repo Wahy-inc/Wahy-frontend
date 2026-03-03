@@ -18,11 +18,20 @@ export default function Home() {
       const now = new Date();
       
       if (expireDate > now) {
-        router.push('./platform/dashboard');
+        if (role === 'admin') {
+          router.push('./platform/dashboard/admin');
+        } else if (role === 'student') {
+          router.push('./platform/dashboard/student');
+        } else {
+          // Invalid role, clear tokens
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('expire');
+        }
       } else {
         // Clear expired tokens
         localStorage.removeItem('access_token');
         localStorage.removeItem('expire');
+        localStorage.removeItem('role');
       }
     }
   }, [router]);

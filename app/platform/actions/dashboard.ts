@@ -357,7 +357,7 @@ export async function listSchedulesMe(): Promise<openApi.ScheduleRead[] | null> 
 
 export async function createSchedule(state: CreateScheduleFormState, formData: FormData): Promise<CreateScheduleFormState> {
     const validation = createScheduleSchema.safeParse({
-        student_id: formData.get('student-id'),
+        student_id: formData.get('student_id'),
         start_time: formData.get('start-time'),
         end_time: formData.get('end-time'),
         effective_from: formData.get('effective-from'),
@@ -365,6 +365,7 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
         rrule_string: formData.get('rrule_string'),
         notes: formData.get('notes'),
     })
+    console.log("Validation result:", validation);
 
     if (!validation.success) {
         return { error: validation.error.flatten().fieldErrors }
@@ -490,9 +491,16 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
 }
 
 export async function getSchedulesForStudent(state: GetSchedualesForStudentFormState, formData: FormData): Promise<GetSchedualesForStudentFormState> {
-    void formData
+    const studentId = Number(formData.get('student-id'))
+    if (isNaN(studentId)) {
+        return { message: 'fail', error: { student_id: ['Student ID must be a number'] } }
+    }
+    if (formData.get('student-id') == '') {
+        window.location.reload() // Refresh the page to show all schedules when student ID is cleared
+        return { message: 'success' }
+    }
     try {
-        const response = await api.api.listMyScheduleApiV1SchedulesMeGet()
+        const response = await api.api.listForStudentApiV1SchedulesStudentStudentIdGet(studentId)
 
         if (response.status === 200) {
             return { message: 'success', data: response.data }

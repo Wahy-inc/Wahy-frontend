@@ -611,8 +611,8 @@ export interface ScheduleRead {
   student_id: number;
   /** Sheikh Id */
   sheikh_id: number;
-  /** Day Of Week */
-  day_of_week: number;
+  /** RRULE String - null if one-off session */
+  rrule_string: string | null;
   /**
    * Start Time
    * @format time
@@ -623,8 +623,6 @@ export interface ScheduleRead {
    * @format time
    */
   end_time: string;
-  /** Is Recurring */
-  is_recurring: boolean;
   /**
    * Effective From
    * @format date

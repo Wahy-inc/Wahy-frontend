@@ -163,6 +163,7 @@ export default function TitleElement({
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
         formData.append("student_id", selectedStudentId?.toString() || "")
+        console.log("Selected student ID:", formData.get("student_id"));
         
         // Generate RRULE if recurring
         if (isRecurring === 'true') {
@@ -262,7 +263,6 @@ export default function TitleElement({
                                 <div className="grid grid-cols-3 gap-4 rtl:text-right">
                                     <div className='flex flex-col col-start-1 col-end-4 row-start-1 row-end-2'>
                                         <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
-                                        {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 col-start-1 col-end-4 row-start-2 row-end-3">
                                         <div className='flex flex-col col-start-1 col-end-2'>
@@ -287,7 +287,7 @@ export default function TitleElement({
                                     <div className='flex flex-col col-start-1 col-end-3 row-start-4 row-end-5'>
                                         <div className="flex flex-col">
                                             <label htmlFor="is-recurring" className="text-sm font-medium">{t('schedules.recurring')}</label>
-                                            <Select name="is-recurring" onValueChange={(value) => setIsRecurring(value)}>
+                                            <Select name="is-recurring" onValueChange={(value: string) => setIsRecurring(value)}>
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue id="selected-recurr-value" placeholder={t('schedules.recurring')} />
                                                 </SelectTrigger>
@@ -305,7 +305,7 @@ export default function TitleElement({
                                     <div className='flex flex-col col-start-3 col-end-4 row-start-4 row-end-5'>
                                         <div className="flex flex-col">
                                             <label htmlFor="is-recurring-period" className="text-sm font-medium">Period</label>
-                                            <Select name="is-recurring-period" onValueChange={(value) => {
+                                            <Select name="is-recurring-period" onValueChange={(value: string) => {
                                                 setIsRecurringPeriod(value)
                                                 setSelectedDayOfWeek('')
                                                 setSelectedDaysOfWeek([])
@@ -351,7 +351,7 @@ export default function TitleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     </div>
-                    <AlertDialog open={getStudentScheduleDialogOpen} onOpenChange={handleGetDialogOpenChange}>
+                    <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('schedules.get_schedules')}</Button>
                     </AlertDialogTrigger>

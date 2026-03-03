@@ -25,12 +25,14 @@ export function useToastListener(actionState: ActionState, config: ToastConfig =
                 toast.error(errorMessage || "An error occurred", {
                     description: Array.isArray(actionState.error) ? actionState.error.join('\n') : actionState.error.toString(),
                 })
+                console.log("Error details:", actionState.error);
             }
             return
         }
 
         if (actionState.message === 'fail') {
             toast.error(errorMessage || `${functionName || 'Action'} failed`)
+            console.log("Failed message:", actionState.message);
             return
         }
 
@@ -46,6 +48,7 @@ export function useToastListener(actionState: ActionState, config: ToastConfig =
                 toast.error(errorMessage || `${functionName || 'Action'} failed`, {
                     description: actionState.message
                 })
+                console.log("Error message:", actionState.message);
             } else {
                 toast.success(successMessage || `${functionName || 'Action'} completed successfully`, {
                     description: actionState.message
