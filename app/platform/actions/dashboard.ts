@@ -238,7 +238,7 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
         const response = await api.api.updateApiV1StudentsStudentIdPatch(studentId, data)
 
         if (response.status === 200) {
-            listStudents() // Refresh the students list after updating a student
+            window.location.reload() // Refresh the students list after updating a student
             return { message: 'success' }
         }
         return { message: 'fail' }
@@ -462,7 +462,7 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
         const response = await api.api.updateApiV1SchedulesScheduleIdPatch(scheduleId, data)
 
         if (response.status === 200) {
-            listSchedules() // Refresh the schedules list after updating a schedule
+            window.location.reload() // Refresh the schedules list after updating a schedule
             return { message: 'success' }
         }
         return { message: 'fail' }
@@ -787,7 +787,7 @@ export async function createInvoices(state: CreateInvoiceFormState, formData: Fo
         }
 
         const data: openApi.InvoiceGenerateRequest = {
-            student_id: uniqueIds[0],
+            student_id: Number(validation.data.student_id),
             student_ids: uniqueIds,
             period_from: validation.data.period_from,
             period_to: validation.data.period_to,
@@ -831,7 +831,7 @@ export async function overrideInvoice(state: OverrideInvoiceFormState, formData:
         const response = await api.api.overrideItemApiV1InvoicesInvoiceIdOverridesPost(invoiceId, data)
 
         if (response.status === 200) {
-            listInvoices() // Refresh the invoices list after overriding an invoice item
+            window.location.reload() // Refresh the invoices list after overriding an invoice item
             return { message: 'success' }
         }
         return { message: 'fail' }
@@ -927,8 +927,8 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         date: formData.get('date'),
         type: formData.get('type'),
         attendance: formData.get('attendance'),
-        juz: formData.get('juz_number'),
-        surah: formData.get('surah_name'),
+        juz: formData.get('juz'),
+        surah: formData.get('surah'),
         ayah_from: formData.get('ayah_from'),
         ayah_to: formData.get('ayah_to'),
         quality: formData.get('quality'),
@@ -941,7 +941,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
     }
     try {
         const data: openApi.LessonCreate = {
-            student_id: String(validation.data.student_id),
+            student_id: Number(validation.data.student_id),
             sheikh_notes: validation.data.sheikh_notes,
             student_notes: validation.data.student_notes,
             date: validation.data.date,
@@ -1054,7 +1054,7 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
         const response = await api.api.updateApiV1LessonsLessonIdPatch(lessonId, data)
 
         if (response.status === 200) {
-            listLessons() // Refresh the lessons list after creating a new lesson
+            window.location.reload() // Refresh the lessons list after creating a new lesson
             return { message: 'success' }
         }
         return { message: 'fail' }

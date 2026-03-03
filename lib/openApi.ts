@@ -359,7 +359,7 @@ export interface InvoiceWithItemsRead {
 /** LessonCreate */
 export interface LessonCreate {
   /** Student Id - Required */
-  student_id: string;
+  student_id: number;
   /**
    * Date - Required
    * @format date

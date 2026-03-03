@@ -166,7 +166,7 @@ export default function Schedules() {
                     if (selectedDaysOfWeek.length === 1) {
                         setSelectedDaysOfWeek([])
                     } else {
-                    setSelectedDaysOfWeek(selectedDaysOfWeek.filter(day => day !== key))
+                    setSelectedDaysOfWeek(selectedDaysOfWeek.filter((day: string) => day !== key))
                     }
                 } else {
                     setSelectedDaysOfWeek([...selectedDaysOfWeek, key])
@@ -190,7 +190,7 @@ export default function Schedules() {
                     if (selectedDaysOfMonth.length === 1) {
                         setSelectedDaysOfMonth([])
                     } else {
-                    setSelectedDaysOfMonth(selectedDaysOfMonth.filter(d => d !== day.toString()))
+                    setSelectedDaysOfMonth(selectedDaysOfMonth.filter((d: string) => d !== day.toString()))
                     }
                 } else {
                     setSelectedDaysOfMonth([...selectedDaysOfMonth, day.toString()])
@@ -366,7 +366,9 @@ export default function Schedules() {
                                     <div className='grid grid-cols-2 gap-4'>
                                         <div className="flex flex-col col-start-1 col-end-2">
                                             <label htmlFor="is-recurring" className="text-sm font-medium">{t('schedules.recurring')}</label>
-                                            <Select name="is-recurring" defaultValue={schedule.rrule_string ? 'true' : 'false'}>
+                                            <Select name="is-recurring" onValueChange={(value: string) => {
+                                                setIsRecurring(value)
+                                            }}>
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder={t('schedules.recurring')} />
                                                 </SelectTrigger>

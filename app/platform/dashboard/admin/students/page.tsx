@@ -36,7 +36,7 @@ export default function Students() {
     const [getStudentState, getStudentAction, getStudentPending] = React.useActionState(getStudent, undefined)
     const [createStudentDialogOpen, setCreateStudentDialogOpen] = React.useState(false)
     const [getStudentDialogOpen, setGetStudentDialogOpen] = React.useState(false)
-    const [updateStudentDialogOpen, setUpdateStudentDialogOpen] = React.useState(false)
+    const [editingStudentId, setEditingStudentId] = React.useState<number | null>(null)
     const [approvalStatus, setApprovalStatus] = React.useState<'success' | 'queued' | 'fail' | null>(null)
     const { isAdmin, isLoading: authLoading } = useAuth()
     const { t, language } = useLocalization()
@@ -72,6 +72,11 @@ export default function Students() {
         }
     }, [getStudentState, createStudentState, updateStudentState, isAdmin])
 
+    React.useEffect(() => {
+        if (updateStudentState?.message === 'success' || updateStudentState?.message === 'queued') {
+            setEditingStudentId(null)
+        }
+    }, [updateStudentState])
 
     React.useEffect(() => {
         if (authLoading) return
@@ -272,10 +277,10 @@ export default function Students() {
                         </ItemActions>
                     ) : null}
                     {student.registration_status === openApi.RegistrationStatus.Approved ? (
-                    <AlertDialog open={updateStudentDialogOpen} onOpenChange={setUpdateStudentDialogOpen}>
+                    <AlertDialog open={editingStudentId === student.id} onOpenChange={(open: boolean) => setEditingStudentId(open ? student.id : null)}>
                         <AlertDialogTrigger asChild>
                             <ItemActions>
-                                <Button onClick={() => (student.id, {})} size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white">
+                                <Button onClick={() => setEditingStudentId(student.id)} size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white">
                                     {t('common.update')}
                                 </Button>
                             </ItemActions>
@@ -436,14 +441,14 @@ export default function Students() {
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
     if (!students || students.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('students.no_students_found')}</p></DashboardPage>
 
-    const pendingStudents = students?.filter((student) => {
+    const pendingStudents = students?.filter((student: openApi.StudentRead) => {
         return student.registration_status === openApi.RegistrationStatus.Pending;
     })
-    const approvedStudents = students?.filter((student) => {
+    const approvedStudents = students?.filter((student: openApi.StudentRead) => {
         return student.registration_status === openApi.RegistrationStatus.Approved;
     })
     
-    const rejectedStudents = students?.filter((student) => {
+    const rejectedStudents = students?.filter((student: openApi.StudentRead) => {
         return student.registration_status === openApi.RegistrationStatus.Rejected;
     })
 
@@ -466,7 +471,7 @@ export default function Students() {
             )}
             <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">{t('students.pending_students')}</p>
-                {pendingStudents && pendingStudents.length > 0 ? pendingStudents.map((student) => (
+                {pendingStudents && pendingStudents.length > 0 ? pendingStudents.map((student: openApi.StudentRead) => (
                     <div key={student.id}>
                         {studentElement(student, '')}
                     </div>
@@ -475,7 +480,7 @@ export default function Students() {
             <div className="w-full h-1 bg-gray-400"></div>
             <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">{t('students.approved_students')}</p>
-                {approvedStudents && approvedStudents.length > 0 ? approvedStudents.map((student) => (
+                {approvedStudents && approvedStudents.length > 0 ? approvedStudents.map((student: openApi.StudentRead) => (
                     <div key={student.id}>
                         {studentElement(student, '#6a7282')}
                     </div>
@@ -484,7 +489,7 @@ export default function Students() {
             <div className="w-full h-1 bg-gray-400"></div>
             <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">{t('students.rejected_students')}</p>
-                {rejectedStudents && rejectedStudents.length > 0 ? rejectedStudents.map((student) => (
+                {rejectedStudents && rejectedStudents.length > 0 ? rejectedStudents.map((student: openApi.StudentRead) => (
                     <div key={student.id}>
                         {studentElement(student, 'rgba(242,70,70,0.95)')}
                     </div>

@@ -247,7 +247,7 @@ export default function TitleElement({
                                             {createFormSubmitted && createState?.error?.juz && <p className="text-red-500 text-sm">{createState.error.juz}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.surah'), "surah", "", "text")}
+                                            {fieldInput(t('lessons.surah'), "surah", "surah", "text")}
                                             {createFormSubmitted && createState?.error?.surah && <p className="text-red-500 text-sm">{createState.error.surah}</p>}
                                         </div>
                                         <div className='flex flex-col'>
