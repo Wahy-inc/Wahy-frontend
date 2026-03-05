@@ -1,5 +1,5 @@
 import * as openApi from "@/lib/openApi"
-import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
+import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetAttendanceStudentAnalyticsFormState, getAttendanceStudentAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
 import { createIdempotencyKey, enqueueOfflineMutation, isClientOnline, shouldQueueMutation } from "@/lib/offlineSync"
 import { getCachedData, offlineCacheKeys, setCachedData } from "@/lib/offlineCache"
 import { getApi } from "@/lib/apiClient"
@@ -939,10 +939,10 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
             date: validation.data.date,
             type: validation.data.type,
             attendance: validation.data.attendance,
-            juz_number: validation.data.juz ? String(validation.data.juz) : undefined,
+            juz_number: validation.data.juz ? Number(validation.data.juz) : undefined,
             surah_name: validation.data.surah,
-            ayah_from: validation.data.ayah_from ? String(validation.data.ayah_from) : undefined,
-            ayah_to: validation.data.ayah_to ? String(validation.data.ayah_to) : undefined,
+            ayah_from: validation.data.ayah_from ? Number(validation.data.ayah_from) : undefined,
+            ayah_to: validation.data.ayah_to ? Number(validation.data.ayah_to) : undefined,
             quality: validation.data.quality,
             absence_reason: validation.data.absence_reason,
             recurrence: validation.data.recurrence ? { rrule: validation.data.recurrence } : undefined,
@@ -981,10 +981,10 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
                     date: validation.data.date,
                     type: validation.data.type,
                     attendance: validation.data.attendance,
-                    juz_number: String(validation.data.juz),
+                    juz_number: Number(validation.data.juz),
                     surah_name: validation.data.surah,
-                    ayah_from: String(validation.data.ayah_from),
-                    ayah_to: String(validation.data.ayah_to),
+                    ayah_from: Number(validation.data.ayah_from),
+                    ayah_to: Number(validation.data.ayah_to),
                     quality: validation.data.quality,
                     absence_reason: validation.data.absence_reason,
                     recurrence: validation.data.recurrence ? { rrule: validation.data.recurrence } : undefined,
@@ -1128,6 +1128,34 @@ export async function attendanceAnalytics(state: GetAttendanceAnalyticsFormState
             end_date: validation.data.period_end,
         }
         const response = await api.api.attendanceApiV1AnalyticsAttendanceGet(data)
+
+        if (response.status === 200) {
+            return { message: 'success', data: response.data }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function attendanceStudentAnalytics(state: GetAttendanceStudentAnalyticsFormState, formData: FormData): Promise<GetAttendanceStudentAnalyticsFormState> {
+    const validation = getAttendanceStudentAnalyticsSchema.safeParse({
+        student_id: formData.get('student_id'),
+        period_start: formData.get('period_start'),
+        period_end: formData.get('period_end'),
+    })
+
+    if (!validation.success) {
+        console.log('succeded');
+        return { message: 'fail' }
+    }
+    try {
+        const data = {
+            start_date: validation.data.period_start,
+            end_date: validation.data.period_end,
+        }
+        const studentId = Number(validation.data.student_id)
+        const response = await api.api.getAttendanceHoursApiV1StudentsStudentIdAttendanceHoursGet(studentId, data)
 
         if (response.status === 200) {
             return { message: 'success', data: response.data }

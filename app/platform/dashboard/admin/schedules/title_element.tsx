@@ -149,16 +149,16 @@ export default function TitleElement({
         }
     }
 
-    const handleGetDialogOpenChange = (open: boolean) => {
-        if (!open) {
-            setGetFormSubmitted(false)
-        }
-        if (getSchedualesForStudentState?.message === 'success') {
-            setgetStudentScheduleDialogOpen(false)
-        } else {
-            setgetStudentScheduleDialogOpen(open)
-        }
-    }
+    // const handleGetDialogOpenChange = (open: boolean) => {
+    //     if (!open) {
+    //         setGetFormSubmitted(false)
+    //     }
+    //     if (getSchedualesForStudentState?.message === 'success') {
+    //         setgetStudentScheduleDialogOpen(false)
+    //     } else {
+    //         setgetStudentScheduleDialogOpen(open)
+    //     }
+    // }
 
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)

@@ -304,6 +304,7 @@
   "analytics": {
     "title": "Analytics",
     "attendance_analytics": "Attendance Analytics",
+    "attendance_student_analytics": "Student Attendance Analytics",
     "performance_analytics": "Performance Analytics",
     "financial_analytics": "Financial Analytics",
     "operational_analytics": "Operational Analytics",
@@ -311,6 +312,10 @@
     "end_time": "End Time",
     "period_from": "Period From",
     "period_to": "To",
+    "hours_per_month": "Hours per Month",
+    "hours_attended": "Hours Attended",
+    "absent_hours": "Absent Hours",
+    "remaining_hours": "Remaining Hours",
     "total_lessons": "Total Lessons",
     "present": "Present",
     "late": "Late",
