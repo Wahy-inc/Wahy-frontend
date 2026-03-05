@@ -452,6 +452,18 @@ export type GetAttendanceStudentAnalyticsFormState =
     }
     | undefined;
 
+export const getAttendanceMEAnalyticsSchema = zod.object({
+    period_start: zod.string().min(1).trim(),
+    period_end: zod.string().min(1).trim(),
+})
+
+export type GetAttendanceMEAnalyticsFormState =
+    | {
+        message?: string;
+        data?: openApi.StudentAttendanceHoursAnalytics;
+    }
+    | undefined;
+
 export const getPerformanceAnalyticsSchema = zod.object({
     period_start: zod.string().min(1).trim(),
     period_end: zod.string().min(1).trim(),

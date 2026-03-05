@@ -1,5 +1,5 @@
 import * as openApi from "@/lib/openApi"
-import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetAttendanceStudentAnalyticsFormState, getAttendanceStudentAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
+import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetAttendanceMEAnalyticsFormState, getAttendanceMEAnalyticsSchema, GetAttendanceStudentAnalyticsFormState, getAttendanceStudentAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
 import { createIdempotencyKey, enqueueOfflineMutation, isClientOnline, shouldQueueMutation } from "@/lib/offlineSync"
 import { getCachedData, offlineCacheKeys, setCachedData } from "@/lib/offlineCache"
 import { getApi } from "@/lib/apiClient"
@@ -1128,6 +1128,32 @@ export async function attendanceAnalytics(state: GetAttendanceAnalyticsFormState
             end_date: validation.data.period_end,
         }
         const response = await api.api.attendanceApiV1AnalyticsAttendanceGet(data)
+
+        if (response.status === 200) {
+            return { message: 'success', data: response.data }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function attendanceMEAnalytics(state: GetAttendanceMEAnalyticsFormState, formData: FormData): Promise<GetAttendanceMEAnalyticsFormState> {
+    const validation = getAttendanceMEAnalyticsSchema.safeParse({
+        period_start: formData.get('period_start'),
+        period_end: formData.get('period_end'),
+    })
+
+    if (!validation.success) {
+        console.log('succeded');
+        return { message: 'fail' }
+    }
+    try {
+        const data = {
+            start_date: validation.data.period_start,
+            end_date: validation.data.period_end,
+        }
+        const response = await api.api.getMyAttendanceHoursApiV1StudentsMeAttendanceHoursGet(data)
 
         if (response.status === 200) {
             return { message: 'success', data: response.data }
