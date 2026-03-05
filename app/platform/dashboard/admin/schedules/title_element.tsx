@@ -167,7 +167,7 @@ export default function TitleElement({
         
         // Generate RRULE if recurring
         if (isRecurring === 'true') {
-            const effectiveUntil = formData.get('effective-until') as string | null
+            const effectiveUntil = formData.get('effective_until') as string | null
             const rrule = generateRRule(isRecurringPeriod, selectedDayOfWeek, selectedDaysOfWeek, selectedDayOfMonth, selectedDaysOfMonth, effectiveUntil)
             if (rrule) {
                 formData.append("rrule_string", rrule)
@@ -280,7 +280,7 @@ export default function TitleElement({
                                             {createFormSubmitted && createState?.error?.effective_from && <p className="text-red-500 text-sm">{createState.error.effective_from}</p>}
                                         </div>
                                         <div className='flex flex-col col-start-2 col-end-3'>
-                                            {fieldInput(t('schedules.effective_until'), "effective-until", "date", "date")}
+                                            {fieldInput(t('schedules.effective_until'), "effective_until", "date", "date")}
                                             {createFormSubmitted && createState?.error?.effective_until && <p className="text-red-500 text-sm">{createState.error.effective_until}</p>}
                                         </div>
                                     </div>

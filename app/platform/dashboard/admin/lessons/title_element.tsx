@@ -100,7 +100,8 @@ export default function TitleElement({
         setCreateFormSubmitted(true)
         formData.append("student_id", selectedStudentId?.toString() || "")
         // Generate RRULE if recurring
-            const rrule = generateRRule(isRecurringPeriod, selectedDayOfWeek, selectedDaysOfWeek, selectedDayOfMonth, selectedDaysOfMonth, null)
+            const effectiveUntil = formData.get('effective_until') as string | null
+            const rrule = generateRRule(isRecurringPeriod, selectedDayOfWeek, selectedDaysOfWeek, selectedDayOfMonth, selectedDaysOfMonth, effectiveUntil)
             if (rrule) {
                 formData.append("rrule_string", rrule)
             }
@@ -259,7 +260,7 @@ export default function TitleElement({
                                             {createFormSubmitted && createState?.error?.ayah_to && <p className="text-red-500 text-sm">{createState.error.ayah_to}</p>}
                                         </div>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-3 gap-4">
                                         <div className="flex flex-col">
                                             <label htmlFor="quality" className="text-sm font-medium">{t('lessons.quality')}</label>
                                             <Select name="quality">
@@ -303,6 +304,9 @@ export default function TitleElement({
                                                     </SelectContent>
                                                 </Select>
                                             </div>
+                                        <div className='flex flex-col'>
+                                            {fieldInput(t('schedules.effective_until'), "effective_until", t('schedules.effective_until_label'), "date")}
+                                        </div>
                                     </div>
                                     <div className="col-start-1 col-end-4 row-start-5 row-end-6 flex-wrap flex flex-row gap-1 rounded-xl justify-start">
                                         {(isRecurringPeriod === 'weekly' || isRecurringPeriod === 'customWeekly') && (
