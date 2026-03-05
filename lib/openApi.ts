@@ -85,6 +85,15 @@ export enum AttendanceStatus {
   Excused = "excused",
 }
 
+/** WirdAssignmentStatus */
+export enum WirdAssignmentStatus {
+  Assigned = "assigned",
+  CompletedByStudent = "completed_by_student",
+  VerifiedBySeikh = "verified_by_sheikh",
+  NeedsRetry = "needs_retry",
+  Cancelled = "cancelled",
+}
+
 /** AdminSignupRequest */
 export interface AdminSignupRequest {
   /**
@@ -356,6 +365,12 @@ export interface InvoiceWithItemsRead {
   recipient_student_ids: number[];
 }
 
+/** LessonRecurrence */
+export interface LessonRecurrence {
+  /** RRULE - RFC 5545 RRULE string */
+  rrule: string;
+}
+
 /** LessonCreate */
 export interface LessonCreate {
   /** Student Id - Required */
@@ -372,11 +387,11 @@ export interface LessonCreate {
   /** Surah Name - Optional */
   surah_name?: string | null;
   /** Juz Number - Optional */
-  juz_number?: string | null;
+  juz_number?: number | null;
   /** Ayah From - Optional */
-  ayah_from?: string | null;
+  ayah_from?: number | null;
   /** Ayah To - Optional */
-  ayah_to?: string | null;
+  ayah_to?: number | null;
   /** Quality - Optional */
   quality?: LessonQuality | null;
   /** Absence Reason - Required when attendance is not "present" */
@@ -386,7 +401,7 @@ export interface LessonCreate {
   /** Sheikh Notes - Optional */
   sheikh_notes?: string | null;
   /** Recurrence - RFC 5545 RRULE for bulk lesson creation */
-  recurrence?: { rrule: string } | null;
+  recurrence?: LessonRecurrence | null;
 }
 
 /** LessonRead */
@@ -399,6 +414,8 @@ export interface LessonRead {
   sheikh_id: number;
   /** Schedule Id */
   schedule_id: number | null;
+  /** Recurrence Group Id */
+  recurrence_group_id: string | null;
   /**
    * Date
    * @format date
@@ -414,6 +431,10 @@ export interface LessonRead {
   /** Ayah To */
   ayah_to: number | null;
   quality: LessonQuality | null;
+  /** Pass Fail */
+  pass_fail: boolean | null;
+  /** Attempts */
+  attempts: number;
   attendance: AttendanceStatus;
   /** Absence Reason */
   absence_reason: string | null;
@@ -937,6 +958,189 @@ export interface ValidationError {
   msg: string;
   /** Error Type */
   type: string;
+}
+
+/** StudentAttendanceHoursAnalytics */
+export interface StudentAttendanceHoursAnalytics {
+  /**
+   * Period Start
+   * @format date
+   */
+  period_start: string;
+  /**
+   * Period End
+   * @format date
+   */
+  period_end: string;
+  /** Hours Per Month */
+  hours_per_month: number;
+  /** Hours Attended */
+  hours_attended: number;
+  /** Remaining Hours */
+  remaining_hours: number;
+  /** Absent Hours */
+  absent_hours: number;
+}
+
+/** SheikhPreferencesRead */
+export interface SheikhPreferencesRead {
+  /** Id */
+  id: number;
+  /** Lesson List Limit */
+  lesson_list_limit: number;
+}
+
+/** SheikhPreferencesUpdate */
+export interface SheikhPreferencesUpdate {
+  /** Lesson List Limit */
+  lesson_list_limit?: number | null;
+}
+
+/** WirdAssignmentCreate */
+export interface WirdAssignmentCreate {
+  /** Student Id */
+  student_id: number;
+  /** Title */
+  title: string;
+  /** Surah Name */
+  surah_name?: string | null;
+  /** Ayah From */
+  ayah_from?: number | null;
+  /** Ayah To */
+  ayah_to?: number | null;
+  /**
+   * Due Date
+   * @format date
+   */
+  due_date?: string | null;
+  /** Notes */
+  notes?: string | null;
+}
+
+/** WirdAssignmentRead */
+export interface WirdAssignmentRead {
+  /** Id */
+  id: number;
+  /** Student Id */
+  student_id: number;
+  /** Sheikh Id */
+  sheikh_id: number;
+  /** Source Lesson Id */
+  source_lesson_id: number | null;
+  /** Title */
+  title: string;
+  /** Surah Name */
+  surah_name: string | null;
+  /** Ayah From */
+  ayah_from: number | null;
+  /** Ayah To */
+  ayah_to: number | null;
+  /**
+   * Due Date
+   * @format date
+   */
+  due_date: string | null;
+  /** Notes */
+  notes: string | null;
+  status: WirdAssignmentStatus;
+  /**
+   * Completed At
+   * @format date-time
+   */
+  completed_at: string | null;
+  /**
+   * Verified At
+   * @format date-time
+   */
+  verified_at: string | null;
+  /** Verified By User Id */
+  verified_by_user_id: number | null;
+  /** Verification Notes */
+  verification_notes: string | null;
+  /**
+   * Source Updated At
+   * @format date-time
+   */
+  source_updated_at: string;
+  /**
+   * Created At
+   * @format date-time
+   */
+  created_at: string;
+  /**
+   * Updated At
+   * @format date-time
+   */
+  updated_at: string;
+}
+
+/** WirdAssignmentUpdate */
+export interface WirdAssignmentUpdate {
+  /** Title */
+  title?: string | null;
+  /** Surah Name */
+  surah_name?: string | null;
+  /** Ayah From */
+  ayah_from?: number | null;
+  /** Ayah To */
+  ayah_to?: number | null;
+  /**
+   * Due Date
+   * @format date
+   */
+  due_date?: string | null;
+  /** Notes */
+  notes?: string | null;
+  status?: WirdAssignmentStatus | null;
+}
+
+/** WirdCompletionSubmit */
+export interface WirdCompletionSubmit {
+  /** Submitted Notes */
+  submitted_notes?: string | null;
+}
+
+/** WirdReviewRequest */
+export interface WirdReviewRequest {
+  /** Completion Id */
+  completion_id?: number | null;
+  /** Verification Notes */
+  verification_notes?: string | null;
+}
+
+/** CalendarFeedRead */
+export interface CalendarFeedRead {
+  /** Is Enabled */
+  is_enabled: boolean;
+  /** Feed Url */
+  feed_url: string;
+  /**
+   * Last Rotated At
+   * @format date-time
+   */
+  last_rotated_at: string | null;
+  /**
+   * Last Accessed At
+   * @format date-time
+   */
+  last_accessed_at: string | null;
+}
+
+/** CalendarFeedUpdate */
+export interface CalendarFeedUpdate {
+  /** Is Enabled */
+  is_enabled: boolean;
+}
+
+/** CalendarFeedRotateRead */
+export interface CalendarFeedRotateRead {
+  /** Feed Url */
+  feed_url: string;
+  /**
+   * Rotated At
+   * @format date-time
+   */
+  rotated_at: string;
 }
 
 export type QueryParamsType = Record<string | number, any>;
@@ -1472,7 +1676,7 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<AttendanceAnalytics, HTTPValidationError>({
+      this.request<StudentAttendanceHoursAnalytics, HTTPValidationError>({
         path: `/api/v1/students/me/attendance-hours`,
         method: "GET",
         query: query,
@@ -1498,7 +1702,7 @@ export class Api<
       },
       params: RequestParams = {},
     ) =>
-      this.request<AttendanceAnalytics, HTTPValidationError>({
+      this.request<StudentAttendanceHoursAnalytics, HTTPValidationError>({
         path: `/api/v1/students/${studentId}/attendance-hours`,
         method: "GET",
         query: query,
@@ -2179,6 +2383,272 @@ export class Api<
         method: "POST",
         body: data,
         type: ContentType.Json,
+        ...params,
+      }),
+
+    /**
+     * @description Get sheikh preferences.
+     *
+     * @tags sheikh
+     * @name GetPreferencesApiV1SheikhPreferencesGet
+     * @summary Get sheikh preferences
+     * @request GET:/api/v1/sheikh/preferences
+     */
+    getPreferencesApiV1SheikhPreferencesGet: (params: RequestParams = {}) =>
+      this.request<SheikhPreferencesRead, HTTPValidationError>({
+        path: `/api/v1/sheikh/preferences`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Update sheikh preferences.
+     *
+     * @tags sheikh
+     * @name PatchPreferencesApiV1SheikhPreferencesPatch
+     * @summary Update sheikh preferences
+     * @request PATCH:/api/v1/sheikh/preferences
+     */
+    patchPreferencesApiV1SheikhPreferencesPatch: (
+      data: SheikhPreferencesUpdate,
+      params: RequestParams = {},
+    ) =>
+      this.request<SheikhPreferencesRead, HTTPValidationError>({
+        path: `/api/v1/sheikh/preferences`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description List wird assignments for sheikh.
+     *
+     * @tags wird-v2
+     * @name ListAllApiV2WirdGet
+     * @summary List wird assignments (sheikh)
+     * @request GET:/api/v2/wird
+     */
+    listAllApiV2WirdGet: (
+      query?: {
+        /** Student Id */
+        student_id?: number | null;
+        /** Status */
+        status?: WirdAssignmentStatus | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<WirdAssignmentRead[], HTTPValidationError>({
+        path: `/api/v2/wird`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Create wird assignment.
+     *
+     * @tags wird-v2
+     * @name CreateApiV2WirdPost
+     * @summary Create wird assignment
+     * @request POST:/api/v2/wird
+     */
+    createApiV2WirdPost: (
+      data: WirdAssignmentCreate,
+      params: RequestParams = {},
+    ) =>
+      this.request<WirdAssignmentRead, HTTPValidationError>({
+        path: `/api/v2/wird`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Update wird assignment.
+     *
+     * @tags wird-v2
+     * @name UpdateApiV2WirdAssignmentIdPatch
+     * @summary Update wird assignment (sheikh)
+     * @request PATCH:/api/v2/wird/{assignment_id}
+     */
+    updateApiV2WirdAssignmentIdPatch: (
+      assignmentId: number,
+      data: WirdAssignmentUpdate,
+      params: RequestParams = {},
+    ) =>
+      this.request<WirdAssignmentRead, HTTPValidationError>({
+        path: `/api/v2/wird/${assignmentId}`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Verify wird completion.
+     *
+     * @tags wird-v2
+     * @name VerifyApiV2WirdAssignmentIdVerifyPost
+     * @summary Verify wird completion (sheikh)
+     * @request POST:/api/v2/wird/{assignment_id}/verify
+     */
+    verifyApiV2WirdAssignmentIdVerifyPost: (
+      assignmentId: number,
+      data: WirdReviewRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<WirdAssignmentRead, HTTPValidationError>({
+        path: `/api/v2/wird/${assignmentId}/verify`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Reject wird completion.
+     *
+     * @tags wird-v2
+     * @name RejectApiV2WirdAssignmentIdRejectPost
+     * @summary Reject wird completion (sheikh)
+     * @request POST:/api/v2/wird/{assignment_id}/reject
+     */
+    rejectApiV2WirdAssignmentIdRejectPost: (
+      assignmentId: number,
+      data: WirdReviewRequest,
+      params: RequestParams = {},
+    ) =>
+      this.request<WirdAssignmentRead, HTTPValidationError>({
+        path: `/api/v2/wird/${assignmentId}/reject`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description List my wird assignments.
+     *
+     * @tags wird-v2
+     * @name ListMyAssignmentsApiV2WirdMeGet
+     * @summary List my wird assignments
+     * @request GET:/api/v2/wird/me
+     */
+    listMyAssignmentsApiV2WirdMeGet: (
+      query?: {
+        /** Status */
+        status?: WirdAssignmentStatus | null;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<WirdAssignmentRead[], HTTPValidationError>({
+        path: `/api/v2/wird/me`,
+        method: "GET",
+        query: query,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Submit wird completion.
+     *
+     * @tags wird-v2
+     * @name CompleteApiV2WirdMeAssignmentIdCompletePost
+     * @summary Submit wird completion
+     * @request POST:/api/v2/wird/me/{assignment_id}/complete
+     */
+    completeApiV2WirdMeAssignmentIdCompletePost: (
+      assignmentId: number,
+      data: WirdCompletionSubmit,
+      params: RequestParams = {},
+    ) =>
+      this.request<WirdAssignmentRead, HTTPValidationError>({
+        path: `/api/v2/wird/me/${assignmentId}/complete`,
+        method: "POST",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Get calendar feed info.
+     *
+     * @tags calendar-v2
+     * @name GetFeedApiV2CalendarFeedGet
+     * @summary Get calendar feed info
+     * @request GET:/api/v2/calendar/feed
+     */
+    getFeedApiV2CalendarFeedGet: (params: RequestParams = {}) =>
+      this.request<CalendarFeedRead, HTTPValidationError>({
+        path: `/api/v2/calendar/feed`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Enable or disable calendar feed.
+     *
+     * @tags calendar-v2
+     * @name UpdateFeedApiV2CalendarFeedPatch
+     * @summary Enable or disable calendar feed
+     * @request PATCH:/api/v2/calendar/feed
+     */
+    updateFeedApiV2CalendarFeedPatch: (
+      data: CalendarFeedUpdate,
+      params: RequestParams = {},
+    ) =>
+      this.request<CalendarFeedRead, HTTPValidationError>({
+        path: `/api/v2/calendar/feed`,
+        method: "PATCH",
+        body: data,
+        type: ContentType.Json,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Rotate calendar feed token.
+     *
+     * @tags calendar-v2
+     * @name RotateFeedApiV2CalendarFeedRotatePost
+     * @summary Rotate calendar feed token
+     * @request POST:/api/v2/calendar/feed/rotate
+     */
+    rotateFeedApiV2CalendarFeedRotatePost: (params: RequestParams = {}) =>
+      this.request<CalendarFeedRotateRead, HTTPValidationError>({
+        path: `/api/v2/calendar/feed/rotate`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Download ICS feed.
+     *
+     * @tags calendar-v2
+     * @name DownloadCalendarFeedApiV2CalendarFeedFeedTokenIcsGet
+     * @summary Download ICS feed
+     * @request GET:/api/v2/calendar/feed/{feed_token}.ics
+     */
+    downloadCalendarFeedApiV2CalendarFeedFeedTokenIcsGet: (
+      feedToken: string,
+      params: RequestParams = {},
+    ) =>
+      this.request<string, HTTPValidationError>({
+        path: `/api/v2/calendar/feed/${feedToken}.ics`,
+        method: "GET",
+        format: "text",
         ...params,
       }),
   };

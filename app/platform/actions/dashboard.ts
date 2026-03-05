@@ -119,6 +119,7 @@ export async function createStudent(state: CreateStudentFormState, formData: For
             special_notes: validation.data.specialNotes,
             private_notes: validation.data.privateNotes,
         }
+        console.log(data);
 
         if (!isClientOnline()) {
             enqueueOfflineMutation({
