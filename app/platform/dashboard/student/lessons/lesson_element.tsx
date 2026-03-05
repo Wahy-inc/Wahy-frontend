@@ -3,17 +3,25 @@ import { DataTable } from "./data_table"
 import { useColumnsWithLocalization } from "./columns"
 import * as Icon from '@deemlol/next-icons'
 import { useLocalization } from "@/lib/localization-context"
+import { Badge } from "@/components/ui/badge"
 
 export default function LessonElement({lesson}: {lesson: openApi.LessonRead}) {
     const { t } = useLocalization()
     const { columns, HWcolumns, isRTL } = useColumnsWithLocalization()
     return (
         <div className="overflow-hidden border-2 rounded-xl bg-white flex flex-col justify-start my-5 p-4 shadow-[0px_4px_30px_rgba(0,0,0,0.1)] opacity-90 backdrop-blur-sm hover:opacity-80 transition duration-300 hover:scale-101" dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className='flex flex-col justify-center items-start mb-4'>
-                <p id="name" className="text-3xl text-slate-800">{t('lessons.id')}: {lesson.id}</p>
-                <div className={`grid grid-cols-2 ${isRTL ? 'text-right' : 'text-left'}`}>
-                    <p className="text-xl text-slate-600 flex items-center col-start-1 col-end-2"><Icon.Calendar className="inline pr-1"/>: {lesson.date}</p>
-                    <p className="text-xl text-slate-600 flex items-center col-start-2 col-end-3"><Icon.Clock className="inline pr-1"/> {t('lessons.attendance')}: {lesson.attendance}</p>
+            <div className={`flex flex-col justify-center items-start mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                <div className="flex items-center gap-4">
+                    <div className={`bg-blue-900 min-w-14 h-14 px-2 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md`}>
+                        {lesson.id}
+                    </div>
+                <div>
+                <h3 className="text-2xl font-bold text-slate-800">{t('lessons.schedule_id')} : {lesson.schedule_id}</h3>
+                <div className="grid grid-cols-2 gap-0 mt-1">
+                    <p className=" text-slate-600 flex items-center"><Badge variant="outline" className="text-xs"><Icon.Calendar className="inline pr-1"/>: {lesson.date}</Badge></p>
+                    <p className=" text-slate-600 flex items-center"><Badge variant="outline" className="text-xs"><Icon.Clock className="inline pr-1"/>{t('lessons.attendance')}: {lesson.attendance}</Badge></p>
+                </div>
+                </div>
                 </div>
             </div>
             <div className="mb-2">

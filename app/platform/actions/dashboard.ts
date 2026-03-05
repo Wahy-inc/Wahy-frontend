@@ -773,29 +773,25 @@ export async function createInvoices(state: CreateInvoiceFormState, formData: Fo
     }
 
     try {
-        const selectedIds = (validation.data.student_ids || '')
+        const selectedIds = (validation.data.student_ids || validation.data.student_id || '')
             .split(',')
             .map((value) => Number(value.trim()))
             .filter((value) => !Number.isNaN(value))
-        const singleId = Number(validation.data.student_id)
-        if (!Number.isNaN(singleId) && singleId > 0) {
-            selectedIds.unshift(singleId)
-        }
-        const uniqueIds = Array.from(new Set(selectedIds))
-        if (uniqueIds.length === 0) {
-            return { error: { student_id: ['At least one student is required'] } }
-        }
-
-        const data: openApi.InvoiceGenerateRequest = {
-            student_id: Number(validation.data.student_id),
-            student_ids: uniqueIds,
-            period_from: validation.data.period_from,
-            period_to: validation.data.period_to,
-            due_date: validation.data.due_date,
-        }
+            const uniqueIds = Array.from(new Set(selectedIds))
+            if (uniqueIds.length === 0) {
+                return { error: { student_id: ['At least one student is required'] } }
+            }
+            
+            const data: openApi.InvoiceGenerateRequest = {
+                student_id: Number(validation.data.student_id),
+                student_ids: selectedIds,
+                period_from: validation.data.period_from,
+                period_to: validation.data.period_to,
+                due_date: validation.data.due_date,
+            }
         const response = await api.api.generateApiV1InvoicesGeneratePost(data)
 
-        if (response.status === 201) {
+        if (response.status === 200) {
             return { message: 'success' }
         }
         return { message: 'fail' }
@@ -807,7 +803,6 @@ export async function createInvoices(state: CreateInvoiceFormState, formData: Fo
 export async function overrideInvoice(state: OverrideInvoiceFormState, formData: FormData): Promise<OverrideInvoiceFormState> {
     const validation = overrideInvoiceSchema.safeParse({
         invoice_id: formData.get('invoice_id'),
-        invoice_item_id: formData.get('invoice_item_id'),
         billable: formData.get('billable'),
         override_reason: formData.get('override_reason'),
     })
@@ -819,13 +814,9 @@ export async function overrideInvoice(state: OverrideInvoiceFormState, formData:
 
     try {
         const invoiceId = Number(validation.data.invoice_id)
-        const invoiceItemId = Number(validation.data.invoice_item_id)
-        if (Number.isNaN(invoiceId) || Number.isNaN(invoiceItemId)) {
-            return { message: 'fail' }
-        }
         const data: openApi.InvoiceItemOverrideRequest = {
-            item_id: invoiceItemId,
-            billable: validation.data.billable === 'true',
+            item_id: Number(validation.data.invoice_id),
+            billable: validation.data.billable.toLowerCase() === 'yes',
             override_reason: validation.data.override_reason,
         }
         const response = await api.api.overrideItemApiV1InvoicesInvoiceIdOverridesPost(invoiceId, data)
@@ -910,7 +901,7 @@ export async function markInvoiceAsPaid(state: PayInvoiceFormState, formData: Fo
         const response = await api.api.markInvoicePaidApiV1InvoicesInvoiceIdPaidPatch(id, data)
 
         if (response.status === 200) {
-            listInvoices() // Refresh the invoices list after marking an invoice as paid
+            window.location.reload() // Refresh the invoices list after marking an invoice as paid
             return { message: 'success' }
         }
         return { message: 'fail' }

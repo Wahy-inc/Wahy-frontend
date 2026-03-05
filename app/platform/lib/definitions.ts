@@ -384,7 +384,6 @@ export type GetInvoiceByIDFormState =
 
 export const overrideInvoiceSchema = zod.object({
     invoice_id: zod.string().min(1),
-    invoice_item_id: zod.string().min(1),
     billable: zod.string().min(1),
     override_reason: zod.string().trim().min(3),
 })

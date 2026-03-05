@@ -161,19 +161,19 @@ export default function Invoices() {
                         </Accordion>
                     </div>
                 </ItemContent>
-                <ItemActions>
-                    <Button disabled={isOffline} size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => {
-                        if (isOffline) {
-                            return
-                        }
-                        downloadInvoicePDF(invoice.id)
-                    }}>
-                        {t('invoices.download_pdf')}
-                    </Button>
-                </ItemActions>
-                    <div>
+                <div className="grid grid-cols-3 gap-1 place-items-center">
+                    <ItemActions className="col-start-1 col-end-2">
+                        <Button disabled={isOffline} size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => {
+                            if (isOffline) {
+                                return
+                            }
+                            downloadInvoicePDF(invoice.id)
+                        }}>
+                            {t('invoices.download_pdf')}
+                        </Button>
+                    </ItemActions>
                     {invoice.status === openApi.InvoiceStatus.Generated? (
-                        <ItemActions>
+                        <ItemActions className="col-start-2 col-end-3">
                             <AlertDialog open={paidInvoiceDialogOpen} onOpenChange={payInvoiceState?.message == 'success'? () => setPaidInvoiceDialogOpen(false) : setPaidInvoiceDialogOpen}>
                                 <AlertDialogTrigger asChild>
                                     <ItemActions>
@@ -213,17 +213,18 @@ export default function Invoices() {
                                     </form>
                                 </AlertDialogContent>
                             </AlertDialog>
-                            <Button size="sm" variant="outline" className="transition duration-300 border-red-500 border text-red-500 bg-transparent hover:bg-red-500 hover:text-white">
-                                {t('common.cancel')}
-                            </Button>
                         </ItemActions>
                     ) : null}
-                    {invoice.status === openApi.InvoiceStatus.Paid ? (
-                        <ItemActions>
+                            {invoice.status === openApi.InvoiceStatus.Paid ? (
+                                <Button disabled={true} size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white col-start-2 col-end-3">
+                                    {t('invoices.paid')}
+                                </Button>
+                            ) : null}
+                        <ItemActions className="col-start-3 col-end-4">
                             <AlertDialog open={overrideInvoiceDialogOpen} onOpenChange={overrideInvoiceState?.message == 'success'? () => setOverrideInvoiceDialogOpen(false) : setOverrideInvoiceDialogOpen}>
                                 <AlertDialogTrigger asChild>
                                     <ItemActions>
-                                        <Button size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white">
+                                        <Button size="sm" variant="outline" className="transition duration-300 border-red-500 border text-red-500 bg-transparent hover:bg-red-500 hover:text-white">
                                             {t('invoices.override')}
                                         </Button>
                                     </ItemActions>
@@ -234,9 +235,6 @@ export default function Invoices() {
                                     <AlertDialogTitle>{t('invoices.override_invoice')}</AlertDialogTitle>
                                         <div className="flex flex-col gap-4 w-full rtl:text-right">
                                             <input hidden value={invoice.id} name="invoice_id" type="text" />
-                                            <div className='flex flex-col'>
-                                                {fieldInput(t('invoices.item_id'),"invoice_item_id", '', "number")}
-                                            </div>
                                             <div className='flex flex-col'>
                                                 {fieldInput(t('invoices.billable'),"billable", t('invoices.yes_or_no'), "text")}
                                             </div>
@@ -252,11 +250,8 @@ export default function Invoices() {
                                     </form>
                                 </AlertDialogContent>
                             </AlertDialog>
-                            <Button disabled={true} size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent">
-                                {t('invoices.paid')}
-                            </Button>
                         </ItemActions>
-                    ) : null}</div>
+                </div>
             </Item>
         </div>
     )
