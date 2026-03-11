@@ -208,7 +208,7 @@ export async function flushOfflineMutations(): Promise<void> {
         payload: item.payload,
         idempotency_key: item.idempotency_key,
       })),
-    });
+    }, { secure: true });
     if (response.status === 200) {
       results = response.data.results;
     }
@@ -275,7 +275,7 @@ export async function flushOfflineMutations(): Promise<void> {
     upsertIssues(issues);
 
     if (ackIds.length > 0) {
-      await api.api.ackApiV1SyncAckPost({ ids: ackIds });
+      await api.api.ackApiV1SyncAckPost({ ids: ackIds }, { secure: true });
     }
   } catch {
     return;

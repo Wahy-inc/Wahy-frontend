@@ -8,9 +8,20 @@
 import * as openApi from '@/lib/openApi';
 import { requestManager } from '@/lib/requestManager';
 
+// Security worker that fetches the current access token from localStorage
+const securityWorker = async (): Promise<{ headers: { Authorization?: string } }> => {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+  return {
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  };
+};
+
 // Create the API instance once
 const baseApi = new openApi.Api<unknown>({
   baseUrl: '',
+  securityWorker,
 });
 
 // Get the original request method
