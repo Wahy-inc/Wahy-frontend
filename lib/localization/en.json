@@ -63,6 +63,7 @@
     "very_good": "Very Good",
     "good": "Good",
     "fair": "Fair",
+    "repetition": "Repetition",
     "needs_improvement": "Needs Improvement",
     "pass_fail": "Pass/Fail",
     "attempts": "Attempts",

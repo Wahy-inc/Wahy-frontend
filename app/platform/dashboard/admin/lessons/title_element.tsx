@@ -70,20 +70,7 @@ export default function TitleElement({
     const [selectedDaysOfWeek, setSelectedDaysOfWeek] = useState<string[]>([])
     const [selectedDayOfMonth, setSelectedDayOfMonth] = useState<string>('')
     const [selectedDaysOfMonth, setSelectedDaysOfMonth] = useState<string[]>([])
-
-    const handleCreateDialogOpenChange = (open: boolean) => {
-        if (!open) {
-            setCreateFormSubmitted(false)
-            setSelectedDayOfWeek('')     
-            setSelectedDaysOfWeek([])    
-            setIsRecurringPeriod('')     
-        }
-        if (createState?.message === 'success') {
-            setCreateLessonDialogOpen(false)
-        } else {
-            setCreateLessonDialogOpen(open)
-        }
-    }
+    const [pass, setPass] = useState<string>('')
 
     const handleGetDialogOpenChange = (open: boolean) => {
         if (!open) {
@@ -105,6 +92,14 @@ export default function TitleElement({
             if (rrule) {
                 formData.append("rrule_string", rrule)
             }
+            console.log("quality in create",formData.get('quality'));
+            if (formData.get('quality') == openApi.LessonQuality.Repetition) {
+                setPass('fail')
+            } else {
+                setPass('pass')
+            }
+            formData.append('pass_fail', pass)
+            console.log("form data pass", formData.get('pass_fail'))
         createAction(formData)
     }
 
@@ -183,7 +178,7 @@ export default function TitleElement({
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
                     <div>
-                    <AlertDialog open={createLessonDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
+                    <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">{t('lessons.create_lesson')}</Button>
                         </AlertDialogTrigger>
@@ -275,6 +270,7 @@ export default function TitleElement({
                                                         <SelectItem value={openApi.LessonQuality.Good}>{t('lessons.good')}</SelectItem>
                                                         <SelectItem value={openApi.LessonQuality.Fair}>{t('lessons.fair')}</SelectItem>
                                                         <SelectItem value={openApi.LessonQuality.NeedsImprovement}>{t('lessons.needs_improvement')}</SelectItem>
+                                                        <SelectItem value={openApi.LessonQuality.Repetition}>{t('lessons.repetition')}</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
@@ -304,7 +300,7 @@ export default function TitleElement({
                                                     </SelectContent>
                                                 </Select>
                                             </div>
-                                        <div className='flex flex-col'>
+                                        <div className='flex flex-col col-start-3 col-end-4'>
                                             {fieldInput(t('schedules.effective_until'), "effective_until", t('schedules.effective_until_label'), "date")}
                                         </div>
                                     </div>
@@ -351,7 +347,7 @@ export default function TitleElement({
                             {t('lessons.get_lesson_desc')}
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
-                            {fieldInput(t('lessons.student_id'), "lesson-id", t('lessons.enter_lesson_id'), "number")}
+                            {fieldInput(t('lessons.lesson_details'), "lesson-id", t('lessons.enter_lesson_id'), "number")}
                             {getFormSubmitted && getLessonState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.get_failed')}</p> : null}
                         </div>
                         </AlertDialogHeader>

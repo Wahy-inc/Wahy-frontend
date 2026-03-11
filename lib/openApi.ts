@@ -60,6 +60,7 @@ export enum LessonQuality {
   Good = "good",
   Fair = "fair",
   NeedsImprovement = "needs_improvement",
+  Repetition = "repetition",
 }
 
 /** InvoiceStatus */
@@ -402,6 +403,7 @@ export interface LessonCreate {
   sheikh_notes?: string | null;
   /** Recurrence - RFC 5545 RRULE for bulk lesson creation */
   recurrence?: LessonRecurrence | null;
+  pass_fail?: boolean | null;
 }
 
 /** LessonRead */

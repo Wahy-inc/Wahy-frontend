@@ -72,6 +72,8 @@ export const CreatLessonSchema = zod.object({
     sheikh_notes: zod.string().min(0).trim(),
     student_notes: zod.string().min(0).trim(),
     recurrence: zod.string().min(0).trim().optional(),
+    effective_until: zod.string().min(0).trim().optional(),
+    pass_fail: zod.string().min(0).trim().optional(),
 })
 
 export type CreateLessonFormState =
@@ -91,6 +93,7 @@ export type CreateLessonFormState =
             student_notes?: string[];
             pass_fail?: string[];
             recurrence?: string[];
+            effective_until?: string[];
         }
         message?: string;
     }

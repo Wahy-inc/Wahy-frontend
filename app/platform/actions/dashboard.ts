@@ -926,6 +926,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         quality: formData.get('quality'),
         absence_reason: formData.get('absence_reason'),
         recurrence: formData.get('rrule_string'),
+        pass_fail: formData.get('pass_fail'),
     })
 
     if (!validation.success) {
@@ -946,6 +947,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
             quality: validation.data.quality,
             absence_reason: validation.data.absence_reason,
             recurrence: validation.data.recurrence ? { rrule: validation.data.recurrence } : undefined,
+            pass_fail: validation.data.pass_fail == 'pass',
         }
 
         console.log('Created lesson data:', data);
@@ -988,6 +990,7 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
                     quality: validation.data.quality,
                     absence_reason: validation.data.absence_reason,
                     recurrence: validation.data.recurrence ? { rrule: validation.data.recurrence } : undefined,
+                    pass_fail: validation.data.pass_fail == 'pass',
                 },
                 idempotency_key: createIdempotencyKey(),
             })
