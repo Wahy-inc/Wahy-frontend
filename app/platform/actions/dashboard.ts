@@ -661,7 +661,7 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
             tags: validation.data.tags?.split(',').map(tag => tag.trim()) || [],
             access_level: validation.data.access_level,
             thumbnail_image_path: validation.data.thumbnail,
-            student_ids: validation.data.student_ids == '' ? null : validation.data.student_ids,
+            student_ids: (validation.data.student_ids == '') || (validation.data.student_ids == null) ? null : validation.data.student_ids,
         }
         const response = await api.api.createApiV1LibraryPost(data)
 
