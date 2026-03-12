@@ -129,22 +129,22 @@ export default function LessonElement({lesson, updateAction, updateState, update
                                             {updateState?.error?.juz && <p className="text-red-500 text-sm">{updateState.error.juz}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.surah'), "surah", String(lesson.surah_name), "text")}
+                                            {fieldInput(t('lessons.surah') + " (Optional)", "surah", String(lesson.surah_name), "text")}
                                             {updateState?.error?.surah && <p className="text-red-500 text-sm">{updateState.error.surah}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.ayah_from'), "ayah-from", String(lesson.ayah_from), "number")}
+                                            {fieldInput(t('lessons.ayah_from') + " (Optional)", "ayah-from", String(lesson.ayah_from), "number")}
                                             {updateState?.error?.ayah_from && <p className="text-red-500 text-sm">{updateState.error.ayah_from}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.ayah_to'), "ayah-to", String(lesson.ayah_to), "number")}
+                                            {fieldInput(t('lessons.ayah_to') + " (Optional)", "ayah-to", String(lesson.ayah_to), "number")}
                                             {updateState?.error?.ayah_to && <p className="text-red-500 text-sm">{updateState.error.ayah_to}</p>}
                                         </div>
                                     </div>
                                     <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
                                     <div className='flex flex-col'>
                                         <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
-                                            <label htmlFor="quality" className="text-sm font-medium">{t('lessons.quality')}</label>
+                                            <label htmlFor="quality" className="text-sm font-medium">{t('lessons.quality')} (Optional)</label>
                                             <Select defaultValue={getQuality(lesson.quality)} name="quality">
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue/>
@@ -165,15 +165,15 @@ export default function LessonElement({lesson, updateAction, updateState, update
                                     </div>
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.absence_reason'), "absence-reason", String(lesson.absence_reason), "text")}
+                                        {fieldInput(t('lessons.absence_reason') + " (Optional)", "absence-reason", String(lesson.absence_reason), "text")}
                                         {updateState?.error?.absence_reason && <p className="text-red-500 text-sm">{updateState.error.absence_reason}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.sheikh_notes'), "sheikh-notes", String(lesson.sheikh_notes), "text")}
+                                        {fieldInput(t('lessons.sheikh_notes') + " (Optional)", "sheikh-notes", String(lesson.sheikh_notes), "text")}
                                         {updateState?.error?.sheikh_notes && <p className="text-red-500 text-sm">{updateState.error.sheikh_notes}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.student_notes'), "student-notes", String(lesson.student_notes), "text")}
+                                        {fieldInput(t('lessons.student_notes') + " (Optional)", "student-notes", String(lesson.student_notes), "text")}
                                         {updateState?.error?.student_notes && <p className="text-red-500 text-sm">{updateState.error.student_notes}</p>}
                                     </div>
                                     {updateState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.update_failed')}</p> : null}

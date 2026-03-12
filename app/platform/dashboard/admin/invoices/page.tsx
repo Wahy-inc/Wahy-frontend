@@ -193,15 +193,15 @@ export default function Invoices() {
                                                 {payInvoiceState?.error?.paid_date && <p className="text-red-500 text-sm">{payInvoiceState.error.paid_date}</p>}
                                             </div>
                                             <div className='flex flex-col'>
-                                                {fieldInput(t('invoices.payment_method'),"payment_method", '', "text")}
+                                                {fieldInput(t('invoices.payment_method') + " (Optional)","payment_method", '', "text")}
                                                 {payInvoiceState?.error?.payment_method && <p className="text-red-500 text-sm">{payInvoiceState.error.payment_method}</p>}
                                             </div>
                                             <div className='flex flex-col'>
-                                                {fieldInput(t('invoices.payment_reference'),"payment_reference", '', "text")}
+                                                {fieldInput(t('invoices.payment_reference') + " (Optional)","payment_reference", '', "text")}
                                                 {payInvoiceState?.error?.payment_reference && <p className="text-red-500 text-sm">{payInvoiceState.error.payment_reference}</p>}
                                             </div>
                                             <div className='flex flex-col'>
-                                                {fieldInput(t('invoices.payment_notes'),"payment_notes", '', "text")}
+                                                {fieldInput(t('invoices.payment_notes') + " (Optional)","payment_notes", '', "text")}
                                                 {payInvoiceState?.error?.payment_notes && <p className="text-red-500 text-sm">{payInvoiceState.error.payment_notes}</p>}
                                             </div>
                                         </div>

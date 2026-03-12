@@ -89,30 +89,30 @@ export default function TitleElement({
                                     </div>
                                 </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput(t('students.phone'),"phone", "", "text")}
+                                    {fieldInput(t('students.phone') + " (Optional)","phone", "", "text")}
                                     {createFormSubmitted && createState?.error?.phone && <p className="text-red-500 text-sm">{createState.error.phone}</p>}
                                 </div>
                                 <div className="flex flex-row justify-between gap-3">
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('students.date_of_birth'),"dateOfBirth", "", "date")}
+                                        {fieldInput(t('students.date_of_birth') + " (Optional)","dateOfBirth", "", "date")}
                                         {createFormSubmitted && createState?.error?.dateOfBirth && <p className="text-red-500 text-sm">{createState.error.dateOfBirth}</p>}
                                     </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput(t('students.timezone'),"timeZone", "", "text")}
+                                    {fieldInput(t('students.timezone') + " (Optional)","timeZone", "", "text")}
                                     {createFormSubmitted && createState?.error?.timeZone && <p className="text-red-500 text-sm">{createState.error.timeZone}</p>}
                                 </div>
                                 </div>
                                 <div className="flex flex-row justify-between gap-3">
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('students.current_juz'),"currjuz", "", "number")}
+                                        {fieldInput(t('students.current_juz') + " (Optional)","currjuz", "", "number")}
                                         {createFormSubmitted && createState?.error?.currjuz && <p className="text-red-500 text-sm">{createState.error.currjuz}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('students.current_surah'),"currsurah", "", "text")}
+                                        {fieldInput(t('students.current_surah') + " (Optional)","currsurah", "", "text")}
                                         {createFormSubmitted && createState?.error?.currsurah && <p className="text-red-500 text-sm">{createState.error.currsurah}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('students.current_ayah'),"currayah", "", "number")}
+                                        {fieldInput(t('students.current_ayah') + " (Optional)","currayah", "", "number")}
                                         {createFormSubmitted && createState?.error?.currayah && <p className="text-red-500 text-sm">{createState.error.currayah}</p>}
                                     </div>
                                 </div>
@@ -122,7 +122,7 @@ export default function TitleElement({
                                         {createFormSubmitted && createState?.error?.lessonsPerWeek && <p className="text-red-500 text-sm">{createState.error.lessonsPerWeek}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('students.lessons_rate'),"lessonRate", "", "number")}
+                                        {fieldInput(t('students.lessons_rate') + " (Optional)","lessonRate", "", "number")}
                                         {createFormSubmitted && createState?.error?.lessonRate && <p className="text-red-500 text-sm">{createState.error.lessonRate}</p>}
                                     </div>
                                     <div className="flex flex-col">
@@ -145,11 +145,11 @@ export default function TitleElement({
                                     </div>
                                 </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput(t('students.private_notes'),"privateNotes", "", "text")}
+                                    {fieldInput(t('students.private_notes') + " (Optional)","privateNotes", "", "text")}
                                     {createFormSubmitted && createState?.error?.privateNotes && <p className="text-red-500 text-sm">{createState.error.privateNotes}</p>}
                                 </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput(t('students.special_notes'),"specialNotes", "", "text")}
+                                    {fieldInput(t('students.special_notes') + " (Optional)","specialNotes", "", "text")}
                                     {createFormSubmitted && createState?.error?.specialNotes && <p className="text-red-500 text-sm">{createState.error.specialNotes}</p>}
                                 </div>
                                 </div>

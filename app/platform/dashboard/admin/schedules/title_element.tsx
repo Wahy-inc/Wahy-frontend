@@ -264,7 +264,7 @@ export default function TitleElement({
                                             {createFormSubmitted && createState?.error?.effective_from && <p className="text-red-500 text-sm">{createState.error.effective_from}</p>}
                                         </div>
                                         <div className='flex flex-col col-start-2 col-end-3'>
-                                            {fieldInput(t('schedules.effective_until'), "effective-until", "date", "date")}
+                                            {fieldInput(t('schedules.effective_until') + " (Optional)", "effective-until", "date", "date")}
                                             {createFormSubmitted && createState?.error?.effective_until && <p className="text-red-500 text-sm">{createState.error.effective_until}</p>}
                                         </div>
                                     </div>
@@ -321,7 +321,7 @@ export default function TitleElement({
                                             )}
                                     </div>
                                     <div className='flex flex-col col-start-1 col-end-4 row-start-6 row-end-7'>
-                                        {fieldInput(t('schedules.notes'), "notes", t('schedules.enter_notes'), "text")}
+                                        {fieldInput(t('schedules.notes') + " (Optional)", "notes", t('schedules.enter_notes'), "text")}
                                         {createFormSubmitted && createState?.error?.notes && <p className="text-red-500 text-sm">{createState.error.notes}</p>}
                                     </div>
                                     {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">{t('schedules.create_failed')}</p> : null}

@@ -9,16 +9,16 @@ export const SignUpSchema = zod.object({
     password: zod.string().min(6, { error: 'Password must be at least 6 characters long' })
         .regex(/[a-zA-Z]/, { error: 'Password must contain at least one letter' })
         .regex(/[0-9]/, { error: 'Password must contain at least one number' }).trim(),
-    phone: zod.string().min(1, { error: 'Phone number is required' }).trim(),
-    dateOfBirth: zod.string().min(1, { error: 'Date of birth is required' }).trim(),
+    phone: zod.string().trim().optional(),
+    dateOfBirth: zod.string().trim().optional(),
     timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
-    currjuz: zod.string().min(1, { error: 'Current Juz is required' }).trim(),
-    currsurah: zod.string().min(1, { error: 'Current Surah is required' }).trim(),
-    currayah: zod.string().min(1, { error: 'Current Ayah is required' }).trim(),
+    currjuz: zod.string().trim().optional(),
+    currsurah: zod.string().trim().optional(),
+    currayah: zod.string().trim().optional(),
     lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
-    lessonRate: zod.string().min(1, { error: 'Lesson rate is required' }).trim(),
+    lessonRate: zod.string().trim().optional(),
     billingCycle: zod.enum(openApi.BillingCycle, { error: 'Invalid billing cycle' }),
-    specialNotes: zod.string().min(0, { error: 'Special notes is required' }).trim(),
+    specialNotes: zod.string().trim().optional(),
 })
 
 export type SignupFormState =
@@ -63,14 +63,14 @@ export const CreatLessonSchema = zod.object({
     date: zod.string().min(1, { error: 'Date is required' }).trim(),
     type: zod.enum(LessonType, { error: 'Invalid lesson type' }),
     attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }),
-    juz: zod.string().trim().min(1, { error: 'Juz is required' }),
-    surah: zod.string().trim().min(1, { error: 'Surah is required' }),
-    ayah_from: zod.string({ error: 'Ayah from must be a number' }).trim().min(1, { error: 'Ayah from is required' }),
-    ayah_to: zod.string({ error: 'Ayah to must be a number' }).trim().min(1, { error: 'Ayah to is required' }),
-    quality: zod.enum(LessonQuality, { error: 'Invalid lesson quality' }),
-    absence_reason: zod.string().min(0).trim(),
-    sheikh_notes: zod.string().min(0).trim(),
-    student_notes: zod.string().min(0).trim(),
+    juz: zod.string().trim().optional(),
+    surah: zod.string().trim().optional(),
+    ayah_from: zod.string().trim().optional(),
+    ayah_to: zod.string().trim().optional(),
+    quality: zod.enum(LessonQuality, { error: 'Invalid lesson quality' }).optional(),
+    absence_reason: zod.string().trim().optional(),
+    sheikh_notes: zod.string().trim().optional(),
+    student_notes: zod.string().trim().optional(),
     recurrence: zod.string().min(0).trim().optional(),
     effective_until: zod.string().min(0).trim().optional(),
     pass_fail: zod.string().min(0).trim().optional(),
@@ -100,18 +100,18 @@ export type CreateLessonFormState =
     | undefined;
 
 export const UpdateLessonSchema = zod.object({
-    schedule_id: zod.string({ error: 'Schedule ID must be a number' }),
-    date: zod.string().min(1, { error: 'Date is required' }).trim(),
-    type: zod.enum(LessonType, { error: 'Invalid lesson type' }),
-    attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }),
-    juz: zod.string({ error: 'Juz must be a number' }).trim().min(1, { error: 'Juz is required' }),
-    surah: zod.string().trim().min(1, { error: 'Surah is required' }),
-    ayah_from: zod.string({ error: 'Ayah from must be a number' }).trim().min(1, { error: 'Ayah from is required' }),
-    ayah_to: zod.string({ error: 'Ayah to must be a number' }).trim().min(1, { error: 'Ayah to is required' }),
-    quality: zod.enum(LessonQuality, { error: 'Invalid lesson quality' }),
-    absence_reason: zod.string().min(0, { error: 'Absence reason is required' }).trim(),
-    sheikh_notes: zod.string().min(0, { error: 'Sheikh notes is required' }).trim(),
-    student_notes: zod.string().min(0, { error: 'Student notes is required' }).trim(),
+    schedule_id: zod.string().optional(),
+    date: zod.string().trim().optional(),
+    type: zod.enum(LessonType, { error: 'Invalid lesson type' }).optional(),
+    attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }).optional(),
+    juz: zod.string().trim().optional(),
+    surah: zod.string().trim().optional(),
+    ayah_from: zod.string().trim().optional(),
+    ayah_to: zod.string().trim().optional(),
+    quality: zod.enum(LessonQuality, { error: 'Invalid lesson quality' }).optional(),
+    absence_reason: zod.string().trim().optional(),
+    sheikh_notes: zod.string().trim().optional(),
+    student_notes: zod.string().trim().optional(),
 })
 
 export type UpdateLessonFormState =
@@ -153,9 +153,9 @@ export const createScheduleSchema = zod.object({
     start_time: zod.string().min(1, { error: 'Start time is required' }).trim(),
     end_time: zod.string().min(1, { error: 'End time is required' }).trim(),
     effective_from: zod.string().min(1, { error: 'Effective from is required' }).trim(),
-    effective_until: zod.string().min(0, { error: 'Effective until is required' }).trim(),
+    effective_until: zod.string().trim().optional(),
     rrule_string: zod.string().min(0).trim().optional(),
-    notes: zod.string().min(0, { error: 'Notes is required' }).trim(),
+    notes: zod.string().trim().optional(),
 })
 
 export type CreateScheduleFormState =
@@ -173,14 +173,14 @@ export type CreateScheduleFormState =
     | undefined;
 
 export const UpdateScheduleSchema = zod.object({
-    start_time: zod.string().min(1, { error: 'Start time is required' }).trim(),
-    end_time: zod.string().min(1, { error: 'End time is required' }).trim(),
-    effective_from: zod.string().min(1, { error: 'Effective from is required' }).trim(),
-    effective_until: zod.string().min(0, { error: 'Effective until is required' }).trim(),
+    start_time: zod.string().trim().optional(),
+    end_time: zod.string().trim().optional(),
+    effective_from: zod.string().trim().optional(),
+    effective_until: zod.string().trim().optional(),
     rrule_string: zod.string().min(0).trim().optional(),
-    is_active: zod.enum(['true', 'false'], { error: 'Is active must be yes or no' }),
-    cancellation_reason: zod.string().min(0, { error: 'Cancellation reason is required' }).trim(),
-    notes: zod.string().min(0, { error: 'Notes is required' }).trim(),
+    is_active: zod.enum(['true', 'false'], { error: 'Is active must be yes or no' }).optional(),
+    cancellation_reason: zod.string().trim().optional(),
+    notes: zod.string().trim().optional(),
 })
 
 export type UpdateScheduleFormState =
@@ -216,12 +216,12 @@ export type GetSchedualesForStudentFormState =
 export const createLibraryItemSchema = zod.object({
     title: zod.string().min(1, { error: 'Title is required' }).trim(),
     url: zod.string().min(1, { error: 'URL is required' }).url({ error: 'Invalid URL format' }).trim(),
-    description: zod.string().min(0, { error: 'Description is required' }).trim(),
-    category: zod.string().min(1, { error: 'Category is required' }).trim(),
-    tags: zod.string().min(0, { error: 'Tags is required' }).trim(),
+    description: zod.string().trim().optional(),
+    category: zod.string().trim().optional(),
+    tags: zod.string().trim().optional(),
     access_level: zod.enum(openApi.LibraryAccessLevel, { error: 'Access level is required' }),
-    thumbnail: zod.string().min(0, { error: 'Thumbnail is required' }).url({ error: 'Invalid URL format' }).trim(),
-    student_ids: zod.string().min(0, { error: 'Student IDs is required' }).trim(),
+    thumbnail: zod.string().url({ error: 'Invalid URL format' }).trim().optional(),
+    student_ids: zod.string().trim().optional(),
 })
 
 export type CreateLibraryItemFormState =
@@ -258,17 +258,17 @@ export const createStudentSchema = zod.object({
     id: zod.string({ error: 'ID must be a number' }),
     arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
     enname: zod.string().min(1, { error: 'Name is required' }).regex(/^[A-Za-z\s]+$/, { error: 'Name must be in English' }).trim(),
-    phone: zod.string().min(1, { error: 'Phone number is required' }).trim(),
-    dateOfBirth: zod.string().min(1, { error: 'Date of birth is required' }).trim(),
+    phone: zod.string().trim().optional(),
+    dateOfBirth: zod.string().trim().optional(),
     timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
-    currjuz: zod.string().min(1, { error: 'Current Juz is required' }).trim(),
-    currsurah: zod.string().min(1, { error: 'Current Surah is required' }).trim(),
-    currayah: zod.string().min(1, { error: 'Current Ayah is required' }).trim(),
+    currjuz: zod.string().trim().optional(),
+    currsurah: zod.string().trim().optional(),
+    currayah: zod.string().trim().optional(),
     lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
-    lessonRate: zod.string().min(1, { error: 'Lesson rate is required' }).trim(),
+    lessonRate: zod.string().trim().optional(),
     billingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }),
-    specialNotes: zod.string().min(0, { error: 'Special notes is required' }).trim(),
-    privateNotes: zod.string().min(0, { error: 'Private notes is required' }).trim(),
+    specialNotes: zod.string().trim().optional(),
+    privateNotes: zod.string().trim().optional(),
     recurrence: zod.string().min(0).trim().optional(),
 })
 
@@ -310,21 +310,21 @@ export type GetStudentFormState =
     | undefined;
 
 export const updateStudentSchema = zod.object({
-    arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
-    enname: zod.string().min(1, { error: 'Name is required' }).regex(/^[A-Za-z\s]+$/, { error: 'Name must be in English' }).trim(),
-    phone: zod.string().min(1, { error: 'Phone number is required' }).trim(),
-    dateOfBirth: zod.string().min(1, { error: 'Date of birth is required' }).trim(),
-    timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
-    registerationStatus: zod.enum(openApi.RegistrationStatus, { error: 'Invalid registration status' }),
-    status: zod.enum(openApi.StudentStatus, { error: 'Invalid student status' }),
-    currjuz: zod.string().min(1, { error: 'Current Juz is required' }).trim(),
-    currsurah: zod.string().min(1, { error: 'Current Surah is required' }).trim(),
-    currayah: zod.string().min(1, { error: 'Current Ayah is required' }).trim(),
-    lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
-    lessonRate: zod.string().min(1, { error: 'Lesson rate is required' }).trim(),
-    billingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }),
-    specialNotes: zod.string().min(0, { error: 'Special notes is required' }).trim(),
-    privateNotes: zod.string().min(0, { error: 'Private notes is required' }).trim(),
+    arname: zod.string().regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim().optional(),
+    enname: zod.string().regex(/^[A-Za-z\s]+$/, { error: 'Name must be in English' }).trim().optional(),
+    phone: zod.string().trim().optional(),
+    dateOfBirth: zod.string().trim().optional(),
+    timeZone: zod.string().trim().optional(),
+    registerationStatus: zod.enum(openApi.RegistrationStatus, { error: 'Invalid registration status' }).optional(),
+    status: zod.enum(openApi.StudentStatus, { error: 'Invalid student status' }).optional(),
+    currjuz: zod.string().trim().optional(),
+    currsurah: zod.string().trim().optional(),
+    currayah: zod.string().trim().optional(),
+    lessonsPerWeek: zod.string().trim().optional(),
+    lessonRate: zod.string().trim().optional(),
+    billingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }).optional(),
+    specialNotes: zod.string().trim().optional(),
+    privateNotes: zod.string().trim().optional(),
 })
 
 export type UpdateStudentFormState =
@@ -400,9 +400,9 @@ export type OverrideInvoiceFormState =
 export const payInvoiceSchema = zod.object({
     invoice_id: zod.string(),
     paid_date: zod.string().min(1, { error: 'Paid date is required' }).trim(),
-    payment_method: zod.string().trim(),
-    payment_reference: zod.string().trim(),
-    payment_notes: zod.string().trim(),
+    payment_method: zod.string().trim().optional(),
+    payment_reference: zod.string().trim().optional(),
+    payment_notes: zod.string().trim().optional(),
 })
 
 export type PayInvoiceFormState =

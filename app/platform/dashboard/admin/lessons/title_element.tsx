@@ -232,21 +232,21 @@ export default function TitleElement({
                                             {createFormSubmitted && createState?.error?.juz && <p className="text-red-500 text-sm">{createState.error.juz}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.surah'), "surah", "surah", "text")}
+                                            {fieldInput(t('lessons.surah') + " (Optional)", "surah", "surah", "text")}
                                             {createFormSubmitted && createState?.error?.surah && <p className="text-red-500 text-sm">{createState.error.surah}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.ayah_from'), "ayah_from", "ayah from", "number")}
+                                            {fieldInput(t('lessons.ayah_from') + " (Optional)", "ayah_from", "ayah from", "number")}
                                             {createFormSubmitted && createState?.error?.ayah_from && <p className="text-red-500 text-sm">{createState.error.ayah_from}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.ayah_to'), "ayah_to", "to", "number")}
+                                            {fieldInput(t('lessons.ayah_to') + " (Optional)", "ayah_to", "to", "number")}
                                             {createFormSubmitted && createState?.error?.ayah_to && <p className="text-red-500 text-sm">{createState.error.ayah_to}</p>}
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className="flex flex-col">
-                                            <label htmlFor="quality" className="text-sm font-medium">{t('lessons.quality')}</label>
+                                            <label htmlFor="quality" className="text-sm font-medium">{t('lessons.quality')} (Optional)</label>
                                             <Select name="quality">
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder={t('lessons.quality')} />
@@ -302,15 +302,15 @@ export default function TitleElement({
                                             )}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.absence_reason'), "absence_reason", t('lessons.enter_reason'), "text")}
+                                        {fieldInput(t('lessons.absence_reason') + " (Optional)", "absence_reason", t('lessons.enter_reason'), "text")}
                                         {createFormSubmitted && createState?.error?.absence_reason && <p className="text-red-500 text-sm">{createState.error.absence_reason}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.sheikh_notes'), "sheikh_notes", t('lessons.enter_sheikh_notes'), "text")}
+                                        {fieldInput(t('lessons.sheikh_notes') + " (Optional)", "sheikh_notes", t('lessons.enter_sheikh_notes'), "text")}
                                         {createFormSubmitted && createState?.error?.sheikh_notes && <p className="text-red-500 text-sm">{createState.error.sheikh_notes}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.student_notes'), "student_notes", t('lessons.enter_student_notes'), "text")}
+                                        {fieldInput(t('lessons.student_notes') + " (Optional)", "student_notes", t('lessons.enter_student_notes'), "text")}
                                         {createFormSubmitted && createState?.error?.student_notes && <p className="text-red-500 text-sm">{createState.error.student_notes}</p>}
                                     </div>
                                     {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.create_failed')}</p> : null}

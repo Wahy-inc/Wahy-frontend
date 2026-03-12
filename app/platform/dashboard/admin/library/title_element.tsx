@@ -84,7 +84,7 @@ export default function TitleElement({
                                         {createFormSubmitted && createState?.error?.title && <p className="text-red-500 text-sm">{createState.error.title}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('library.description'),"description", "", "text")}
+                                        {fieldInput(t('library.description') + " (Optional)","description", "", "text")}
                                         {createFormSubmitted && createState?.error?.description && <p className="text-red-500 text-sm">{createState.error.description}</p>}
                                     </div>
                                     <div className='flex flex-col'>
@@ -93,11 +93,11 @@ export default function TitleElement({
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('library.category'),"category", "", "text")}
+                                            {fieldInput(t('library.category') + " (Optional)","category", "", "text")}
                                             {createFormSubmitted && createState?.error?.category && <p className="text-red-500 text-sm">{createState.error.category}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('library.tags'), "tags", t('library.tags_placeholder'), "text")}
+                                            {fieldInput(t('library.tags') + " (Optional)", "tags", t('library.tags_placeholder'), "text")}
                                             {createFormSubmitted && createState?.error?.tags && <p className="text-red-500 text-sm">{createState.error.tags}</p>}
                                         </div>
                                     </div>
@@ -122,7 +122,7 @@ export default function TitleElement({
                                         {createFormSubmitted && createState?.error?.access_level && <p className="text-red-500 text-sm">{createState.error.access_level}</p>}
                                     </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('library.thumbnail'), "thumbnail", t('library.enter_thumbnail_url'), "text")}
+                                            {fieldInput(t('library.thumbnail') + " (Optional)", "thumbnail", t('library.enter_thumbnail_url'), "text")}
                                             {createFormSubmitted && createState?.error?.thumbnail && <p className="text-red-500 text-sm">{createState.error.thumbnail}</p>}
                                         </div>
                                     </div>

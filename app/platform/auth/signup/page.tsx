@@ -78,7 +78,7 @@ export default function SignUp() {
         {state?.error?.password && <p className="text-red-500 text-sm">{state.error.password}</p>}
       </Field>
       <Field>
-      <FieldLabel htmlFor="phone">Phone</FieldLabel>
+      <FieldLabel htmlFor="phone">Phone (Optional)</FieldLabel>
         <Input 
           id="phone" 
           name="phone"
@@ -91,7 +91,7 @@ export default function SignUp() {
       </Field>
       <div className="flex flex-row justify-between gap-3">
       <Field>
-      <FieldLabel htmlFor="date-of-birth">Date of Birth</FieldLabel>
+      <FieldLabel htmlFor="date-of-birth">Date of Birth (Optional)</FieldLabel>
         <Input 
           id="date-of-birth" 
           name="date-of-birth"
@@ -117,7 +117,7 @@ export default function SignUp() {
       </div>
       <div className="flex flex-row justify-between gap-3">
       <Field>
-      <FieldLabel htmlFor="current-juz" style={{minHeight: '3rem'}}>Current juz</FieldLabel>
+      <FieldLabel htmlFor="current-juz" style={{minHeight: '3rem'}}>Current juz (Optional)</FieldLabel>
         <Input 
           id="current-juz" 
           name="current-juz"
@@ -129,7 +129,7 @@ export default function SignUp() {
         {state?.error?.currjuz && <p className="text-red-500 text-sm">{state.error.currjuz}</p>}
       </Field>
       <Field>
-      <FieldLabel htmlFor="current-surah" style={{minHeight: '3rem'}}>Current surah</FieldLabel>
+      <FieldLabel htmlFor="current-surah" style={{minHeight: '3rem'}}>Current surah (Optional)</FieldLabel>
         <Input 
           id="current-surah" 
           name="current-surah"
@@ -141,7 +141,7 @@ export default function SignUp() {
         {state?.error?.currsurah && <p className="text-red-500 text-sm">{state.error.currsurah}</p>}
       </Field>
       <Field>
-      <FieldLabel htmlFor="current-ayah" style={{minHeight: '3rem'}}>Current ayah</FieldLabel>
+      <FieldLabel htmlFor="current-ayah" style={{minHeight: '3rem'}}>Current ayah (Optional)</FieldLabel>
         <Input 
           id="current-ayah" 
           name="current-ayah"
@@ -167,7 +167,7 @@ export default function SignUp() {
         {state?.error?.lessonsPerWeek && <p className="text-red-500 text-sm">{state.error.lessonsPerWeek}</p>}
       </Field>
       <Field>
-      <FieldLabel htmlFor="lessons-rate" style={{minHeight: '3rem'}}>Classes rate</FieldLabel>
+      <FieldLabel htmlFor="lessons-rate" style={{minHeight: '3rem'}}>Classes rate (Optional)</FieldLabel>
         <Input 
           id="lessons-rate" 
           name="lessons-rate"
@@ -198,7 +198,7 @@ export default function SignUp() {
       </div>
       </div>
       <Field>
-      <FieldLabel htmlFor="special-notes">Special notes</FieldLabel>
+      <FieldLabel htmlFor="special-notes">Special notes (Optional)</FieldLabel>
         <Input 
           id="special-notes" 
           name="special-notes"
