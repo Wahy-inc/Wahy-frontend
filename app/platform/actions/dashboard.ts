@@ -658,7 +658,7 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
             external_url: validation.data.url,
             description: validation.data.description,
             category: validation.data.category,
-            tags: validation.data.tags.split(',').map(tag => tag.trim()),
+            tags: validation.data.tags?.split(',').map(tag => tag.trim()) || [],
             access_level: validation.data.access_level,
             thumbnail_image_path: validation.data.thumbnail,
             student_ids: validation.data.student_ids == '' ? null : validation.data.student_ids,
