@@ -232,7 +232,7 @@ export default function TitleElement({
                                             {createFormSubmitted && createState?.error?.juz && <p className="text-red-500 text-sm">{createState.error.juz}</p>}
                                         </div>
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.surah') + " (Optional)", "surah", "surah", "text")}
+                                            {fieldInput(t('lessons.surah') + " (Optional)", "surah", "", "text")}
                                             {createFormSubmitted && createState?.error?.surah && <p className="text-red-500 text-sm">{createState.error.surah}</p>}
                                         </div>
                                         <div className='flex flex-col'>
@@ -302,15 +302,15 @@ export default function TitleElement({
                                             )}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.absence_reason') + " (Optional)", "absence_reason", t('lessons.enter_reason'), "text")}
+                                        {fieldInput(t('lessons.absence_reason') + " (Optional)", "absence_reason", "", "text")}
                                         {createFormSubmitted && createState?.error?.absence_reason && <p className="text-red-500 text-sm">{createState.error.absence_reason}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.sheikh_notes') + " (Optional)", "sheikh_notes", t('lessons.enter_sheikh_notes'), "text")}
+                                        {fieldInput(t('lessons.sheikh_notes') + " (Optional)", "sheikh_notes", "", "text")}
                                         {createFormSubmitted && createState?.error?.sheikh_notes && <p className="text-red-500 text-sm">{createState.error.sheikh_notes}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.student_notes') + " (Optional)", "student_notes", t('lessons.enter_student_notes'), "text")}
+                                        {fieldInput(t('lessons.student_notes') + " (Optional)", "student_notes", "", "text")}
                                         {createFormSubmitted && createState?.error?.student_notes && <p className="text-red-500 text-sm">{createState.error.student_notes}</p>}
                                     </div>
                                     {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.create_failed')}</p> : null}

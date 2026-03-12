@@ -140,7 +140,7 @@ export default function Schedules() {
                         </div>
                         <CardTitle style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '2 !important', gridRowEnd:'3 !important'}}>{item.title}</CardTitle>
                         <CardDescription style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '3 !important', gridRowEnd:'4 !important'}}>
-                            {item.description && item.description.length > 100 ? item.description.substring(0, 100) + '...' : 'No description provided.'}
+                            {item.description && item.description.length > 100 ? item.description.substring(0, 100) + '...' : (item.description || 'No description')}
                         </CardDescription>
                     </div>
                 </CardHeader>
