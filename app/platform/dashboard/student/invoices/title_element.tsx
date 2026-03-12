@@ -35,17 +35,6 @@ export default function TitleElement({
     // Track if forms have been submitted in current dialog session
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
 
-    const handleGetDialogOpenChange = (open: boolean) => {
-        if (!open) {
-            setGetFormSubmitted(false)
-        }
-        if (getInvoiceState?.message === 'success') {
-            setgetInvoicesDialogOpen(false)
-        } else {
-            setgetInvoicesDialogOpen(open)
-        }
-    }
-
     const handleGetSubmit = (formData: FormData) => {
         setGetFormSubmitted(true)
         getInvoiceAction(formData)
@@ -57,7 +46,7 @@ export default function TitleElement({
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
-                    <AlertDialog open={getInvoicesDialogOpen} onOpenChange={handleGetDialogOpenChange}>
+                    <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('invoices.get_invoice')}</Button>
                     </AlertDialogTrigger>

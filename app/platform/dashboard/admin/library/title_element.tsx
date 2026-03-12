@@ -52,28 +52,6 @@ export default function TitleElement({
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
     const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
 
-    const handleCreateDialogOpenChange = (open: boolean) => {
-        if (!open) {
-            setCreateFormSubmitted(false)
-        }
-        if (createState?.message === 'success') {
-            setcreateLibraryDialogOpen(false)
-        } else {
-            setcreateLibraryDialogOpen(open)
-        }
-    }
-
-    const handleGetDialogOpenChange = (open: boolean) => {
-        if (!open) {
-            setGetFormSubmitted(false)
-        }
-        if (getLibraryState?.message === 'success') {
-            setgetLibraryDialogOpen(false)
-        } else {
-            setgetLibraryDialogOpen(open)
-        }
-    }
-
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
         formData.append("student_ids", selectedStudentId?.toString() || "")
@@ -92,7 +70,7 @@ export default function TitleElement({
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
                     <div>
-                    <AlertDialog open={createLibraryDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
+                    <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button disabled={disableCreate} className="transition duration-300 col-start-1 col-end-2 cursor-pointer">{t('library.create_item')}</Button>
                         </AlertDialogTrigger>
@@ -163,7 +141,7 @@ export default function TitleElement({
                     </AlertDialog>
                     {disableCreate ? <p className="text-amber-700 text-xs mt-2">{t('library.offline_only')}</p> : null}
                     </div>
-                    <AlertDialog open={getLibraryDialogOpen} onOpenChange={handleGetDialogOpenChange}>
+                    <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('library.get_item')}</Button>
                     </AlertDialogTrigger>

@@ -50,28 +50,6 @@ export default function TitleElement({
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
     const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
 
-    const handleCreateDialogOpenChange = (open: boolean) => {
-        if (!open) {
-            setCreateFormSubmitted(false)
-        }
-        if (createState?.message === 'success') {
-            setcreateInvoicesDialogOpen(false)
-        } else {
-            setcreateInvoicesDialogOpen(open)
-        }
-    }
-
-    const handleGetDialogOpenChange = (open: boolean) => {
-        if (!open) {
-            setGetFormSubmitted(false)
-        }
-        if (getInvoiceState?.message === 'success') {
-            setgetInvoicesDialogOpen(false)
-        } else {
-            setgetInvoicesDialogOpen(open)
-        }
-    }
-
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
         formData.append("student_id", selectedStudentId?.toString() || "")
@@ -90,7 +68,7 @@ export default function TitleElement({
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
                     <div>
-                    <AlertDialog open={createInvoicesDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
+                    <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button disabled={disableGenerate} className="transition duration-300 col-start-1 col-end-2 cursor-pointer">{t('invoices.generate_invoice')}</Button>
                         </AlertDialogTrigger>
@@ -130,7 +108,7 @@ export default function TitleElement({
                     </AlertDialog>
                     {disableGenerate ? <p className="text-amber-700 text-xs mt-2">{t('invoices.offline_only')}</p> : null}
                     </div>
-                    <AlertDialog open={getInvoicesDialogOpen} onOpenChange={handleGetDialogOpenChange}>
+                    <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('invoices.get_invoice')}</Button>
                     </AlertDialogTrigger>

@@ -72,17 +72,6 @@ export default function TitleElement({
     const [selectedDaysOfMonth, setSelectedDaysOfMonth] = useState<string[]>([])
     const [pass, setPass] = useState<string>('')
 
-    const handleGetDialogOpenChange = (open: boolean) => {
-        if (!open) {
-            setGetFormSubmitted(false)
-        }
-        if (getLessonState?.message === 'success') {
-            setGetLessonDialogOpen(false)
-        } else {
-            setGetLessonDialogOpen(open)
-        }
-    }
-
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
         formData.append("student_id", selectedStudentId?.toString() || "")
@@ -335,7 +324,7 @@ export default function TitleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     </div>
-                    <AlertDialog open={getLessonDialogOpen} onOpenChange={handleGetDialogOpenChange}>
+                    <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('lessons.get_lesson')}</Button>
                     </AlertDialogTrigger>

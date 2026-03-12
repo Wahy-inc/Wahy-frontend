@@ -44,35 +44,13 @@ export default function TitleElement({
     }) {
     const { t } = useLocalization()
     // Track if forms have been submitted in current dialog session
-    const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
+    // const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
 
-    const handleCreateDialogOpenChange = (open: boolean) => {
-        if (!open) {
-            setCreateFormSubmitted(false)
-        }
-        if (createState?.message === 'success') {
-            setcreateStudentDialogOpen(false)
-        } else {
-            setcreateStudentDialogOpen(open)
-        }
-    }
-
-    const handleGetDialogOpenChange = (open: boolean) => {
-        if (!open) {
-            setGetFormSubmitted(false)
-        }
-        if (getStudentState?.message === 'success') {
-            setgetStudentDialogOpen(false)
-        } else {
-            setgetStudentDialogOpen(open)
-        }
-    }
-
-    const handleCreateSubmit = (formData: FormData) => {
-        setCreateFormSubmitted(true)
-        createAction(formData)
-    }
+    // const handleCreateSubmit = (formData: FormData) => {
+    //     setCreateFormSubmitted(true)
+    //     createAction(formData)
+    // }
 
     const handleGetSubmit = (formData: FormData) => {
         setGetFormSubmitted(true)
@@ -87,7 +65,7 @@ export default function TitleElement({
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
-                    <AlertDialog open={createStudentDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
+                    {/* <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">{t('students.create_student')}</Button>
                         </AlertDialogTrigger>
@@ -182,8 +160,8 @@ export default function TitleElement({
                             </AlertDialogFooter>
                             </form>
                         </AlertDialogContent>
-                    </AlertDialog>
-                    <AlertDialog open={getStudentDialogOpen} onOpenChange={handleGetDialogOpenChange}>
+                    </AlertDialog> */}
+                    <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('students.get_student')}</Button>
                     </AlertDialogTrigger>

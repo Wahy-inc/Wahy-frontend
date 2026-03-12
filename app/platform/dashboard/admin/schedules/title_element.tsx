@@ -142,23 +142,7 @@ export default function TitleElement({
             setIsRecurring('')            
             setIsRecurringPeriod('')     
         }
-        if (createState?.message === 'success') {
-            setcreateScheduleDialogOpen(false)
-        } else {
-            setcreateScheduleDialogOpen(open)
-        }
     }
-
-    // const handleGetDialogOpenChange = (open: boolean) => {
-    //     if (!open) {
-    //         setGetFormSubmitted(false)
-    //     }
-    //     if (getSchedualesForStudentState?.message === 'success') {
-    //         setgetStudentScheduleDialogOpen(false)
-    //     } else {
-    //         setgetStudentScheduleDialogOpen(open)
-    //     }
-    // }
 
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
@@ -252,7 +236,7 @@ export default function TitleElement({
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
                     <div>
-                    <AlertDialog open={createScheduleDialogOpen} onOpenChange={handleCreateDialogOpenChange}>
+                    <AlertDialog onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">{t('schedules.create_schedule')}</Button>
                         </AlertDialogTrigger>
