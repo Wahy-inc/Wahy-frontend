@@ -220,7 +220,7 @@ export const createLibraryItemSchema = zod.object({
     category: zod.string().trim().optional(),
     tags: zod.string().trim().optional(),
     access_level: zod.enum(openApi.LibraryAccessLevel, { error: 'Access level is required' }),
-    thumbnail: zod.string().url({ error: 'Invalid URL format' }).trim().optional(),
+    thumbnail: zod.string().trim().optional(),
     student_ids: zod.string().trim().optional(),
 })
 

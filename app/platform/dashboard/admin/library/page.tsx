@@ -124,11 +124,15 @@ export default function Schedules() {
             <div onClick={() => window.location.href=item.external_url} className="cursor-pointer">
                 <div className="absolute inset-0 z-10 aspect-video bg-black/35" />
                 <Image
-                    src={item.thumbnail_image_path || 'https://via.placeholder.com/400x200?text=No+Image'}
-                    alt="Event cover"
+                    src={item.thumbnail_image_path || 'https://developers.elementor.com/docs/hooks/placeholder-image/'}
+                    alt={item.title || 'Library item'}
                     width={400}
                     height={200}
                     className="relative z-20 aspect-video w-full object-cover brightness-60 grayscale dark:brightness-40"
+                    onError={(e) => {
+                        const img = e.target as HTMLImageElement
+                        img.src = 'https://developers.elementor.com/docs/hooks/placeholder-image/'
+                    }}
                 />
                 <CardHeader>
                     <div className="grid grid-rows-3 gap-1 pt-1">
