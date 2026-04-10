@@ -1187,6 +1187,228 @@ export interface HttpResponse<D extends unknown, E extends unknown = unknown>
   error: E;
 }
 
+/** CalendarSlotItem */
+export interface CalendarSlotItem {
+  /**
+   * Date
+   * @format date
+   */
+  date: string;
+  /**
+   * Start Time
+   * @format time
+   */
+  start_time: string;
+  /**
+   * End Time
+   * @format time
+   */
+  end_time: string;
+  /** Schedule Id */
+  schedule_id: number;
+  /** Student Id */
+  student_id: number;
+  /** Student Name En */
+  student_name_en: string;
+  /** Student Name Ar */
+  student_name_ar: string;
+  /** Lesson Data */
+  lesson_data: Record<string, any> | null;
+}
+
+/** CalendarGridResponse */
+export interface CalendarGridResponse {
+  /** Slots */
+  slots: CalendarSlotItem[];
+}
+
+/** ClassGroupItem */
+export interface ClassGroupItem {
+  /** Schedule Id */
+  schedule_id: number;
+  /** Student Id */
+  student_id: number;
+  /** Student Name En */
+  student_name_en: string;
+  /** Student Name Ar */
+  student_name_ar: string;
+  /** Day Label */
+  day_label: string;
+  /**
+   * Start Time
+   * @format time
+   */
+  start_time: string;
+  /**
+   * End Time
+   * @format time
+   */
+  end_time: string;
+  /** RRULE String */
+  rrule_string: string | null;
+  /**
+   * Effective From
+   * @format date
+   */
+  effective_from: string;
+  /** Effective Until */
+  effective_until: string | null;
+  /** Next Occurrence */
+  next_occurrence: string | null;
+  /** Total Lessons */
+  total_lessons: number;
+  /** Is Active */
+  is_active: boolean;
+}
+
+/** ClassGroupListResponse */
+export interface ClassGroupListResponse {
+  /** Classes */
+  classes: ClassGroupItem[];
+}
+
+/** ClassHistoryResponse */
+export interface ClassHistoryResponse {
+  /** Lessons */
+  lessons: LessonRead[];
+  /** Total Count */
+  total: number;
+}
+
+/** ClassAttendanceSummary */
+export interface ClassAttendanceSummary {
+  /**
+   * Period Start
+   * @format date
+   */
+  period_start: string;
+  /**
+   * Period End
+   * @format date
+   */
+  period_end: string;
+  /** Total Classes */
+  total_classes: number;
+  /** Present Count */
+  present_count: number;
+  /** Absent Count */
+  absent_count: number;
+  /** Late Count */
+  late_count: number;
+  /** Excused Count */
+  excused_count: number;
+  /** Attendance Rate */
+  attendance_rate: number;
+}
+
+/** ClassFileRead */
+export interface ClassFileRead {
+  /** Id */
+  id: number;
+  /** Schedule Id */
+  schedule_id: number;
+  /** Sheikh Id */
+  sheikh_id: number;
+  /** Original Filename */
+  original_filename: string;
+  /** Stored Filename */
+  stored_filename: string;
+  /** File Path */
+  file_path: string;
+  /** File Size Bytes */
+  file_size_bytes: number;
+  /** Mime Type */
+  mime_type: string;
+  /** Download Count */
+  download_count: number;
+  /**
+   * Created At
+   * @format date-time
+   */
+  created_at: string;
+  /**
+   * Updated At
+   * @format date-time
+   */
+  updated_at: string;
+}
+
+/** NotificationType */
+export enum NotificationType {
+  UpcomingSession = "upcoming_session",
+  ScheduleReminder = "schedule_reminder",
+  System = "system",
+}
+
+/** NotificationRead */
+export interface NotificationRead {
+  /** Id */
+  id: number;
+  /** User Id */
+  user_id: number;
+  /** Type */
+  type: NotificationType;
+  /** Title */
+  title: string;
+  /** Body */
+  body: string;
+  /** Related Entity Type */
+  related_entity_type: string | null;
+  /** Related Entity Id */
+  related_entity_id: number | null;
+  /** Is Read */
+  is_read: boolean;
+  /** Read At */
+  read_at: string | null;
+  /** Scheduled For */
+  scheduled_for: string | null;
+  /**
+   * Created At
+   * @format date-time
+   */
+  created_at: string;
+  /**
+   * Updated At
+   * @format date-time
+   */
+  updated_at: string;
+}
+
+/** ImportNotificationRead */
+export interface ImportNotificationRead {
+  /** Notification */
+  notification: NotificationRead;
+}
+
+/** UpcomingSessionResponse */
+export interface UpcomingSessionResponse {
+  /** Schedule Id */
+  schedule_id: number;
+  /** Student Id */
+  student_id: number;
+  /** Student Name En */
+  student_name_en: string;
+  /** Student Name Ar */
+  student_name_ar: string;
+  /**
+   * Start Time
+   * @format time
+   */
+  start_time: string;
+  /**
+   * End Time
+   * @format time
+   */
+  end_time: string;
+  /**
+   * Date
+   * @format date
+   */
+  date: string;
+  /** Minutes Until Start */
+  minutes_until_start: number;
+}
+
 type CancelToken = Symbol | string | number;
 
 export enum ContentType {
@@ -2653,7 +2875,321 @@ export class Api<
         format: "text",
         ...params,
       }),
+
+    /**
+     * @description Get calendar grid view with all scheduled sessions.
+     *
+     * @tags calendar-v2
+     * @name GetCalendarGrid
+     * @summary Get calendar grid
+     * @request GET:/api/v2/calendar/grid
+     */
+    getCalendarGrid: (params: RequestParams = {}) =>
+      this.request<CalendarGridResponse, HTTPValidationError>({
+        path: `/api/v2/calendar/grid`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
   };
+
+  classes = {
+    /**
+     * @description List all classes for the current sheikh.
+     *
+     * @tags classes-v2
+     * @name ListClasses
+     * @summary List classes
+     * @request GET:/api/v2/classes
+     */
+    listClasses: (params: RequestParams = {}) =>
+      this.request<ClassGroupListResponse, HTTPValidationError>({
+        path: `/api/v2/classes`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Get history and lessons for a specific class.
+     *
+     * @tags classes-v2
+     * @name GetClassHistory
+     * @summary Get class history
+     * @request GET:/api/v2/classes/{schedule_id}/history
+     */
+    getClassHistory: (scheduleId: number, params: RequestParams = {}) =>
+      this.request<ClassHistoryResponse, HTTPValidationError>({
+        path: `/api/v2/classes/${scheduleId}/history`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Get attendance statistics for a specific class.
+     *
+     * @tags classes-v2
+     * @name GetClassAttendance
+     * @summary Get class attendance
+     * @request GET:/api/v2/classes/{schedule_id}/attendance
+     */
+    getClassAttendance: (scheduleId: number, params: RequestParams = {}) =>
+      this.request<ClassAttendanceSummary, HTTPValidationError>({
+        path: `/api/v2/classes/${scheduleId}/attendance`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description List all classes for the current student.
+     *
+     * @tags classes-v2
+     * @name ListMyClasses
+     * @summary List my classes
+     * @request GET:/api/v2/classes/me
+     */
+    listMyClasses: (params: RequestParams = {}) =>
+      this.request<ClassGroupListResponse, HTTPValidationError>({
+        path: `/api/v2/classes/me`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Get lesson history for a specific class (student view).
+     *
+     * @tags classes-v2
+     * @name GetMyClassHistory
+     * @summary Get my class history
+     * @request GET:/api/v2/classes/me/{schedule_id}/history
+     */
+    getMyClassHistory: (scheduleId: number, params: RequestParams = {}) =>
+      this.request<ClassHistoryResponse, HTTPValidationError>({
+        path: `/api/v2/classes/me/${scheduleId}/history`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Get attendance statistics for a specific class (student view).
+     *
+     * @tags classes-v2
+     * @name GetMyClassAttendance
+     * @summary Get my class attendance
+     * @request GET:/api/v2/classes/me/{schedule_id}/attendance
+     */
+    getMyClassAttendance: (scheduleId: number, params: RequestParams = {}) =>
+      this.request<ClassAttendanceSummary, HTTPValidationError>({
+        path: `/api/v2/classes/me/${scheduleId}/attendance`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+  };
+
+  classFiles = {
+    /**
+     * @description Upload a class file (pdf, document, etc).
+     *
+     * @tags class-files-v2
+     * @name UploadClassFile
+     * @summary Upload class file
+     * @request POST:/api/v2/class-files/{schedule_id}/files
+     */
+    uploadClassFile: (
+      scheduleId: number,
+      data: Record<string, any>,
+      params: RequestParams = {},
+    ) =>
+      this.request<ImportNotificationRead, HTTPValidationError>({
+        path: `/api/v2/class-files/${scheduleId}/files`,
+        method: "POST",
+        body: data,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description List files for a specific class.
+     *
+     * @tags class-files-v2
+     * @name ListClassFiles
+     * @summary List class files
+     * @request GET:/api/v2/class-files/{schedule_id}/files
+     */
+    listClassFiles: (scheduleId: number, params: RequestParams = {}) =>
+      this.request<ClassFileRead[], HTTPValidationError>({
+        path: `/api/v2/class-files/${scheduleId}/files`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Download a specific class file.
+     *
+     * @tags class-files-v2
+     * @name DownloadClassFile
+     * @summary Download class file
+     * @request GET:/api/v2/class-files/{schedule_id}/files/{file_id}
+     */
+    downloadClassFile: (
+      scheduleId: number,
+      fileId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<any, HTTPValidationError>({
+        path: `/api/v2/class-files/${scheduleId}/files/${fileId}`,
+        method: "GET",
+        format: "blob",
+        ...params,
+      }),
+
+    /**
+     * @description Delete a specific class file.
+     *
+     * @tags class-files-v2
+     * @name DeleteClassFile
+     * @summary Delete class file
+     * @request DELETE:/api/v2/class-files/{schedule_id}/files/{file_id}
+     */
+    deleteClassFile: (
+      scheduleId: number,
+      fileId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, HTTPValidationError>({
+        path: `/api/v2/class-files/${scheduleId}/files/${fileId}`,
+        method: "DELETE",
+        ...params,
+      }),
+
+    /**
+     * @description List files for a specific class (student view).
+     *
+     * @tags class-files-v2
+     * @name ListMyClassFiles
+     * @summary List my class files
+     * @request GET:/api/v2/class-files/me/{schedule_id}/files
+     */
+    listMyClassFiles: (scheduleId: number, params: RequestParams = {}) =>
+      this.request<ClassFileRead[], HTTPValidationError>({
+        path: `/api/v2/class-files/me/${scheduleId}/files`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Download a specific class file (student view).
+     *
+     * @tags class-files-v2
+     * @name DownloadMyClassFile
+     * @summary Download my class file
+     * @request GET:/api/v2/class-files/me/{schedule_id}/files/{file_id}
+     */
+    downloadMyClassFile: (
+      scheduleId: number,
+      fileId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<any, HTTPValidationError>({
+        path: `/api/v2/class-files/me/${scheduleId}/files/${fileId}`,
+        method: "GET",
+        format: "blob",
+        ...params,
+      }),
+  };
+
+  notifications = {
+    /**
+     * @description List upcoming sessions for the current sheikh.
+     *
+     * @tags notifications-v2
+     * @name UpcomingSessions
+     * @summary Get upcoming sessions
+     * @request GET:/api/v2/notifications/sessions/upcoming
+     */
+    upcomingSessions: (params: RequestParams = {}) =>
+      this.request<UpcomingSessionResponse[], HTTPValidationError>({
+        path: `/api/v2/notifications/sessions/upcoming`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description List upcoming sessions for the current student.
+     *
+     * @tags notifications-v2
+     * @name MyUpcomingSessions
+     * @summary Get my upcoming sessions
+     * @request GET:/api/v2/notifications/sessions/me/upcoming
+     */
+    myUpcomingSessions: (params: RequestParams = {}) =>
+      this.request<UpcomingSessionResponse[], HTTPValidationError>({
+        path: `/api/v2/notifications/sessions/me/upcoming`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description List all notifications for the current user.
+     *
+     * @tags notifications-v2
+     * @name ListNotifications
+     * @summary List notifications
+     * @request GET:/api/v2/notifications
+     */
+    listNotifications: (params: RequestParams = {}) =>
+      this.request<NotificationRead[], HTTPValidationError>({
+        path: `/api/v2/notifications`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Mark a specific notification as read.
+     *
+     * @tags notifications-v2
+     * @name ReadNotification
+     * @summary Mark notification as read
+     * @request PATCH:/api/v2/notifications/{notification_id}/read
+     */
+    readNotification: (
+      notificationId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<NotificationRead, HTTPValidationError>({
+        path: `/api/v2/notifications/${notificationId}/read`,
+        method: "PATCH",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Mark all notifications as read for the current user.
+     *
+     * @tags notifications-v2
+     * @name ReadAllNotifications
+     * @summary Mark all notifications as read
+     * @request POST:/api/v2/notifications/read-all
+     */
+    readAllNotifications: (params: RequestParams = {}) =>
+      this.request<void, HTTPValidationError>({
+        path: `/api/v2/notifications/read-all`,
+        method: "POST",
+        ...params,
+      }),
+  };
+
   health = {
     /**
      * No description
