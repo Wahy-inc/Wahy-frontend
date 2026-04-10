@@ -2884,10 +2884,11 @@ export class Api<
      * @summary Get calendar grid
      * @request GET:/api/v2/calendar/grid
      */
-    getCalendarGrid: (params: RequestParams = {}) =>
+    getCalendarGrid: (query: { start_date: string; end_date: string }, params: RequestParams = {}) =>
       this.request<CalendarGridResponse, HTTPValidationError>({
         path: `/api/v2/calendar/grid`,
         method: "GET",
+        query: query,
         format: "json",
         ...params,
       }),
