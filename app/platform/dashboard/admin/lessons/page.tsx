@@ -2,13 +2,13 @@
 
 import React, { useActionState } from "react";
 import * as openApi from "@/lib/openApi"
-import { createLesson, getLessonByID, getLessonByIDMe, listLessons, updateLesson } from "@/app/platform/actions/dashboard";
+import { createLesson, getLessonByDay, listLessons, updateLesson } from "@/app/platform/actions/dashboard";
 import DashboardPage from "../page";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UpdateLessonFormState, GetLessonByIDFormState } from "@/app/platform/lib/definitions";
+import { UpdateLessonFormState, GetLessonByDayFormState } from "@/app/platform/lib/definitions";
 import LessonElement from "./lesson_element";
 import TitleElement from "./title_element";
 import { useAuth } from "@/lib/auth-context";
@@ -20,22 +20,22 @@ import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 export default function Lessons() {
     const {isAdmin, isLoading: authLoading } = useAuth()
     const { t } = useLocalization()
-    const [lessons, setLessons] = React.useState<openApi.LessonRead[] | null>(null)
+    const [lessons, setLessons] = React.useState<openApi.ClassGroupListResponse | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const [createState, createAction, createPending] = useActionState(createLesson, undefined)
     const updateLessonAction = (state: UpdateLessonFormState, formData: FormData) => updateLesson(state, formData, Number(formData.get('lesson-id')))
     const [updateState, updateAction, updatePending] = useActionState(updateLessonAction, undefined)
-    const getLessonAction = async (state: GetLessonByIDFormState, formData: FormData) => {
-        return isAdmin ? getLessonByID(state, formData) : getLessonByIDMe(state, formData)
+    const getLessonAction = async (state: GetLessonByDayFormState, formData: FormData) => {
+        return getLessonByDay(state, formData)
     }
     const [getLessonState, getLessonFormAction, getLessonPending] = useActionState(getLessonAction, undefined)
-    const [fetchedLesson, setFetchedLesson] = React.useState<openApi.LessonRead | null>(null)
+    const [fetchedLessons, setFetchedLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
     const [getLessonDialogOpen, setGetLessonDialogOpen] = React.useState(false)
     const [createLessonDialogOpen, setCreateLessonDialogOpen] = React.useState(false)
     const [updateLessonDialogOpen, setUpdateLessonDialogOpen] = React.useState(false)
     const [searchStudentId, setSearchStudentId] = React.useState<string>("")
-    const [filteredLessons, setFilteredLessons] = React.useState<openApi.LessonRead[] | null>(null)
+    const [filteredLessons, setFilteredLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
 
     useToastListener(createState, {functionName: "Create Lesson", successMessage: t('lessons.create_success'), errorMessage: t('lessons.create_error')})
     useToastListener(updateState, {functionName: "Update Lesson", successMessage: t('lessons.update_success'), errorMessage: t('lessons.update_error')})
@@ -44,10 +44,10 @@ export default function Lessons() {
     React.useEffect(() => {
         if (authLoading) return
 
-        const cachedLessons = getCachedData<openApi.LessonRead[]>(
+        const cachedLessons = getCachedData<openApi.ClassGroupListResponse>(
             offlineCacheKeys.lessonsListAdmin,
         )
-        if (cachedLessons && cachedLessons.length > 0) {
+        if (cachedLessons && cachedLessons.classes.length > 0) {
             setLessons(cachedLessons)
             setLoading(false)
         }
@@ -70,7 +70,7 @@ export default function Lessons() {
 
     React.useEffect(() => {
         if (getLessonState?.message == 'success' && getLessonState.data) {
-            setFetchedLesson(getLessonState.data)
+            setFetchedLessons(getLessonState.data)
         }
         if (
             createState?.message === 'success' ||
@@ -120,7 +120,7 @@ export default function Lessons() {
         if (studentId === "") {
             setFilteredLessons(null)
         } else if (lessons) {
-            const filtered = lessons.filter(lesson => 
+            const filtered = lessons.classes.filter(lesson => 
                 lesson.student_id.toString().startsWith(studentId)
             )
             setFilteredLessons(filtered)
@@ -136,8 +136,8 @@ export default function Lessons() {
         }
     }
 
-    const content = lessons?.map((lesson) => (
-        <div key={lesson.id}>
+    const content = lessons?.classes?.map((lesson) => (
+        <div key={`lesson-${lesson.schedule_id}-${lesson.student_id}`}>
             <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
         </div>
     ))
@@ -151,7 +151,7 @@ export default function Lessons() {
             displayTitle = `${t('lessons.title')} - Student ${searchStudentId}`
         } else {
             displayContent = filteredLessons.map((lesson) => (
-                <div key={lesson.id}>
+                <div key={`lesson-${lesson.schedule_id}-${lesson.student_id}`}>
                     <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
                 </div>
             ))
@@ -182,7 +182,7 @@ export default function Lessons() {
 
     if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('lessons.loading_lessons')}</p></DashboardPage>
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!lessons || lessons.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.no_data_found')}</p></DashboardPage>
+    if (!lessons || lessons.classes.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.no_data_found')}</p></DashboardPage>
 
     const actionStatusBanner = (createState?.message || updateState?.message) ? (
         <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
@@ -200,10 +200,10 @@ export default function Lessons() {
         </div>
     ) : null
 
-    if (fetchedLesson && getLessonState?.message == 'success') {
+    if (fetchedLessons && getLessonState?.message == 'success') {
         return <DashboardPage title={(
             <TitleElement
-                title={`${t('lessons.lesson_details')} ${fetchedLesson.id}`}
+                title={`${t('lessons.lesson_details')} ${fetchedLessons.length}`}
                 createAction={createAction}
                 createState={createState}
                 createPending={createPending}
@@ -222,9 +222,19 @@ export default function Lessons() {
         )}>
             <div className='mx-10'>{actionStatusBanner}</div>
             <div className='flex flex-row justify-end'>
-                <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLesson(null)}}>{t('common.clear')}</Button>
+                <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLessons([])}}>{t('common.clear')}</Button>
             </div>
-            <div><LessonElement lesson={fetchedLesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} /></div>
+            <div>
+                {fetchedLessons.length === 0 ? (
+                    <p className="text-slate-700 text-xl">{t('lessons.no_lessons_found')}</p>
+                ) : (
+                    fetchedLessons.map((lesson) => (
+                        <div key={`lesson-${lesson.schedule_id}-${lesson.student_id}`}>
+                            <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
+                        </div>
+                    ))
+                )}
+            </div>
         </DashboardPage>
     } else {
         return <DashboardPage title={title}>

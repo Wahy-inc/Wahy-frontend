@@ -1,192 +1,159 @@
 import * as openApi from "@/lib/openApi"
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
-import { DataTable } from "./data_table"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useColumnsWithLocalization } from "./columns"
+import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
 import * as Icon from '@deemlol/next-icons'
+import { Clock, Calendar, Power, RefreshCw } from "lucide-react"
 import { JSX } from "react"
 import { UpdateLessonFormState } from "@/app/platform/lib/definitions"
 import { useLocalization } from "@/lib/localization-context"
-import { Badge } from "@/components/ui/badge"
-import { getLocalStudent } from "@/app/platform/actions/dashboard"
 
-const getQuality = (quality: string | null) => {
-        switch (quality) {
-            case 'excellent':
-                return openApi.LessonQuality.Excellent
-            case 'very_good':
-                return openApi.LessonQuality.VeryGood
-            case 'good':
-                return openApi.LessonQuality.Good
-            case 'fair':
-                return openApi.LessonQuality.Fair
-            case 'needs_improvement':
-                return openApi.LessonQuality.NeedsImprovement
-            case null:
-                return 'Not Evaluated'
-        }
-}
-
-export default function LessonElement({lesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput}: {lesson: openApi.LessonRead, updateAction: (formData: FormData) => void, updateState: UpdateLessonFormState | null | undefined, updatePending: boolean, setUpdateLessonDialogOpen: (open: boolean) => void, updateLessonDialogOpen: boolean, fieldInput: (label: string, name: string, defaultValue: string, type: string) => JSX.Element}) {
+export default function LessonElement({lesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput}: {lesson: openApi.ClassGroupItem, updateAction: (formData: FormData) => void, updateState: UpdateLessonFormState | null | undefined, updatePending: boolean, setUpdateLessonDialogOpen: (open: boolean) => void, updateLessonDialogOpen: boolean, fieldInput: (label: string, name: string, defaultValue: string, type: string) => JSX.Element}) {
     const { t, language } = useLocalization()
-    const { columns, HWcolumns, isRTL } = useColumnsWithLocalization()
+    const isRTL = language === 'ar'
     return (
-        <div className="overflow-hidden border-2 rounded-xl bg-white flex flex-col justify-start my-5 p-4 shadow-[0px_4px_30px_rgba(0,0,0,0.1)] opacity-90 backdrop-blur-sm hover:opacity-80 transition duration-300 hover:scale-101" dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className={`flex flex-col justify-center items-start mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                <div className="flex items-center gap-4">
-                    <div className={`bg-blue-900 min-w-14 h-14 px-2 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md`}>
-                        {lesson.id}
+        <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            {/* Day Header Bar */}
+            <div className={`bg-purple-900 h-2`} />
+            
+            <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        {/* Schedule Circle */}
+                        <div className={`bg-purple-900 min-w-14 h-14 px-2 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md`}>
+                            {lesson.schedule_id}
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-bold text-slate-800">{lesson.day_label}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="outline" className="text-xs">
+                                    <Icon.User className="w-3 h-3 mr-1" />
+                                    {language === 'ar' ? lesson.student_name_ar : lesson.student_name_en}
+                                </Badge>
+                                <span className="text-slate-400 text-sm">ID: {lesson.student_id}</span>
+                            </div>
+                        </div>
                     </div>
-                <div>
-                <h3 className="text-2xl font-bold text-slate-800">{getLocalStudent(lesson.student_id)?.[language === 'ar' ? 'full_name_arabic' : 'full_name_english'] || `Student #${lesson.student_id}`}</h3>
-                <div className="grid grid-cols-3 gap-0 mt-1">
-                    <Badge variant="outline" className="text-xs">
-                        {t('lessons.schedule_id')}
-                        <span className="text-slate-600 text-sm">{lesson.schedule_id}</span>
-                    </Badge>
-                    <p className=" text-slate-600 flex items-center"><Badge variant="outline" className="text-xs"><Icon.Calendar className="inline pr-1"/>: {lesson.date}</Badge></p>
-                    <p className=" text-slate-600 flex items-center"><Badge variant="outline" className="text-xs"><Icon.Clock className="inline pr-1"/>{t('lessons.attendance')}: {lesson.attendance}</Badge></p>
+                    
+                    {/* Status Badges */}
+                    <div className="flex flex-col gap-2 items-end">
+                        <Badge variant={lesson.is_active ? "default" : "destructive"} className="gap-1">
+                            <Power className="w-3 h-3" />
+                            {lesson.is_active ? t('schedules.active') : t('schedules.inactive')}
+                        </Badge>
+                        {lesson.rrule_string && (
+                            <Badge variant="secondary" className="gap-1">
+                                <RefreshCw className="w-3 h-3" />
+                                {t('schedules.recurring')}
+                            </Badge>
+                        )}
+                    </div>
                 </div>
+            </CardHeader>
+
+            <CardContent className="pt-4">
+                {/* Time Display */}
+                <div className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-4 mb-4">
+                    <div className="flex items-center justify-center gap-8">
+                        <div className="text-center">
+                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('schedules.start_time')}</p>
+                            <div className="flex items-center gap-2">
+                                <Clock className="w-5 h-5 text-green-500" />
+                                <span className="text-2xl font-bold text-slate-800">{lesson.start_time}</span>
+                            </div>
+                        </div>
+                        <div className="flex items-center">
+                            <div className="w-12 h-0.5 bg-slate-300" />
+                            <Icon.ChevronRight className="w-5 h-5 text-slate-400" />
+                            <div className="w-12 h-0.5 bg-slate-300" />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('schedules.end_time')}</p>
+                            <div className="flex items-center gap-2">
+                                <Clock className="w-5 h-5 text-red-500" />
+                                <span className="text-2xl font-bold text-slate-800">{lesson.end_time}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                {/* Effective Dates */}
+                <div className="grid grid-cols-2 gap-4 mb-4">
+                    <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-100">
+                        <Calendar className="w-5 h-5 text-green-600" />
+                        <div>
+                            <p className="text-xs text-green-600 font-medium">{t('schedules.effective_from_label')}</p>
+                            <p className="text-sm font-semibold text-slate-700">{lesson.effective_from}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100">
+                        <Calendar className="w-5 h-5 text-orange-600" />
+                        <div>
+                            <p className="text-xs text-orange-600 font-medium">{t('schedules.effective_until_label')}</p>
+                            <p className="text-sm font-semibold text-slate-700">
+                                {lesson.effective_until || t('schedules.no_end_date')}
+                            </p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div className="mb-2">
-                <p className="text-lg text-slate-600 pb-0.5">{t('lessons.recited')}</p>
-                <DataTable columns={columns} data={[lesson]} isRTL={isRTL} />
-            </div>
-            <div className="mb-2">
-                <p className="text-lg text-slate-600 pb-0.5">{t('lessons.new_memorization')}</p>
-                <DataTable columns={HWcolumns} data={[lesson]} isRTL={isRTL} />
-            </div>
-            {lesson.absence_reason && <p className={`w-full text-[12px] text-slate-600 ${isRTL ? 'text-right' : 'text-left'}`}><span className="font-bold text-slate-800">{t('lessons.absence_reason')}</span> &quot;{lesson.absence_reason}&quot;</p>}
-            {lesson.sheikh_notes && <p className={`w-full text-[12px] text-slate-600 ${isRTL ? 'text-right' : 'text-left'}`}><span className="font-bold text-slate-800">{t('lessons.sheikh_notes')}</span> &quot;{lesson.sheikh_notes}&quot;</p>}
-            {lesson.student_notes && <p className={`w-full text-[12px] text-slate-600 ${isRTL ? 'text-right' : 'text-left'}`}><span className="font-bold text-slate-800">{t('lessons.student_notes')}</span> &quot;{lesson.student_notes}&quot;</p>}
-            <div className={`flex flex-row ${isRTL ? 'flex-row-reverse' : ''} justify-end`}>
-                    <AlertDialog open={updateLessonDialogOpen} onOpenChange={updateState?.message == 'success'? () => setUpdateLessonDialogOpen(false) : setUpdateLessonDialogOpen}>
+
+                {/* Next Occurrence and Total Lessons */}
+                {(lesson.next_occurrence || lesson.total_lessons > 0) && (
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                        {lesson.next_occurrence && (
+                            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                                <Calendar className="w-5 h-5 text-blue-600" />
+                                <div>
+                                    <p className="text-xs text-blue-600 font-medium">{t('schedules.next_occurrence')}</p>
+                                    <p className="text-sm font-semibold text-slate-700">{lesson.next_occurrence}</p>
+                                </div>
+                            </div>
+                        )}
+                        <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+                            <Icon.BookOpen className="w-5 h-5 text-indigo-600" />
+                            <div>
+                                <p className="text-xs text-indigo-600 font-medium">{t('schedules.total_lessons')}</p>
+                                <p className="text-sm font-semibold text-slate-700">{lesson.total_lessons}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Actions */}
+                <Separator className="my-4" />
+                <div className="flex justify-end gap-3">
+                    <AlertDialog open={updateLessonDialogOpen} onOpenChange={setUpdateLessonDialogOpen}>
                         <AlertDialogTrigger asChild>
-                            <Button className="transition duration-300 mt-4 cursor-pointer bg-slate-400 hover:bg-slate-600">{t('lessons.update_lesson')}</Button>
+                            <Button className="transition duration-300 cursor-pointer bg-slate-400 hover:bg-slate-600">{t('lessons.update_lesson')}</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <form action={updateAction} className="w-full bg-background" dir={isRTL ? 'rtl' : 'ltr'}>
-                            <AlertDialogHeader>
-                            <AlertDialogTitle>{t('lessons.update_lesson')}</AlertDialogTitle>
-                                <div className={`flex flex-col gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                    <input type="hidden" name="lesson-id" value={lesson.id} />
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.schedule_id'), "schedule-id", String(lesson.schedule_id), "number")}
-                                        {updateState?.error?.schedule_id && <p className="text-red-500 text-sm">{updateState.error.schedule_id}</p>}
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>{t('lessons.update_lesson')}</AlertDialogTitle>
+                                    <div className={`flex flex-col gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
+                                        <input type="hidden" name="schedule-id" value={lesson.schedule_id} />
+                                        {/* {fieldInput(t('schedules.effective_from_label'), "effective-from", lesson.effective_from, "date")}
+                                        {updateState?.error?.effective_from && <p className="text-red-500 text-sm">{updateState.error.effective_from}</p>}
+                                        {fieldInput(t('schedules.effective_until_label'), "effective-until", lesson.effective_until || "", "date")}
+                                        {updateState?.error?.effective_until && <p className="text-red-500 text-sm">{updateState.error.effective_until}</p>}
+                                        {fieldInput(t('schedules.start_time'), "start-time", lesson.start_time, "time")}
+                                        {updateState?.error?.start_time && <p className="text-red-500 text-sm">{updateState.error.start_time}</p>}
+                                        {fieldInput(t('schedules.end_time'), "end-time", lesson.end_time, "time")}
+                                        {updateState?.error?.end_time && <p className="text-red-500 text-sm">{updateState.error.end_time}</p>}
+                                        {updateState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.update_failed')}</p> : null} */}
                                     </div>
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.date'), "date", String(lesson.date), "date")}
-                                            {updateState?.error?.date && <p className="text-red-500 text-sm">{updateState.error.date}</p>}
-                                        </div>
-                                    <div className='flex flex-col'>
-                                        <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
-                                            <label htmlFor="type" className="text-sm font-medium">{t('lessons.type')}</label>
-                                            <Select defaultValue={lesson.type} name="type">
-                                                <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectLabel>{t('lessons.type')}</SelectLabel>
-                                                        <SelectItem value={openApi.LessonType.Evaluation}>{t('lessons.evaluation')}</SelectItem>
-                                                        <SelectItem value={openApi.LessonType.NewMemorization}>{t('lessons.new_memorization')}</SelectItem>
-                                                        <SelectItem value={openApi.LessonType.Revision}>{t('lessons.revision')}</SelectItem>
-                                                        <SelectItem value={openApi.LessonType.Makeup}>{t('lessons.makeup')}</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        {updateState?.error?.type && <p className="text-red-500 text-sm">{updateState.error.type}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
-                                            <label htmlFor="attendance" className="text-sm font-medium">{t('lessons.attendance')}</label>
-                                            <Select defaultValue={lesson.attendance} name="attendance">
-                                                <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue/>
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectLabel>{t('lessons.attendance')}</SelectLabel>
-                                                        <SelectItem value={openApi.AttendanceStatus.Present}>{t('lessons.present')}</SelectItem>
-                                                        <SelectItem value={openApi.AttendanceStatus.Absent}>{t('lessons.absent')}</SelectItem>
-                                                        <SelectItem value={openApi.AttendanceStatus.Excused}>{t('lessons.excused')}</SelectItem>
-                                                        <SelectItem value={openApi.AttendanceStatus.Late}>{t('lessons.late')}</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        {updateState?.error?.attendance && <p className="text-red-500 text-sm">{updateState.error.attendance}</p>}
-                                    </div>
-                                    </div>
-                                    <div className={`grid grid-cols-4 gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                        <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.juz'),"juz", String(lesson.juz_number), "number")}
-                                            {updateState?.error?.juz && <p className="text-red-500 text-sm">{updateState.error.juz}</p>}
-                                        </div>
-                                        <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.surah') + " (Optional)", "surah", String(lesson.surah_name), "text")}
-                                            {updateState?.error?.surah && <p className="text-red-500 text-sm">{updateState.error.surah}</p>}
-                                        </div>
-                                        <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.ayah_from') + " (Optional)", "ayah-from", String(lesson.ayah_from), "number")}
-                                            {updateState?.error?.ayah_from && <p className="text-red-500 text-sm">{updateState.error.ayah_from}</p>}
-                                        </div>
-                                        <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.ayah_to') + " (Optional)", "ayah-to", String(lesson.ayah_to), "number")}
-                                            {updateState?.error?.ayah_to && <p className="text-red-500 text-sm">{updateState.error.ayah_to}</p>}
-                                        </div>
-                                    </div>
-                                    <div className={`grid grid-cols-2 gap-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                                    <div className='flex flex-col'>
-                                        <div className={`flex flex-col ${isRTL ? 'text-right' : 'text-left'}`}>
-                                            <label htmlFor="quality" className="text-sm font-medium">{t('lessons.quality')} (Optional)</label>
-                                            <Select defaultValue={getQuality(lesson.quality)} name="quality">
-                                                <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue/>
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectLabel>{t('lessons.quality')}</SelectLabel>
-                                                        <SelectItem value={openApi.LessonQuality.Excellent}>{t('lessons.excellent')}</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.VeryGood}>{t('lessons.very_good')}</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.Good}>{t('lessons.good')}</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.Fair}>{t('lessons.fair')}</SelectItem>
-                                                        <SelectItem value={openApi.LessonQuality.NeedsImprovement}>{t('lessons.needs_improvement')}</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        {updateState?.error?.quality && <p className="text-red-500 text-sm">{updateState.error.quality}</p>}
-                                    </div>
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.absence_reason') + " (Optional)", "absence-reason", String(lesson.absence_reason), "text")}
-                                        {updateState?.error?.absence_reason && <p className="text-red-500 text-sm">{updateState.error.absence_reason}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.sheikh_notes') + " (Optional)", "sheikh-notes", String(lesson.sheikh_notes), "text")}
-                                        {updateState?.error?.sheikh_notes && <p className="text-red-500 text-sm">{updateState.error.sheikh_notes}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.student_notes') + " (Optional)", "student-notes", String(lesson.student_notes), "text")}
-                                        {updateState?.error?.student_notes && <p className="text-red-500 text-sm">{updateState.error.student_notes}</p>}
-                                    </div>
-                                    {updateState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.update_failed')}</p> : null}
-                                </div>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter className={`mt-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                                <AlertDialogCancel type="reset" disabled={updatePending}>{t('common.cancel')}</AlertDialogCancel>
-                                <Button type="submit" disabled={updatePending}>{updatePending ? t('common.updating') : t('common.update')}</Button>
-                            </AlertDialogFooter>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter className={`mt-4 ${isRTL ? 'flex-row-reverse' : ''}`}>
+                                    <AlertDialogCancel type="reset" disabled={updatePending}>{t('common.cancel')}</AlertDialogCancel>
+                                    <Button type="submit" disabled={updatePending}>{updatePending ? t('common.updating') : t('common.update')}</Button>
+                                </AlertDialogFooter>
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
-            </div>
-        </div>
+                </div>
+            </CardContent>
+        </Card>
     )
 }

@@ -1,5 +1,5 @@
 import * as openApi from "@/lib/openApi"
-import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetAttendanceMEAnalyticsFormState, getAttendanceMEAnalyticsSchema, GetAttendanceStudentAnalyticsFormState, getAttendanceStudentAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
+import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetAttendanceMEAnalyticsFormState, getAttendanceMEAnalyticsSchema, GetAttendanceStudentAnalyticsFormState, getAttendanceStudentAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByDayFormState, GetLessonByIDFormState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
 import { createIdempotencyKey, enqueueOfflineMutation, isClientOnline, shouldQueueMutation } from "@/lib/offlineSync"
 import { getCachedData, offlineCacheKeys, setCachedData } from "@/lib/offlineCache"
 import { getApi } from "@/lib/apiClient"
@@ -526,22 +526,17 @@ export async function deleteSchedule(scheduleId: number): Promise<boolean> {
     }
 }
 
-export async function listLessons(stu_id: number | null = null): Promise<openApi.LessonRead[] | null> {
+export async function listLessons(): Promise<openApi.ClassGroupListResponse | null> {
     try {
-        const response = await api.api.listAllApiV1LessonsGet(stu_id ? { student_id: stu_id } : { student_id: undefined })
-
+        const response = await api.classes.listClasses()
         if (response.status === 200) {
-            if (stu_id === null) {
-                setCachedData(offlineCacheKeys.lessonsListAdmin, response.data)
-            } else {
-                setCachedData(offlineCacheKeys.lessonsListByStudent(stu_id), response.data)
-            }
+            setCachedData(offlineCacheKeys.lessonsListAdmin, response.data)
             return response.data
         }
         return null
     } catch (error) {
-        const cacheKey = stu_id === null ? offlineCacheKeys.lessonsListAdmin : offlineCacheKeys.lessonsListByStudent(stu_id)
-        const cached = getCachedData<openApi.LessonRead[]>(cacheKey)
+        const cacheKey = offlineCacheKeys.lessonsListAdmin
+        const cached = getCachedData<openApi.ClassGroupListResponse>(cacheKey)
         if (cached) {
             return cached
         }
@@ -1081,16 +1076,13 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
     }
 }
 
-export async function getLessonByID(state: GetLessonByIDFormState, formData: FormData): Promise<GetLessonByIDFormState> {
-    const lessonId = Number(formData.get('lesson-id'))
-    if (isNaN(lessonId)) {
-        return { error: { lesson_id: ['Lesson ID must be a number'] } }
-    }
+export async function getLessonByDay(state: GetLessonByDayFormState, formData: FormData): Promise<GetLessonByDayFormState> {
     try {
-        const response = await api.api.getOneApiV1LessonsLessonIdGet(lessonId)
+        const response = await api.classes.listClasses()
 
         if (response.status === 200) {
-            return { message: 'success', data: response.data }
+            const data = response.data["classes"].filter(lesson => lesson.day_label === formData.get('day'))
+            return { message: 'success', data: data }
         }
         return { message: 'fail' }
     } catch (error) {
