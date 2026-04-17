@@ -1,5 +1,6 @@
 import { getApi } from "@/lib/apiClient"
 import { GetCalendarDayDataResponseState, GetCalendarGridResponseState } from "../lib/definitionsv2";
+import * as openApi from "@/lib/openApi"
 
 const api = getApi()
 
@@ -47,5 +48,79 @@ export async function calenderGetDayData(dayID: string): Promise<GetCalendarDayD
     } catch (error) {
         console.error("Error fetching calendar day data:", error);
         return { message: 'fail' }
+    }
+}
+
+export async function notificationsGetUpcoming(): Promise<openApi.UpcomingSessionResponse[] | null> {
+    try {
+        const response = await api.notifications.upcomingSessions();
+        if (!response.ok || !response.data) {
+            console.log("failed");
+            return null
+        }
+        if (response.status == 200) {
+            console.log("Received upcoming notifications", response.data);
+            return response.data
+        }
+        return null
+    } catch (error) {
+        console.error("Error fetching upcoming notifications:", error);
+        return null
+    }
+}
+
+export async function notificationsGetAll(): Promise<openApi.NotificationRead[] | null> {
+    try {
+        const response = await api.notifications.listNotifications();
+        if (!response.ok || !response.data) {
+            console.log("failed");
+            return null
+        }
+        if (response.status == 200) {
+            console.log("Received notifications", response.data);
+            return response.data
+        }
+        return null
+    } catch (error) {
+        console.error("Error fetching notifications:", error);
+        return null
+    }
+}
+
+export async function notificationsMarkAsRead(notificationId: number): Promise<boolean> {
+    try {
+        console.log("Marking notification as read", notificationId);
+        const response = await api.notifications.readNotification(notificationId);
+        if (!response.ok) {
+            console.log("failed to mark notification as read");
+            return false
+        }
+        if (response.status == 200) {
+            console.log("Marked notification as read", notificationId);
+            return true
+        }
+        return false
+    } catch (error) {
+        console.error("Error marking notification as read:", error);
+        return false
+    }   
+}
+
+export async function notificationsMarkAllAsRead(): Promise<boolean> {
+    try {
+        console.log("Marking all notifications as read");
+        const response = await api.notifications.readAllNotifications();
+        if (!response.ok) {
+            console.log("failed to mark all notifications as read");
+            return false
+        }
+        if (response.status == 204) {
+            console.log("Marked all notifications as read");
+            return true
+        }
+        return false
+    } catch (error) {
+        console.error("Error marking all notifications as read:", error);
+        return false
     }
 }

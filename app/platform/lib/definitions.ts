@@ -148,6 +148,17 @@ export type GetLessonByDayFormState =
     }
     | undefined;
 
+export type getLessonHistoryState =
+    | {
+        error?: {
+            day?: string[];
+        }
+        message?: string;
+        data?: openApi.ClassHistoryResponse;
+    }
+    | undefined;
+
+
 export const createScheduleSchema = zod.object({
     student_id: zod.string(),
     start_time: zod.string().min(1, { error: 'Start time is required' }).trim(),

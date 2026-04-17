@@ -15,11 +15,14 @@ import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
+import { dummyClassGroupItems } from "@/lib/dummydata";
+import { useRouter } from "next/navigation";
 
 
 export default function Lessons() {
     const {isAdmin, isLoading: authLoading } = useAuth()
     const { t } = useLocalization()
+    const router = useRouter()
     const [lessons, setLessons] = React.useState<openApi.ClassGroupListResponse | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
@@ -47,7 +50,7 @@ export default function Lessons() {
         const cachedLessons = getCachedData<openApi.ClassGroupListResponse>(
             offlineCacheKeys.lessonsListAdmin,
         )
-        if (cachedLessons && cachedLessons.classes.length > 0) {
+        if (cachedLessons && cachedLessons?.classes?.length > 0) {
             setLessons(cachedLessons)
             setLoading(false)
         }
@@ -119,8 +122,8 @@ export default function Lessons() {
         
         if (studentId === "") {
             setFilteredLessons(null)
-        } else if (lessons) {
-            const filtered = lessons.classes.filter(lesson => 
+        } else if (dummyClassGroupItems) {
+            const filtered = dummyClassGroupItems.filter(lesson => 
                 lesson.student_id.toString().startsWith(studentId)
             )
             setFilteredLessons(filtered)
@@ -136,8 +139,8 @@ export default function Lessons() {
         }
     }
 
-    const content = lessons?.classes?.map((lesson) => (
-        <div key={`lesson-${lesson.schedule_id}-${lesson.student_id}`}>
+    const content = dummyClassGroupItems?.map((lesson) => (
+        <div key={`lesson-${lesson.schedule_id}-${lesson.student_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}`)}>
             <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
         </div>
     ))
@@ -146,16 +149,16 @@ export default function Lessons() {
     let displayTitle = t('lessons.title')
 
     if (searchStudentId && filteredLessons) {
-        if (filteredLessons.length === 0) {
+        if (filteredLessons?.length === 0) {
             displayContent = [<p key="no-lessons" className="text-slate-700 text-xl">{t('lessons.no_lessons_found')} {searchStudentId}</p>]
             displayTitle = `${t('lessons.title')} - Student ${searchStudentId}`
         } else {
             displayContent = filteredLessons.map((lesson) => (
-                <div key={`lesson-${lesson.schedule_id}-${lesson.student_id}`}>
+                <div key={`lesson-${lesson.schedule_id}-${lesson.student_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}`)}>
                     <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
                 </div>
             ))
-            displayTitle = `${t('lessons.title')} - Student ${searchStudentId} (${filteredLessons.length})`
+            displayTitle = `${t('lessons.title')} - Student ${searchStudentId} (${filteredLessons?.length})`
         }
     }
 
@@ -182,7 +185,7 @@ export default function Lessons() {
 
     if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('lessons.loading_lessons')}</p></DashboardPage>
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!lessons || lessons.classes.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.no_data_found')}</p></DashboardPage>
+    if (!lessons || lessons.classes?.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.no_data_found')}</p></DashboardPage>
 
     const actionStatusBanner = (createState?.message || updateState?.message) ? (
         <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
@@ -203,7 +206,7 @@ export default function Lessons() {
     if (fetchedLessons && getLessonState?.message == 'success') {
         return <DashboardPage title={(
             <TitleElement
-                title={`${t('lessons.lesson_details')} ${fetchedLessons.length}`}
+                title={`${t('lessons.lesson_details')} ${fetchedLessons?.length? `(${fetchedLessons.length})` : ''}`}
                 createAction={createAction}
                 createState={createState}
                 createPending={createPending}
@@ -225,7 +228,7 @@ export default function Lessons() {
                 <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLessons([])}}>{t('common.clear')}</Button>
             </div>
             <div>
-                {fetchedLessons.length === 0 ? (
+                {fetchedLessons?.length === 0 ? (
                     <p className="text-slate-700 text-xl">{t('lessons.no_lessons_found')}</p>
                 ) : (
                     fetchedLessons.map((lesson) => (
