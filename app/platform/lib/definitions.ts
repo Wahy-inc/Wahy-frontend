@@ -1,4 +1,4 @@
-import { AttendanceStatus, LessonQuality, LessonType } from '@/lib/openApi';
+import { AttendanceStatus, LessonType } from '@/lib/openApi';
 import * as zod from 'zod';
 import * as openApi from "@/lib/openApi";
 
@@ -62,18 +62,14 @@ export const CreatLessonSchema = zod.object({
     student_id: zod.string().min(1, { error: 'Student ID is required' }),
     date: zod.string().min(1, { error: 'Date is required' }).trim(),
     type: zod.enum(LessonType, { error: 'Invalid lesson type' }),
-    attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }),
-    juz: zod.string().trim().optional(),
-    surah: zod.string().trim().optional(),
-    ayah_from: zod.string().trim().optional(),
-    ayah_to: zod.string().trim().optional(),
-    quality: zod.enum(LessonQuality, { error: 'Invalid lesson quality' }).optional(),
+    attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }).optional(),
     absence_reason: zod.string().trim().optional(),
+    pass_fail: zod.string().trim().optional(),
     sheikh_notes: zod.string().trim().optional(),
     student_notes: zod.string().trim().optional(),
+    what_is_heard_from_sheikh: zod.string().trim().optional(),
+    homework: zod.string().trim().optional(),
     recurrence: zod.string().min(0).trim().optional(),
-    effective_until: zod.string().min(0).trim().optional(),
-    pass_fail: zod.string().min(0).trim().optional(),
 })
 
 export type CreateLessonFormState =
@@ -83,52 +79,42 @@ export type CreateLessonFormState =
             date?: string[];
             type?: string[];
             attendance?: string[];
-            juz?: string[];
-            surah?: string[];
-            ayah_from?: string[];
-            ayah_to?: string[];
-            quality?: string[];
             absence_reason?: string[];
+            pass_fail?: string[];
             sheikh_notes?: string[];
             student_notes?: string[];
-            pass_fail?: string[];
+            what_is_heard_from_sheikh?: string[];
+            homework?: string[];
             recurrence?: string[];
-            effective_until?: string[];
         }
         message?: string;
     }
     | undefined;
 
 export const UpdateLessonSchema = zod.object({
-    schedule_id: zod.string().optional(),
     date: zod.string().trim().optional(),
     type: zod.enum(LessonType, { error: 'Invalid lesson type' }).optional(),
     attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }).optional(),
-    juz: zod.string().trim().optional(),
-    surah: zod.string().trim().optional(),
-    ayah_from: zod.string().trim().optional(),
-    ayah_to: zod.string().trim().optional(),
-    quality: zod.enum(LessonQuality, { error: 'Invalid lesson quality' }).optional(),
     absence_reason: zod.string().trim().optional(),
+    pass_fail: zod.string().trim().optional(),
     sheikh_notes: zod.string().trim().optional(),
     student_notes: zod.string().trim().optional(),
+    what_is_heard_from_sheikh: zod.string().trim().optional(),
+    homework: zod.string().trim().optional(),
 })
 
 export type UpdateLessonFormState =
     | {
         error?: {
-            schedule_id?: string[];
             date?: string[];
             type?: string[];
             attendance?: string[];
-            juz?: string[];
-            surah?: string[];
-            ayah_from?: string[];
-            ayah_to?: string[];
-            quality?: string[];
             absence_reason?: string[];
+            pass_fail?: string[];
             sheikh_notes?: string[];
             student_notes?: string[];
+            what_is_heard_from_sheikh?: string[];
+            homework?: string[];
         }
         message?: string;
     }
@@ -272,15 +258,11 @@ export const createStudentSchema = zod.object({
     phone: zod.string().trim().optional(),
     dateOfBirth: zod.string().trim().optional(),
     timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
-    currjuz: zod.string().trim().optional(),
-    currsurah: zod.string().trim().optional(),
-    currayah: zod.string().trim().optional(),
     lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
     lessonRate: zod.string().trim().optional(),
     billingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }),
     specialNotes: zod.string().trim().optional(),
     privateNotes: zod.string().trim().optional(),
-    recurrence: zod.string().min(0).trim().optional(),
 })
 
 export type CreateStudentFormState =
@@ -292,15 +274,11 @@ export type CreateStudentFormState =
             phone?: string[];
             dateOfBirth?: string[];
             timeZone?: string[];
-            currjuz?: string[];
-            currsurah?: string[];
-            currayah?: string[];
             lessonsPerWeek?: string[];
             lessonRate?: string[];
             billingCycle?: string[];
             specialNotes?: string[];
             privateNotes?: string[];
-            recurrence?: string[];
         }
         message?: string;
     }
@@ -326,11 +304,7 @@ export const updateStudentSchema = zod.object({
     phone: zod.string().trim().optional(),
     dateOfBirth: zod.string().trim().optional(),
     timeZone: zod.string().trim().optional(),
-    registerationStatus: zod.enum(openApi.RegistrationStatus, { error: 'Invalid registration status' }).optional(),
     status: zod.enum(openApi.StudentStatus, { error: 'Invalid student status' }).optional(),
-    currjuz: zod.string().trim().optional(),
-    currsurah: zod.string().trim().optional(),
-    currayah: zod.string().trim().optional(),
     lessonsPerWeek: zod.string().trim().optional(),
     lessonRate: zod.string().trim().optional(),
     billingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }).optional(),
@@ -346,11 +320,7 @@ export type UpdateStudentFormState =
             phone?: string[];
             dateOfBirth?: string[];
             timeZone?: string[];
-            registerationStatus?: string[];
             status?: string[];
-            currjuz?: string[];
-            currsurah?: string[];
-            currayah?: string[];
             lessonsPerWeek?: string[];
             lessonRate?: string[];
             billingCycle?: string[];
@@ -499,5 +469,19 @@ export type GetFinancialAnalyticsFormState =
     | {
         message?: string;
         data?: openApi.FinancialAnalytics;
+    }
+    | undefined;
+
+export const getLessonByIDSchema = zod.object({
+    lesson_id: zod.string({ error: 'Lesson ID must be a number' }),
+})
+
+export type GetLessonByIDFormState =
+    | {
+        error?: {
+            lesson_id?: string[];
+        }
+        message?: string;
+        data?: openApi.LessonRead;
     }
     | undefined;

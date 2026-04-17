@@ -1,5 +1,5 @@
 import * as openApi from "@/lib/openApi"
-import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetAttendanceMEAnalyticsFormState, getAttendanceMEAnalyticsSchema, GetAttendanceStudentAnalyticsFormState, getAttendanceStudentAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByDayFormState, getLessonHistoryState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
+import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetAttendanceMEAnalyticsFormState, getAttendanceMEAnalyticsSchema, GetAttendanceStudentAnalyticsFormState, getAttendanceStudentAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByDayFormState, GetLessonByIDFormState, getLessonHistoryState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
 import { createIdempotencyKey, enqueueOfflineMutation, isClientOnline, shouldQueueMutation } from "@/lib/offlineSync"
 import { getCachedData, offlineCacheKeys, setCachedData } from "@/lib/offlineCache"
 import { getApi } from "@/lib/apiClient"
@@ -110,9 +110,6 @@ export async function createStudent(state: CreateStudentFormState, formData: For
             phone: validation.data.phone,
             date_of_birth: validation.data.dateOfBirth,
             timezone: validation.data.timeZone,
-            current_juz: Number(validation.data.currjuz),
-            current_surah: validation.data.currsurah,
-            current_ayah: Number(validation.data.currayah),
             lessons_per_week: Number(validation.data.lessonsPerWeek),
             lesson_rate: Number(validation.data.lessonRate),
             billing_cycle: validation.data.billingCycle as openApi.BillingCycle,
@@ -150,9 +147,6 @@ export async function createStudent(state: CreateStudentFormState, formData: For
                     phone: validation.data.phone,
                     date_of_birth: validation.data.dateOfBirth,
                     timezone: validation.data.timeZone,
-                    current_juz: Number(validation.data.currjuz),
-                    current_surah: validation.data.currsurah,
-                    current_ayah: Number(validation.data.currayah),
                     lessons_per_week: Number(validation.data.lessonsPerWeek),
                     lesson_rate: Number(validation.data.lessonRate),
                     billing_cycle: validation.data.billingCycle,
@@ -215,9 +209,7 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
             phone: validation.data.phone,
             date_of_birth: validation.data.dateOfBirth,
             timezone: validation.data.timeZone,
-            current_juz: Number(validation.data.currjuz),
-            current_surah: validation.data.currsurah,
-            current_ayah: Number(validation.data.currayah),
+            status: validation.data.status as openApi.StudentStatus | undefined,
             lessons_per_week: Number(validation.data.lessonsPerWeek),
             lesson_rate: Number(validation.data.lessonRate),
             billing_cycle: validation.data.billingCycle as openApi.BillingCycle,
@@ -255,9 +247,7 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
                     phone: validation.data.phone,
                     date_of_birth: validation.data.dateOfBirth,
                     timezone: validation.data.timeZone,
-                    current_juz: Number(validation.data.currjuz),
-                    current_surah: validation.data.currsurah,
-                    current_ayah: Number(validation.data.currayah),
+                    status: validation.data.status,
                     lessons_per_week: Number(validation.data.lessonsPerWeek),
                     lesson_rate: Number(validation.data.lessonRate),
                     billing_cycle: validation.data.billingCycle,
@@ -528,10 +518,10 @@ export async function deleteSchedule(scheduleId: number): Promise<boolean> {
 
 export async function listLessons(): Promise<openApi.ClassGroupListResponse | null> {
     try {
-        const response = await api.classes.listClasses()
+        const response = await api.api.listAllApiV1LessonsGet()
         if (response.status === 200) {
             setCachedData(offlineCacheKeys.lessonsListAdmin, response.data)
-            return response.data
+            return response.data as unknown as openApi.ClassGroupListResponse
         }
         return null
     } catch (error) {
@@ -656,7 +646,9 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
             tags: validation.data.tags?.split(',').map(tag => tag.trim()) || [],
             access_level: validation.data.access_level,
             thumbnail_image_path: validation.data.thumbnail,
-            student_ids: (validation.data.student_ids == '') || (validation.data.student_ids == null) ? null : validation.data.student_ids,
+            student_ids: (validation.data.student_ids === '' || !validation.data.student_ids) 
+                ? null 
+                : validation.data.student_ids.split(',').map(id => Number(id.trim())).filter(id => !isNaN(id)) || null,
         }
         const response = await api.api.createApiV1LibraryPost(data)
 
@@ -930,19 +922,16 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
     try {
         const data: openApi.LessonCreate = {
             student_id: Number(validation.data.student_id),
-            sheikh_notes: validation.data.sheikh_notes,
-            student_notes: validation.data.student_notes,
             date: validation.data.date,
             type: validation.data.type,
             attendance: validation.data.attendance,
-            juz_number: validation.data.juz ? Number(validation.data.juz) : undefined,
-            surah_name: validation.data.surah,
-            ayah_from: validation.data.ayah_from ? Number(validation.data.ayah_from) : undefined,
-            ayah_to: validation.data.ayah_to ? Number(validation.data.ayah_to) : undefined,
-            quality: validation.data.quality,
             absence_reason: validation.data.absence_reason,
+            pass_fail: validation.data.pass_fail === 'pass' ? true : validation.data.pass_fail === 'fail' ? false : null,
+            student_notes: validation.data.student_notes,
+            sheikh_notes: validation.data.sheikh_notes,
+            what_is_heard_from_sheikh: undefined,
+            homework: undefined,
             recurrence: validation.data.recurrence ? { rrule: validation.data.recurrence } : undefined,
-            pass_fail: validation.data.pass_fail == 'pass',
         }
 
         console.log('Created lesson data:', data);
@@ -972,20 +961,17 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
                 entity_type: 'lesson',
                 operation: openApi.SyncOperation.Create,
                 payload: {
-                    student_id: String(validation.data.student_id),
-                    sheikh_notes: validation.data.sheikh_notes,
-                    student_notes: validation.data.student_notes,
+                    student_id: Number(validation.data.student_id),
                     date: validation.data.date,
                     type: validation.data.type,
                     attendance: validation.data.attendance,
-                    juz_number: Number(validation.data.juz),
-                    surah_name: validation.data.surah,
-                    ayah_from: Number(validation.data.ayah_from),
-                    ayah_to: Number(validation.data.ayah_to),
-                    quality: validation.data.quality,
                     absence_reason: validation.data.absence_reason,
+                    pass_fail: validation.data.pass_fail === 'pass' ? true : validation.data.pass_fail === 'fail' ? false : null,
+                    student_notes: validation.data.student_notes,
+                    sheikh_notes: validation.data.sheikh_notes,
+                    what_is_heard_from_sheikh: validation.data.what_is_heard_from_sheikh,
+                    homework: validation.data.homework,
                     recurrence: validation.data.recurrence ? { rrule: validation.data.recurrence } : undefined,
-                    pass_fail: validation.data.pass_fail == 'pass',
                 },
                 idempotency_key: createIdempotencyKey(),
             })
@@ -997,18 +983,15 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
 
 export async function updateLesson(state: UpdateLessonFormState, formData: FormData, lessonId: number): Promise<UpdateLessonFormState> {
     const validation = UpdateLessonSchema.safeParse({
-        schedule_id: formData.get('schedule-id'),
         sheikh_notes: formData.get('sheikh-notes'),
         student_notes: formData.get('student-notes'),
         date: formData.get('date'),
         type: formData.get('type'),
         attendance: formData.get('attendance'),
-        juz: formData.get('juz'),
-        surah: formData.get('surah'),
-        ayah_from: formData.get('ayah-from'),
-        ayah_to: formData.get('ayah-to'),
-        quality: formData.get('quality'),
         absence_reason: formData.get('absence-reason'),
+        pass_fail: formData.get('pass-fail'),
+        what_is_heard_from_sheikh: formData.get('what-is-heard-from-sheikh'),
+        homework: formData.get('homework'),
     })
 
     if (!validation.success) {
@@ -1016,18 +999,15 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
     }
     try {
         const data: openApi.LessonUpdate = {
-            schedule_id: Number(validation.data.schedule_id),
-            sheikh_notes: validation.data.sheikh_notes,
-            student_notes: validation.data.student_notes,
             date: validation.data.date,
             type: validation.data.type,
             attendance: validation.data.attendance,
-            juz_number: Number(validation.data.juz),
-            surah_name: validation.data.surah,
-            ayah_from: Number(validation.data.ayah_from),
-            ayah_to: Number(validation.data.ayah_to),
-            quality: validation.data.quality,
-            absence_reason: validation.data.absence_reason
+            absence_reason: validation.data.absence_reason,
+            pass_fail: validation.data.pass_fail ? validation.data.pass_fail === 'pass' : null,
+            student_notes: validation.data.student_notes,
+            sheikh_notes: validation.data.sheikh_notes,
+            what_is_heard_from_sheikh: validation.data.what_is_heard_from_sheikh,
+            homework: validation.data.homework,
         }
 
         if (!isClientOnline()) {
@@ -1055,18 +1035,15 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
                 entity_id: lessonId,
                 operation: openApi.SyncOperation.Update,
                 payload: {
-                    schedule_id: Number(validation.data.schedule_id),
-                    sheikh_notes: validation.data.sheikh_notes,
-                    student_notes: validation.data.student_notes,
                     date: validation.data.date,
                     type: validation.data.type,
                     attendance: validation.data.attendance,
-                    juz_number: Number(validation.data.juz),
-                    surah_name: validation.data.surah,
-                    ayah_from: Number(validation.data.ayah_from),
-                    ayah_to: Number(validation.data.ayah_to),
-                    quality: validation.data.quality,
                     absence_reason: validation.data.absence_reason,
+                    pass_fail: validation.data.pass_fail ? validation.data.pass_fail === 'pass' : null,
+                    student_notes: validation.data.student_notes,
+                    sheikh_notes: validation.data.sheikh_notes,
+                    what_is_heard_from_sheikh: validation.data.what_is_heard_from_sheikh,
+                    homework: validation.data.homework,
                 },
                 idempotency_key: createIdempotencyKey(),
             })
@@ -1078,11 +1055,15 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
 
 export async function getLessonByDay(state: GetLessonByDayFormState, formData: FormData): Promise<GetLessonByDayFormState> {
     try {
-        const response = await api.classes.listClasses()
+        const response = await api.api.listAllApiV1LessonsGet()
 
         if (response.status === 200) {
-            const data = response.data["classes"].filter(lesson => lesson.day_label === formData.get('day'))
-            return { message: 'success', data: data }
+            const data = response.data.filter((lesson: openApi.LessonRead) => {
+                const lessonDate = new Date(lesson.date).toDateString()
+                const filterDate = new Date(formData.get('day') as string).toDateString()
+                return lessonDate === filterDate
+            })
+            return { message: 'success', data: data as unknown as openApi.ClassGroupItem[] }
         }
         return { message: 'fail' }
     } catch (error) {
@@ -1092,10 +1073,12 @@ export async function getLessonByDay(state: GetLessonByDayFormState, formData: F
 
 export async function getLessonHistory(state: getLessonHistoryState, id: number): Promise<getLessonHistoryState> {
     try {
-        const response = await api.classes.getMyClassHistory(id)
+        const response = await api.api.listAllApiV1LessonsGet()
 
         if (response.status === 200) {
-            return { message: 'success', data: response.data }
+            const lessons = response.data.filter((lesson: openApi.LessonRead) => lesson.schedule_id === id)
+            const history: openApi.ClassHistoryResponse = { lessons: lessons, total: lessons.length }
+            return { message: 'success', data: history }
         }
         return { message: 'fail' }
     } catch (error) {
@@ -1180,16 +1163,14 @@ export async function attendanceStudentAnalytics(state: GetAttendanceStudentAnal
     })
 
     if (!validation.success) {
-        console.log('succeded');
         return { message: 'fail' }
     }
     try {
-        const data = {
+        const studentId = Number(validation.data.student_id)
+        const response = await api.api.getStudentAttendanceHoursApiV1StudentsStudentIdAttendanceHoursGet(studentId, {
             start_date: validation.data.period_start,
             end_date: validation.data.period_end,
-        }
-        const studentId = Number(validation.data.student_id)
-        const response = await api.api.getAttendanceHoursApiV1StudentsStudentIdAttendanceHoursGet(studentId, data)
+        })
 
         if (response.status === 200) {
             return { message: 'success', data: response.data }
