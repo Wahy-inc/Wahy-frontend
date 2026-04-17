@@ -107,7 +107,9 @@
     "recited": "Прочитано",
     "new_memorization": "Новое заучивание",
     "id": "ID",
-    "due_date": "Срок сдачи"
+    "due_date": "Срок сдачи",
+    "lesson_history": "История уроков",
+    "total_lessons": "Всего уроков"
   },
   "schedules": {
     "title": "Расписания",

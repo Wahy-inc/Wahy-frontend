@@ -9,10 +9,14 @@ import { Clock, Calendar, Power, RefreshCw } from "lucide-react"
 import { JSX } from "react"
 import { UpdateLessonFormState } from "@/app/platform/lib/definitions"
 import { useLocalization } from "@/lib/localization-context"
+import { getLocalStudent } from "@/app/platform/actions/dashboard"
 
 export default function LessonElement({lesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput}: {lesson: openApi.LessonRead, updateAction: (formData: FormData) => void, updateState: UpdateLessonFormState | null | undefined, updatePending: boolean, setUpdateLessonDialogOpen: (open: boolean) => void, updateLessonDialogOpen: boolean, fieldInput: (label: string, name: string, defaultValue: string, type: string) => JSX.Element}) {
     const { t, language } = useLocalization()
-    const isRTL = language === 'ar'
+    const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const date = new Date(lesson.date);
+    const dayNumber = date.getDay();
+
     return (
         <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">            
             <CardHeader className="pb-2">
@@ -23,13 +27,13 @@ export default function LessonElement({lesson, updateAction, updateState, update
                             {lesson.id}
                         </div>
                         <div>
-                            <h3 className="text-2xl font-bold text-slate-800">{lesson.date}</h3>
+                            <h3 className="text-2xl font-bold text-slate-800">{t(`schedules.${dayKeys[dayNumber]}`)}</h3>
                             <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">{language === 'ar' ? getLocalStudent(lesson.student_id)?.full_name_arabic : getLocalStudent(lesson.student_id)?.full_name_english}</Badge>
                                 <Badge variant="outline" className="text-xs">
                                     <Icon.User className="w-3 h-3 mr-1" />
                                     {t(`lessons.${lesson.type}`)}
                                 </Badge>
-                                <span className="text-slate-400 text-sm">Student ID: {lesson.student_id}</span>
                             </div>
                         </div>
                     </div>

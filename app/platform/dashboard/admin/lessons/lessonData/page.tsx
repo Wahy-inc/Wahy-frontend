@@ -71,17 +71,9 @@ export default function LessonDataPage() {
         }
     };
 
-    const getQualityBadgeVariant = (quality: openApi.LessonQuality | null) => {
-        switch (quality) {
-            case openApi.LessonQuality.Excellent:
-                return "default";
-            case openApi.LessonQuality.VeryGood:
-                return "secondary";
-            case openApi.LessonQuality.Good:
-                return "outline";
-            default:
-                return "destructive";
-        }
+    const getQualityBadgeVariant = (pass_fail: boolean | null) => {
+        if (pass_fail === null) return "outline";
+        return pass_fail ? "default" : "destructive";
     };
 
     const lessonHistoryElement = (lesson: openApi.LessonRead) => (
@@ -108,16 +100,16 @@ export default function LessonDataPage() {
                         </div>
                     </div>
                     
-                    {/* Attendance Badge */}
+                    {/* Attendance & Pass/Fail Badges */}
                     <div className="flex flex-col gap-2 items-end">
                         <Badge variant="outline" className={`gap-1 ${getAttendanceColor(lesson.attendance)}`}>
                             {getAttendanceIcon(lesson.attendance)}
                             {t(`lessons.${lesson.attendance}`)}
                         </Badge>
-                        {lesson.quality && (
-                            <Badge variant={getQualityBadgeVariant(lesson.quality)} className="gap-1">
-                                <Icon.Star className="w-3 h-3" />
-                                {t(`lessons.${lesson.quality}`)}
+                        {lesson.pass_fail !== null && (
+                            <Badge variant={getQualityBadgeVariant(lesson.pass_fail)} className="gap-1">
+                                {lesson.pass_fail ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
+                                {lesson.pass_fail ? t('lessons.passed') : t('lessons.failed')}
                             </Badge>
                         )}
                     </div>
@@ -125,69 +117,10 @@ export default function LessonDataPage() {
             </CardHeader>
 
             <CardContent className="pt-4">
-                {/* Quranic Information */}
-                {(lesson.juz_number || lesson.surah_name || lesson.ayah_from) && (
-                    <div className="bg-gradient-to-r from-slate-50 to-slate-100 rounded-xl p-4 mb-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            {lesson.juz_number && (
-                                <div className="text-center">
-                                    <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('lessons.juz')}</p>
-                                    <p className="text-xl font-bold text-slate-800">{lesson.juz_number}</p>
-                                </div>
-                            )}
-                            {lesson.surah_name && (
-                                <div className="text-center">
-                                    <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('lessons.surah')}</p>
-                                    <p className="text-xl font-bold text-slate-800">{lesson.surah_name}</p>
-                                </div>
-                            )}
-                            {(lesson.ayah_from || lesson.ayah_to) && (
-                                <div className="col-span-2 text-center">
-                                    <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('lessons.ayah_range')}</p>
-                                    <p className="text-lg font-semibold text-slate-800">
-                                        {lesson.ayah_from}
-                                        {lesson.ayah_to && lesson.ayah_from !== lesson.ayah_to ? ` - ${lesson.ayah_to}` : ''}
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                {/* Attempts and Pass/Fail Info */}
-                {(lesson.attempts > 0 || lesson.pass_fail !== null) && (
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                        {lesson.attempts > 0 && (
-                            <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-100">
-                                <Icon.Target className="w-5 h-5 text-purple-600" />
-                                <div>
-                                    <p className="text-xs text-purple-600 font-medium">{t('lessons.attempts')}</p>
-                                    <p className="text-sm font-semibold text-slate-700">{lesson.attempts}</p>
-                                </div>
-                            </div>
-                        )}
-                        {lesson.pass_fail !== null && (
-                            <div className={`flex items-center gap-3 p-3 rounded-lg border ${lesson.pass_fail ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
-                                {lesson.pass_fail ? (
-                                    <CheckCircle className="w-5 h-5 text-green-600" />
-                                ) : (
-                                    <XCircle className="w-5 h-5 text-red-600" />
-                                )}
-                                <div>
-                                    <p className={`text-xs font-medium ${lesson.pass_fail ? 'text-green-600' : 'text-red-600'}`}>{t('lessons.result')}</p>
-                                    <p className={`text-sm font-semibold ${lesson.pass_fail ? 'text-green-700' : 'text-red-700'}`}>
-                                        {lesson.pass_fail ? t('lessons.passed') : t('lessons.failed')}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
-
                 {/* Absence Reason */}
                 {lesson.absence_reason && (
                     <div className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-200 mb-4">
-                        <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                        <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 shrink-0" />
                         <div>
                             <p className="text-xs text-red-600 font-medium mb-1">{t('lessons.absence_reason')}</p>
                             <p className="text-sm text-red-700">{lesson.absence_reason}</p>
@@ -198,7 +131,7 @@ export default function LessonDataPage() {
                 {/* Sheikh Notes */}
                 {lesson.sheikh_notes && (
                     <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100 mb-4">
-                        <Icon.MessageSquare className="w-5 h-5 text-blue-600 mt-0.5" />
+                        <Icon.MessageSquare className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
                         <div>
                             <p className="text-xs text-blue-600 font-medium mb-1">{t('lessons.sheikh_notes')}</p>
                             <p className="text-sm text-blue-700">{lesson.sheikh_notes}</p>
@@ -209,7 +142,7 @@ export default function LessonDataPage() {
                 {/* Student Notes */}
                 {lesson.student_notes && (
                     <div className="flex items-start gap-3 p-3 bg-amber-50 rounded-lg border border-amber-200 mb-4">
-                        <Icon.MessageSquare className="w-5 h-5 text-amber-600 mt-0.5" />
+                        <Icon.MessageSquare className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
                         <div>
                             <p className="text-xs text-amber-600 font-medium mb-1">{t('lessons.student_notes')}</p>
                             <p className="text-sm text-amber-700">{lesson.student_notes}</p>
@@ -217,39 +150,24 @@ export default function LessonDataPage() {
                     </div>
                 )}
 
-                {/* Next Homework Info */}
-                {lesson.next_homework_type && (
+                {/* What Was Heard From Sheikh */}
+                {lesson.what_is_heard_from_sheikh && (
+                    <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-100 mb-4">
+                        <Icon.MessageSquare className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
+                        <div>
+                            <p className="text-xs text-green-600 font-medium mb-1">{t('lessons.what_heard')}</p>
+                            <p className="text-sm text-green-700">{lesson.what_is_heard_from_sheikh}</p>
+                        </div>
+                    </div>
+                )}
+
+                {/* Homework */}
+                {lesson.homework && (
                     <>
                         <Separator className="my-4" />
-                        <div className="bg-indigo-50 rounded-xl p-4 border border-indigo-100">
-                            <h4 className="text-lg font-semibold text-indigo-900 mb-3">{t('lessons.next_homework')}</h4>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <p className="text-xs text-indigo-600 font-medium mb-1">{t('lessons.type')}</p>
-                                    <p className="text-sm font-semibold text-indigo-900">{t(`lessons.${lesson.next_homework_type}`)}</p>
-                                </div>
-                                {lesson.next_homework_due_date && (
-                                    <div>
-                                        <p className="text-xs text-indigo-600 font-medium mb-1">{t('lessons.due_date')}</p>
-                                        <p className="text-sm font-semibold text-indigo-900">{lesson.next_homework_due_date}</p>
-                                    </div>
-                                )}
-                                {lesson.next_homework_surah && (
-                                    <div>
-                                        <p className="text-xs text-indigo-600 font-medium mb-1">{t('lessons.surah')}</p>
-                                        <p className="text-sm font-semibold text-indigo-900">{lesson.next_homework_surah}</p>
-                                    </div>
-                                )}
-                                {(lesson.next_homework_ayah_from || lesson.next_homework_ayah_to) && (
-                                    <div>
-                                        <p className="text-xs text-indigo-600 font-medium mb-1">{t('lessons.ayah_range')}</p>
-                                        <p className="text-sm font-semibold text-indigo-900">
-                                            {lesson.next_homework_ayah_from}
-                                            {lesson.next_homework_ayah_to && lesson.next_homework_ayah_from !== lesson.next_homework_ayah_to ? ` - ${lesson.next_homework_ayah_to}` : ''}
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
+                        <div className="bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
+                            <h4 className="text-lg font-semibold text-indigo-900 mb-3">{t('lessons.homework')}</h4>
+                            <p className="text-sm text-indigo-700">{lesson.homework}</p>
                         </div>
                     </>
                 )}
@@ -287,7 +205,7 @@ export default function LessonDataPage() {
     );
 
     return (
-        <DashboardPage title={`Lesson History`}>
+        <DashboardPage title={t('lessons.lesson_history')}>
             {content}
         </DashboardPage>
     )

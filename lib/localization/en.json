@@ -107,7 +107,9 @@
     "recited": "Recited",
     "new_memorization": "New Memorization",
     "id": "ID",
-    "due_date": "Due Date"
+    "due_date": "Due Date",
+    "lesson_history": "Lesson History",
+    "total_lessons": "Total Lessons"
   },
   "schedules": {
     "title": "Schedules",

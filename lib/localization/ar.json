@@ -107,7 +107,9 @@
     "recited": "المحفوظ",
     "new_memorization": "حفظ جديد",
     "id": "رقم الهوية",
-    "due_date": "تاريخ الاستحقاق"
+    "due_date": "تاريخ الاستحقاق",
+    "lesson_history": "سجل الدروس",
+    "total_lessons": "إجمالي الدروس"
   },
   "schedules": {
     "title": "الجداول الزمنية",
