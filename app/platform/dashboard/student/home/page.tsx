@@ -43,7 +43,7 @@ export default function AdminHomePage() {
     const titleElement = (
         <div className="flex flex-row justify-between my-3">
             <div id="title">
-                <p className='text-4xl text-slate-950 font-bold mb-5'>Home Page</p>
+                <p className='text-4xl text-slate-950 font-bold mb-5'>{t('home.title_page')}</p>
             </div>
             <div id="period" className="flex flex-row items-center">
                 <form className="grid grid-cols-3 gap-0">
@@ -56,7 +56,7 @@ export default function AdminHomePage() {
         <div className="w-full bg-slate-200 border border-slate-400  rounded-xl p-4 my-4 mx-1">
             <div className="flex items-center justify-center gap-8">
                 <div className="text-center">
-                    <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Current Time</p>
+                    <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">{t('home.current_time')}</p>
                     <div className="flex items-center gap-2">
                         <icon.Clock className="w-5 h-5 text-green-500" />
                         <span className="text-[6rem] font-bold text-slate-800">{time.getHours()}
@@ -88,7 +88,7 @@ export default function AdminHomePage() {
                                         </div>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-xs text-slate-200 uppercase tracking-wide mb-1">Start in</p>
+                                        <p className="text-xs text-slate-200 uppercase tracking-wide mb-1">{t('home.start_in')}</p>
                                         <div className="rounded-xl text-center p-5 bg-slate-800 text-slate-200">
                                             {session.minutes_until_start}
                                         </div>
@@ -126,7 +126,7 @@ export default function AdminHomePage() {
                 <CarouselContent className="h-full">
                     <CarouselItem className="rounded-xl p-4">
                         <div className="w-full h-full flex items-center justify-center border border-slate-300 bg-slate-50 rounded-xl p-22 mx-1">
-                            <p className="text-xl font-bold text-slate-600">No upcoming sessions</p>
+                            <p className="text-xl font-bold text-slate-600">{t('home.no_upcoming_sessions')}</p>
                         </div>
                     </CarouselItem>
                 </CarouselContent>

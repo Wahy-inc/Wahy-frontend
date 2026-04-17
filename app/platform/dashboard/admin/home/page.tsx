@@ -57,7 +57,7 @@ export default function AdminHomePage() {
     const titleElement = (
         <div className="flex flex-row justify-between my-3">
             <div id="title">
-                <p className='text-4xl text-slate-950 font-bold mb-5'>Home Page</p>
+                <p className='text-4xl text-slate-950 font-bold mb-5'>{t('home.title_page')}</p>
             </div>
             <div id="period" className="flex flex-row items-center">
                 <form className="grid grid-cols-3 gap-0">
@@ -70,7 +70,7 @@ export default function AdminHomePage() {
         <div className="w-full bg-slate-200 border border-slate-400  rounded-xl p-4 my-4 mx-1">
             <div className="flex items-center justify-center gap-8">
                 <div className="text-center">
-                    <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">Current Time</p>
+                    <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">{t('home.current_time')}</p>
                     <div className="flex items-center gap-2">
                         <icon.Clock className="w-5 h-5 text-green-500" />
                         <span className="text-[6rem] font-bold text-slate-800">{time.getHours()}
@@ -102,7 +102,7 @@ export default function AdminHomePage() {
                                         </div>
                                     </div>
                                     <div className="text-center">
-                                        <p className="text-xs text-slate-200 uppercase tracking-wide mb-1">Start in</p>
+                                        <p className="text-xs text-slate-200 uppercase tracking-wide mb-1">{t('home.start_in')}</p>
                                         <div className="rounded-xl text-center p-5 bg-slate-800 text-slate-200">
                                             {session.minutes_until_start}
                                         </div>
@@ -140,7 +140,7 @@ export default function AdminHomePage() {
                 <CarouselContent className="h-full">
                     <CarouselItem className="rounded-xl p-4">
                         <div className="w-full h-full flex items-center justify-center border border-slate-300 bg-slate-50 rounded-xl p-22 mx-1">
-                            <p className="text-xl font-bold text-slate-600">No upcoming sessions</p>
+                            <p className="text-xl font-bold text-slate-600">{t('home.no_upcoming_sessions')}</p>
                         </div>
                     </CarouselItem>
                 </CarouselContent>
@@ -153,8 +153,8 @@ export default function AdminHomePage() {
     const notificationsWidget = (
         <Card className="w-full bg-slate-50 border border-slate-300 rounded-xl p-4 my-4 mx-1 text-slate-600">
         <CardHeader className="flex items-center">
-            <CardTitle className="text-xl">Notifications </CardTitle>
-            { (<span className="bg-slate-800 text-slate-100 text-[10px] rounded-2xl px-2 py-1 hover:opacity-80 hover:cursor-pointer" onClick={() => notificationsMarkAllAsRead()}><icon.Check className="w-3 h-3 inline" />Mark all as Read</span>) }
+            <CardTitle className="text-xl">{t('notifications.title')} </CardTitle>
+            { (<span className="bg-slate-800 text-slate-100 text-[10px] rounded-2xl px-2 py-1 hover:opacity-80 hover:cursor-pointer" onClick={() => notificationsMarkAllAsRead()}><icon.Check className="w-3 h-3 inline" />{t('notifications.mark_all_as_read')}</span>) }
         </CardHeader>
         <CardContent>
             <Accordion type="single" collapsible defaultValue="plans">
@@ -177,19 +177,19 @@ export default function AdminHomePage() {
                             <AccordionContent className="p-2">
                                 <p className="text-slate-500 text-sm">{notification.body}</p>
                                 <div className="h-0.5 bg-slate-500 w-full"></div>
-                                <p className="text-slate-500 text-sm"><span className="font-bold">User ID: {notification.user_id}</span></p>
+                                <p className="text-slate-500 text-sm"><span className="font-bold">{t('notifications.user_id_label')}: {notification.user_id}</span></p>
                                 {notification.related_entity_id && notification.related_entity_type && (
-                                    <p className="text-slate-500 text-sm">Entity ID: {notification.related_entity_id} | Entity Type: {notification.related_entity_type}</p>
+                                    <p className="text-slate-500 text-sm">{t('notifications.entity_id_label')}: {notification.related_entity_id} | {t('notifications.entity_type_label')}: {notification.related_entity_type}</p>
                                 )}
-                                <p className="text-slate-500 text-sm">ID: {notification.id} {notification.scheduled_for && ` | Scheduled for: ${notification.scheduled_for}`}</p>
-                                <p className="text-slate-500 text-sm">{notification.read_at && <span className="font-bold">Read at: {notification.read_at}</span>} | Created at: {notification.created_at} | Updated at: {notification.updated_at}</p>
+                                <p className="text-slate-500 text-sm">{t('notifications.id_label')}: {notification.id} {notification.scheduled_for && ` | ${t('notifications.scheduled_for_label')}: ${notification.scheduled_for}`}</p>
+                                <p className="text-slate-500 text-sm">{notification.read_at && <span className="font-bold">{t('notifications.read_at_label')}: {notification.read_at}</span>} | {t('notifications.created_at_label')}: {notification.created_at} | {t('notifications.updated_at_label')}: {notification.updated_at}</p>
                             </AccordionContent>
                         </AccordionItem>
                     ))
                 ) : (
                     <AccordionItem value="no-notifications">
-                        <AccordionTrigger>No notifications</AccordionTrigger>
-                        <AccordionContent>You have no notifications at this time.</AccordionContent>
+                        <AccordionTrigger>{t('notifications.no_notifications')}</AccordionTrigger>
+                        <AccordionContent>{t('notifications.no_notifications_desc')}</AccordionContent>
                     </AccordionItem>
                 )}
             </Accordion>

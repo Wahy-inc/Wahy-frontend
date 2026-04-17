@@ -516,17 +516,17 @@ export async function deleteSchedule(scheduleId: number): Promise<boolean> {
     }
 }
 
-export async function listLessons(): Promise<openApi.ClassGroupListResponse | null> {
+export async function listLessons(): Promise<openApi.LessonRead[] | null> {
     try {
         const response = await api.api.listAllApiV1LessonsGet()
         if (response.status === 200) {
             setCachedData(offlineCacheKeys.lessonsListAdmin, response.data)
-            return response.data as unknown as openApi.ClassGroupListResponse
+            return response.data
         }
         return null
     } catch (error) {
         const cacheKey = offlineCacheKeys.lessonsListAdmin
-        const cached = getCachedData<openApi.ClassGroupListResponse>(cacheKey)
+        const cached = getCachedData<openApi.LessonRead[]>(cacheKey)
         if (cached) {
             return cached
         }
@@ -1054,16 +1054,16 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
 }
 
 export async function getLessonByDay(state: GetLessonByDayFormState, formData: FormData): Promise<GetLessonByDayFormState> {
+    const lessonId = Number(formData.get('lesson-id'))
+    if (isNaN(lessonId)) {
+        return { error: { lesson_id: ['Lesson ID must be a number'] } }
+    }
     try {
         const response = await api.api.listAllApiV1LessonsGet()
 
         if (response.status === 200) {
-            const data = response.data.filter((lesson: openApi.LessonRead) => {
-                const lessonDate = new Date(lesson.date).toDateString()
-                const filterDate = new Date(formData.get('day') as string).toDateString()
-                return lessonDate === filterDate
-            })
-            return { message: 'success', data: data as unknown as openApi.ClassGroupItem[] }
+            const lessons = response.data.filter((lesson: openApi.LessonRead) => lesson.id === lessonId)
+            return { message: 'success', data: lessons }
         }
         return { message: 'fail' }
     } catch (error) {

@@ -121,16 +121,16 @@ export type UpdateLessonFormState =
     | undefined;
 
 export const GetLessonByDay = zod.object({
-    day: zod.string({ error: 'Day is required' }),
+    lesson_id: zod.string({ error: 'Lesson ID is required' }),
 })
 
 export type GetLessonByDayFormState =
     | {
         error?: {
-            day?: string[];
+            lesson_id?: string[];
         }
         message?: string;
-        data?: openApi.ClassGroupItem[];
+        data?: openApi.LessonRead[];
     }
     | undefined;
 

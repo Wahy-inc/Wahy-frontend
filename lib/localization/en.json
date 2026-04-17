@@ -8,7 +8,11 @@
     "description": "An islamic platform to help sheikhs supervise and monitor their students and their progress.",
     "admin_login": "Admin Login",
     "student_signup": "Student Signup",
-    "student_login": "Student Login"
+    "student_login": "Student Login",
+    "title_page": "Home Page",
+    "current_time": "Current Time",
+    "start_in": "Start in",
+    "no_upcoming_sessions": "No upcoming sessions"
   },
   "common": {
     "loading": "Loading...",
@@ -66,10 +70,15 @@
     "repetition": "Repetition",
     "needs_improvement": "Needs Improvement",
     "pass_fail": "Pass/Fail",
+    "passed": "Passed",
+    "failed": "Failed",
     "attempts": "Attempts",
     "absence_reason": "Absence Reason",
+    "lesson_type": "Lesson Type",
+    "what_heard": "What Was Heard from Sheikh",
     "sheikh_notes": "Sheikh Notes",
     "student_notes": "Student Notes",
+    "homework": "Homework",
     "enter_student_id": "Enter student id...",
     "enter_schedule_id": "Enter schedule id...",
     "select_date": "Select date...",
@@ -375,5 +384,19 @@
     "offline_saved": "Saved offline. Changes will sync automatically when connection is restored.",
     "offline_error": "Action failed. Please review your input and try again.",
     "connection_restored": "Connection restored"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "mark_all_as_read": "Mark all as Read",
+    "no_notifications": "No notifications",
+    "no_notifications_desc": "You have no notifications at this time.",
+    "user_id_label": "User ID",
+    "entity_id_label": "Entity ID",
+    "entity_type_label": "Entity Type",
+    "id_label": "ID",
+    "scheduled_for_label": "Scheduled for",
+    "read_at_label": "Read at",
+    "created_at_label": "Created at",
+    "updated_at_label": "Updated at"
   }
 }

@@ -15,7 +15,6 @@ import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
-import { dummyClassGroupItems } from "@/lib/dummydata";
 import { useRouter } from "next/navigation";
 
 
@@ -23,7 +22,7 @@ export default function Lessons() {
     const {isAdmin, isLoading: authLoading } = useAuth()
     const { t } = useLocalization()
     const router = useRouter()
-    const [lessons, setLessons] = React.useState<openApi.ClassGroupListResponse | null>(null)
+    const [lessons, setLessons] = React.useState<openApi.LessonRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const [createState, createAction, createPending] = useActionState(createLesson, undefined)
@@ -33,12 +32,12 @@ export default function Lessons() {
         return getLessonByDay(state, formData)
     }
     const [getLessonState, getLessonFormAction, getLessonPending] = useActionState(getLessonAction, undefined)
-    const [fetchedLessons, setFetchedLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
+    const [fetchedLessons, setFetchedLessons] = React.useState<openApi.LessonRead[] | null>(null)
     const [getLessonDialogOpen, setGetLessonDialogOpen] = React.useState(false)
     const [createLessonDialogOpen, setCreateLessonDialogOpen] = React.useState(false)
     const [updateLessonDialogOpen, setUpdateLessonDialogOpen] = React.useState(false)
     const [searchStudentId, setSearchStudentId] = React.useState<string>("")
-    const [filteredLessons, setFilteredLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
+    const [filteredLessons, setFilteredLessons] = React.useState<openApi.LessonRead[] | null>(null)
 
     useToastListener(createState, {functionName: "Create Lesson", successMessage: t('lessons.create_success'), errorMessage: t('lessons.create_error')})
     useToastListener(updateState, {functionName: "Update Lesson", successMessage: t('lessons.update_success'), errorMessage: t('lessons.update_error')})
@@ -47,10 +46,10 @@ export default function Lessons() {
     React.useEffect(() => {
         if (authLoading) return
 
-        const cachedLessons = getCachedData<openApi.ClassGroupListResponse>(
+        const cachedLessons = getCachedData<openApi.LessonRead[]>(
             offlineCacheKeys.lessonsListAdmin,
         )
-        if (cachedLessons && cachedLessons?.classes?.length > 0) {
+        if (cachedLessons && cachedLessons?.length > 0) {
             setLessons(cachedLessons)
             setLoading(false)
         }
@@ -122,8 +121,8 @@ export default function Lessons() {
         
         if (studentId === "") {
             setFilteredLessons(null)
-        } else if (dummyClassGroupItems) {
-            const filtered = dummyClassGroupItems.filter(lesson => 
+        } else if (lessons) {
+            const filtered = lessons.filter(lesson => 
                 lesson.student_id.toString().startsWith(studentId)
             )
             setFilteredLessons(filtered)
@@ -139,8 +138,8 @@ export default function Lessons() {
         }
     }
 
-    const content = dummyClassGroupItems?.map((lesson) => (
-        <div key={`lesson-${lesson.schedule_id}-${lesson.student_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}`)}>
+    const content = lessons?.map((lesson) => (
+        <div className="my-4" key={`lesson-${lesson.id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?lessonID=${lesson.id}`)}>
             <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
         </div>
     ))
@@ -154,7 +153,7 @@ export default function Lessons() {
             displayTitle = `${t('lessons.title')} - Student ${searchStudentId}`
         } else {
             displayContent = filteredLessons.map((lesson) => (
-                <div key={`lesson-${lesson.schedule_id}-${lesson.student_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}`)}>
+                <div key={`lesson-${lesson.id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?lessonID=${lesson.id}`)}>
                     <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
                 </div>
             ))
@@ -185,7 +184,7 @@ export default function Lessons() {
 
     if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('lessons.loading_lessons')}</p></DashboardPage>
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!lessons || lessons.classes?.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.no_data_found')}</p></DashboardPage>
+    if (!lessons || lessons.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.no_data_found')}</p></DashboardPage>
 
     const actionStatusBanner = (createState?.message || updateState?.message) ? (
         <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
@@ -232,7 +231,7 @@ export default function Lessons() {
                     <p className="text-slate-700 text-xl">{t('lessons.no_lessons_found')}</p>
                 ) : (
                     fetchedLessons.map((lesson) => (
-                        <div key={`lesson-${lesson.schedule_id}-${lesson.student_id}`}>
+                        <div key={`lesson-${lesson.id}`}>
                             <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
                         </div>
                     ))

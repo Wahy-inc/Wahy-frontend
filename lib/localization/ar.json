@@ -8,7 +8,11 @@
     "description": "منصة إسلامية لمساعدة الشيوخ على الإشراف ومراقبة طلابهم وتقدمهم.",
     "admin_login": "تسجيل الدخول كشيخ",
     "student_signup": "انشاء حساب طالب",
-    "student_login": "تسجيل الدخول كطالب"
+    "student_login": "تسجيل الدخول كطالب",
+    "title_page": "الصفحة الرئيسية",
+    "current_time": "الوقت الحالي",
+    "start_in": "بدء في",
+    "no_upcoming_sessions": "لا توجد جلسات قادمة"
   },
   "common": {
     "loading": "جاري التحميل...",
@@ -66,10 +70,15 @@
     "repetition": "إعادة",
     "needs_improvement": "يحتاج إلى تحسين",
     "pass_fail": "نجح/رسب",
+    "passed": "نجح",
+    "failed": "رسب",
     "attempts": "المحاولات",
     "absence_reason": "سبب الغياب",
+    "lesson_type": "نوع الدرس",
+    "what_heard": "ما سمعه من الشيخ",
     "sheikh_notes": "ملاحظات الشيخ",
     "student_notes": "ملاحظات الطالب",
+    "homework": "الواجب المنزلي",
     "enter_student_id": "أدخل رقم هوية الطالب...",
     "enter_schedule_id": "أدخل رقم الهوية الجدول الزمني...",
     "select_date": "اختر التاريخ...",
@@ -368,5 +377,19 @@
     "offline_saved": "تم الحفظ بدون اتصال. سيتم مزامنة التغييرات تلقائياً عند استعادة الاتصال.",
     "offline_error": "فشل الإجراء. يرجى مراجعة البيانات والمحاولة مرة أخرى.",
     "connection_restored": "تم استعادة الاتصال"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "mark_all_as_read": "اجعل الكل كمقروء",
+    "no_notifications": "لا توجد إشعارات",
+    "no_notifications_desc": "ليس لديك إشعارات في الوقت الحالي.",
+    "user_id_label": "رقم هوية المستخدم",
+    "entity_id_label": "رقم هوية الكيان",
+    "entity_type_label": "نوع الكيان",
+    "id_label": "رقم الهوية",
+    "scheduled_for_label": "مجدول ل",
+    "read_at_label": "تم القراءة في",
+    "created_at_label": "تم الإنشاء في",
+    "updated_at_label": "تم التحديث في"
   }
 }

@@ -8,7 +8,11 @@
     "description": "Исламская платформа для помощи шейхам в контроле и мониторинге их учеников и их прогресса.",
     "admin_login": "Вход администратора",
     "student_signup": "Регистрация студента",
-    "student_login": "Вход студента"
+    "student_login": "Вход студента",
+    "title_page": "Главная страница",
+    "current_time": "Текущее время",
+    "start_in": "Начало через",
+    "no_upcoming_sessions": "Нет предстоящих сеансов"
   },
   "common": {
     "loading": "Загрузка...",
@@ -66,10 +70,15 @@
     "repetition": "Повторение",
     "needs_improvement": "Требует улучшения",
     "pass_fail": "Сдал/Не сдал",
+    "passed": "Сдал",
+    "failed": "Не сдал",
     "attempts": "Попытки",
     "absence_reason": "Причина отсутствия",
+    "lesson_type": "Тип урока",
+    "what_heard": "Что слышал от шейха",
     "sheikh_notes": "Примечания шейха",
     "student_notes": "Примечания студента",
+    "homework": "Домашнее задание",
     "enter_student_id": "Введите ID студента...",
     "enter_schedule_id": "Введите ID расписания...",
     "select_date": "Выберите дату...",
@@ -370,5 +379,19 @@
     "offline_saved": "Сохранено локально. Изменения будут синхронизированы автоматически при восстановлении соединения.",
     "offline_error": "Действие не удалось. Пожалуйста, проверьте введённые данные и повторите попытку.",
     "connection_restored": "Соединение восстановлено"
+  },
+  "notifications": {
+    "title": "Уведомления",
+    "mark_all_as_read": "Отметить все как прочитанные",
+    "no_notifications": "Нет уведомлений",
+    "no_notifications_desc": "У вас нет уведомлений в данный момент.",
+    "user_id_label": "ID пользователя",
+    "entity_id_label": "ID сущности",
+    "entity_type_label": "Тип сущности",
+    "id_label": "ID",
+    "scheduled_for_label": "Запланировано на",
+    "read_at_label": "Прочитано в",
+    "created_at_label": "Создано в",
+    "updated_at_label": "Обновлено в"
   }
 }
