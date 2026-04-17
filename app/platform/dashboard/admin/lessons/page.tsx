@@ -2,13 +2,13 @@
 
 import React, { useActionState } from "react";
 import * as openApi from "@/lib/openApi"
-import { createLesson, getLessonByDay, listLessons, updateLesson } from "@/app/platform/actions/dashboard";
+import { createLesson, getLessonByDay, listLessons } from "@/app/platform/actions/dashboard";
 import DashboardPage from "../page";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { UpdateLessonFormState, GetLessonByDayFormState } from "@/app/platform/lib/definitions";
+import { GetLessonByDayFormState } from "@/app/platform/lib/definitions";
 import LessonElement from "./lesson_element";
 import TitleElement from "./title_element";
 import { useAuth } from "@/lib/auth-context";
@@ -26,8 +26,6 @@ export default function Lessons() {
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const [createState, createAction, createPending] = useActionState(createLesson, undefined)
-    const updateLessonAction = (state: UpdateLessonFormState, formData: FormData) => updateLesson(state, formData, Number(formData.get('lesson-id')))
-    const [updateState, updateAction, updatePending] = useActionState(updateLessonAction, undefined)
     const getLessonAction = async (state: GetLessonByDayFormState, formData: FormData) => {
         return getLessonByDay(state, formData)
     }
@@ -35,12 +33,10 @@ export default function Lessons() {
     const [fetchedLessons, setFetchedLessons] = React.useState<openApi.LessonRead[] | null>(null)
     const [getLessonDialogOpen, setGetLessonDialogOpen] = React.useState(false)
     const [createLessonDialogOpen, setCreateLessonDialogOpen] = React.useState(false)
-    const [updateLessonDialogOpen, setUpdateLessonDialogOpen] = React.useState(false)
     const [searchStudentId, setSearchStudentId] = React.useState<string>("")
     const [filteredLessons, setFilteredLessons] = React.useState<openApi.LessonRead[] | null>(null)
 
     useToastListener(createState, {functionName: "Create Lesson", successMessage: t('lessons.create_success'), errorMessage: t('lessons.create_error')})
-    useToastListener(updateState, {functionName: "Update Lesson", successMessage: t('lessons.update_success'), errorMessage: t('lessons.update_error')})
     useToastListener(getLessonState, {functionName: "Get Lesson", successMessage: t('lessons.get_success'), errorMessage: t('lessons.get_error')})
     
     React.useEffect(() => {
@@ -76,9 +72,7 @@ export default function Lessons() {
         }
         if (
             createState?.message === 'success' ||
-            createState?.message === 'queued' ||
-            updateState?.message === 'success' ||
-            updateState?.message === 'queued'
+            createState?.message === 'queued'
         ) {
             const fetchLessons = async () => {
                 try {
@@ -95,7 +89,7 @@ export default function Lessons() {
             }
             fetchLessons()
         }
-    }, [getLessonState, createState, updateState, t])
+    }, [getLessonState, createState, t])
 
     if (!isAdmin) {
             return (
@@ -140,7 +134,7 @@ export default function Lessons() {
 
     const content = lessons?.map((lesson) => (
         <div className="my-4" key={`lesson-${lesson.id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?lessonID=${lesson.id}`)}>
-            <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
+            <LessonElement lesson={lesson}/>
         </div>
     ))
 
@@ -154,7 +148,7 @@ export default function Lessons() {
         } else {
             displayContent = filteredLessons.map((lesson) => (
                 <div key={`lesson-${lesson.id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?lessonID=${lesson.id}`)}>
-                    <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
+                    <LessonElement lesson={lesson}/>
                 </div>
             ))
             displayTitle = `${t('lessons.title')} - Student ${searchStudentId} (${filteredLessons?.length})`
@@ -186,17 +180,17 @@ export default function Lessons() {
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
     if (!lessons || lessons.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.no_data_found')}</p></DashboardPage>
 
-    const actionStatusBanner = (createState?.message || updateState?.message) ? (
+    const actionStatusBanner = (createState?.message) ? (
         <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
-            createState?.message === 'queued' || updateState?.message === 'queued'
+            createState?.message === 'queued'
                 ? 'border-amber-200 bg-amber-50 text-amber-800'
-                : createState?.message === 'fail' || updateState?.message === 'fail'
+                : createState?.message === 'fail'
                     ? 'border-red-200 bg-red-50 text-red-800'
                     : 'border-emerald-200 bg-emerald-50 text-emerald-800'
         }`}>
-            {createState?.message === 'queued' || updateState?.message === 'queued'
+            {createState?.message === 'queued'
                 ? t('lessons.offline_sync')
-                : createState?.message === 'fail' || updateState?.message === 'fail'
+                : createState?.message === 'fail'
                     ? t('lessons.offline_error')
                     : t('messages.success')}
         </div>
@@ -232,7 +226,7 @@ export default function Lessons() {
                 ) : (
                     fetchedLessons.map((lesson) => (
                         <div key={`lesson-${lesson.id}`}>
-                            <LessonElement lesson={lesson} updateAction={updateAction} updateState={updateState} updatePending={updatePending} setUpdateLessonDialogOpen={setUpdateLessonDialogOpen} updateLessonDialogOpen={updateLessonDialogOpen} fieldInput={fieldInput} />
+                            <LessonElement lesson={lesson}/>
                         </div>
                     ))
                 )}

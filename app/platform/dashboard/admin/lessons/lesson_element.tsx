@@ -1,17 +1,12 @@
 import * as openApi from "@/lib/openApi"
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { Card, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
 import * as Icon from '@deemlol/next-icons'
-import { Clock, Calendar, Power, RefreshCw } from "lucide-react"
-import { JSX } from "react"
-import { UpdateLessonFormState } from "@/app/platform/lib/definitions"
+import { Power, RefreshCw } from "lucide-react"
 import { useLocalization } from "@/lib/localization-context"
 import { getLocalStudent } from "@/app/platform/actions/dashboard"
 
-export default function LessonElement({lesson, updateAction, updateState, updatePending, setUpdateLessonDialogOpen, updateLessonDialogOpen, fieldInput}: {lesson: openApi.LessonRead, updateAction: (formData: FormData) => void, updateState: UpdateLessonFormState | null | undefined, updatePending: boolean, setUpdateLessonDialogOpen: (open: boolean) => void, updateLessonDialogOpen: boolean, fieldInput: (label: string, name: string, defaultValue: string, type: string) => JSX.Element}) {
+export default function LessonElement({lesson}: {lesson: openApi.LessonRead}) {
     const { t, language } = useLocalization()
     const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
     const date = new Date(lesson.date);

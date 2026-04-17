@@ -1,42 +1,53 @@
 import * as openApi from "@/lib/openApi"
-import { DataTable } from "./data_table"
-import { useColumnsWithLocalization } from "./columns"
-import * as Icon from '@deemlol/next-icons'
-import { useLocalization } from "@/lib/localization-context"
+import { Card, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import * as Icon from '@deemlol/next-icons'
+import { Power, RefreshCw } from "lucide-react"
+import { useLocalization } from "@/lib/localization-context"
+import { getLocalStudent } from "@/app/platform/actions/dashboard"
 
 export default function LessonElement({lesson}: {lesson: openApi.LessonRead}) {
-    const { t } = useLocalization()
-    const { columns, HWcolumns, isRTL } = useColumnsWithLocalization()
+    const { t, language } = useLocalization()
+    const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+    const date = new Date(lesson.date);
+    const dayNumber = date.getDay();
+
     return (
-        <div className="overflow-hidden border-2 rounded-xl bg-white flex flex-col justify-start my-5 p-4 shadow-[0px_4px_30px_rgba(0,0,0,0.1)] opacity-90 backdrop-blur-sm hover:opacity-80 transition duration-300 hover:scale-101" dir={isRTL ? 'rtl' : 'ltr'}>
-            <div className={`flex flex-col justify-center items-start mb-4 ${isRTL ? 'text-right' : 'text-left'}`}>
-                <div className="flex items-center gap-4">
-                    <div className={`bg-blue-900 min-w-14 h-14 px-2 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md`}>
-                        {lesson.id}
+        <Card className="overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">            
+            <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        {/* Lesson Circle */}
+                        <div className={`bg-slate-800 min-w-14 h-14 px-2 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md`}>
+                            {lesson.id}
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-bold text-slate-800">{t(`schedules.${dayKeys[dayNumber]}`)}</h3>
+                            <div className="flex items-center gap-2 mt-1">
+                                <Badge variant="secondary" className="text-xs">{language === 'ar' ? getLocalStudent(lesson.student_id)?.full_name_arabic : getLocalStudent(lesson.student_id)?.full_name_english}</Badge>
+                                <Badge variant="outline" className="text-xs">
+                                    <Icon.User className="w-3 h-3 mr-1" />
+                                    {t(`lessons.${lesson.type}`)}
+                                </Badge>
+                            </div>
+                        </div>
                     </div>
-                <div>
-                <h3 className="text-2xl font-bold text-slate-800">{t('lessons.schedule_id')} : {lesson.schedule_id}</h3>
-                <div className="grid grid-cols-2 gap-0 mt-1">
-                    <p className=" text-slate-600 flex items-center"><Badge variant="outline" className="text-xs"><Icon.Calendar className="inline pr-1"/>: {lesson.date}</Badge></p>
-                    <p className=" text-slate-600 flex items-center"><Badge variant="outline" className="text-xs"><Icon.Clock className="inline pr-1"/>{t('lessons.attendance')}: {lesson.attendance}</Badge></p>
+                    
+                    {/* Status Badges */}
+                    <div className="flex flex-col gap-2 items-end">
+                        <Badge variant={lesson.attendance === openApi.AttendanceStatus.Present ? "default" : "destructive"} className="gap-1">
+                            <Power className="w-3 h-3" />
+                            {t(`lessons.${lesson.attendance}`)}
+                        </Badge>
+                        {lesson.pass_fail !== null && (
+                            <Badge variant={lesson.pass_fail ? "default" : "destructive"} className="gap-1">
+                                <RefreshCw className="w-3 h-3" />
+                                {lesson.pass_fail ? t('lessons.passed') : t('lessons.failed')}
+                            </Badge>
+                        )}
+                    </div>
                 </div>
-                </div>
-                </div>
-            </div>
-            <div className="mb-2">
-                <p className="text-lg text-slate-600 pb-0.5">{t('lessons.recited')}</p>
-                <DataTable columns={columns} data={[lesson]} isRTL={isRTL} />
-            </div>
-            <div className="mb-2">
-                <p className="text-lg text-slate-600 pb-0.5">{t('lessons.new_memorization')}</p>
-                <DataTable columns={HWcolumns} data={[lesson]} isRTL={isRTL} />
-            </div>
-            {lesson.absence_reason && <p className={`w-full text-[12px] text-slate-600 ${isRTL ? 'text-right' : 'text-left'}`}><span className="font-bold text-slate-800">{t('lessons.absence_reason')}</span> &quot;{lesson.absence_reason}&quot;</p>}
-            {lesson.sheikh_notes && <p className={`w-full text-[12px] text-slate-600 ${isRTL ? 'text-right' : 'text-left'}`}><span className="font-bold text-slate-800">{t('lessons.sheikh_notes')}</span> &quot;{lesson.sheikh_notes}&quot;</p>}
-            {lesson.student_notes && <p className={`w-full text-[12px] text-slate-600 ${isRTL ? 'text-right' : 'text-left'}`}><span className="font-bold text-slate-800">{t('lessons.student_notes')}</span> &quot;{lesson.student_notes}&quot;</p>}
-            <div className={`flex flex-row ${isRTL ? 'flex-row-reverse' : ''} justify-end`}>
-            </div>
-        </div>
+            </CardHeader>
+        </Card>
     )
 }
