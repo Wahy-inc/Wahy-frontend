@@ -14,7 +14,7 @@ export async function calenderGetData({startDate, endDate}: {startDate: string, 
             end_date: endDate
         }
         console.log("Sending data", data);
-        const response = await api.api.getCalendarGrid(data);
+        const response = await api.api.getCalendarGridApiV2CalendarGridGet(data);
         if (!response.ok || !response.data || response.status == 422) {
             console.log("failed");
             return { message: 'fail' }
@@ -53,7 +53,25 @@ export async function calenderGetDayData(dayID: string): Promise<GetCalendarDayD
 
 export async function notificationsGetUpcoming(): Promise<openApi.UpcomingSessionResponse[] | null> {
     try {
-        const response = await api.notifications.upcomingSessions();
+        const response = await api.api.upcomingSessionsApiV2NotificationsSessionsUpcomingGet();
+        if (!response.ok || !response.data) {
+            console.log("failed");
+            return null
+        }
+        if (response.status == 200) {
+            console.log("Received upcoming notifications", response.data);
+            return response.data
+        }
+        return null
+    } catch (error) {
+        console.error("Error fetching upcoming notifications:", error);
+        return null
+    }
+}
+
+export async function studentNotificationsGetUpcoming(): Promise<openApi.UpcomingSessionResponse[] | null> {
+    try {
+        const response = await api.api.myUpcomingSessionsApiV2NotificationsSessionsMeUpcomingGet();
         if (!response.ok || !response.data) {
             console.log("failed");
             return null
@@ -71,7 +89,7 @@ export async function notificationsGetUpcoming(): Promise<openApi.UpcomingSessio
 
 export async function notificationsGetAll(): Promise<openApi.NotificationRead[] | null> {
     try {
-        const response = await api.notifications.listNotifications();
+        const response = await api.api.listUserNotificationsApiV2NotificationsGet();
         if (!response.ok || !response.data) {
             console.log("failed");
             return null
@@ -90,7 +108,7 @@ export async function notificationsGetAll(): Promise<openApi.NotificationRead[] 
 export async function notificationsMarkAsRead(notificationId: number): Promise<boolean> {
     try {
         console.log("Marking notification as read", notificationId);
-        const response = await api.notifications.readNotification(notificationId);
+        const response = await api.api.readNotificationApiV2NotificationsNotificationIdReadPatch(notificationId);
         if (!response.ok) {
             console.log("failed to mark notification as read");
             return false
@@ -109,7 +127,7 @@ export async function notificationsMarkAsRead(notificationId: number): Promise<b
 export async function notificationsMarkAllAsRead(): Promise<boolean> {
     try {
         console.log("Marking all notifications as read");
-        const response = await api.notifications.readAllNotifications();
+        const response = await api.api.readAllNotificationsApiV2NotificationsReadAllPost();
         if (!response.ok) {
             console.log("failed to mark all notifications as read");
             return false

@@ -4,7 +4,7 @@ import DashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { notificationsGetAll, notificationsGetUpcoming, notificationsMarkAsRead, notificationsMarkAllAsRead } from "@/app/platform/actions/dashboardv2";
+import { studentNotificationsGetUpcoming } from "@/app/platform/actions/dashboardv2";
 import {
   Carousel,
   CarouselContent,
@@ -13,18 +13,15 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel"
 import { useLocalization } from "@/lib/localization-context";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 export default function AdminHomePage() {
     const [time, setTime] = React.useState(new Date())
     const { t, language } = useLocalization();
     const [upcomings, setUpcomings] = React.useState<openApi.UpcomingSessionResponse[] | null>(null)
-    const [notifications, setNotifications] = React.useState<openApi.NotificationRead[] | null>(null)
 
     const fetchUpcomings = async () => {
         try {
-            const data = await notificationsGetUpcoming()
+            const data = await studentNotificationsGetUpcoming()
             setUpcomings(data)
         } catch (error) {
             console.error('Error fetching upcoming sessions:', error)
@@ -32,16 +29,6 @@ export default function AdminHomePage() {
         }
     }
     
-    const fetchNotifications = async () => {
-        try {
-            const data = await notificationsGetAll()
-            setNotifications(data)
-        } catch (error) {
-            console.error('Error fetching notifications:', error)
-            setNotifications([])
-        }
-    }
-
     React.useEffect(() => {
         const interval = setInterval(() => {
             setTime(new Date())
@@ -51,7 +38,6 @@ export default function AdminHomePage() {
 
     React.useEffect(() => {
         fetchUpcomings()
-        fetchNotifications()
     }, [])
 
     const titleElement = (
@@ -150,53 +136,6 @@ export default function AdminHomePage() {
         </Carousel>
     )
 
-    const notificationsWidget = (
-        <Card className="w-full bg-slate-50 border border-slate-300 rounded-xl p-4 my-4 mx-1 text-slate-600">
-        <CardHeader className="flex items-center">
-            <CardTitle className="text-xl">Notifications </CardTitle>
-            { (<span className="bg-slate-800 text-slate-100 text-[10px] rounded-2xl px-2 py-1 hover:opacity-80 hover:cursor-pointer" onClick={() => notificationsMarkAllAsRead()}><icon.Check className="w-3 h-3 inline" />Mark all as Read</span>) }
-        </CardHeader>
-        <CardContent>
-            <Accordion type="single" collapsible defaultValue="plans">
-                {notifications && notifications.length > 0 ? (
-                    notifications.map((notification) => (
-                        <AccordionItem key={`notification-${notification.id}`} value={`notification-${notification.id}`}>
-                            <AccordionTrigger onClick={() => notificationsMarkAsRead(notification.id)}>
-                                <p className="text-lg px-2">{notification.title}</p>
-                                <div className="px-1 py-0.5 bg-slate-800 text-slate-100 text-sm rounded-2xl">
-                                    {notification.type}
-                                </div>
-                                <div>
-                                    {notification.is_read ? (
-                                        <icon.Check className="w-5 h-5 text-slate-900" />
-                                    ) : (
-                                        <icon.X className="w-5 h-5 text-slate-500" />
-                                    )}
-                                </div>
-                            </AccordionTrigger>
-                            <AccordionContent className="p-2">
-                                <p className="text-slate-500 text-sm">{notification.body}</p>
-                                <div className="h-0.5 bg-slate-500 w-full"></div>
-                                <p className="text-slate-500 text-sm"><span className="font-bold">User ID: {notification.user_id}</span></p>
-                                {notification.related_entity_id && notification.related_entity_type && (
-                                    <p className="text-slate-500 text-sm">Entity ID: {notification.related_entity_id} | Entity Type: {notification.related_entity_type}</p>
-                                )}
-                                <p className="text-slate-500 text-sm">ID: {notification.id} {notification.scheduled_for && ` | Scheduled for: ${notification.scheduled_for}`}</p>
-                                <p className="text-slate-500 text-sm">{notification.read_at && <span className="font-bold">Read at: {notification.read_at}</span>} | Created at: {notification.created_at} | Updated at: {notification.updated_at}</p>
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))
-                ) : (
-                    <AccordionItem value="no-notifications">
-                        <AccordionTrigger>No notifications</AccordionTrigger>
-                        <AccordionContent>You have no notifications at this time.</AccordionContent>
-                    </AccordionItem>
-                )}
-            </Accordion>
-        </CardContent>
-        </Card>
-    )
-
     return <DashboardPage title={titleElement}>
         <div className="grid grid-cols-2 gap-16 items-center">
             <div className="col-start-1 col-end-2">
@@ -204,9 +143,6 @@ export default function AdminHomePage() {
             </div>
             <div className="col-start-2 col-end-3">
                 {upcomingSessionsWidget}
-            </div>
-            <div className="col-start-1 col-end-3">
-                {notificationsWidget}
             </div>
         </div>
             </DashboardPage>
