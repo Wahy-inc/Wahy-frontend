@@ -38,10 +38,6 @@ export default function TitleElement({
     getLessonPending,
     getLessonState,
     fieldInput,
-    createLessonDialogOpen,
-    setCreateLessonDialogOpen,
-    getLessonDialogOpen,
-    setGetLessonDialogOpen,
 }: {
         title: string,
         handleSearchStudentId: (e: React.ChangeEvent<HTMLInputElement>) => void,
@@ -54,10 +50,6 @@ export default function TitleElement({
         createAction: (formData: FormData) => void,
         createPending: boolean,
         fieldInput: (label: string, name: string, holder: string, type: string) => JSX.Element,
-        createLessonDialogOpen: boolean,
-        setCreateLessonDialogOpen: (open: boolean) => void,
-        getLessonDialogOpen: boolean,
-        setGetLessonDialogOpen: (open: boolean) => void,
     }) {
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)

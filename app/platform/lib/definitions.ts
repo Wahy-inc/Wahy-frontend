@@ -64,12 +64,10 @@ export const CreatLessonSchema = zod.object({
     type: zod.enum(LessonType, { error: 'Invalid lesson type' }),
     attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }).optional(),
     absence_reason: zod.string().trim().optional(),
-    pass_fail: zod.string().trim().optional(),
     sheikh_notes: zod.string().trim().optional(),
     student_notes: zod.string().trim().optional(),
     what_is_heard_from_sheikh: zod.string().trim().optional(),
     homework: zod.string().trim().optional(),
-    recurrence: zod.string().min(0).trim().optional(),
 })
 
 export type CreateLessonFormState =
@@ -80,18 +78,17 @@ export type CreateLessonFormState =
             type?: string[];
             attendance?: string[];
             absence_reason?: string[];
-            pass_fail?: string[];
             sheikh_notes?: string[];
             student_notes?: string[];
             what_is_heard_from_sheikh?: string[];
             homework?: string[];
-            recurrence?: string[];
         }
         message?: string;
     }
     | undefined;
 
 export const UpdateLessonSchema = zod.object({
+    id: zod.string({ error: 'Lesson ID is required' }),
     date: zod.string().trim().optional(),
     type: zod.enum(LessonType, { error: 'Invalid lesson type' }).optional(),
     attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }).optional(),
@@ -106,6 +103,7 @@ export const UpdateLessonSchema = zod.object({
 export type UpdateLessonFormState =
     | {
         error?: {
+            id?: string[];
             date?: string[];
             type?: string[];
             attendance?: string[];

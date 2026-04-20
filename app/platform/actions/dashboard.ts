@@ -906,14 +906,9 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
         date: formData.get('date'),
         type: formData.get('type'),
         attendance: formData.get('attendance'),
-        juz: formData.get('juz'),
-        surah: formData.get('surah'),
-        ayah_from: formData.get('ayah_from'),
-        ayah_to: formData.get('ayah_to'),
-        quality: formData.get('quality'),
         absence_reason: formData.get('absence_reason'),
-        recurrence: formData.get('rrule_string'),
-        pass_fail: formData.get('pass_fail'),
+        what_is_heard_from_sheikh: formData.get('what_is_heard_from_sheikh'),
+        homework: formData.get('homework'),
     })
 
     if (!validation.success) {
@@ -926,12 +921,10 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
             type: validation.data.type,
             attendance: validation.data.attendance,
             absence_reason: validation.data.absence_reason,
-            pass_fail: validation.data.pass_fail === 'pass' ? true : validation.data.pass_fail === 'fail' ? false : null,
             student_notes: validation.data.student_notes,
             sheikh_notes: validation.data.sheikh_notes,
-            what_is_heard_from_sheikh: undefined,
-            homework: undefined,
-            recurrence: validation.data.recurrence ? { rrule: validation.data.recurrence } : undefined,
+            what_is_heard_from_sheikh: validation.data.what_is_heard_from_sheikh,
+            homework: validation.data.homework,
         }
 
         console.log('Created lesson data:', data);
@@ -966,12 +959,10 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
                     type: validation.data.type,
                     attendance: validation.data.attendance,
                     absence_reason: validation.data.absence_reason,
-                    pass_fail: validation.data.pass_fail === 'pass' ? true : validation.data.pass_fail === 'fail' ? false : null,
                     student_notes: validation.data.student_notes,
                     sheikh_notes: validation.data.sheikh_notes,
                     what_is_heard_from_sheikh: validation.data.what_is_heard_from_sheikh,
                     homework: validation.data.homework,
-                    recurrence: validation.data.recurrence ? { rrule: validation.data.recurrence } : undefined,
                 },
                 idempotency_key: createIdempotencyKey(),
             })
@@ -981,16 +972,16 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
     }
 }
 
-export async function updateLesson(state: UpdateLessonFormState, formData: FormData, lessonId: number): Promise<UpdateLessonFormState> {
+export async function updateLesson(state: UpdateLessonFormState, formData: FormData): Promise<UpdateLessonFormState> {
     const validation = UpdateLessonSchema.safeParse({
-        sheikh_notes: formData.get('sheikh-notes'),
-        student_notes: formData.get('student-notes'),
+        id: formData.get('lesson-id'),
+        sheikh_notes: formData.get('sheikh_notes'),
+        student_notes: formData.get('student_notes'),
         date: formData.get('date'),
         type: formData.get('type'),
         attendance: formData.get('attendance'),
-        absence_reason: formData.get('absence-reason'),
-        pass_fail: formData.get('pass-fail'),
-        what_is_heard_from_sheikh: formData.get('what-is-heard-from-sheikh'),
+        absence_reason: formData.get('absence_reason'),
+        what_is_heard_from_sheikh: formData.get('what_is_heard_from_sheikh'),
         homework: formData.get('homework'),
     })
 
@@ -1003,7 +994,6 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
             type: validation.data.type,
             attendance: validation.data.attendance,
             absence_reason: validation.data.absence_reason,
-            pass_fail: validation.data.pass_fail ? validation.data.pass_fail === 'pass' : null,
             student_notes: validation.data.student_notes,
             sheikh_notes: validation.data.sheikh_notes,
             what_is_heard_from_sheikh: validation.data.what_is_heard_from_sheikh,
@@ -1013,7 +1003,7 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
         if (!isClientOnline()) {
             enqueueOfflineMutation({
                 entity_type: 'lesson',
-                entity_id: lessonId,
+                entity_id: Number(validation.data.id),
                 operation: openApi.SyncOperation.Update,
                 payload: data as unknown as Record<string, unknown>,
                 idempotency_key: createIdempotencyKey(),
@@ -1021,7 +1011,7 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
             return { message: 'queued' }
         }
 
-        const response = await api.api.updateApiV1LessonsLessonIdPatch(lessonId, data)
+        const response = await api.api.updateApiV1LessonsLessonIdPatch(Number(validation.data.id), data)
 
         if (response.status === 200) {
             window.location.reload() // Refresh the lessons list after creating a new lesson
@@ -1032,14 +1022,13 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
         if (shouldQueueMutation(error)) {
             enqueueOfflineMutation({
                 entity_type: 'lesson',
-                entity_id: lessonId,
+                entity_id: Number(validation.data.id),
                 operation: openApi.SyncOperation.Update,
                 payload: {
                     date: validation.data.date,
                     type: validation.data.type,
                     attendance: validation.data.attendance,
                     absence_reason: validation.data.absence_reason,
-                    pass_fail: validation.data.pass_fail ? validation.data.pass_fail === 'pass' : null,
                     student_notes: validation.data.student_notes,
                     sheikh_notes: validation.data.sheikh_notes,
                     what_is_heard_from_sheikh: validation.data.what_is_heard_from_sheikh,
@@ -1071,12 +1060,12 @@ export async function getLessonByDay(state: GetLessonByDayFormState, formData: F
     }
 }
 
-export async function getLessonHistory(state: getLessonHistoryState, id: number): Promise<getLessonHistoryState> {
+export async function getLessonHistory(state: getLessonHistoryState, scheduleID: number, studentID: number, day: number): Promise<getLessonHistoryState> {
     try {
         const response = await api.api.listAllApiV1LessonsGet()
 
         if (response.status === 200) {
-            const lessons = response.data.filter((lesson: openApi.LessonRead) => lesson.schedule_id === id)
+            const lessons = response.data.filter((lesson: openApi.LessonRead) => lesson.schedule_id === scheduleID && lesson.student_id === studentID && new Date(lesson.date).getDay() === day)
             const history: openApi.ClassHistoryResponse = { lessons: lessons, total: lessons.length }
             return { message: 'success', data: history }
         }

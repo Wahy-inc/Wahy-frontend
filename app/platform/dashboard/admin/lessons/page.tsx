@@ -31,8 +31,6 @@ export default function Lessons() {
     }
     const [getLessonState, getLessonFormAction, getLessonPending] = useActionState(getLessonAction, undefined)
     const [fetchedLessons, setFetchedLessons] = React.useState<openApi.LessonRead[] | null>(null)
-    const [getLessonDialogOpen, setGetLessonDialogOpen] = React.useState(false)
-    const [createLessonDialogOpen, setCreateLessonDialogOpen] = React.useState(false)
     const [searchStudentId, setSearchStudentId] = React.useState<string>("")
     const [filteredLessons, setFilteredLessons] = React.useState<openApi.LessonRead[] | null>(null)
 
@@ -133,7 +131,7 @@ export default function Lessons() {
     }
 
     const content = lessons?.map((lesson) => (
-        <div className="my-4" key={`lesson-${lesson.id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?lessonID=${lesson.id}`)}>
+        <div className="my-4" key={`lesson-${lesson.id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${new Date(lesson.date).getDay()}`)}>
             <LessonElement lesson={lesson}/>
         </div>
     ))
@@ -147,7 +145,7 @@ export default function Lessons() {
             displayTitle = `${t('lessons.title')} - Student ${searchStudentId}`
         } else {
             displayContent = filteredLessons.map((lesson) => (
-                <div key={`lesson-${lesson.id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?lessonID=${lesson.id}`)}>
+                <div key={`lesson-${lesson.id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${new Date(lesson.date).getDay()}`)}>
                     <LessonElement lesson={lesson}/>
                 </div>
             ))
@@ -168,10 +166,6 @@ export default function Lessons() {
             createAction={createAction}
             createPending={createPending}
             fieldInput={fieldInput}
-            createLessonDialogOpen={createLessonDialogOpen}
-            setCreateLessonDialogOpen={setCreateLessonDialogOpen}
-            getLessonDialogOpen={getLessonDialogOpen}
-            setGetLessonDialogOpen={setGetLessonDialogOpen}
         />
     )
 
@@ -203,11 +197,7 @@ export default function Lessons() {
                 createAction={createAction}
                 createState={createState}
                 createPending={createPending}
-                setCreateLessonDialogOpen={setCreateLessonDialogOpen}
-                createLessonDialogOpen={createLessonDialogOpen}
                 fieldInput={fieldInput}
-                getLessonDialogOpen={getLessonDialogOpen}
-                setGetLessonDialogOpen={setGetLessonDialogOpen}
                 handleSearchStudentId={handleSearchStudentId}
                 searchStudentId={searchStudentId}
                 handleClearFilter={handleClearFilter}

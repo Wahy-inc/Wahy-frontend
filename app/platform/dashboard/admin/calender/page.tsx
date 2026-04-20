@@ -46,6 +46,7 @@ export default function CalendarPage() {
                 </div>
             </div>
     )
+    
     const content = (<Calendar
         mode="single"
         className="rounded-lg border min-w-full min-h-full text-3xl font-bold"

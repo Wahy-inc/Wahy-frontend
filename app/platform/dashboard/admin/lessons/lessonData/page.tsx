@@ -1,13 +1,11 @@
 'use client'
 
 import { useSearchParams } from "next/navigation";
-import React, { useState } from "react";
+import React, { useActionState, useState } from "react";
 import * as openApi from "@/lib/openApi";
-import { dummyHistory } from "@/lib/dummydata";
 import DashboardPage from "../../page";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { CheckCircle, XCircle, AlertCircle } from "lucide-react";
 import * as Icon from '@deemlol/next-icons';
 import { useLocalization } from "@/lib/localization-context";
@@ -17,29 +15,48 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
+import { getLessonHistory, updateLesson } from "@/app/platform/actions/dashboard";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Field } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function LessonDataPage() {
     const searchData = useSearchParams();
     const scheduleID = searchData.get('scheduleID');
     const studentID = searchData.get('studentID');
+    const day = searchData.get('day');
     const [history, setHistory] = useState<openApi.ClassHistoryResponse>();
+    const [editingLessonId, setEditingLessonId] = useState<number | null>(null);
+    const [updateFormSubmitted, setUpdateFormSubmitted] = useState(false);
+    const [updateState, updateAction, updatePending] = useActionState(updateLesson, undefined);
     const { t, language } = useLocalization();
     const isRTL = language === 'ar';
 
     React.useEffect(() => {
-        if (scheduleID) {
-            // getLessonHistory({ message: 'pending' }, Number(lessonID)).then((res) => {
-            //     setHistory(res?.data);
-            // });
-            const lessonList = dummyHistory.filter((item) => item.schedule_id === Number(scheduleID) && item.student_id === Number(studentID));
-            if (lessonList) {
-                setHistory({
-                    total: 1,
-                    lessons: lessonList,
-                });
-            }
+        try {
+            getLessonHistory({ message: 'pending' }, Number(scheduleID), Number(studentID), Number(day)).then((res) => {
+                setHistory(res?.data);
+            });
+        } catch (error) {
+            console.error("Error fetching lesson history:", error);
         }
-    }, [scheduleID, studentID]);
+    }, [scheduleID, studentID, day]);
+
+    const handleUpdateSubmit = (formData: FormData) => {
+        setUpdateFormSubmitted(true);
+        updateAction(formData);
+    }
+
+    const fieldInput = (label: string, name: string, holder: string, type: string) => (        
+        <Field orientation="vertical" className='w-full inline'>
+            <Label htmlFor={name}>{label}</Label>
+            <Input id={name} name={name} type={type} placeholder={holder} defaultValue={holder}></Input>
+        </Field>
+    )
 
     const getAttendanceIcon = (attendance: openApi.AttendanceStatus) => {
         switch (attendance) {
@@ -69,11 +86,6 @@ export default function LessonDataPage() {
             default:
                 return "bg-slate-50 border-slate-100 text-slate-700";
         }
-    };
-
-    const getQualityBadgeVariant = (pass_fail: boolean | null) => {
-        if (pass_fail === null) return "outline";
-        return pass_fail ? "default" : "destructive";
     };
 
     const lessonHistoryElement = (lesson: openApi.LessonRead) => (
@@ -106,17 +118,46 @@ export default function LessonDataPage() {
                             {getAttendanceIcon(lesson.attendance)}
                             {t(`lessons.${lesson.attendance}`)}
                         </Badge>
-                        {lesson.pass_fail !== null && (
-                            <Badge variant={getQualityBadgeVariant(lesson.pass_fail)} className="gap-1">
-                                {lesson.pass_fail ? <CheckCircle className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                                {lesson.pass_fail ? t('lessons.passed') : t('lessons.failed')}
-                            </Badge>
-                        )}
                     </div>
                 </div>
             </CardHeader>
-
             <CardContent className="pt-4">
+                <div className="bg-linear-to-r from-slate-50 to-slate-100 rounded-xl p-4 mb-4">
+                    <div className="flex items-center justify-center gap-8">
+                        <div className="text-center">
+                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('lessons.what_heard')}</p>
+                            <div className="flex items-center gap-2">
+                                <Icon.FileText className="w-5 h-5 text-indigo-500" />
+                                <span className="text-2xl font-bold text-slate-600">
+                                    {lesson.what_is_heard_from_sheikh ? (
+                                        <p className="text-sm">{lesson.what_is_heard_from_sheikh}</p>
+                                    ) : (
+                                        <p className="text-sm italic">{t('lessons.no_what_heard')}</p>
+                                    )}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex items-center">
+                            <div className="w-12 h-0.5 bg-slate-300" />
+                            <Icon.Circle className="w-5 h-5 text-slate-400" />
+                            <div className="w-12 h-0.5 bg-slate-300" />
+                        </div>
+                        <div className="text-center">
+                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('lessons.homework')}</p>
+                            <div className="flex items-center gap-2">
+                                <Icon.FilePlus className="w-5 h-5 text-green-500" />
+                                <span className="text-2xl font-bold text-slate-600">
+                                    {lesson.homework ? (
+                                        <p className="text-sm">{lesson.homework}</p>
+                                    ) : (
+                                        <p className="text-sm italic">{t('lessons.no_homework')}</p>
+                                    )}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* Absence Reason */}
                 {lesson.absence_reason && (
                     <div className="flex items-start gap-3 p-3 bg-red-50 rounded-lg border border-red-200 mb-4">
@@ -129,48 +170,119 @@ export default function LessonDataPage() {
                 )}
 
                 {/* Sheikh Notes */}
-                {lesson.sheikh_notes && (
                     <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100 mb-4">
                         <Icon.MessageSquare className="w-5 h-5 text-blue-600 mt-0.5 shrink-0" />
                         <div>
                             <p className="text-xs text-blue-600 font-medium mb-1">{t('lessons.sheikh_notes')}</p>
-                            <p className="text-sm text-blue-700">{lesson.sheikh_notes}</p>
+                            {lesson.sheikh_notes ? (
+                                        <p className="text-sm text-blue-700">{lesson.sheikh_notes}</p>
+                                    ) : (
+                                        <p className="text-sm text-blue-400 italic">{t('lessons.no_sheikh_notes')}</p>
+                                    )}
                         </div>
                     </div>
-                )}
 
                 {/* Student Notes */}
-                {lesson.student_notes && (
                     <div className="flex items-start gap-3 p-3 bg-amber-50 rounded-lg border border-amber-200 mb-4">
                         <Icon.MessageSquare className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
                         <div>
                             <p className="text-xs text-amber-600 font-medium mb-1">{t('lessons.student_notes')}</p>
-                            <p className="text-sm text-amber-700">{lesson.student_notes}</p>
+                            {lesson.student_notes ? (
+                                <p className="text-sm text-amber-700">{lesson.student_notes}</p>
+                            ) : (
+                                <p className="text-sm text-amber-400 italic">{t('lessons.no_student_notes')}</p>
+                            )}
                         </div>
                     </div>
-                )}
-
-                {/* What Was Heard From Sheikh */}
-                {lesson.what_is_heard_from_sheikh && (
-                    <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-100 mb-4">
-                        <Icon.MessageSquare className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
-                        <div>
-                            <p className="text-xs text-green-600 font-medium mb-1">{t('lessons.what_heard')}</p>
-                            <p className="text-sm text-green-700">{lesson.what_is_heard_from_sheikh}</p>
-                        </div>
-                    </div>
-                )}
-
-                {/* Homework */}
-                {lesson.homework && (
-                    <>
-                        <Separator className="my-4" />
-                        <div className="bg-linear-to-r from-indigo-50 to-purple-50 rounded-xl p-4 border border-indigo-100">
-                            <h4 className="text-lg font-semibold text-indigo-900 mb-3">{t('lessons.homework')}</h4>
-                            <p className="text-sm text-indigo-700">{lesson.homework}</p>
-                        </div>
-                    </>
-                )}
+                    <Separator className="my-4" />
+                <div className="flex justify-end items-end">
+                    <AlertDialog open={editingLessonId === lesson.id} onOpenChange={(open: boolean) => setEditingLessonId(open ? lesson.id : null)}>
+                        <AlertDialogTrigger asChild>
+                            <Button className="transition duration-300 cursor-pointer bg-slate-400 hover:bg-slate-600">{t('lessons.update_lesson')}</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <form action={handleUpdateSubmit}>
+                            <AlertDialogHeader>
+                            <AlertDialogTitle>{t('lessons.update_lesson')}</AlertDialogTitle>
+                                <div className="flex flex-col gap-4 rtl:text-right">
+                                    <div className="grid grid-cols-3 gap-4">
+                                        <input type="text" name="lesson-id" value={lesson.id} readOnly hidden/>
+                                        <div className='flex flex-col'>
+                                            {fieldInput(t('lessons.date'), "date", lesson.date, "date")}
+                                            {updateFormSubmitted && updateState?.error?.date && <p className="text-red-500 text-sm">{updateState.error.date}</p>}
+                                        </div>
+                                        <div className='flex flex-col'>
+                                            <div className="flex flex-col">
+                                                <label htmlFor="type" className="text-sm font-medium">{t('lessons.type')}</label>
+                                                <Select name="type" defaultValue={lesson.type}>
+                                                    <SelectTrigger className="w-full max-w-48">
+                                                        <SelectValue placeholder={t('lessons.select_a_type')} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>{t('lessons.type')}</SelectLabel>
+                                                            <SelectItem value={openApi.LessonType.Evaluation}>{t('lessons.evaluation')}</SelectItem>
+                                                            <SelectItem value={openApi.LessonType.NewMemorization}>{t('lessons.new_memorization')}</SelectItem>
+                                                            <SelectItem value={openApi.LessonType.Revision}>{t('lessons.revision')}</SelectItem>
+                                                            <SelectItem value={openApi.LessonType.Makeup}>{t('lessons.makeup')}</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            {updateFormSubmitted && updateState?.error?.type && <p className="text-red-500 text-sm">{updateState.error.type}</p>}
+                                        </div>
+                                        <div className='flex flex-col'>
+                                            <div className="flex flex-col">
+                                                <label htmlFor="attendance" className="text-sm font-medium">{t('lessons.attendance')}</label>
+                                                <Select name="attendance" defaultValue={lesson.attendance}>
+                                                    <SelectTrigger className="w-full max-w-48">
+                                                        <SelectValue placeholder={t('lessons.attendance')} />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>{t('lessons.attendance')}</SelectLabel>
+                                                            <SelectItem value={openApi.AttendanceStatus.Present}>{t('lessons.present')}</SelectItem>
+                                                            <SelectItem value={openApi.AttendanceStatus.Absent}>{t('lessons.absent')}</SelectItem>
+                                                            <SelectItem value={openApi.AttendanceStatus.Excused}>{t('lessons.excused')}</SelectItem>
+                                                            <SelectItem value={openApi.AttendanceStatus.Late}>{t('lessons.late')}</SelectItem>
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            {updateFormSubmitted && updateState?.error?.attendance && <p className="text-red-500 text-sm">{updateState.error.attendance}</p>}
+                                        </div>
+                                    </div>
+                                    <div className='flex flex-col'>
+                                        {fieldInput(t('lessons.what_heard'), "what_is_heard_from_sheikh", lesson.what_is_heard_from_sheikh ?? '', "text")}
+                                        {updateFormSubmitted && updateState?.error?.what_is_heard_from_sheikh && <p className="text-red-500 text-sm">{updateState.error.what_is_heard_from_sheikh}</p>}
+                                    </div>
+                                    <div className='flex flex-col'>
+                                        {fieldInput(t('lessons.homework'), "homework", lesson.homework ?? '', "text")}
+                                        {updateFormSubmitted && updateState?.error?.homework && <p className="text-red-500 text-sm">{updateState.error.homework}</p>}
+                                    </div>
+                                    <div className='flex flex-col'>
+                                        {fieldInput(t('lessons.absence_reason') + " (Optional)", "absence_reason", lesson.absence_reason ?? '', "text")}
+                                        {updateFormSubmitted && updateState?.error?.absence_reason && <p className="text-red-500 text-sm">{updateState.error.absence_reason}</p>}
+                                    </div>
+                                    <div className='flex flex-col'>
+                                        {fieldInput(t('lessons.sheikh_notes') + " (Optional)", "sheikh_notes", lesson.sheikh_notes ?? '', "text")}
+                                        {updateFormSubmitted && updateState?.error?.sheikh_notes && <p className="text-red-500 text-sm">{updateState.error.sheikh_notes}</p>}
+                                    </div>
+                                    <div className='flex flex-col'>
+                                        {fieldInput(t('lessons.student_notes') + " (Optional)", "student_notes", lesson.student_notes ?? '', "text")}
+                                        {updateFormSubmitted && updateState?.error?.student_notes && <p className="text-red-500 text-sm">{updateState.error.student_notes}</p>}
+                                    </div>
+                                    {updateFormSubmitted && updateState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.update_failed')}</p> : null}
+                                </div>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="mt-4">
+                                <AlertDialogCancel type="reset" disabled={updatePending} onClick={() => setUpdateFormSubmitted(false)}>{t('common.cancel')}</AlertDialogCancel>
+                                <Button type="submit" disabled={updatePending}>{updatePending ? t('common.updating') : t('common.update')}</Button>
+                            </AlertDialogFooter>
+                            </form>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
             </CardContent>
         </Card>
     );
@@ -204,8 +316,20 @@ export default function LessonDataPage() {
         </div>
     );
 
+    const titleElement = (
+            <div className="flex flex-row justify-between my-3">
+                <div id="title">
+                    <p className='text-4xl text-slate-950 font-bold mb-5'>{t('lessons.lesson_history')}</p>
+                </div>
+                <div id="period" className="flex flex-row items-center">
+                    <form className="grid grid-cols-3 gap-0">
+                    </form>
+                </div>
+            </div>
+    )
+
     return (
-        <DashboardPage title={t('lessons.lesson_history')}>
+        <DashboardPage title={titleElement}>
             {content}
         </DashboardPage>
     )
