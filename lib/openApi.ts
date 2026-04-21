@@ -293,6 +293,18 @@ export interface CalendarFeedUpdate {
   is_enabled: boolean;
 }
 
+/**
+ * CalendarFeedEnableResponse
+ * Response body for ``PATCH /calendar/feed`` containing only the enabled status.
+ */
+export interface CalendarFeedEnableResponse {
+  /**
+   * Is Enabled
+   * Current enabled status of the ICS feed.
+   */
+  is_enabled: boolean;
+}
+
 /** CalendarGridResponse */
 export interface CalendarGridResponse {
   /** Slots */
@@ -4245,7 +4257,7 @@ export class Api<
       data: CalendarFeedUpdate,
       params: RequestParams = {},
     ) =>
-      this.request<CalendarFeedRead, HTTPValidationError>({
+      this.request<CalendarFeedEnableResponse, HTTPValidationError>({
         path: `/api/v2/calendar/feed`,
         method: "PATCH",
         body: data,

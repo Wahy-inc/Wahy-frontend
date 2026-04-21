@@ -69,10 +69,12 @@ export default function AdminHomePage() {
     const timeWidget = (
         <div className="w-full bg-slate-200 border border-slate-400  rounded-xl p-4 my-4 mx-1">
             <div className="flex items-center justify-center gap-8">
-                <div className="text-center">
-                    <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">{t('home.current_time')}</p>
-                    <div className="flex items-center gap-2">
+                <div className="text-center flex flex-col items-center">
+                    <div className="flex flex-row gap-1 w-fit">
                         <icon.Clock className="w-5 h-5 text-green-500" />
+                        <p className="text-xs text-slate-600 uppercase tracking-wide mb-1">{t('home.current_time')}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
                         <span className="text-[6rem] font-bold text-slate-800">{time.getHours()}
                         <span className="text-8xl font-bold text-slate-800">:</span>{time.getMinutes().toString().padStart(2, '0')}
                         <span className="text-8xl font-bold text-slate-800">:</span>{time.getSeconds().toString().padStart(2, '0')}</span>
