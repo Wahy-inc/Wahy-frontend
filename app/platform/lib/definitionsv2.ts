@@ -8,7 +8,7 @@ export type GetCalendarGridResponseState =
 
 export type GetCalendarDayDataResponseState = 
 | {
-    data?: openApi.LessonRead;
+    data?: openApi.LessonRead[];
     message: string;
 } | undefined;
 

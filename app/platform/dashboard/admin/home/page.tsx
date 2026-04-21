@@ -21,13 +21,14 @@ export default function AdminHomePage() {
     const { t, language } = useLocalization();
     const [upcomings, setUpcomings] = React.useState<openApi.UpcomingSessionResponse[] | null>(null)
     const [notifications, setNotifications] = React.useState<openApi.NotificationRead[] | null>(null)
+    const isInitialized = React.useRef(false)
 
     const fetchUpcomings = async () => {
         try {
             const data = await notificationsGetUpcoming()
             setUpcomings(data)
         } catch (error) {
-            console.error('Error fetching upcoming sessions:', error)
+            console.error('Error fetching upcoming sessions:', error instanceof Error ? error.message : JSON.stringify(error))
             setUpcomings([])
         }
     }
@@ -37,7 +38,7 @@ export default function AdminHomePage() {
             const data = await notificationsGetAll()
             setNotifications(data)
         } catch (error) {
-            console.error('Error fetching notifications:', error)
+            console.error('Error fetching notifications:', error instanceof Error ? error.message : JSON.stringify(error))
             setNotifications([])
         }
     }
@@ -50,6 +51,9 @@ export default function AdminHomePage() {
     }, [])
 
     React.useEffect(() => {
+        if (isInitialized.current) return;
+        isInitialized.current = true;
+        
         fetchUpcomings()
         fetchNotifications()
     }, [])

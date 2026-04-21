@@ -30,19 +30,20 @@ export async function calenderGetData({startDate, endDate}: {startDate: string, 
     }
 }
 
-export async function calenderGetDayData(dayID: string): Promise<GetCalendarDayDataResponseState> {
-    if (!dayID) {
-        throw new Error("Day ID is required");
+export async function calenderGetDayData(dayID: string[]): Promise<GetCalendarDayDataResponseState> {
+    if (!dayID || dayID.length === 0) {
+        throw new Error("Day IDDs are required");
     }
     try {
-        const response = await api.api.getMyLessonApiV1LessonsMeLessonIdGet(Number(dayID));
+        const response = await api.api.listAllApiV1LessonsGet();
         if (!response.ok || !response.data || response.status == 422 || response.status == 404) {
             console.log("failed");
             return { message: 'fail' }
         }
         if (response.status == 200) {
             console.log("Received calendar day data", response.data);
-            return { data: response.data, message: 'success' }
+            const filteredData = response.data.filter((lesson) => dayID.includes(lesson.id.toString()));
+            return { data: filteredData, message: 'success' }
         }
         return { message: 'fail' }
     } catch (error) {
