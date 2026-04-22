@@ -1,8 +1,10 @@
 'use client'
+
 import { calenderGetDayData } from "@/app/platform/actions/dashboardv2";
 import { LessonRead } from "@/lib/openApi";
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
+import { Suspense } from "react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -19,7 +21,7 @@ import { Label } from "@/components/ui/label";
 import * as Icon from '@deemlol/next-icons';
 import { updateLesson } from "@/app/platform/actions/dashboard";
 
-export default function CalendarDayDataPage() {
+function CalendarDayDataContent() {
   const searchParams = useSearchParams();
   const dayIDs = searchParams.get("dayIDs");
   const { t, language } = useLocalization();
@@ -346,5 +348,13 @@ export default function CalendarDayDataPage() {
         {daysData.map(lesson => lessonElement(lesson))}
       </div>
     </DashboardPage>
+  );
+}
+
+export default function CalendarDayDataPage() {
+  return (
+    <Suspense fallback={<DashboardPage title={<div className="flex flex-row justify-between my-3"><div id="title"><p className="text-4xl text-slate-950 font-bold mb-5">Loading...</p></div></div>}><div className="flex items-center justify-center p-8"><p className="text-slate-700 text-lg">Loading lessons...</p></div></DashboardPage>}>
+      <CalendarDayDataContent />
+    </Suspense>
   );
 }

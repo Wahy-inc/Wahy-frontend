@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import React, { useActionState, useState } from "react";
+import { Suspense } from "react";
 import * as openApi from "@/lib/openApi";
 import DashboardPage from "../../page";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
@@ -26,7 +27,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrig
 import { useToastListener } from "@/lib/toastListener";
 import { UploadedClassFile } from "@/app/platform/lib/definitionsv2";
 
-export default function LessonDataPage() {
+function LessonDataContent() {
     const searchData = useSearchParams();
     const scheduleID = searchData.get('scheduleID');
     const [attendance, setattendance] = React.useState<openApi.ClassAttendanceSummary | null>(null);
@@ -532,4 +533,12 @@ export default function LessonDataPage() {
             {content}
         </DashboardPage>
     )
+}
+
+export default function LessonDataPage() {
+  return (
+    <Suspense fallback={<DashboardPage title={<div className="flex flex-row justify-between my-3"><div id="title"><p className="text-4xl text-slate-950 font-bold mb-5">Loading...</p></div></div>}><div className="flex items-center justify-center p-8"><p className="text-slate-700 text-lg">Loading lessons...</p></div></DashboardPage>}>
+      <LessonDataContent />
+    </Suspense>
+  );
 }
