@@ -248,17 +248,15 @@ export default function Home() {
                         </CardDescription>
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 grid grid-cols-4 w-full p-0">
+                        <CardHeader className="border-b-2 border-gray-500 grid grid-cols-3 w-full p-0">
                             <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">{t('analytics.pass_rate')}</p>
                             <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.attendance_rate')}</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-3 col-end-4">{t('analytics.homework_rate')}</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-4 col-end-5">{t('analytics.timeliness_rate')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-3 col-end-4">{t('analytics.timeliness_rate')}</p>
                         </CardHeader>
-                        <CardDescription className="grid grid-cols-4">
+                        <CardDescription className="grid grid-cols-3">
                             <p className="text-gray-300 text-4xl font-bold col-start-1 col-end-2 text-center">{analytic.pass_rate}</p>
                             <p className="text-gray-300 text-4xl font-bold col-start-2 col-end-3 text-center">{analytic.attendance_rate}</p>
-                            <p className="text-gray-300 text-4xl font-bold col-start-3 col-end-4 text-center">{analytic.homework_rate}</p>
-                            <p className="text-gray-300 text-4xl font-bold col-start-4 col-end-5 text-center">{analytic.timeliness_rate}</p>
+                            <p className="text-gray-300 text-4xl font-bold col-start-3 col-end-4 text-center">{analytic.timeliness_rate}</p>
                         </CardDescription>
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
@@ -409,7 +407,6 @@ export default function Home() {
             passed_count: 0,
             pass_rate: 0,
             attendance_rate: 0,
-            homework_rate: 0,
             timeliness_rate: 0,
             determination_score: 0
         })}
