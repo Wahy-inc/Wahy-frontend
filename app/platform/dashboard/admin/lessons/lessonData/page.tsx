@@ -15,7 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { attendanceClassAnalytics, getLessonHistory, updateLesson } from "@/app/platform/actions/dashboard";
+import { attendanceClassAnalytics, deleteClassFile, downloadClassFile, getLessonHistory, listUploadClassFile, updateLesson, uploadClassFile } from "@/app/platform/actions/dashboard";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -24,25 +24,32 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToastListener } from "@/lib/toastListener";
+import { UploadedClassFile } from "@/app/platform/lib/definitionsv2";
 
 export default function LessonDataPage() {
     const searchData = useSearchParams();
     const scheduleID = searchData.get('scheduleID');
     const [attendance, setattendance] = React.useState<openApi.ClassAttendanceSummary | null>(null);
+    const [files, setFiles] = React.useState<UploadedClassFile[] | null>(null);
     const [attendanceState, attendanceAction, attendancePending] = React.useActionState(attendanceClassAnalytics, undefined);
     const [history, setHistory] = useState<openApi.ClassHistoryResponse>();
     const [editingLessonId, setEditingLessonId] = useState<number | null>(null);
     const [updateFormSubmitted, setUpdateFormSubmitted] = useState(false);
     const [updateState, updateAction, updatePending] = useActionState(updateLesson, undefined);
+    const [uploadFileState, uploadFileAction, uploadFilePending] = useActionState(uploadClassFile, undefined);
     const { t, language } = useLocalization();
     const isRTL = language === 'ar';
 
     useToastListener(attendanceState, { functionName: t('analytics.attendance_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
+    useToastListener(uploadFileState, { functionName: t('files.upload_file'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
 
     React.useEffect(() => {
         try {
             getLessonHistory({ message: 'pending' }, Number(scheduleID)).then((res) => {
                 setHistory(res?.data);
+            });
+            listUploadClassFile(Number(scheduleID)).then((res) => {
+                setFiles(res?.data || null);
             });
         } catch (error) {
             console.error("Error fetching lesson history:", error);
@@ -58,11 +65,21 @@ export default function LessonDataPage() {
         if (attendanceState?.message === 'success' && attendanceState.data) {
             setattendance(attendanceState.data)
         }
-    }, [attendanceState])
+        if (uploadFileState?.message === 'success' && uploadFileState.data) {
+            listUploadClassFile(Number(scheduleID)).then((res) => {
+                setFiles(res?.data || null);
+            });
+        }
+    }, [attendanceState, uploadFileState, scheduleID]);
 
     const handleAttendanceSubmit = (formData: FormData) => {
         formData.append('schedule_id', scheduleID || '')
         attendanceAction(formData)
+    }
+
+    const handleFileUploadSubmit = (formData: FormData) => {
+        formData.append('schedule_id', scheduleID || '')
+        uploadFileAction(formData)
     }
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
@@ -196,6 +213,50 @@ export default function LessonDataPage() {
                 </div>
             </div>
     )}
+
+    const getFileSize = (sizeInBytes: number) => {
+        if (sizeInBytes >= 1e9) {
+            return (sizeInBytes / 1e9).toFixed(2) + ' GB';
+        } else if (sizeInBytes >= 1e6) {
+            return (sizeInBytes / 1e6).toFixed(2) + ' MB';
+        } else if (sizeInBytes >= 1e3) {
+            return (sizeInBytes / 1e3).toFixed(2) + ' KB';
+        } else {
+            return sizeInBytes + ' Bytes';
+        }
+    }
+
+    const uploadedFileElement = (file: UploadedClassFile) => {
+        return (
+            <div key={`${file.file_path}-${file.created_at}-${file.updated_at}`} className="flex flex-row items-center justify-between p-0 gap-1 bg-slate-200 shadow border border-slate-800 rounded-lg overflow-hidden my-2">
+                <div className="flex flex-row">
+                    <div className="w-fit h-full p-3 bg-slate-800">
+                        <Icon.File className="w-8 h-8 text-slate-200" />
+                    </div>
+                    <div className="flex flex-col gap-1 p-1">
+                        <div className="flex flex-row gap-3">
+                            <p className="text-md text-slate-800 font-bold">{file.original_filename}</p>
+                            <div className="flex flex-row gap-2">
+                                <Badge variant="default" className="gap-2 bg-slate-800 text-slate-200">
+                                    <Icon.Download className="w-5 h-5 text-slate-500" />
+                                    <p>{file.download_count} Downloads</p>
+                                </Badge>
+                                <Badge variant="outline" className="gap-2 border-slate-800 text-slate-800">
+                                    <Icon.Disc className="w-5 h-5 text-slate-500" />
+                                    <p className="text-slate-800">{getFileSize(file.file_size_bytes)}</p>
+                                </Badge>
+                            </div>
+                        </div>
+                        <p className="text-sm text-slate-600">Created at: {new Date(file.created_at).toLocaleDateString()} | Uploaded at: {new Date(file.updated_at).toLocaleDateString()}</p>
+                    </div>
+                </div>
+                <div className="flex flex-row gap-1 w-fit h-full p-2">
+                    <Button variant="default" className="bg-green-600 hover:bg-green-800 text-slate-100 rounded-lg" onClick={() => downloadClassFile(Number(scheduleID), file.id)}><Icon.Download className="w-3 h-3" /></Button>
+                    <Button variant="default" className="bg-red-600 hover:bg-red-800 text-slate-100 rounded-lg" onClick={() => deleteClassFile(Number(scheduleID), file.id)}><Icon.Trash className="w-3 h-3" /></Button>
+                </div>
+            </div>
+        )
+    }
 
     const lessonHistoryElement = (lesson: openApi.LessonRead) => (
         <Card key={lesson.id} className={`overflow-hidden border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 ${isRTL? 'text-right' : 'text-left'}`}>
@@ -452,6 +513,22 @@ export default function LessonDataPage() {
                 student_name_en: "",
                 })}
             </div>}
+            <div className="flex flex-col justify-center border-dashed border-2 border-slate-800 bg-slate-300 rounded-lg p-4 my-6">
+                <div className="w-full overflow-y-scroll max-h-100">
+                    {files && files.length > 0 ? files.map((file) => uploadedFileElement(file)) : (
+                        <div className="flex items-center justify-center min-h-50">
+                            <p className="text-slate-500 text-lg">{t('lessons.no_files_found')}</p>
+                        </div>
+                    )}
+                </div>
+                <Separator className="my-4 bg-slate-800" />
+                <div className="flex flex-row gap-2 px-30">
+                    <form action={handleFileUploadSubmit} className="flex flex-row gap-2 w-full">
+                        <Button disabled={uploadFilePending} type="submit" variant="default" className="px-2 w-30 bg-slate-800 py-1 text-slate-200 rounded-lg cursor-pointer hover:bg-slate-700">Upload File</Button>
+                        <Input id="file" name="file" type="file" className=" text-slate-800 border border-slate-800 rounded-lg px-4 py-2 cursor-pointer" required />
+                    </form>
+                </div>
+            </div>
             {content}
         </DashboardPage>
     )

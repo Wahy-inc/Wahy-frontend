@@ -3,6 +3,7 @@ import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, Cre
 import { createIdempotencyKey, enqueueOfflineMutation, isClientOnline, shouldQueueMutation } from "@/lib/offlineSync"
 import { getCachedData, offlineCacheKeys, setCachedData } from "@/lib/offlineCache"
 import { getApi } from "@/lib/apiClient"
+import { DeleteClassFileResponseState, DownloadClassFileResponseState, ListUploadedClassFilesResponseState, uploadClassFileResponseState } from "../lib/definitionsv2"
 
 const api = getApi()
 
@@ -1104,6 +1105,87 @@ export async function getLessonByDayMe(state: GetLessonByDayFormState, formData:
         if (response.status === 200) {
             const lessons = response.data.classes.filter((lesson: openApi.ClassGroupItem) => lesson.day_label == lessonDay)
             return { message: 'success', data: lessons }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function uploadClassFile(state: uploadClassFileResponseState, formData: FormData): Promise<uploadClassFileResponseState> {
+    const scheduleId = Number(formData.get('schedule_id'))
+    const file = formData.get('file') as File
+    
+    if (!file) {
+        return { message: 'fail'}
+    }
+    
+    const data: openApi.BodyUploadClassFileApiV2ClassFilesScheduleIdFilesPost = {
+        file: file,
+    }
+    try {
+        const response = await api.api.uploadClassFileApiV2ClassFilesScheduleIdFilesPost(scheduleId, data)
+        if (response.status === 201) {
+            return { message: 'success' , data: response.data }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function listUploadClassFile(scheduleId: number): Promise<ListUploadedClassFilesResponseState> {
+    try {
+        const response = await api.api.listClassFilesApiV2ClassFilesScheduleIdFilesGet(scheduleId)
+        if (response.status === 200) {
+            return { message: 'success' , data: response.data }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function listMyUploadClassFile(scheduleId: number): Promise<ListUploadedClassFilesResponseState> {
+    try {
+        const response = await api.api.listMyClassFilesApiV2ClassFilesMeScheduleIdFilesGet(scheduleId)
+        if (response.status === 200) {
+            return { message: 'success' , data: response.data }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function downloadClassFile(scheduleId: number, fileId: number): Promise<boolean> {
+    try {
+        const response = await api.api.downloadClassFileApiV2ClassFilesScheduleIdFilesFileIdGet(scheduleId, fileId)
+        if (response.status === 200) {
+            // Handle response.data as binary blob to prevent file corruption
+            const blob = response.data instanceof Blob ? response.data : new Blob([response.data])
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.setAttribute('download', `classfile_${fileId}`)
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            window.URL.revokeObjectURL(url)
+            return true
+        }
+        return false
+    } catch (error) {
+        return false
+    }
+}
+
+export async function deleteClassFile(scheduleId: number, fileId: number): Promise<DeleteClassFileResponseState> {
+    try {
+        const response = await api.api.deleteClassFileApiV2ClassFilesScheduleIdFilesFileIdDelete(scheduleId, fileId)
+        if (response.status === 204) {
+            window.location.reload()
+            return { message: 'success' }
         }
         return { message: 'fail' }
     } catch (error) {
