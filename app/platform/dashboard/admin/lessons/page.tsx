@@ -127,11 +127,11 @@ export default function Lessons() {
         }
     }
 
-    const content = lessons?.map((lesson) => (
-        <div className="my-4" key={`lesson-${lesson.student_id}-${lesson.schedule_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
+    const content = Array.isArray(lessons) ? lessons.map((lesson) => (
+        <div className="my-4" key={`lesson-${lesson.student_id}-${lesson.schedule_id}-${lesson.day_label}-${lesson.rrule_string}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
             <LessonElement lesson={lesson}/>
         </div>
-    ))
+    )) : []
 
     let displayContent = content
     let displayTitle = t('lessons.title')
@@ -141,11 +141,11 @@ export default function Lessons() {
             displayContent = [<p key="no-lessons" className="text-slate-700 text-xl">{t('lessons.no_lessons_found')} {searchStudentId}</p>]
             displayTitle = `${t('lessons.title')} - Student ${searchStudentId}`
         } else {
-            displayContent = filteredLessons.map((lesson) => (
-                <div key={`lesson-${lesson.student_id}-${lesson.schedule_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
+            displayContent = Array.isArray(filteredLessons) ? filteredLessons.map((lesson) => (
+                <div key={`lesson-${lesson.student_id}-${lesson.schedule_id}-${lesson.day_label}-${lesson.rrule_string}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
                     <LessonElement lesson={lesson}/>
                 </div>
-            ))
+            )) : []
             displayTitle = `${t('lessons.title')} - Student ${searchStudentId} (${filteredLessons?.length})`
         }
     }

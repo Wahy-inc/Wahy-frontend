@@ -172,33 +172,6 @@ export default function Profile() {
                 </CardContent>
             </Card>
 
-            {/* Progress Card */}
-            <Card className="border-slate-200">
-                <CardHeader className="border-b border-slate-100">
-                    <div className="flex items-center gap-2">
-                        <BookOpen className="w-5 h-5 text-slate-600" />
-                        <CardTitle className="text-xl text-slate-800">{t('profile.memorization_progress')}</CardTitle>
-                    </div>
-                    <CardDescription>{t('profile.your_basic_profile')}</CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="p-4 bg-slate-50 rounded-lg text-center">
-                            <p className="text-sm text-slate-500 mb-1">{t('profile.current_juz')}</p>
-                            <p className="text-3xl font-bold text-slate-800">{profile.current_juz || "-"}</p>
-                        </div>
-                        <div className="p-4 bg-slate-50 rounded-lg text-center">
-                            <p className="text-sm text-slate-500 mb-1">{t('profile.current_surah')}</p>
-                            <p className="text-xl font-bold text-slate-800">{profile.current_surah || "-"}</p>
-                        </div>
-                        <div className="p-4 bg-slate-50 rounded-lg text-center">
-                            <p className="text-sm text-slate-500 mb-1">{t('profile.current_ayah')}</p>
-                            <p className="text-3xl font-bold text-slate-800">{profile.current_ayah || "-"}</p>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
             {/* Billing Card */}
             <Card className="border-slate-200">
                 <CardHeader className="border-b border-slate-100">

@@ -207,25 +207,6 @@ export default function Students() {
                                     </div>
                                   </div>
 
-                                  {/* Memorization Progress */}
-                                  <div className="bg-linear-to-r from-green-50 to-green-100 p-4 rounded-lg">
-                                    <h3 className="font-semibold text-green-900 mb-3 text-sm">{t('students.current_juz')} • {t('students.current_surah')} • {t('students.current_ayah')}</h3>
-                                    <div className="grid grid-cols-3 gap-4">
-                                      <div className="flex flex-col">
-                                        <span className="text-xs text-green-700 font-medium">{t('students.current_juz')}</span>
-                                        <span className="text-sm text-slate-800 font-semibold">{student.current_juz}</span>
-                                      </div>
-                                      <div className="flex flex-col">
-                                        <span className="text-xs text-green-700 font-medium">{t('students.current_surah')}</span>
-                                        <span className="text-sm text-slate-800 font-semibold">{student.current_surah}</span>
-                                      </div>
-                                      <div className="flex flex-col">
-                                        <span className="text-xs text-green-700 font-medium">{t('students.current_ayah')}</span>
-                                        <span className="text-sm text-slate-800 font-semibold">{student.current_ayah}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-
                                   {/* Lessons & Billing */}
                                   <div className="bg-linear-to-r from-amber-50 to-amber-100 p-4 rounded-lg">
                                     <h3 className="font-semibold text-amber-900 mb-3 text-sm">{t('students.lessons_rate')} • {t('students.lessons_per_week')} • {t('students.billing_cycle')}</h3>
@@ -315,20 +296,6 @@ export default function Students() {
                                     {updateStudentState?.error?.timeZone && <p className="text-red-500 text-sm">{updateStudentState.error.timeZone}</p>}
                                 </div>
                                 </div>
-                                <div className="flex flex-row justify-between gap-3">
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('students.current_juz'),"current-juz", String(student.current_juz), "number")}
-                                        {updateStudentState?.error?.currjuz && <p className="text-red-500 text-sm">{updateStudentState.error.currjuz}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('students.current_surah'),"current-surah", String(student.current_surah), "text")}
-                                        {updateStudentState?.error?.currsurah && <p className="text-red-500 text-sm">{updateStudentState.error.currsurah}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('students.current_ayah'),"current-ayah", String(student.current_ayah), "number")}
-                                        {updateStudentState?.error?.currayah && <p className="text-red-500 text-sm">{updateStudentState.error.currayah}</p>}
-                                    </div>
-                                </div>
                                 <div className="flex flex-row justify-between gap-3 items-center">
                                     <div className='flex flex-col'>
                                         {fieldInput(t('students.lessons_per_week'),"lessons-per-week", String(student.lessons_per_week), "text")}
@@ -375,7 +342,6 @@ export default function Students() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {updateStudentState?.error?.registerationStatus && <p className="text-red-500 text-sm">{updateStudentState.error.registerationStatus}</p>}
                                     </div>
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
