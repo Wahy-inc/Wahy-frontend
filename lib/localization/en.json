@@ -474,6 +474,9 @@
   "language_options": {
     "english": "English",
     "russian": "Russian",
-    "arabic": "العربية"
+    "arabic": "العربية",
+    "french": "Français",
+    "german": "Deutsch",
+    "spanish": "Español"
   }
 }

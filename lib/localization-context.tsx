@@ -4,8 +4,11 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import en from '@/lib/localization/en.json'
 import ar from '@/lib/localization/ar.json'
 import ru from '@/lib/localization/ru.json'
+import fr from '@/lib/localization/fr.json'
+import de from '@/lib/localization/de.json'
+import es from '@/lib/localization/es.json'
 
-type Language = 'en' | 'ar' | 'ru'
+type Language = 'en' | 'ar' | 'ru' | 'fr' | 'de' | 'es'
 
 interface LocalizationContextType {
   language: Language
@@ -18,14 +21,17 @@ const LocalizationContext = createContext<LocalizationContextType | undefined>(u
 const translations: Record<Language, any> = {
   en,
   ar,
-  ru
+  ru,
+  fr,
+  de,
+  es
 }
 
 export function LocalizationProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>('en')
   const [isHydrated, setIsHydrated] = useState(false)
 
-  // Sync with localStorage after hydration to avoid mismatch
+  // Sync with localStora['en', 'ar', 'ru', 'fr', 'de', 'es'].includes(savedLanguage
   useEffect(() => {
     const savedLanguage = localStorage.getItem('language') as Language | null
     if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ar')) {
@@ -81,3 +87,5 @@ export function useLocalization() {
   }
   return context
 }
+
+export type { LocalizationContextType };
