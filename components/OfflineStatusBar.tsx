@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { clearSyncIssues, getOfflineQueueSize, getSyncIssues, isClientOnline, type SyncIssue } from "@/lib/offlineSync";
+import { useLocalization } from "@/lib/localization-context";
 
 export function OfflineStatusBar() {
+  const { t } = useLocalization();
   const [online, setOnline] = useState(true);
   const [queueSize, setQueueSize] = useState(0);
   const [issuesCount, setIssuesCount] = useState(0);
@@ -35,10 +37,10 @@ export function OfflineStatusBar() {
   }
 
   const statusText = issuesCount > 0
-    ? `Sync needs attention: ${issuesCount} conflict/error item${issuesCount === 1 ? "" : "s"}`
+    ? t('sync_status.sync_needs_attention').replace('{count}', issuesCount.toString()).replace('{s}', issuesCount === 1 ? "" : "s")
     : !online
-      ? `Offline mode: ${queueSize} change${queueSize === 1 ? "" : "s"} queued`
-      : `Back online: syncing ${queueSize} queued change${queueSize === 1 ? "" : "s"}`;
+      ? t('sync_status.offline_mode_queued').replace('{count}', queueSize.toString()).replace('{s}', queueSize === 1 ? "" : "s")
+      : t('sync_status.back_online_syncing').replace('{count}', queueSize.toString()).replace('{s}', queueSize === 1 ? "" : "s");
 
   const statusClasses = issuesCount > 0
     ? "bg-red-100 text-red-800 border border-red-200"
@@ -53,7 +55,7 @@ export function OfflineStatusBar() {
         {issuesCount > 0 ? (
           <details className="rounded-md border border-red-200 bg-red-50/60 px-2 py-1">
             <summary className="cursor-pointer text-xs font-semibold text-red-700">
-              View sync issue details
+              {t('sync_status.view_sync_details')}
             </summary>
             <div className="mt-2 space-y-2">
               {issues.slice(0, 5).map((issue) => (
@@ -66,7 +68,7 @@ export function OfflineStatusBar() {
                 </div>
               ))}
               {issues.length > 5 ? (
-                <div className="text-xs text-red-700">Showing 5 of {issues.length} issues.</div>
+                <div className="text-xs text-red-700">{t('sync_status.showing_issues').replace('{count}', '5').replace('{total}', issues.length.toString())}</div>
               ) : null}
             </div>
           </details>
@@ -82,7 +84,7 @@ export function OfflineStatusBar() {
             setIssues([]);
           }}
         >
-          Clear
+          {t('sync_status.clear_button')}
         </button>
       ) : null}
     </div>

@@ -4,6 +4,7 @@ import "./style/globals.css";
 import { TokenRefresher } from "@/components/TokenRefresher";
 import { PwaBootstrap } from "@/components/PwaBootstrap";
 import { LocalizationProvider } from "@/lib/localization-context";
+import { Footer } from "@/components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,14 +41,8 @@ export default function RootLayout({
           <PwaBootstrap />
           <TokenRefresher />
           {children}
+          <Footer />
         </LocalizationProvider>
-      <footer className="w-full bg-slate-950 text-slate-100 text-md p-8">
-        <p className="text-slate-100 pt-12 pb-2 text-5xl font-bold">Wahy.</p>
-        <p className="w-[300px] opacity-70 pb-15">An islamic platform that specializes in helping sheikhs and eases their work.</p>
-        <p className="text-sm text-gray-500 mt-4">
-          &copy; {new Date().getFullYear()} Wahy. All rights reserved.
-        </p>
-      </footer>
       </body>
     </html>
   );

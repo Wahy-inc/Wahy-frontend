@@ -404,5 +404,76 @@
     "read_at_label": "Read at",
     "created_at_label": "Created at",
     "updated_at_label": "Updated at"
+  },
+  "footer": {
+    "brand_name": "Wahy",
+    "description": "An islamic platform that specializes in helping sheikhs and eases their work.",
+    "copyright": "All rights reserved"
+  },
+  "auth": {
+    "logout": "Logout",
+    "email_label": "Email",
+    "email_placeholder": "name@example.com",
+    "password_label": "Password",
+    "password_placeholder": "Enter your password",
+    "reset_button": "Reset",
+    "submit_button": "Submit",
+    "submitting": "Submitting...",
+    "name_arabic_label": "Name in Arabic",
+    "name_arabic_placeholder": "Ahmed Mohammed",
+    "name_english_label": "Name in English",
+    "name_english_placeholder": "Ahmed Mohammed",
+    "phone_optional_label": "Phone (Optional)",
+    "phone_placeholder": "Enter your phone number",
+    "date_of_birth_optional_label": "Date of Birth (Optional)",
+    "date_placeholder": "yyyy-mm-dd"
+  },
+  "access_control": {
+    "access_denied_title": "Access Denied",
+    "access_denied_message": "You do not have permission to view this page.",
+    "close_menu_aria_label": "Close menu overlay",
+    "menu_button_text": "Menu"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "feed_info_title": "Feed info",
+    "copy_button": "Copy",
+    "last_accessed_prefix": "Last Accessed: ",
+    "not_accessed_yet": "Not accessed yet",
+    "last_regenerated_prefix": "Last Regenerated: ",
+    "not_regenerated_yet": "Not regenerated yet",
+    "no_feed_available": "No feed available",
+    "day_data_fetch_error": "Failed to fetch calendar day data"
+  },
+  "file_upload": {
+    "size_gb": "GB",
+    "size_mb": "MB",
+    "size_kb": "KB",
+    "size_bytes": "Bytes",
+    "created_at_prefix": "Created at: ",
+    "uploaded_at_prefix": "Uploaded at: ",
+    "schedule_prefix": "Schedule: "
+  },
+  "sync_status": {
+    "sync_needs_attention": "Sync needs attention: {count} conflict/error item{s}",
+    "offline_mode_queued": "Offline mode: {count} change{s} queued",
+    "back_online_syncing": "Back online: syncing {count} queued change{s}",
+    "view_sync_details": "View sync issue details",
+    "showing_issues": "Showing {count} of {total} issues.",
+    "clear_button": "Clear"
+  },
+  "error_messages": {
+    "error_fetching_sessions": "Error fetching upcoming sessions:",
+    "error_fetching_lesson_history": "Error fetching lesson history:",
+    "failed_load_students": "Failed to load students",
+    "failed_load_schedules": "Failed to load schedules",
+    "failed_load_library": "Failed to load library items",
+    "console_error_prefix": "Error:",
+    "fetched_data_prefix": "Fetched data:"
+  },
+  "language_options": {
+    "english": "English",
+    "russian": "Russian",
+    "arabic": "العربية"
   }
 }

@@ -8,7 +8,6 @@ import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GetLessonByDayFormState } from "@/app/platform/lib/definitions";
 import LessonElement from "./lesson_element";
 import TitleElement from "./title_element";
 import { useAuth } from "@/lib/auth-context";
@@ -22,14 +21,14 @@ export default function Lessons() {
     const {isAdmin, isLoading: authLoading } = useAuth()
     const { t } = useLocalization()
     const router = useRouter()
-    const [lessons, setLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
+    const [lessons, setLessons] = React.useState<openApi.ClassGroupItem[]>([])
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const [createState, createAction, createPending] = useActionState(createLesson, undefined)
     const [getLessonState, getLessonFormAction, getLessonPending] = useActionState(getLessonByDay, undefined)
-    const [fetchedLessons, setFetchedLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
+    const [fetchedLessons, setFetchedLessons] = React.useState<openApi.ClassGroupItem[]>([])
     const [searchStudentId, setSearchStudentId] = React.useState<string>("")
-    const [filteredLessons, setFilteredLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
+    const [filteredLessons, setFilteredLessons] = React.useState<openApi.ClassGroupItem[]>([])
 
     useToastListener(createState, {functionName: "Create Lesson", successMessage: t('lessons.create_success'), errorMessage: t('lessons.create_error')})
     useToastListener(getLessonState, {functionName: "Get Lesson", successMessage: t('lessons.get_success'), errorMessage: t('lessons.get_error')})
@@ -53,7 +52,7 @@ export default function Lessons() {
                 setError(null)
             } catch (err) {
                 setError(t('lessons.loading_lessons'))
-                setLessons(null)
+                setLessons([])
             } finally {
                 setLoading(false)
             }
@@ -73,11 +72,11 @@ export default function Lessons() {
                 try {
                     setLoading(true)
                     const data = await listLessons()
-                    setLessons(data)
+                    setLessons(data || [])
                     setError(null)
                 } catch (err) {
                     setError(t('lessons.loading_lessons'))
-                    setLessons(null)
+                    setLessons([])
                 } finally {
                     setLoading(false)
                 }
@@ -109,8 +108,8 @@ export default function Lessons() {
         setSearchStudentId(studentId)
         
         if (studentId === "") {
-            setFilteredLessons(null)
-        } else if (lessons) {
+            setFilteredLessons([])
+        } else {
             const filtered = lessons.filter(lesson => 
                 lesson.student_id.toString().startsWith(studentId)
             )
@@ -120,18 +119,18 @@ export default function Lessons() {
 
     const handleClearFilter = () => {
         setSearchStudentId("")
-        setFilteredLessons(null)
+        setFilteredLessons([])
         const searchInput = document.getElementById("student-id-search") as HTMLInputElement
         if (searchInput) {
             searchInput.value = ""
         }
     }
 
-    const content = Array.isArray(lessons) ? lessons.map((lesson) => (
+    const content = lessons.map((lesson) => (
         <div className="my-4" key={`lesson-${lesson.student_id}-${lesson.schedule_id}-${lesson.day_label}-${lesson.rrule_string}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
             <LessonElement lesson={lesson}/>
         </div>
-    )) : []
+    ))
 
     let displayContent = content
     let displayTitle = t('lessons.title')
@@ -141,11 +140,11 @@ export default function Lessons() {
             displayContent = [<p key="no-lessons" className="text-slate-700 text-xl">{t('lessons.no_lessons_found')} {searchStudentId}</p>]
             displayTitle = `${t('lessons.title')} - Student ${searchStudentId}`
         } else {
-            displayContent = Array.isArray(filteredLessons) ? filteredLessons.map((lesson) => (
+            displayContent = filteredLessons.map((lesson) => (
                 <div key={`lesson-${lesson.student_id}-${lesson.schedule_id}-${lesson.day_label}-${lesson.rrule_string}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
                     <LessonElement lesson={lesson}/>
                 </div>
-            )) : []
+            )) 
             displayTitle = `${t('lessons.title')} - Student ${searchStudentId} (${filteredLessons?.length})`
         }
     }

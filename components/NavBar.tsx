@@ -21,9 +21,9 @@ export function NavBar() {
                   <SelectContent>
                     <SelectGroup>
                       <SelectLabel>{t('navbar.language')}</SelectLabel>
-                      <SelectItem value='en'>English</SelectItem>
-                      <SelectItem value='ru'>Russian</SelectItem>
-                      <SelectItem value='ar'>العربية</SelectItem>
+                      <SelectItem value='en'>{t('language_options.english')}</SelectItem>
+                      <SelectItem value='ru'>{t('language_options.russian')}</SelectItem>
+                      <SelectItem value='ar'>{t('language_options.arabic')}</SelectItem>
                     </SelectGroup>
                   </SelectContent>
             </Select>

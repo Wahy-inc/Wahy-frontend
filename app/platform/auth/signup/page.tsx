@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { signup } from "../../actions/auth"
 import { Button } from "@/components/ui/button"
 import * as openApi from "@/lib/openApi"
+import { useLocalization } from "@/lib/localization-context"
 import {
   Field,
   FieldGroup,
@@ -15,6 +16,7 @@ import {Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigg
 import { useToastListener } from "@/lib/toastListener"
 
 export default function SignUp() {
+    const { t } = useLocalization()
     const [state, action, pending] = useActionState(signup, undefined)
     const router = useRouter()
 
@@ -31,22 +33,22 @@ export default function SignUp() {
     <FieldGroup>
       <div className="flex flex-row justify-between gap-3">
       <Field>
-        <FieldLabel htmlFor="ar-name">Name in Arabic</FieldLabel>
+        <FieldLabel htmlFor="ar-name">{t('auth.name_arabic_label')}</FieldLabel>
         <Input 
           id="ar-name" 
           name="ar-name"
-          placeholder="Ahmed Mohammed" 
+          placeholder={t('auth.name_arabic_placeholder')} 
           className="bg-slate-100 text-slate-800"
           disabled={pending}
         />
         {state?.error?.arname && <p className="text-red-500 text-sm">{state.error.arname}</p>}
       </Field>
       <Field>
-        <FieldLabel htmlFor="en-name">Name in English</FieldLabel>
+        <FieldLabel htmlFor="en-name">{t('auth.name_english_label')}</FieldLabel>
         <Input 
           id="en-name" 
           name="en-name"
-          placeholder="Ahmed Mohammed" 
+          placeholder={t('auth.name_english_placeholder')} 
           className="bg-slate-100 text-slate-800"
           disabled={pending}
         />
@@ -54,35 +56,35 @@ export default function SignUp() {
       </Field>
       </div>
       <Field>
-        <FieldLabel htmlFor="email">Email</FieldLabel>
+        <FieldLabel htmlFor="email">{t('auth.email_label')}</FieldLabel>
         <Input
           id="email"
           name="email"
           type="email"
-          placeholder="name@example.com"
+          placeholder={t('auth.email_placeholder')}
           className="bg-slate-100 text-slate-800"
           disabled={pending}
         />
         {state?.error?.email && <p className="text-red-500 text-sm">{state.error.email}</p>}
       </Field>
       <Field>
-        <FieldLabel htmlFor="password">Password</FieldLabel>
+        <FieldLabel htmlFor="password">{t('auth.password_label')}</FieldLabel>
         <Input
           id="password"
           name="password"
           type="password"
-          placeholder="Enter your password"
+          placeholder={t('auth.password_placeholder')}
           className="bg-slate-100 text-slate-800"
           disabled={pending}
         />
         {state?.error?.password && <p className="text-red-500 text-sm">{state.error.password}</p>}
       </Field>
       <Field>
-      <FieldLabel htmlFor="phone">Phone (Optional)</FieldLabel>
+      <FieldLabel htmlFor="phone">{t('auth.phone_optional_label')}</FieldLabel>
         <Input 
           id="phone" 
           name="phone"
-          placeholder="Enter your phone number" 
+          placeholder={t('auth.phone_placeholder')} 
           className="bg-slate-100 text-slate-800"
           disabled={pending}
           type="text"
@@ -91,11 +93,11 @@ export default function SignUp() {
       </Field>
       <div className="flex flex-row justify-between gap-3">
       <Field>
-      <FieldLabel htmlFor="date-of-birth">Date of Birth (Optional)</FieldLabel>
+      <FieldLabel htmlFor="date-of-birth">{t('auth.date_of_birth_optional_label')}</FieldLabel>
         <Input 
           id="date-of-birth" 
           name="date-of-birth"
-          placeholder="yyyy-mm-dd" 
+          placeholder={t('auth.date_placeholder')} 
           className="bg-slate-100 text-slate-800"
           disabled={pending}
           type="date"

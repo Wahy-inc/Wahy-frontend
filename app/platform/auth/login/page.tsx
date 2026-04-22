@@ -13,9 +13,11 @@ import { Input } from "@/components/ui/input"
 import { useAuth } from "@/lib/auth-context"
 import { useToastListener } from "@/lib/toastListener"
 import { listStudents } from "../../actions/dashboard"
+import { useLocalization } from "@/lib/localization-context"
 
 export default function SignIn() {
     const { isAdmin } = useAuth()
+    const { t } = useLocalization()
     const [state, action, pending] = useActionState(signinAdmin, undefined)
     const [Studentstate, Studentaction, Studentpending] = useActionState(signinStudent, undefined)
     const router = useRouter()
@@ -40,24 +42,24 @@ export default function SignIn() {
     <form action={isAdmin ? action : Studentaction} className="w-xs lg:w-lg mx-auto my-10 border-2 border-slate-800 p-6 rounded-lg shadow-lg bg-slate-800 text-slate-100">
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="email">Email</FieldLabel>
+        <FieldLabel htmlFor="email">{t('auth.email_label')}</FieldLabel>
         <Input
           id="email"
           name="email"
           type="email"
-          placeholder="name@example.com"
+          placeholder={t('auth.email_placeholder')}
           className="bg-slate-100 text-slate-800"
           disabled={isAdmin ? pending : Studentpending}
         />
         {isAdmin ? (state?.error?.email && <p className="text-red-500 text-sm">{state.error.email}</p>) : (Studentstate?.error?.email && <p className="text-red-500 text-sm">{Studentstate.error.email}</p>)}
       </Field>
       <Field>
-        <FieldLabel htmlFor="password">Password</FieldLabel>
+        <FieldLabel htmlFor="password">{t('auth.password_label')}</FieldLabel>
         <Input
           id="password"
           name="password"
           type="password"
-          placeholder="Enter your password"
+          placeholder={t('auth.password_placeholder')}
           className="bg-slate-100 text-slate-800"
           disabled={isAdmin ? pending : Studentpending}
         />
@@ -65,10 +67,10 @@ export default function SignIn() {
       </Field>
       <Field orientation="horizontal">
         <Button type="reset" variant="outline" className="text-slate-800 border-2 border-slate-800" disabled={isAdmin ? pending : Studentpending}>
-          Reset
+          {t('auth.reset_button')}
         </Button>
         <Button type="submit" disabled={isAdmin ? pending : Studentpending}>
-          {isAdmin ? (pending ? "Submitting..." : "Submit") : (Studentpending ? "Submitting..." : "Submit")}
+          {isAdmin ? (pending ? t('auth.submitting') : t('auth.submit_button')) : (Studentpending ? t('auth.submitting') : t('auth.submit_button'))}
         </Button>
       </Field>
     </FieldGroup>

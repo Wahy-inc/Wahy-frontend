@@ -247,7 +247,7 @@ export default function LessonDataPage() {
                                 </Badge>
                             </div>
                         </div>
-                        <p className="text-sm text-slate-600">Created at: {new Date(file.created_at).toLocaleDateString()} | Uploaded at: {new Date(file.updated_at).toLocaleDateString()}</p>
+                        <p className="text-sm text-slate-600">{t('file_upload.created_at_prefix')}{new Date(file.created_at).toLocaleDateString()} | {t('file_upload.uploaded_at_prefix')}{new Date(file.updated_at).toLocaleDateString()}</p>
                     </div>
                 </div>
                 <div className="flex flex-row gap-1 w-fit h-full p-2">

@@ -18,8 +18,8 @@ export default function DashboardPage({children: children, title: title}: {child
         return (
             <div className="flex items-center justify-center min-h-screen">
                 <div className="text-center">
-                    <h1 className="text-2xl font-bold">Access Denied</h1>
-                    <p className="text-lg">You do not have permission to view this page.</p>
+                    <h1 className="text-2xl font-bold">{t('access_control.access_denied_title')}</h1>
+                    <p className="text-lg">{t('access_control.access_denied_message')}</p>
                 </div>
             </div>
         )
@@ -31,7 +31,7 @@ export default function DashboardPage({children: children, title: title}: {child
                 <button
                     className="fixed inset-0 z-30 bg-black/40 lg:hidden"
                     onClick={() => setMobileSidebarOpen(false)}
-                    aria-label="Close menu overlay"
+                    aria-label={t('access_control.close_menu_aria_label')}
                 />
             ) : null}
             <div
@@ -63,7 +63,7 @@ export default function DashboardPage({children: children, title: title}: {child
                         onClick={() => setMobileSidebarOpen(true)}
                     >
                         <icon.Menu />
-                        Menu
+                        {t('access_control.menu_button_text')}
                     </button>
                 </div>
                 <div id='title' className='sticky top-0 z-20 bg-slate-100 pt-4 lg:pt-10 px-4 lg:px-10 rounded-xl pb-4 flex flex-col gap-3'>

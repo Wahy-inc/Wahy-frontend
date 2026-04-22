@@ -18,7 +18,7 @@ export default function DashboardPage({children: children, title: title}: {child
                 <button
                     className="fixed inset-0 z-30 bg-black/40 lg:hidden"
                     onClick={() => setMobileSidebarOpen(false)}
-                    aria-label="Close menu overlay"
+                    aria-label={t('access_control.close_menu_aria_label')}
                 />
             ) : null}
             <div
@@ -49,7 +49,7 @@ export default function DashboardPage({children: children, title: title}: {child
                         onClick={() => setMobileSidebarOpen(true)}
                     >
                         <icon.Menu />
-                        Menu
+                        {t('access_control.menu_button_text')}
                     </button>
                 </div>
                 <div id='title' className='sticky top-0 z-20 bg-slate-100 pt-4 lg:pt-10 px-4 lg:px-10 rounded-xl pb-4 flex flex-col gap-3'>

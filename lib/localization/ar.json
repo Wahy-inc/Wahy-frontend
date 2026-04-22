@@ -397,5 +397,76 @@
     "read_at_label": "تم القراءة في",
     "created_at_label": "تم الإنشاء في",
     "updated_at_label": "تم التحديث في"
+  },
+  "footer": {
+    "brand_name": "وحي",
+    "description": "منصة إسلامية متخصصة في مساعدة الشيوخ وتيسير عملهم.",
+    "copyright": "جميع الحقوق محفوظة"
+  },
+  "auth": {
+    "logout": "تسجيل الخروج",
+    "email_label": "البريد الإلكتروني",
+    "email_placeholder": "name@example.com",
+    "password_label": "كلمة المرور",
+    "password_placeholder": "أدخل كلمة المرور",
+    "reset_button": "إعادة تعيين",
+    "submit_button": "إرسال",
+    "submitting": "جاري الإرسال...",
+    "name_arabic_label": "الاسم بالعربية",
+    "name_arabic_placeholder": "أحمد محمد",
+    "name_english_label": "الاسم بالإنجليزية",
+    "name_english_placeholder": "Ahmed Mohammed",
+    "phone_optional_label": "الهاتف (اختياري)",
+    "phone_placeholder": "أدخل رقم الهاتف",
+    "date_of_birth_optional_label": "تاريخ الميلاد (اختياري)",
+    "date_placeholder": "yyyy-mm-dd"
+  },
+  "access_control": {
+    "access_denied_title": "الوصول مرفوض",
+    "access_denied_message": "ليس لديك إذن لعرض هذه الصفحة.",
+    "close_menu_aria_label": "إغلاق قائمة التراكب",
+    "menu_button_text": "القائمة"
+  },
+  "calendar": {
+    "title": "التقويم",
+    "feed_info_title": "معلومات التغذية",
+    "copy_button": "نسخ",
+    "last_accessed_prefix": "آخر وصول: ",
+    "not_accessed_yet": "لم يتم الوصول بعد",
+    "last_regenerated_prefix": "آخر تجديد: ",
+    "not_regenerated_yet": "لم يتم التجديد بعد",
+    "no_feed_available": "لا توجد تغذية متاحة",
+    "day_data_fetch_error": "فشل في جلب بيانات اليوم"
+  },
+  "file_upload": {
+    "size_gb": "GB",
+    "size_mb": "MB",
+    "size_kb": "KB",
+    "size_bytes": "Bytes",
+    "created_at_prefix": "تم الإنشاء في: ",
+    "uploaded_at_prefix": "تم التحميل في: ",
+    "schedule_prefix": "الجدول: "
+  },
+  "sync_status": {
+    "sync_needs_attention": "المزامنة تحتاج اهتمام: {count} عنصر بتضارب/خطأ",
+    "offline_mode_queued": "وضع دون اتصال: {count} تغيير في الانتظار",
+    "back_online_syncing": "العودة للاتصال: مزامنة {count} تغيير في الانتظار",
+    "view_sync_details": "عرض تفاصيل المشكلة",
+    "showing_issues": "يتم عرض {count} من {total} مشاكل.",
+    "clear_button": "مسح"
+  },
+  "error_messages": {
+    "error_fetching_sessions": "خطأ في جلب الجلسات القادمة:",
+    "error_fetching_lesson_history": "خطأ في جلب سجل الدروس:",
+    "failed_load_students": "فشل تحميل الطلاب",
+    "failed_load_schedules": "فشل تحميل الجداول الزمنية",
+    "failed_load_library": "فشل تحميل عناصر المكتبة",
+    "console_error_prefix": "خطأ:",
+    "fetched_data_prefix": "البيانات المجلوبة:"
+  },
+  "language_options": {
+    "english": "English",
+    "russian": "Русский",
+    "arabic": "العربية"
   }
 }

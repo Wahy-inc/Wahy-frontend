@@ -9,9 +9,11 @@ import * as React from "react"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 import { Check } from "lucide-react"
+import { useLocalization } from "@/lib/localization-context"
 
 export default function CalendarPage() {
     const router = useRouter()
+    const { t } = useLocalization()
     const {isAdmin, isLoading: authLoading } = useAuth()
     const [calenderData, setcalenderData] = useState<GetCalendarGridResponseState | undefined>(undefined)
     const isInitialized = React.useRef(false)
@@ -77,24 +79,24 @@ export default function CalendarPage() {
     const titleElement = (
             <div className="flex flex-col justify-start my-3 w-full">
                 <div id="title">
-                    <p className='text-4xl text-slate-950 font-bold mb-5'>Calendar</p>
+                    <p className='text-4xl text-slate-950 font-bold mb-5'>{t('calendar.title')}</p>
                 </div>
                 <div id="feed" className="rounded-lg border border-slate-400 bg-slate-200 px-4 py-2">
                     <div className="flex flex-row gap-2 items-center">
-                        <p className="text-slate-800 font-bold text-md">Feed info</p>
+                        <p className="text-slate-800 font-bold text-md">{t('calendar.feed_info_title')}</p>
                         <Button variant="outline" className="w-8 h-4 text-[10px] bg-slate-200 border-slate-800 text-slate-800 hover:bg-slate-800 hover:text-slate-200" onClick={() => {
                             navigator.clipboard.writeText(feed || "")
                         }}>
-                            Copy
+                            {t('calendar.copy_button')}
                         </Button>
                     </div>
                     <div>
-                        <p className="text-slate-500 text-sm">{feedAccessed ? `Last Accessed: ${formatDateLocal(feedAccessed)}` : "Not accessed yet"} | {feedRotated ? `Last Regenerated: ${formatDateLocal(feedRotated)}` : "Not regenerated yet"}</p>
+                        <p className="text-slate-500 text-sm">{feedAccessed ? `${t('calendar.last_accessed_prefix')}${formatDateLocal(feedAccessed)}` : t('calendar.not_accessed_yet')} | {feedRotated ? `${t('calendar.last_regenerated_prefix')}${formatDateLocal(feedRotated)}` : t('calendar.not_regenerated_yet')}</p>
                     </div>
                     <div className="flex xl:flex-row flex-col justify-between gap-1 items-center">
                         <div className="flex flex-row gap-2 items-center">
                             <div className="px-2 py-1 text-sm text-slate-800 rounded-lg border border-slate-400 bg-slate-100 w-[30vw]">
-                                <p className="text-slate-800 text-sm wrap-break-word whitespace-normal">{feed || "No feed available"}</p>
+                                <p className="text-slate-800 text-sm wrap-break-word whitespace-normal">{feed || t('calendar.no_feed_available')}</p>
                             </div>
                             { feedEnabled && <div className="rounded-3xl bg-slate-800 text-slate-200 w-8 h-8 flex items-center justify-center"><Check className="w-4" /></div> }
                         </div>

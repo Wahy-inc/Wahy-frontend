@@ -517,30 +517,29 @@ export async function deleteSchedule(scheduleId: number): Promise<boolean> {
     }
 }
 
-export async function listLessons(): Promise<openApi.ClassGroupItem[] | null> {
+export async function listLessons(): Promise<openApi.ClassGroupItem[]> {
     try {
         const response = await api.api.listClassesApiV2ClassesGet()
         if (response.status === 200) {
-            setCachedData(offlineCacheKeys.lessonsListAdmin, response.data)
+            setCachedData(offlineCacheKeys.lessonsListAdmin, response.data.classes)
             return response.data.classes
         }
-        return null
+        return []
     } catch (error) {
         const cacheKey = offlineCacheKeys.lessonsListAdmin
         const cached = getCachedData<openApi.ClassGroupItem[]>(cacheKey)
-        if (cached) {
+        if (cached && Array.isArray(cached)) {
             return cached
         }
-        return null
+        return []
     }
 }
 
-export async function listLessonsMe(): Promise<openApi.ClassGroupItem[] | null> {
+export async function listLessonsMe(): Promise<openApi.ClassGroupItem[]> {
     try {
         const response = await api.api.listMyClassesApiV2ClassesMeGet()
 
         if (response.status === 200) {
-            setCachedData(offlineCacheKeys.lessonsListMe, response.data)
             const results: openApi.ClassGroupItem[] = []
             for (const lesson of response.data.classes) {
                 let isin = false;
@@ -554,15 +553,16 @@ export async function listLessonsMe(): Promise<openApi.ClassGroupItem[] | null> 
                     results.push(lesson)
                 }
             }
+            setCachedData(offlineCacheKeys.lessonsListMe, results)
             return results
         }
-        return null
+        return []
     } catch (error) {
         const cached = getCachedData<openApi.ClassGroupItem[]>(offlineCacheKeys.lessonsListMe)
-        if (cached) {
+        if (cached && Array.isArray(cached)) {
             return cached
         }
-        return null
+        return []
     }
 }
 
