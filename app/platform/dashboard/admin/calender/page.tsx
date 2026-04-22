@@ -88,6 +88,9 @@ export default function CalendarPage() {
                             Copy
                         </Button>
                     </div>
+                    <div>
+                        <p className="text-slate-500 text-sm">{feedAccessed ? `Last accessed: ${formatDateLocal(feedAccessed)}` : "Not accessed yet"} | {feedRotated ? `Last rotated: ${formatDateLocal(feedRotated)}` : "Not rotated yet"}</p>
+                    </div>
                     <div className="flex xl:flex-row flex-col justify-between gap-1 items-center">
                         <div className="flex flex-row gap-2 items-center">
                             <div className="px-2 py-1 text-sm text-slate-800 rounded-lg border border-slate-400 bg-slate-100 w-[30vw]">

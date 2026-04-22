@@ -115,44 +115,6 @@ export default function SignUp() {
         {state?.error?.timeZone && <p className="text-red-500 text-sm">{state.error.timeZone}</p>}
       </Field>
       </div>
-      <div className="flex flex-row justify-between gap-3">
-      <Field>
-      <FieldLabel htmlFor="current-juz" style={{minHeight: '3rem'}}>Current juz (Optional)</FieldLabel>
-        <Input 
-          id="current-juz" 
-          name="current-juz"
-          placeholder="Enter your current juz" 
-          className="bg-slate-100 text-slate-800"
-          disabled={pending}
-          type="number"
-        />
-        {state?.error?.currjuz && <p className="text-red-500 text-sm">{state.error.currjuz}</p>}
-      </Field>
-      <Field>
-      <FieldLabel htmlFor="current-surah" style={{minHeight: '3rem'}}>Current surah (Optional)</FieldLabel>
-        <Input 
-          id="current-surah" 
-          name="current-surah"
-          placeholder="Enter your current surah" 
-          className="bg-slate-100 text-slate-800"
-          disabled={pending}
-          type="text"
-        />
-        {state?.error?.currsurah && <p className="text-red-500 text-sm">{state.error.currsurah}</p>}
-      </Field>
-      <Field>
-      <FieldLabel htmlFor="current-ayah" style={{minHeight: '3rem'}}>Current ayah (Optional)</FieldLabel>
-        <Input 
-          id="current-ayah" 
-          name="current-ayah"
-          placeholder="Enter your current ayah" 
-          className="bg-slate-100 text-slate-800"
-          disabled={pending}
-          type="number"
-        />
-        {state?.error?.currayah && <p className="text-red-500 text-sm">{state.error.currayah}</p>}
-      </Field>
-      </div>
       <div className="flex flex-row justify-between gap-3 items-center">
       <Field>
       <FieldLabel htmlFor="lessons-per-week" style={{minHeight: '3rem'}}>Classes per week</FieldLabel>

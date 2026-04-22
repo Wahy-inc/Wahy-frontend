@@ -12,9 +12,6 @@ export const SignUpSchema = zod.object({
     phone: zod.string().trim().optional(),
     dateOfBirth: zod.string().trim().optional(),
     timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
-    currjuz: zod.string().trim().optional(),
-    currsurah: zod.string().trim().optional(),
-    currayah: zod.string().trim().optional(),
     lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
     lessonRate: zod.string().trim().optional(),
     billingCycle: zod.enum(openApi.BillingCycle, { error: 'Invalid billing cycle' }),
@@ -31,9 +28,6 @@ export type SignupFormState =
             phone?: string[];
             dateOfBirth?: string[];
             timeZone?: string[];
-            currjuz?: string[];
-            currsurah?: string[];
-            currayah?: string[];
             lessonsPerWeek?: string[];
             lessonRate?: string[];
             billingCycle?: string[];
