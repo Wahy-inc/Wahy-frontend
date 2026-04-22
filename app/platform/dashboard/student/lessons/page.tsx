@@ -2,40 +2,37 @@
 
 import React, { useActionState } from "react";
 import * as openApi from "@/lib/openApi"
-import { getLessonByIDMe, listLessonsMe } from "@/app/platform/actions/dashboard";
+import { getLessonByDayMe, listLessonsMe } from "@/app/platform/actions/dashboard";
 import DashboardPage from "../page";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { GetLessonByIDFormState } from "@/app/platform/lib/definitions";
 import LessonElement from "./lesson_element";
 import TitleElement from "./title_element";
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
+import { useRouter } from "next/navigation";
 
 
 export default function Lessons() {
     const { isLoading: authLoading } = useAuth()
     const { t } = useLocalization()
-    const [lessons, setLessons] = React.useState<openApi.LessonRead[] | null>(null)
+    const [lessons, setLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
-    const getLessonAction = async (state: GetLessonByIDFormState, formData: FormData) => {
-        return getLessonByIDMe(state, formData)
-    }
-    const [getLessonState, getLessonFormAction, getLessonPending] = useActionState(getLessonAction, undefined)
-    const [fetchedLesson, setFetchedLesson] = React.useState<openApi.LessonRead | null>(null)
-    const [getLessonDialogOpen, setGetLessonDialogOpen] = React.useState(false)
+    const [getLessonState, getLessonFormAction, getLessonPending] = useActionState(getLessonByDayMe, undefined)
+    const [fetchedLessons, setFetchedLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
+    const router = useRouter()
 
     useToastListener(getLessonState, {functionName: "Get Lesson", successMessage: t('lessons.get_success'), errorMessage: t('lessons.get_error')})
     
     React.useEffect(() => {
         if (authLoading) return
 
-        const cachedLessons = getCachedData<openApi.LessonRead[]>(
+        const cachedLessons = getCachedData<openApi.ClassGroupItem[]>(
             offlineCacheKeys.lessonsListMe,
         )
         if (cachedLessons && cachedLessons.length > 0) {
@@ -61,7 +58,7 @@ export default function Lessons() {
 
     React.useEffect(() => {
         if (getLessonState?.message == 'success' && getLessonState.data) {
-            setFetchedLesson(getLessonState.data)
+            setFetchedLessons(getLessonState.data)
         }
        
     }, [getLessonState, t])
@@ -73,11 +70,11 @@ export default function Lessons() {
         </Field>
     )
 
-    const content = lessons?.map((lesson) => (
-        <div key={lesson.id}>
+    const content = Array.isArray(lessons) ? lessons.map((lesson) => (
+        <div key={`lesson-${lesson.schedule_id}-${lesson.student_id}`} className="cursor-pointer my-3" onClick={() => router.push(`/platform/dashboard/student/lessons/lessonData?scheduleID=${lesson.schedule_id}`)} >
             <LessonElement lesson={lesson} />
         </div>
-    ))
+    )) : []
 
     const displayContent = content
     const displayTitle = t('lessons.title')
@@ -89,8 +86,6 @@ export default function Lessons() {
             getLessonAction={getLessonFormAction}
             getLessonPending={getLessonPending}
             fieldInput={fieldInput}
-            getLessonDialogOpen={getLessonDialogOpen}
-            setGetLessonDialogOpen={setGetLessonDialogOpen}
         />
     )
 
@@ -99,25 +94,34 @@ export default function Lessons() {
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
     if (!lessons || lessons.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.no_data_found')}</p></DashboardPage>
 
-    if (fetchedLesson && getLessonState?.message == 'success') {
+    if (fetchedLessons && getLessonState?.message == 'success') {
         return <DashboardPage title={(
             <TitleElement
-                title={`${t('lessons.lesson_details')} ${fetchedLesson.id}`}
+                title={`${t('lessons.lesson_details')} ${fetchedLessons?.length? `(${fetchedLessons.length})` : ''}`}
                 fieldInput={fieldInput}
-                getLessonDialogOpen={getLessonDialogOpen}
-                setGetLessonDialogOpen={setGetLessonDialogOpen}
                 getLessonState={getLessonState}
                 getLessonAction={getLessonFormAction}
                 getLessonPending={getLessonPending}
             />
         )}>
             <div className='flex flex-row justify-end'>
-                <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLesson(null)}}>{t('common.clear')}</Button>
+                <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLessons([])}}>{t('common.clear')}</Button>
             </div>
-            <div><LessonElement lesson={fetchedLesson}/></div>
+            <div>
+                {fetchedLessons?.length === 0 ? (
+                    <p className="text-slate-700 text-xl">{t('lessons.no_lessons_found')}</p>
+                ) : (
+                    Array.isArray(fetchedLessons) && fetchedLessons.map((lesson) => (
+                        <div className="my-3" key={`lesson-${lesson.student_id}-${lesson.schedule_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}`)}>
+                            <LessonElement lesson={lesson}/>
+                        </div>
+                    ))
+                )}
+            </div>
         </DashboardPage>
     } else {
-        return <DashboardPage title={title}>{displayContent}</DashboardPage>
+        return <DashboardPage title={title}>
+            <div>{displayContent}</div>
+        </DashboardPage>
     }
-
 }

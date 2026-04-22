@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useLocalization } from "@/lib/localization-context";
 import React, { JSX, useState } from "react";
-import { GetLessonByIDFormState } from "../../../lib/definitions";
+import { GetLessonByDayFormState } from "../../../lib/definitions";
 
 export default function TitleElement({
     title,
@@ -19,16 +19,12 @@ export default function TitleElement({
     getLessonPending,
     getLessonState,
     fieldInput,
-    getLessonDialogOpen,
-    setGetLessonDialogOpen,
 }: {
         title: string,
-        getLessonState: GetLessonByIDFormState,
+        getLessonState: GetLessonByDayFormState,
         getLessonAction: (formData: FormData) => void,
         getLessonPending: boolean,
         fieldInput: (label: string, name: string, holder: string, type: string) => JSX.Element,
-        getLessonDialogOpen: boolean,
-        setGetLessonDialogOpen: (open: boolean) => void,
     }) {
     // Track if forms have been submitted in current dialog session
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
@@ -57,7 +53,7 @@ export default function TitleElement({
                             {t('lessons.get_lesson_desc')}
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
-                            {fieldInput(t('lessons.student_id'), "lesson-id", t('lessons.enter_lesson_id'), "number")}
+                            {fieldInput(t('lessons.lesson_day'), "lesson-day", t('lessons.enter_lesson_day'), "text")}
                             {getFormSubmitted && getLessonState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.get_failed')}</p> : null}
                         </div>
                         </AlertDialogHeader>

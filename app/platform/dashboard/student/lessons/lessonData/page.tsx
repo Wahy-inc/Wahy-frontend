@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearchParams } from "next/navigation";
-import React, { useActionState, useState } from "react";
+import React, { useState } from "react";
 import * as openApi from "@/lib/openApi";
 import DashboardPage from "../../page";
 import { Card, CardContent, CardDescription, CardHeader } from "@/components/ui/card";
@@ -15,44 +15,32 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { attendanceClassAnalytics, getLessonHistory, updateLesson } from "@/app/platform/actions/dashboard";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Field } from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { attendanceClassMEAnalytics, getMeMyLessonHistory } from "@/app/platform/actions/dashboard";
 import { useToastListener } from "@/lib/toastListener";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export default function LessonDataPage() {
     const searchData = useSearchParams();
     const scheduleID = searchData.get('scheduleID');
     const [attendance, setattendance] = React.useState<openApi.ClassAttendanceSummary | null>(null);
-    const [attendanceState, attendanceAction, attendancePending] = React.useActionState(attendanceClassAnalytics, undefined);
+    const [attendanceState, attendanceAction, attendancePending] = React.useActionState(attendanceClassMEAnalytics, undefined);
     const [history, setHistory] = useState<openApi.ClassHistoryResponse>();
-    const [editingLessonId, setEditingLessonId] = useState<number | null>(null);
-    const [updateFormSubmitted, setUpdateFormSubmitted] = useState(false);
-    const [updateState, updateAction, updatePending] = useActionState(updateLesson, undefined);
     const { t, language } = useLocalization();
     const isRTL = language === 'ar';
 
     useToastListener(attendanceState, { functionName: t('analytics.attendance_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
+    
 
     React.useEffect(() => {
         try {
-            getLessonHistory({ message: 'pending' }, Number(scheduleID)).then((res) => {
+            getMeMyLessonHistory({ message: 'pending' }, Number(scheduleID)).then((res) => {
                 setHistory(res?.data);
             });
         } catch (error) {
             console.error("Error fetching lesson history:", error);
         }
     }, [scheduleID]);
-
-    const handleUpdateSubmit = (formData: FormData) => {
-        setUpdateFormSubmitted(true);
-        updateAction(formData);
-    }
 
     React.useEffect(() => {
         if (attendanceState?.message === 'success' && attendanceState.data) {
@@ -64,13 +52,6 @@ export default function LessonDataPage() {
         formData.append('schedule_id', scheduleID || '')
         attendanceAction(formData)
     }
-
-    const fieldInput = (label: string, name: string, holder: string, type: string) => (        
-        <Field orientation="vertical" className='w-full inline'>
-            <Label htmlFor={name}>{label}</Label>
-            <Input id={name} name={name} type={type} placeholder={holder} defaultValue={holder}></Input>
-        </Field>
-    )
 
     const getAttendanceIcon = (attendance: openApi.AttendanceStatus) => {
         switch (attendance) {
@@ -303,95 +284,6 @@ export default function LessonDataPage() {
                             )}
                         </div>
                     </div>
-                    <Separator className="my-4" />
-                <div className="flex justify-end items-end">
-                    <AlertDialog open={editingLessonId === lesson.id} onOpenChange={(open: boolean) => setEditingLessonId(open ? lesson.id : null)}>
-                        <AlertDialogTrigger asChild>
-                            <Button className="transition duration-300 cursor-pointer bg-slate-400 hover:bg-slate-600">{t('lessons.update_lesson')}</Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <form action={handleUpdateSubmit}>
-                            <AlertDialogHeader>
-                            <AlertDialogTitle>{t('lessons.update_lesson')}</AlertDialogTitle>
-                                <div className="flex flex-col gap-4 rtl:text-right">
-                                    <div className="grid grid-cols-3 gap-4">
-                                        <input type="text" name="lesson-id" value={lesson.id} readOnly hidden/>
-                                        <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.date'), "date", lesson.date, "date")}
-                                            {updateFormSubmitted && updateState?.error?.date && <p className="text-red-500 text-sm">{updateState.error.date}</p>}
-                                        </div>
-                                        <div className='flex flex-col'>
-                                            <div className="flex flex-col">
-                                                <label htmlFor="type" className="text-sm font-medium">{t('lessons.type')}</label>
-                                                <Select name="type" defaultValue={lesson.type}>
-                                                    <SelectTrigger className="w-full max-w-48">
-                                                        <SelectValue placeholder={t('lessons.select_a_type')} />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            <SelectLabel>{t('lessons.type')}</SelectLabel>
-                                                            <SelectItem value={openApi.LessonType.Evaluation}>{t('lessons.evaluation')}</SelectItem>
-                                                            <SelectItem value={openApi.LessonType.NewMemorization}>{t('lessons.new_memorization')}</SelectItem>
-                                                            <SelectItem value={openApi.LessonType.Revision}>{t('lessons.revision')}</SelectItem>
-                                                            <SelectItem value={openApi.LessonType.Makeup}>{t('lessons.makeup')}</SelectItem>
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            {updateFormSubmitted && updateState?.error?.type && <p className="text-red-500 text-sm">{updateState.error.type}</p>}
-                                        </div>
-                                        <div className='flex flex-col'>
-                                            <div className="flex flex-col">
-                                                <label htmlFor="attendance" className="text-sm font-medium">{t('lessons.attendance')}</label>
-                                                <Select name="attendance" defaultValue={lesson.attendance}>
-                                                    <SelectTrigger className="w-full max-w-48">
-                                                        <SelectValue placeholder={t('lessons.attendance')} />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            <SelectLabel>{t('lessons.attendance')}</SelectLabel>
-                                                            <SelectItem value={openApi.AttendanceStatus.Present}>{t('lessons.present')}</SelectItem>
-                                                            <SelectItem value={openApi.AttendanceStatus.Absent}>{t('lessons.absent')}</SelectItem>
-                                                            <SelectItem value={openApi.AttendanceStatus.Excused}>{t('lessons.excused')}</SelectItem>
-                                                            <SelectItem value={openApi.AttendanceStatus.Late}>{t('lessons.late')}</SelectItem>
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            {updateFormSubmitted && updateState?.error?.attendance && <p className="text-red-500 text-sm">{updateState.error.attendance}</p>}
-                                        </div>
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.what_heard'), "what_is_heard_from_sheikh", lesson.what_is_heard_from_sheikh ?? '', "text")}
-                                        {updateFormSubmitted && updateState?.error?.what_is_heard_from_sheikh && <p className="text-red-500 text-sm">{updateState.error.what_is_heard_from_sheikh}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.homework'), "homework", lesson.homework ?? '', "text")}
-                                        {updateFormSubmitted && updateState?.error?.homework && <p className="text-red-500 text-sm">{updateState.error.homework}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.absence_reason') + " (Optional)", "absence_reason", lesson.absence_reason ?? '', "text")}
-                                        {updateFormSubmitted && updateState?.error?.absence_reason && <p className="text-red-500 text-sm">{updateState.error.absence_reason}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.sheikh_notes') + " (Optional)", "sheikh_notes", lesson.sheikh_notes ?? '', "text")}
-                                        {updateFormSubmitted && updateState?.error?.sheikh_notes && <p className="text-red-500 text-sm">{updateState.error.sheikh_notes}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.student_notes') + " (Optional)", "student_notes", lesson.student_notes ?? '', "text")}
-                                        {updateFormSubmitted && updateState?.error?.student_notes && <p className="text-red-500 text-sm">{updateState.error.student_notes}</p>}
-                                    </div>
-                                    {updateFormSubmitted && updateState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.update_failed')}</p> : null}
-                                </div>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter className="mt-4">
-                                <AlertDialogCancel type="reset" disabled={updatePending} onClick={() => setUpdateFormSubmitted(false)}>{t('common.cancel')}</AlertDialogCancel>
-                                <Button type="submit" disabled={updatePending}>{updatePending ? t('common.updating') : t('common.update')}</Button>
-                            </AlertDialogFooter>
-                            </form>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                </div>
             </CardContent>
         </Card>
     );

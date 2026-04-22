@@ -1,5 +1,5 @@
 import * as openApi from "@/lib/openApi"
-import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetAttendanceMEAnalyticsFormState, getAttendanceMEAnalyticsSchema, GetAttendanceStudentAnalyticsFormState, getAttendanceStudentAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByDayFormState, GetLessonByIDFormState, getLessonHistoryState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
+import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, CreateLibraryItemFormState, createLibraryItemSchema, CreateScheduleFormState, createScheduleSchema, CreateStudentFormState, createStudentSchema, CreatLessonSchema, GetAttendanceAnalyticsFormState, getAttendanceAnalyticsSchema, GetAttendanceClassMEAnalyticsFormState, GetAttendanceMEAnalyticsFormState, getAttendanceMEAnalyticsSchema, GetAttendanceStudentAnalyticsFormState, getAttendanceStudentAnalyticsSchema, GetFinancialAnalyticsFormState, getFinancialAnalyticsSchema, GetInvoiceByIDFormState, GetLessonByDayFormState, GetLessonByIDFormState, getLessonHistoryState, GetLibraryItemByIDFormState, GetOperationalAnalyticsFormState, getOperationalAnalyticsSchema, GetPerformanceAnalyticsFormState, getPerformanceAnalyticsSchema, GetSchedualesForStudentFormState, GetStudentFormState, OverrideInvoiceFormState, overrideInvoiceSchema, PayInvoiceFormState, payInvoiceSchema, UpdateLessonFormState, UpdateLessonSchema, UpdateScheduleFormState, UpdateScheduleSchema, UpdateStudentFormState, updateStudentSchema } from "@/app/platform/lib/definitions"
 import { createIdempotencyKey, enqueueOfflineMutation, isClientOnline, shouldQueueMutation } from "@/lib/offlineSync"
 import { getCachedData, offlineCacheKeys, setCachedData } from "@/lib/offlineCache"
 import { getApi } from "@/lib/apiClient"
@@ -516,17 +516,17 @@ export async function deleteSchedule(scheduleId: number): Promise<boolean> {
     }
 }
 
-export async function listLessons(): Promise<openApi.LessonRead[] | null> {
+export async function listLessons(): Promise<openApi.ClassGroupItem[] | null> {
     try {
-        const response = await api.api.listAllApiV1LessonsGet()
+        const response = await api.api.listClassesApiV2ClassesGet()
         if (response.status === 200) {
             setCachedData(offlineCacheKeys.lessonsListAdmin, response.data)
-            return response.data
+            return response.data.classes
         }
         return null
     } catch (error) {
         const cacheKey = offlineCacheKeys.lessonsListAdmin
-        const cached = getCachedData<openApi.LessonRead[]>(cacheKey)
+        const cached = getCachedData<openApi.ClassGroupItem[]>(cacheKey)
         if (cached) {
             return cached
         }
@@ -534,17 +534,30 @@ export async function listLessons(): Promise<openApi.LessonRead[] | null> {
     }
 }
 
-export async function listLessonsMe(): Promise<openApi.LessonRead[] | null> {
+export async function listLessonsMe(): Promise<openApi.ClassGroupItem[] | null> {
     try {
-        const response = await api.api.listMyLessonsApiV1LessonsMeGet()
+        const response = await api.api.listMyClassesApiV2ClassesMeGet()
 
         if (response.status === 200) {
             setCachedData(offlineCacheKeys.lessonsListMe, response.data)
-            return response.data
+            const results: openApi.ClassGroupItem[] = []
+            for (const lesson of response.data.classes) {
+                let isin = false;
+                for (const res of results) {
+                    if (res.schedule_id === lesson.schedule_id && res.day_label === lesson.day_label) {
+                        isin = true
+                        break
+                    }
+                }
+                if (!isin) {
+                    results.push(lesson)
+                }
+            }
+            return results
         }
         return null
     } catch (error) {
-        const cached = getCachedData<openApi.LessonRead[]>(offlineCacheKeys.lessonsListMe)
+        const cached = getCachedData<openApi.ClassGroupItem[]>(offlineCacheKeys.lessonsListMe)
         if (cached) {
             return cached
         }
@@ -1043,15 +1056,12 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
 }
 
 export async function getLessonByDay(state: GetLessonByDayFormState, formData: FormData): Promise<GetLessonByDayFormState> {
-    const lessonId = Number(formData.get('lesson-id'))
-    if (isNaN(lessonId)) {
-        return { error: { lesson_id: ['Lesson ID must be a number'] } }
-    }
+    const lessonDay = formData.get('lesson-day')
     try {
-        const response = await api.api.listAllApiV1LessonsGet()
+        const response = await api.api.listClassesApiV2ClassesGet()
 
         if (response.status === 200) {
-            const lessons = response.data.filter((lesson: openApi.LessonRead) => lesson.id === lessonId)
+            const lessons = response.data.classes.filter((lesson: openApi.ClassGroupItem) => lesson.day_label === lessonDay)
             return { message: 'success', data: lessons }
         }
         return { message: 'fail' }
@@ -1060,14 +1070,12 @@ export async function getLessonByDay(state: GetLessonByDayFormState, formData: F
     }
 }
 
-export async function getLessonHistory(state: getLessonHistoryState, scheduleID: number, studentID: number, day: number): Promise<getLessonHistoryState> {
+export async function getLessonHistory(state: getLessonHistoryState, scheduleID: number): Promise<getLessonHistoryState> {
     try {
-        const response = await api.api.listAllApiV1LessonsGet()
+        const response = await api.api.getHistoryApiV2ClassesScheduleIdHistoryGet(scheduleID)
 
         if (response.status === 200) {
-            const lessons = response.data.filter((lesson: openApi.LessonRead) => lesson.schedule_id === scheduleID && lesson.student_id === studentID && new Date(lesson.date).getDay() === day)
-            const history: openApi.ClassHistoryResponse = { lessons: lessons, total: lessons.length }
-            return { message: 'success', data: history }
+            return { message: 'success', data: response.data }
         }
         return { message: 'fail' }
     } catch (error) {
@@ -1075,16 +1083,27 @@ export async function getLessonHistory(state: getLessonHistoryState, scheduleID:
     }
 }
 
-export async function getLessonByIDMe(state: GetLessonByIDFormState, formData: FormData): Promise<GetLessonByIDFormState> {
-    const lessonId = Number(formData.get('lesson-id'))
-    if (isNaN(lessonId)) {
-        return { error: { lesson_id: ['Lesson ID must be a number'] } }
-    }
+export async function getMeMyLessonHistory(state: getLessonHistoryState, scheduleID: number): Promise<getLessonHistoryState> {
     try {
-        const response = await api.api.getMyLessonApiV1LessonsMeLessonIdGet(lessonId)
+        const response = await api.api.getMyHistoryApiV2ClassesMeScheduleIdHistoryGet(scheduleID)
 
         if (response.status === 200) {
             return { message: 'success', data: response.data }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function getLessonByDayMe(state: GetLessonByDayFormState, formData: FormData): Promise<GetLessonByDayFormState> {
+    const lessonDay = formData.get('lesson-day')
+    try {
+        const response = await api.api.listMyClassesApiV2ClassesMeGet()
+
+        if (response.status === 200) {
+            const lessons = response.data.classes.filter((lesson: openApi.ClassGroupItem) => lesson.day_label == lessonDay)
+            return { message: 'success', data: lessons }
         }
         return { message: 'fail' }
     } catch (error) {
@@ -1134,6 +1153,60 @@ export async function attendanceMEAnalytics(state: GetAttendanceMEAnalyticsFormS
             end_date: validation.data.period_end,
         }
         const response = await api.api.getMyAttendanceHoursApiV1StudentsMeAttendanceHoursGet(data)
+
+        if (response.status === 200) {
+            return { message: 'success', data: response.data }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function attendanceClassMEAnalytics(state: GetAttendanceClassMEAnalyticsFormState, formData: FormData): Promise<GetAttendanceClassMEAnalyticsFormState> {
+    const validation = getAttendanceMEAnalyticsSchema.safeParse({
+        period_start: formData.get('period_start'),
+        period_end: formData.get('period_end'),
+    })
+    const scheduleId = Number(formData.get('schedule_id'))
+
+    if (!validation.success) {
+        console.log('succeded');
+        return { message: 'fail' }
+    }
+    try {
+        const data = {
+            start_date: validation.data.period_start,
+            end_date: validation.data.period_end,
+        }
+        const response = await api.api.getMyAttendanceApiV2ClassesMeScheduleIdAttendanceGet(scheduleId, data)
+
+        if (response.status === 200) {
+            return { message: 'success', data: response.data }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function attendanceClassAnalytics(state: GetAttendanceClassMEAnalyticsFormState, formData: FormData): Promise<GetAttendanceClassMEAnalyticsFormState> {
+    const validation = getAttendanceMEAnalyticsSchema.safeParse({
+        period_start: formData.get('period_start'),
+        period_end: formData.get('period_end'),
+    })
+    const scheduleId = Number(formData.get('schedule_id'))
+
+    if (!validation.success) {
+        console.log('succeded');
+        return { message: 'fail' }
+    }
+    try {
+        const data = {
+            start_date: validation.data.period_start,
+            end_date: validation.data.period_end,
+        }
+        const response = await api.api.getAttendanceApiV2ClassesScheduleIdAttendanceGet(scheduleId, data)
 
         if (response.status === 200) {
             return { message: 'success', data: response.data }

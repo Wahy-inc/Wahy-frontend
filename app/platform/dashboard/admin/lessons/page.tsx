@@ -22,17 +22,14 @@ export default function Lessons() {
     const {isAdmin, isLoading: authLoading } = useAuth()
     const { t } = useLocalization()
     const router = useRouter()
-    const [lessons, setLessons] = React.useState<openApi.LessonRead[] | null>(null)
+    const [lessons, setLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const [createState, createAction, createPending] = useActionState(createLesson, undefined)
-    const getLessonAction = async (state: GetLessonByDayFormState, formData: FormData) => {
-        return getLessonByDay(state, formData)
-    }
-    const [getLessonState, getLessonFormAction, getLessonPending] = useActionState(getLessonAction, undefined)
-    const [fetchedLessons, setFetchedLessons] = React.useState<openApi.LessonRead[] | null>(null)
+    const [getLessonState, getLessonFormAction, getLessonPending] = useActionState(getLessonByDay, undefined)
+    const [fetchedLessons, setFetchedLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
     const [searchStudentId, setSearchStudentId] = React.useState<string>("")
-    const [filteredLessons, setFilteredLessons] = React.useState<openApi.LessonRead[] | null>(null)
+    const [filteredLessons, setFilteredLessons] = React.useState<openApi.ClassGroupItem[] | null>(null)
 
     useToastListener(createState, {functionName: "Create Lesson", successMessage: t('lessons.create_success'), errorMessage: t('lessons.create_error')})
     useToastListener(getLessonState, {functionName: "Get Lesson", successMessage: t('lessons.get_success'), errorMessage: t('lessons.get_error')})
@@ -40,7 +37,7 @@ export default function Lessons() {
     React.useEffect(() => {
         if (authLoading) return
 
-        const cachedLessons = getCachedData<openApi.LessonRead[]>(
+        const cachedLessons = getCachedData<openApi.ClassGroupItem[]>(
             offlineCacheKeys.lessonsListAdmin,
         )
         if (cachedLessons && cachedLessons?.length > 0) {
@@ -131,7 +128,7 @@ export default function Lessons() {
     }
 
     const content = lessons?.map((lesson) => (
-        <div className="my-4" key={`lesson-${lesson.id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${new Date(lesson.date).getDay()}`)}>
+        <div className="my-4" key={`lesson-${lesson.student_id}-${lesson.schedule_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
             <LessonElement lesson={lesson}/>
         </div>
     ))
@@ -145,7 +142,7 @@ export default function Lessons() {
             displayTitle = `${t('lessons.title')} - Student ${searchStudentId}`
         } else {
             displayContent = filteredLessons.map((lesson) => (
-                <div key={`lesson-${lesson.id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${new Date(lesson.date).getDay()}`)}>
+                <div key={`lesson-${lesson.student_id}-${lesson.schedule_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
                     <LessonElement lesson={lesson}/>
                 </div>
             ))
@@ -215,7 +212,7 @@ export default function Lessons() {
                     <p className="text-slate-700 text-xl">{t('lessons.no_lessons_found')}</p>
                 ) : (
                     fetchedLessons.map((lesson) => (
-                        <div key={`lesson-${lesson.id}`}>
+                        <div key={`lesson-${lesson.student_id}-${lesson.schedule_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
                             <LessonElement lesson={lesson}/>
                         </div>
                     ))

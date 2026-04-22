@@ -122,7 +122,7 @@ export type GetLessonByDayFormState =
             lesson_id?: string[];
         }
         message?: string;
-        data?: openApi.LessonRead[];
+        data?: openApi.ClassGroupItem[];
     }
     | undefined;
 
@@ -440,6 +440,13 @@ export type GetAttendanceMEAnalyticsFormState =
     }
     | undefined;
 
+export type GetAttendanceClassMEAnalyticsFormState =
+    | {
+        message?: string;
+        data?: openApi.ClassAttendanceSummary;
+    }
+    | undefined;
+
 export const getPerformanceAnalyticsSchema = zod.object({
     period_start: zod.string().min(1).trim(),
     period_end: zod.string().min(1).trim(),
@@ -474,6 +481,6 @@ export type GetLessonByIDFormState =
             lesson_id?: string[];
         }
         message?: string;
-        data?: openApi.LessonRead;
+        data?: openApi.ClassGroupItem[];
     }
     | undefined;

@@ -192,7 +192,7 @@ export default function TitleElement({
                             {t('lessons.get_lesson_desc')}
                         </AlertDialogDescription>
                         <div className="flex flex-col gap-4 w-full">
-                            {fieldInput(t('lessons.lesson_details'), "lesson-id", t('lessons.enter_lesson_id'), "number")}
+                            {fieldInput(t('lessons.lesson_details'), "lesson-day", t('lessons.enter_lesson_day'), "text")}
                             {getFormSubmitted && getLessonState?.message == 'fail'? <p className="text-red-500 text-sm">{t('lessons.get_failed')}</p> : null}
                         </div>
                         </AlertDialogHeader>
