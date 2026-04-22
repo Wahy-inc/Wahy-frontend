@@ -128,7 +128,8 @@
     "id": "ID",
     "due_date": "Fälligkeitsdatum",
     "lesson_history": "Unterrichtsverlauf",
-    "total_lessons": "Gesamtklassen"
+    "total_lessons": "Gesamtklassen",
+    "no_files_found": "Keine Dateien gefunden"
   },
   "schedules": {
     "title": "Zeitpläne",

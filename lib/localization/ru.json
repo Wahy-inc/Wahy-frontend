@@ -128,7 +128,8 @@
     "id": "ID",
     "due_date": "Срок сдачи",
     "lesson_history": "История уроков",
-    "total_lessons": "Всего уроков"
+    "total_lessons": "Всего уроков",
+    "no_files_found": "Файлы не найдены"
   },
   "schedules": {
     "title": "Расписания",

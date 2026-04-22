@@ -15,14 +15,17 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { attendanceClassMEAnalytics, getMeMyLessonHistory } from "@/app/platform/actions/dashboard";
+import { attendanceClassMEAnalytics, downloadClassFile, getMeMyLessonHistory, listMyUploadClassFile } from "@/app/platform/actions/dashboard";
 import { useToastListener } from "@/lib/toastListener";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { UploadedClassFile } from "@/app/platform/lib/definitionsv2";
+import { Separator } from "radix-ui";
 
 export default function LessonDataPage() {
     const searchData = useSearchParams();
     const scheduleID = searchData.get('scheduleID');
+    const [files, setFiles] = React.useState<UploadedClassFile[] | null>(null);
     const [attendance, setattendance] = React.useState<openApi.ClassAttendanceSummary | null>(null);
     const [attendanceState, attendanceAction, attendancePending] = React.useActionState(attendanceClassMEAnalytics, undefined);
     const [history, setHistory] = useState<openApi.ClassHistoryResponse>();
@@ -36,6 +39,9 @@ export default function LessonDataPage() {
         try {
             getMeMyLessonHistory({ message: 'pending' }, Number(scheduleID)).then((res) => {
                 setHistory(res?.data);
+            });
+            listMyUploadClassFile(Number(scheduleID)).then((res) => {
+                setFiles(res?.data || null);
             });
         } catch (error) {
             console.error("Error fetching lesson history:", error);
@@ -132,6 +138,49 @@ export default function LessonDataPage() {
                         </div>
                         <Button disabled={pending} id="submit" type="submit" className="col-start-3 col-end-4 bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800 hover:border-slate-800 border-2">{t('common.submit')}</Button>
                     </form>
+                </div>
+            </div>
+        )
+    }
+
+    const getFileSize = (sizeInBytes: number) => {
+        if (sizeInBytes >= 1e9) {
+            return (sizeInBytes / 1e9).toFixed(2) + ' GB';
+        } else if (sizeInBytes >= 1e6) {
+            return (sizeInBytes / 1e6).toFixed(2) + ' MB';
+        } else if (sizeInBytes >= 1e3) {
+            return (sizeInBytes / 1e3).toFixed(2) + ' KB';
+        } else {
+            return sizeInBytes + ' Bytes';
+        }
+    }
+
+    const uploadedFileElement = (file: UploadedClassFile) => {
+        return (
+            <div key={`${file.file_path}-${file.created_at}-${file.updated_at}`} className="flex flex-row items-center justify-between p-0 gap-1 bg-slate-200 shadow border border-slate-800 rounded-lg overflow-hidden my-2">
+                <div className="flex flex-row">
+                    <div className="w-fit h-full p-3 bg-slate-800">
+                        <Icon.File className="w-8 h-8 text-slate-200" />
+                    </div>
+                    <div className="flex flex-col gap-1 p-1">
+                        <div className="flex flex-row gap-3">
+                            <p className="text-md text-slate-800 font-bold">{file.original_filename}</p>
+                            <div className="flex flex-row gap-2">
+                                <Badge variant="default" className="gap-2 bg-slate-800 text-slate-200">
+                                    <Icon.Download className="w-5 h-5 text-slate-500" />
+                                    <p>{file.download_count} Downloads</p>
+                                </Badge>
+                                <Badge variant="outline" className="gap-2 border-slate-800 text-slate-800">
+                                    <Icon.Disc className="w-5 h-5 text-slate-500" />
+                                    <p className="text-slate-800">{getFileSize(file.file_size_bytes)}</p>
+                                </Badge>
+                            </div>
+                        </div>
+                        <p className="text-sm text-slate-600">{t('file_upload.created_at_prefix')}{new Date(file.created_at).toLocaleDateString()} | {t('file_upload.uploaded_at_prefix')}{new Date(file.updated_at).toLocaleDateString()}</p>
+                    </div>
+                </div>
+                <div className="flex flex-row gap-1 w-fit h-full p-2">
+                    <Button variant="default" className="bg-green-600 hover:bg-green-800 text-slate-100 rounded-lg" onClick={() => downloadClassFile(Number(scheduleID), file.id)}><Icon.Download className="w-3 h-3" /></Button>
                 </div>
             </div>
         )
@@ -344,6 +393,15 @@ export default function LessonDataPage() {
                 student_name_en: "",
                 })}
             </div>}
+            <div className="flex flex-col justify-center border-dashed border-2 border-slate-800 bg-slate-300 rounded-lg p-4 my-6">
+                <div className="w-full overflow-y-scroll max-h-100">
+                    {files && files.length > 0 ? files.map((file) => uploadedFileElement(file)) : (
+                        <div className="flex items-center justify-center min-h-50">
+                            <p className="text-slate-500 text-lg">{t('lessons.no_files_found')}</p>
+                        </div>
+                    )}
+                </div>
+            </div>
             {content}
         </DashboardPage>
     )

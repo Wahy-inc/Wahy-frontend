@@ -128,7 +128,8 @@
     "id": "ID",
     "due_date": "Fecha de vencimiento",
     "lesson_history": "Historial de clases",
-    "total_lessons": "Total de clases"
+    "total_lessons": "Total de clases",
+    "no_files_found": "No se encontraron archivos"
   },
   "schedules": {
     "title": "Horarios",

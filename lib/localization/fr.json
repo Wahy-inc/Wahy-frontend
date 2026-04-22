@@ -128,7 +128,8 @@
     "id": "ID",
     "due_date": "Date limite",
     "lesson_history": "Historique des cours",
-    "total_lessons": "Total des cours"
+    "total_lessons": "Total des cours",
+    "no_files_found": "Aucun fichier trouvé"
   },
   "schedules": {
     "title": "Plannings",

@@ -113,7 +113,8 @@
     "id": "ID",
     "due_date": "Due Date",
     "lesson_history": "Lesson History",
-    "total_lessons": "Total Lessons"
+    "total_lessons": "Total Lessons",
+    "no_files_found": "No files found"
   },
   "schedules": {
     "title": "Schedules",

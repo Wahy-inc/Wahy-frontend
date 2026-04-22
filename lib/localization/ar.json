@@ -113,7 +113,8 @@
     "id": "رقم الهوية",
     "due_date": "تاريخ الاستحقاق",
     "lesson_history": "سجل الدروس",
-    "total_lessons": "إجمالي الدروس"
+    "total_lessons": "إجمالي الدروس",
+    "no_files_found": "لم يتم العثور على ملفات"
   },
   "schedules": {
     "title": "الجداول الزمنية",
