@@ -20,6 +20,7 @@ import { useToastListener } from "@/lib/toastListener";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UploadedClassFile } from "@/app/platform/lib/definitionsv2";
+import moment from "moment";
 
 function LessonDataContent() {
     const searchData = useSearchParams();
@@ -353,7 +354,7 @@ function LessonDataContent() {
                     value={his.id.toString()}
                     className="border-b px-4 last:border-b-0"
                     >
-                    <AccordionTrigger>{his.date}</AccordionTrigger>
+                    <AccordionTrigger>{`${String(moment(his.date)).slice(0, 4)} | ${his.date}`}</AccordionTrigger>
                     <AccordionContent>{lessonHistoryElement(his)}</AccordionContent>
                     </AccordionItem>
                 ))}
