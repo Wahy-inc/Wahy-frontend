@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToastListener } from "@/lib/toastListener";
 import { UploadedClassFile } from "@/app/platform/lib/definitionsv2";
+import moment from "moment/moment";
 
 function LessonDataContent() {
     const searchData = useSearchParams();
@@ -40,6 +41,7 @@ function LessonDataContent() {
     const [uploadFileState, uploadFileAction, uploadFilePending] = useActionState(uploadClassFile, undefined);
     const { t, language } = useLocalization();
     const isRTL = language === 'ar';
+    const date = new Date();
 
     useToastListener(attendanceState, { functionName: t('analytics.attendance_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
     useToastListener(uploadFileState, { functionName: t('files.upload_file'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
@@ -475,7 +477,7 @@ function LessonDataContent() {
                     value={his.id.toString()}
                     className="border-b px-4 last:border-b-0"
                     >
-                    <AccordionTrigger>{his.date}</AccordionTrigger>
+                    <AccordionTrigger>{`${String(moment(his.date)).slice(0, 4)} | ${his.date}`}</AccordionTrigger>
                     <AccordionContent>{lessonHistoryElement(his)}</AccordionContent>
                     </AccordionItem>
                 ))}

@@ -302,14 +302,16 @@ export async function addLocalSchedules(): Promise<boolean> {
     }
 }
 
-export function getLocalSchedules(id: number): { id: number; schedules: (string[] | undefined)[] }[] | null {
+export function getLocalSchedules(id: number | null): { id: number; schedules: (string[] | undefined)[] }[] | null {
+    if (id === undefined) return null;
     try {
         const data = localStorage.getItem('schedules');
         if (!data) {
             return null;
         }
-        const schedules = JSON.parse(data);
-        return schedules.filter((schedule: { id: number; schedules: (string[] | undefined)[] }) => schedule.id === id);
+        const schedulesData = JSON.parse(data);
+        const schedules = schedulesData.filter((schedule: { id: number; schedules: (string[] | undefined)[] }) => schedule.id === id);
+        return schedules;
     } catch (error) {
         console.error("Error parsing local schedules:", error);
         return null;

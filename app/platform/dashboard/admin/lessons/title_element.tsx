@@ -25,6 +25,7 @@ import { useLocalization } from "@/lib/localization-context";
 import React, { JSX, useState } from "react";
 import { CreateLessonFormState, GetLessonByDayFormState } from "../../../lib/definitions";
 import StudentMenu from "@/components/studentsMenu";
+import { getLocalSchedules } from "@/app/platform/actions/dashboardv2";
 
 export default function TitleElement({
     title,
@@ -68,6 +69,38 @@ export default function TitleElement({
         getLessonAction(formData)
     }
 
+    const getDayFromSchedule = (schedule: string): string => {
+        const dayMap: { [key: string]: number } = {
+            "MO": 0,
+            "TU": 1,
+            "WE": 2,
+            "TH": 3,
+            "FR": 4,
+            "SA": 5,
+            "SU": 6,
+        };
+        const dayIndex = dayMap[schedule.slice(0, 2)];
+        const date = new Date();
+        
+        // JavaScript's getDay(): 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+        // User's format: 0 = Monday, 1 = Tuesday, ..., 6 = Sunday
+        const todayDayOfWeek = new Date().getDay();
+        const todayInUserFormat = (todayDayOfWeek - 1 + 7) % 7;
+        
+        // Calculate days to add to get to target day
+        const daysToAdd = dayIndex - todayInUserFormat;
+        
+        // Add days to current date
+        date.setDate(date.getDate() + daysToAdd);
+        
+        // Format as MM/DD/YYYY
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const year = date.getFullYear();
+        
+        return `${year}-${month}-${day}`;
+    };
+
     return (
             <div className="flex flex-col justify-center">
                 <div className='flex flex-row justify-between items-center'>
@@ -105,7 +138,26 @@ export default function TitleElement({
                                     </div>
                                     <div className="grid grid-cols-3 gap-4">
                                         <div className='flex flex-col'>
-                                            {fieldInput(t('lessons.date'), "date", t('lessons.select_date'), "date")}
+                                            <div className="flex flex-col">
+                                                <label htmlFor="date" className="text-sm font-medium">{t('lessons.date')}</label>
+                                                <Select name="date">
+                                                    <SelectTrigger className="w-full max-w-48">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>{t('lessons.date')}</SelectLabel>
+                                                            {getLocalSchedules(selectedStudentId)?.flatMap((schedules) =>
+                                                                schedules?.schedules.map((sched) => sched?.map((sch) => (
+                                                                    <SelectItem key={`date-${sch}-${new Date().getTime()}`} value={getDayFromSchedule(sch) || ""}>
+                                                                        {sch}
+                                                                    </SelectItem>
+                                                                )))
+                                                            )}
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
                                             {createFormSubmitted && createState?.error?.date && <p className="text-red-500 text-sm">{createState.error.date}</p>}
                                         </div>
                                         <div className='flex flex-col'>
