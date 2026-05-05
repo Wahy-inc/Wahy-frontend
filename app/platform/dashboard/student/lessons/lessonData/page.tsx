@@ -20,7 +20,6 @@ import { useToastListener } from "@/lib/toastListener";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { UploadedClassFile } from "@/app/platform/lib/definitionsv2";
-import { Separator } from "radix-ui";
 
 function LessonDataContent() {
     const searchData = useSearchParams();

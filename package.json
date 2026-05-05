@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@deemlol/next-icons": "^0.1.9",
+    "@martinhipp/rrule": "^1.0.5",
     "@next/env": "^16.1.6",
     "@tanstack/react-table": "^8.21.3",
     "class-variance-authority": "^0.7.1",

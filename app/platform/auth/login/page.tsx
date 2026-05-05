@@ -14,6 +14,7 @@ import { useAuth } from "@/lib/auth-context"
 import { useToastListener } from "@/lib/toastListener"
 import { listStudents } from "../../actions/dashboard"
 import { useLocalization } from "@/lib/localization-context"
+import { addLocalSchedules } from "../../actions/dashboardv2"
 
 export default function SignIn() {
     const { isAdmin } = useAuth()
@@ -31,6 +32,8 @@ export default function SignIn() {
             router.replace('/platform/dashboard/admin')
             localStorage.setItem('students', JSON.stringify([]))
             listStudents()
+            localStorage.setItem('schedules', JSON.stringify([]))
+            addLocalSchedules()
           } else {
             router.replace('/platform/dashboard/student')
           }

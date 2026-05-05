@@ -1,6 +1,7 @@
 import { getApi } from "@/lib/apiClient"
 import { DownloadICSFeedResponseState, EnableFeedResponseState, GenerateFeedResponseState, GetCalendarDayDataResponseState, GetCalendarGridResponseState, RotateFeedResponseState } from "../lib/definitionsv2";
 import * as openApi from "@/lib/openApi"
+import { RRule, WeekdayValue } from '@martinhipp/rrule'
 
 const api = getApi()
 
@@ -255,5 +256,62 @@ export async function notificationsMarkAllAsRead(): Promise<boolean> {
     } catch (error) {
         console.error("Error marking all notifications as read:", error);
         return false
+    }
+}
+
+export async function addLocalSchedules(): Promise<boolean> {
+    try {
+        const response = await api.api.listAllApiV1SchedulesGet();
+        if (!response.ok || !response.data) {
+            console.log("failed to fetch schedules");
+            return false
+        }
+        if (response.status == 200) {
+            const schedules = response.data;
+            const ids:number[] = [];
+            schedules.map((schedule) => ids.includes(schedule.student_id) ? null : ids.push(schedule.student_id));
+
+            const storeData: { id: number; schedules: (string[] | undefined)[] }[] = [];
+            ids.forEach((id) => {
+                const data = {
+                    id: id,
+                    schedules: schedules.filter((schedule) => schedule.student_id === id).map((sch) => {
+                        if (!sch.rrule_string) return undefined;
+                        try {
+                            const rruleString = sch.rrule_string.startsWith('RRULE:') 
+                                ? sch.rrule_string 
+                                : `RRULE:${sch.rrule_string}`;
+                            const rrule = RRule.fromString(rruleString);
+                            const store = rrule.byweekday?.map((weekday) => `${weekday} | ${sch.start_time.slice(0, 5)} : ${sch.end_time.slice(0, 5)}`);
+                            return store;
+                        } catch (err) {
+                            console.warn("Invalid RRULE string:", sch.rrule_string, err);
+                            return undefined;
+                        }
+                    })
+                }
+                storeData.push(data);
+            })
+            localStorage.setItem('schedules', JSON.stringify(storeData));
+            return true
+        }
+        return false
+    } catch (error) {
+        console.error("Error fetching schedules:", error);
+        return false
+    }
+}
+
+export function getLocalSchedules(id: number): { id: number; schedules: (string[] | undefined)[] }[] | null {
+    try {
+        const data = localStorage.getItem('schedules');
+        if (!data) {
+            return null;
+        }
+        const schedules = JSON.parse(data);
+        return schedules.filter((schedule: { id: number; schedules: (string[] | undefined)[] }) => schedule.id === id);
+    } catch (error) {
+        console.error("Error parsing local schedules:", error);
+        return null;
     }
 }
