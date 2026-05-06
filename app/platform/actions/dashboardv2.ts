@@ -275,7 +275,7 @@ export async function addLocalSchedules(): Promise<boolean> {
             ids.forEach((id) => {
                 const data = {
                     id: id,
-                    schedules: schedules.filter((schedule) => schedule.student_id === id).map((sch) => {
+                    schedules: schedules.filter((schedule) => schedule.student_id === id && schedule.is_active).map((sch) => {
                         if (!sch.rrule_string) return undefined;
                         try {
                             const rruleString = sch.rrule_string.startsWith('RRULE:') 
