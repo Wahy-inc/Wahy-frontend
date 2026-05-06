@@ -26,6 +26,7 @@ export default function Schedules() {
     const [schedules, setSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
+    const [hideInActive, setHideInActive] = React.useState(false);
     const [searchStudentId, setSearchStudentId] = React.useState<string>("")
     const [filteredSchedules, setFilteredSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
     const [createScheduleState, createScheduleAction, createSchedulePending] = React.useActionState(createSchedule, undefined)
@@ -75,7 +76,12 @@ export default function Schedules() {
             }
             fetchSchedules()
         }
-    }, [getScheduleState, createScheduleState, updateScheduleState])
+        if (hideInActive && schedules) {
+            setFilteredSchedules(schedules.filter((schedule: openApi.ScheduleRead) => schedule.is_active))
+        } else if (!hideInActive && schedules) {
+            setFilteredSchedules(null)
+        }
+    }, [getScheduleState, createScheduleState, updateScheduleState, hideInActive, schedules])
 
     React.useEffect(() => {
         if (authLoading) return
@@ -528,5 +534,11 @@ export default function Schedules() {
         </div>
     )
 
-    return <DashboardPage title={title}>{content}</DashboardPage>
+    return <DashboardPage title={title}>
+        <div className="flex justify-start items-center gap-2">
+            <Input id="hide-inactive-schedules" name="hide-inactive-schedules" type="checkbox" onClick={() => setHideInActive(!hideInActive)} className="inline w-4 h-4" />
+            <Label htmlFor="hide-inactive-schedules" className="text-slate-800 text-lg cursor-pointer hover:text-slate-600">Hide Inactive Schedules</Label>
+        </div>
+        {content}
+        </DashboardPage>
 }

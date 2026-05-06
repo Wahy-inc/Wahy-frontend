@@ -2,14 +2,14 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { getLocalStudent, getSchedulesForStudent, listSchedulesMe } from "@/app/platform/actions/dashboard";
+import { getSchedulesForStudent, listSchedulesMe } from "@/app/platform/actions/dashboard";
 import DashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Clock, Calendar, RefreshCw, Power, User, MessageSquare, AlertTriangle } from "lucide-react";
+import { Clock, Calendar, RefreshCw, Power, MessageSquare, AlertTriangle } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -22,11 +22,12 @@ export default function Schedules() {
     const [schedules, setSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
+    const [hideInActive, setHideInActive] = React.useState(false)
     const [filteredSchedules, setFilteredSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
     const [getScheduleState, getScheduleAction, getSchedulePending] = React.useActionState(getSchedulesForStudent, undefined)
     const [getScheduleDialogOpen, setGetScheduleDialogOpen] = React.useState(false)
     const { isLoading: authLoading } = useAuth()
-    const { t, language } = useLocalization()
+    const { t } = useLocalization()
 
     useToastListener(getScheduleState, {functionName: "Get Schedules for Student", successMessage: t('schedules.get_success'), errorMessage: t('schedules.get_error')})
     
@@ -34,7 +35,12 @@ export default function Schedules() {
         if (getScheduleState?.message == 'success' && getScheduleState.data) {
             setFilteredSchedules(getScheduleState.data)
         }
-    }, [getScheduleState])
+        if (hideInActive && schedules) {
+            setFilteredSchedules(schedules.filter((schedule: openApi.ScheduleRead) => schedule.is_active))
+        } else if (!hideInActive && schedules) {
+            setFilteredSchedules(null)
+        }
+    }, [getScheduleState, schedules, hideInActive])
 
     React.useEffect(() => {
         if (authLoading) return
@@ -221,5 +227,11 @@ export default function Schedules() {
         </div>
     )
 
-    return <DashboardPage title={title}>{content}</DashboardPage>
+    return <DashboardPage title={title}>
+        <div className="flex justify-start items-center gap-2">
+            <Input id="hide-inactive-schedules" name="hide-inactive-schedules" type="checkbox" onClick={() => setHideInActive(!hideInActive)} className="inline w-4 h-4" />
+            <Label htmlFor="hide-inactive-schedules" className="text-slate-800 text-lg cursor-pointer hover:text-slate-600">Hide Inactive Schedules</Label>
+        </div>
+        {content}
+        </DashboardPage>
 }
