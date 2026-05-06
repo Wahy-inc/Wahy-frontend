@@ -22,7 +22,7 @@ export default function Schedules() {
     const [schedules, setSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
-    const [hideInActive, setHideInActive] = React.useState(false)
+    const [hideInActive, setHideInActive] = React.useState(true)
     const [filteredSchedules, setFilteredSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
     const [getScheduleState, getScheduleAction, getSchedulePending] = React.useActionState(getSchedulesForStudent, undefined)
     const [getScheduleDialogOpen, setGetScheduleDialogOpen] = React.useState(false)
