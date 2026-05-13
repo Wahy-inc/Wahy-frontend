@@ -5,10 +5,7 @@ import * as openApi from "@/lib/openApi";
 export const SignUpSchema = zod.object({
     arname: zod.string().min(1, { error: 'Name is required' }).trim(),
     enname: zod.string().min(1, { error: 'Name is required' }).trim(),
-    email: zod.email({ error: 'Invalid email address' }).trim(),
-    password: zod.string().min(6, { error: 'Password must be at least 6 characters long' })
-        .regex(/[a-zA-Z]/, { error: 'Password must contain at least one letter' })
-        .regex(/[0-9]/, { error: 'Password must contain at least one number' }).trim(),
+    user_id: zod.string().min(1, { error: 'ID is required' }).trim(),
     phone: zod.string().trim().optional(),
     dateOfBirth: zod.string().trim().optional(),
     timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
@@ -23,8 +20,7 @@ export type SignupFormState =
         error?: {
             arname?: string[];
             enname?: string[];
-            email?: string[];
-            password?: string[];
+            user_id?: string[];
             phone?: string[];
             dateOfBirth?: string[];
             timeZone?: string[];

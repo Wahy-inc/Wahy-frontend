@@ -1942,17 +1942,10 @@ export interface StudentSelfRead {
  */
 export interface StudentSignupRequest {
   /**
-   * Email
-   * Student's email address. Must be unique across all users.
-   * @format email
+   * User Id
+   * Unique identifier for the user account.
    */
-  email: string;
-  /**
-   * Password
-   * Account password. Minimum 8 characters.
-   * @minLength 8
-   */
-  password: string;
+  user_id: string;
   /**
    * Full Name Arabic
    * Student's full name in Arabic script.

@@ -8,8 +8,7 @@ export async function signup(state: SignupFormState, formData: FormData): Promis
     const validation = SignUpSchema.safeParse({
         arname: formData.get('ar-name'),
         enname: formData.get('en-name'),
-        email: formData.get('email'),
-        password: formData.get('password'),
+        user_id: formData.get('user_id'),
         phone: formData.get('phone'),
         dateOfBirth: formData.get('date-of-birth'),
         timeZone: formData.get('time-zone'),
@@ -28,8 +27,7 @@ export async function signup(state: SignupFormState, formData: FormData): Promis
 
     try {
         const data: openApi.StudentSignupRequest = {
-            email: validation.data.email,
-            password: validation.data.password,
+            user_id: validation.data.user_id,
             full_name_arabic: validation.data.arname,
             full_name_english: validation.data.enname,
             date_of_birth: validation.data.dateOfBirth,

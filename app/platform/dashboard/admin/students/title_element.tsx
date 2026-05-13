@@ -14,6 +14,7 @@ import { JSX, useState } from "react";
 import { CreateStudentFormState, GetStudentFormState } from "@/app/platform/lib/definitions";
 import { Select, SelectGroup, SelectContent, SelectTrigger, SelectValue, SelectLabel, SelectItem } from "@/components/ui/select";
 import { useLocalization } from "@/lib/localization-context";
+import { useRouter } from "next/navigation";
 
 export default function TitleElement({
     title,
@@ -57,14 +58,13 @@ export default function TitleElement({
         getStudentAction(formData)
     }
 
-    const date = new Date()
-
     return (
             <div className="flex flex-col justify-center">
                 <div className='flex flex-row justify-between items-center'>
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
+                <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer" onClick={() => window.location.href = "./platform/auth/signup"}>{t('students.create_student')}</Button>
                     {/* <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">{t('students.create_student')}</Button>

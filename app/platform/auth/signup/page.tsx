@@ -56,28 +56,15 @@ export default function SignUp() {
       </Field>
       </div>
       <Field>
-        <FieldLabel htmlFor="email">{t('auth.email_label')}</FieldLabel>
+        <FieldLabel htmlFor="user_id">{t('auth.user_id_label')}</FieldLabel>
         <Input
-          id="email"
-          name="email"
-          type="email"
-          placeholder={t('auth.email_placeholder')}
+          id="user_id"
+          name="user_id"
+          type="number"
           className="bg-slate-100 text-slate-800"
           disabled={pending}
         />
-        {state?.error?.email && <p className="text-red-500 text-sm">{state.error.email}</p>}
-      </Field>
-      <Field>
-        <FieldLabel htmlFor="password">{t('auth.password_label')}</FieldLabel>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          placeholder={t('auth.password_placeholder')}
-          className="bg-slate-100 text-slate-800"
-          disabled={pending}
-        />
-        {state?.error?.password && <p className="text-red-500 text-sm">{state.error.password}</p>}
+        {state?.error?.user_id && <p className="text-red-500 text-sm">{state.error.user_id}</p>}
       </Field>
       <Field>
       <FieldLabel htmlFor="phone">{t('auth.phone_optional_label')}</FieldLabel>
