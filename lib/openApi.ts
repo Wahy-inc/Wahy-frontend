@@ -1254,6 +1254,14 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface LoginRequestStudent {
+  /**
+   * User Id
+   * Registered user ID.
+   */
+  user_id: string;
+}
+
 /** NotificationRead */
 export interface NotificationRead {
   /**
@@ -2910,7 +2918,7 @@ export class Api<
      * @secure
      */
     studentSigninApiV1AuthStudentSigninPost: (
-      data: LoginRequest,
+      data: LoginRequestStudent,
       params: RequestParams = {},
     ) =>
       this.request<TokenResponse, void | HTTPValidationError>({

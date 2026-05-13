@@ -48,6 +48,20 @@ export type SignInFormState =
     }
     | undefined;
 
+
+export const SignInStudentSchema = zod.object({
+    user_id: zod.string().min(1, { error: 'User ID is required' }).trim(),
+})
+
+export type SignInStudentFormState =
+    | {
+        error?: {
+            user_id?: string[];
+        }
+        message?: string;
+    }
+    | undefined;
+
 export const CreatLessonSchema = zod.object({
     student_id: zod.string().min(1, { error: 'Student ID is required' }),
     date: zod.string().min(1, { error: 'Date is required' }).trim(),

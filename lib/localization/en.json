@@ -35,9 +35,6 @@
     "no_data_found": "No data found.",
     "not_provided": "Not provided"
   },
-  "auth": {
-    "logout": "Logout"
-  },
   "dashboard": {
     "title": "Dashboard"
   },

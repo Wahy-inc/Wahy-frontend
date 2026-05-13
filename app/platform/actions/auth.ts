@@ -1,4 +1,4 @@
-import { SignupFormState, SignInFormState, SignUpSchema, SignInSchema } from "@/app/platform/lib/definitions"
+import { SignupFormState, SignInFormState, SignUpSchema, SignInSchema, SignInStudentFormState, SignInStudentSchema } from "@/app/platform/lib/definitions"
 import { getApi } from "@/lib/apiClient"
 import * as openApi from "@/lib/openApi"
 
@@ -55,10 +55,9 @@ export async function signup(state: SignupFormState, formData: FormData): Promis
     }
 }
 
-export async function signinStudent(state: SignInFormState, formData: FormData): Promise<SignInFormState> {
-    const validation = SignInSchema.safeParse({
-        email: formData.get('email'),
-        password: formData.get('password'),
+export async function signinStudent(state: SignInStudentFormState, formData: FormData): Promise<SignInStudentFormState> {
+    const validation = SignInStudentSchema.safeParse({
+        user_id: formData.get('user_id'),
     })
 
     if (!validation.success) {
@@ -66,9 +65,8 @@ export async function signinStudent(state: SignInFormState, formData: FormData):
     }
 
     try {
-        const data = {
-            email: validation.data.email,
-            password: validation.data.password,
+        const data: openApi.LoginRequestStudent = {
+            user_id: validation.data.user_id,
         }
         const response = await api.api.studentSigninApiV1AuthStudentSigninPost(data)
         
