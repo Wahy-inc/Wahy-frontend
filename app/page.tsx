@@ -71,16 +71,6 @@ export default function Home() {
             className="flex lg:text-xl h-12 w-39.5 items-center justify-center rounded-full border border-solid text-slate-900 border-slate-900 px-5 transition-colors hover:bg-black/4 md:w-75 md:h-20"
             onClick={() => {
               localStorage.setItem('role', 'student');
-              window.location.href = './platform/auth/signup';
-            }}
-          >
-            Student Signup
-          </Button>
-          <Button
-            variant="outline"
-            className="flex lg:text-xl h-12 w-39.5 items-center justify-center rounded-full border border-solid text-slate-900 border-slate-900 px-5 transition-colors hover:bg-black/4 md:w-75 md:h-20"
-            onClick={() => {
-              localStorage.setItem('role', 'student');
               window.location.href = './platform/auth/login';
             }}
           >

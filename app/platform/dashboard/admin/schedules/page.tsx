@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createSchedule, deleteSchedule, getLocalStudent, getSchedulesForStudent, listSchedules, updateSchedule } from "@/app/platform/actions/dashboard";
+import { createSchedule, deleteSchedule, getLocalStudent, getSchedulesForStudent, listSchedules, listStudents, updateSchedule } from "@/app/platform/actions/dashboard";
 import DashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
 import TitleElement, { generateRRule, monthDays, weekDaysMap } from "./title_element";
@@ -98,6 +98,7 @@ export default function Schedules() {
                 try {
                     setLoading(true)
                     const data = await listSchedules()
+                    listStudents()
                     console.log('Fetched schedules data:', data);
                     setSchedules(data)
                     console.log(data);

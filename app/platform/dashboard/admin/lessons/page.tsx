@@ -15,6 +15,7 @@ import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 import { useRouter } from "next/navigation";
+import { addLocalSchedules } from "@/app/platform/actions/dashboardv2";
 
 
 export default function Lessons() {
@@ -49,6 +50,7 @@ export default function Lessons() {
                 setLoading(true)
                 const data = await listLessons()
                 setLessons(data)
+                addLocalSchedules()
                 setError(null)
             } catch (err) {
                 setError(t('lessons.loading_lessons'))
