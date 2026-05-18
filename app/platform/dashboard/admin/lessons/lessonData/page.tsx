@@ -44,7 +44,6 @@ function LessonDataContent() {
     const abortControllerRef = React.useRef<AbortController | null>(null)
     const { t, language } = useLocalization();
     const isRTL = language === 'ar';
-    const date = new Date();
 
     useToastListener(attendanceState, { functionName: t('analytics.attendance_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
     useToastListener(uploadFileState, { functionName: t('files.upload_file'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
@@ -106,8 +105,9 @@ function LessonDataContent() {
         const totalSize = file.size
         const fileSizeInMB = totalSize / (1024 * 1024)
         
-        // Estimate upload time based on file size (assuming ~1MB per 500ms as baseline)
-        const estimatedUploadTimeMs = Math.max(fileSizeInMB * 500, 1000)
+        // Estimate upload time based on 100 kB/s speed (10 seconds per MB)
+        // For 16MB: ~160 seconds
+        const estimatedUploadTimeMs = Math.max(fileSizeInMB * 50000, 3000)
         
         setUploadProgress(0)
         const startTime = new Date().getTime()

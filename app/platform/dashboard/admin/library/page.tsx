@@ -14,7 +14,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
@@ -151,8 +150,9 @@ export default function Schedules() {
         const totalSize = file.size
         const fileSizeInMB = totalSize / (1024 * 1024)
         
-        // Estimate upload time based on file size (assuming ~1MB per 500ms as baseline)
-        const estimatedUploadTimeMs = Math.max(fileSizeInMB * 500, 1000)
+        // Estimate upload time based on 100 kB/s speed (10 seconds per MB)
+        // For 16MB: ~160 seconds
+        const estimatedUploadTimeMs = Math.max(fileSizeInMB * 10000, 3000)
         
         setUploadProgress(0)
         const startTime = Date.now()
