@@ -971,29 +971,18 @@ export interface LessonCreate {
    * **Required.** ID of the student this lesson belongs to. Must be a student under the current sheikh.
    */
   student_id: number;
+  schedule_id: number;
   /**
    * Date
    * **Required.** Date the lesson took place (ISO 8601, YYYY-MM-DD). When ``recurrence`` is also provided this date becomes the ``DTSTART`` anchor.
    * @format date
    */
   date: string;
-  /** **Required.** Lesson type. Allowed values: ``new_memorization`` · ``revision`` · ``evaluation`` · ``makeup``. */
-  type: LessonType;
   /**
    * **Optional.** Attendance status for this lesson. Allowed values: ``present`` · ``absent`` · ``late`` · ``excused``. Defaults to ``present``. Affects default billing: ``present`` → billable; all others → non-billable (overridable via ``POST /invoices/{id}/overrides``).
    * @default "present"
    */
   attendance?: AttendanceStatus;
-  /**
-   * Absence Reason
-   * **Optional.** Reason for absence. Recommended when ``attendance`` is ``absent`` or ``excused``.
-   */
-  absence_reason?: string | null;
-  /**
-   * Pass Fail
-   * **Optional.** Pass/fail verdict for this lesson. ``true`` = passed, ``false`` = failed. Defaults to ``null`` (not yet evaluated).
-   */
-  pass_fail?: boolean | null;
   /**
    * Student Notes
    * **Optional.** Notes visible to the student (e.g. feedback, encouragement).
@@ -1259,7 +1248,7 @@ export interface LoginRequestStudent {
    * User Id
    * Registered user ID.
    */
-  user_id: string;
+  student_code: string;
 }
 
 /** NotificationRead */

@@ -2,7 +2,7 @@
 
 import React, { useActionState } from "react"
 import { useRouter } from "next/navigation"
-import { signup } from "../../actions/auth"
+import { signup } from "../../../../actions/auth"
 import { Button } from "@/components/ui/button"
 import * as openApi from "@/lib/openApi"
 import { useLocalization } from "@/lib/localization-context"

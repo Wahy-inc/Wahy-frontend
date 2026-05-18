@@ -57,7 +57,7 @@ export async function signup(state: SignupFormState, formData: FormData): Promis
 
 export async function signinStudent(state: SignInStudentFormState, formData: FormData): Promise<SignInStudentFormState> {
     const validation = SignInStudentSchema.safeParse({
-        user_id: formData.get('user_id'),
+        student_code: formData.get('student_code'),
     })
 
     if (!validation.success) {
@@ -66,7 +66,7 @@ export async function signinStudent(state: SignInStudentFormState, formData: For
 
     try {
         const data: openApi.LoginRequestStudent = {
-            user_id: validation.data.user_id,
+            student_code: validation.data.student_code,
         }
         const response = await api.api.studentSigninApiV1AuthStudentSigninPost(data)
         

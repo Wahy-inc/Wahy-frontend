@@ -50,13 +50,13 @@ export type SignInFormState =
 
 
 export const SignInStudentSchema = zod.object({
-    user_id: zod.string().min(1, { error: 'User ID is required' }).trim(),
+    student_code: zod.string().min(1, { error: 'Student code is required' }).trim(),
 })
 
 export type SignInStudentFormState =
     | {
         error?: {
-            user_id?: string[];
+            student_code?: string[];
         }
         message?: string;
     }
@@ -64,10 +64,9 @@ export type SignInStudentFormState =
 
 export const CreatLessonSchema = zod.object({
     student_id: zod.string().min(1, { error: 'Student ID is required' }),
+    schedule_id: zod.string().min(1, { error: 'Schedule ID is required' }),
     date: zod.string().min(1, { error: 'Date is required' }).trim(),
-    type: zod.enum(LessonType, { error: 'Invalid lesson type' }),
     attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }).optional(),
-    absence_reason: zod.string().trim().optional(),
     sheikh_notes: zod.string().trim().optional(),
     student_notes: zod.string().trim().optional(),
     what_is_heard_from_sheikh: zod.string().trim().optional(),
@@ -79,9 +78,8 @@ export type CreateLessonFormState =
         error?: {
             student_id?: string[];
             date?: string[];
-            type?: string[];
-            attendance?: string[];
-            absence_reason?: string[];
+            schedule_id?: string[];
+            attendance: string[];
             sheikh_notes?: string[];
             student_notes?: string[];
             what_is_heard_from_sheikh?: string[];
@@ -96,8 +94,6 @@ export const UpdateLessonSchema = zod.object({
     date: zod.string().trim().optional(),
     type: zod.enum(LessonType, { error: 'Invalid lesson type' }).optional(),
     attendance: zod.enum(AttendanceStatus, { error: 'Invalid attendance status' }).optional(),
-    absence_reason: zod.string().trim().optional(),
-    pass_fail: zod.string().trim().optional(),
     sheikh_notes: zod.string().trim().optional(),
     student_notes: zod.string().trim().optional(),
     what_is_heard_from_sheikh: zod.string().trim().optional(),
@@ -111,8 +107,6 @@ export type UpdateLessonFormState =
             date?: string[];
             type?: string[];
             attendance?: string[];
-            absence_reason?: string[];
-            pass_fail?: string[];
             sheikh_notes?: string[];
             student_notes?: string[];
             what_is_heard_from_sheikh?: string[];
@@ -156,7 +150,6 @@ export const createScheduleSchema = zod.object({
     rrule_string: zod.string().min(0).trim().optional(),
     notes: zod.string().trim().optional(),
 })
-
 export type CreateScheduleFormState =
     | {
         error?: {

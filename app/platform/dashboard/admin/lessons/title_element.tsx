@@ -162,26 +162,6 @@ export default function TitleElement({
                                         </div>
                                         <div className='flex flex-col'>
                                             <div className="flex flex-col">
-                                                <label htmlFor="type" className="text-sm font-medium">{t('lessons.type')}</label>
-                                                <Select name="type">
-                                                    <SelectTrigger className="w-full max-w-48">
-                                                        <SelectValue placeholder={t('lessons.select_a_type')} />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            <SelectLabel>{t('lessons.type')}</SelectLabel>
-                                                            <SelectItem value={openApi.LessonType.Evaluation}>{t('lessons.evaluation')}</SelectItem>
-                                                            <SelectItem value={openApi.LessonType.NewMemorization}>{t('lessons.new_memorization')}</SelectItem>
-                                                            <SelectItem value={openApi.LessonType.Revision}>{t('lessons.revision')}</SelectItem>
-                                                            <SelectItem value={openApi.LessonType.Makeup}>{t('lessons.makeup')}</SelectItem>
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            {createFormSubmitted && createState?.error?.type && <p className="text-red-500 text-sm">{createState.error.type}</p>}
-                                        </div>
-                                        <div className='flex flex-col'>
-                                            <div className="flex flex-col">
                                                 <label htmlFor="attendance" className="text-sm font-medium">{t('lessons.attendance')}</label>
                                                 <Select name="attendance">
                                                     <SelectTrigger className="w-full max-w-48">
@@ -208,10 +188,6 @@ export default function TitleElement({
                                     <div className='flex flex-col'>
                                         {fieldInput(t('lessons.homework'), "homework", "", "text")}
                                         {createFormSubmitted && createState?.error?.homework && <p className="text-red-500 text-sm">{createState.error.homework}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('lessons.absence_reason') + " (Optional)", "absence_reason", "", "text")}
-                                        {createFormSubmitted && createState?.error?.absence_reason && <p className="text-red-500 text-sm">{createState.error.absence_reason}</p>}
                                     </div>
                                     <div className='flex flex-col'>
                                         {fieldInput(t('lessons.sheikh_notes') + " (Optional)", "sheikh_notes", "", "text")}

@@ -151,8 +151,7 @@ export default function TitleElement({
         
         // Generate RRULE if recurring
         if (isRecurring === 'true') {
-            const effectiveUntil = formData.get('effective_until') as string | null
-            const rrule = generateRRule(isRecurringPeriod, selectedDayOfWeek, selectedDaysOfWeek, selectedDayOfMonth, selectedDaysOfMonth, effectiveUntil)
+            const rrule = generateRRule(isRecurringPeriod, selectedDayOfWeek, selectedDaysOfWeek, selectedDayOfMonth, selectedDaysOfMonth, null)
             if (rrule) {
                 formData.append("rrule_string", rrule)
             }
@@ -259,13 +258,9 @@ export default function TitleElement({
                                         </div>
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 col-start-1 col-end-4 row-start-3 row-end-4">
-                                        <div className='flex flex-col col-start-1 col-end-2'>
+                                        <div className='flex flex-col col-start-1 col-end-3'>
                                             {fieldInput(t('schedules.effective_from'),"effective-from", "date", "date")}
                                             {createFormSubmitted && createState?.error?.effective_from && <p className="text-red-500 text-sm">{createState.error.effective_from}</p>}
-                                        </div>
-                                        <div className='flex flex-col col-start-2 col-end-3'>
-                                            {fieldInput(t('schedules.effective_until'), "effective-until", "date", "date")}
-                                            {createFormSubmitted && createState?.error?.effective_until && <p className="text-red-500 text-sm">{createState.error.effective_until}</p>}
                                         </div>
                                     </div>
                                     <div className='flex flex-col col-start-1 col-end-3 row-start-4 row-end-5'>

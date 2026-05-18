@@ -413,8 +413,8 @@
   },
   "auth": {
     "logout": "Logout",
-    "user_id_label": "User ID",
-    "user_id_placeholder": "Enter your user ID",
+    "student_code_label": "Student Code",
+    "student_code_placeholder": "Enter your student code (e.g., STU-ABC123)",
     "reset_button": "Reset",
     "submit_button": "Submit",
     "submitting": "Submitting...",

@@ -353,7 +353,6 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
         start_time: formData.get('start-time'),
         end_time: formData.get('end-time'),
         effective_from: formData.get('effective-from'),
-        effective_until: formData.get('effective-until'),
         rrule_string: formData.get('rrule_string'),
         notes: formData.get('notes'),
     })
@@ -368,7 +367,6 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
             start_time: validation.data.start_time,
             end_time: validation.data.end_time,
             effective_from: validation.data.effective_from,
-            effective_until: validation.data.effective_until,
             rrule_string: validation.data.rrule_string,
             notes: validation.data.notes,
         }
@@ -399,7 +397,6 @@ export async function createSchedule(state: CreateScheduleFormState, formData: F
                     start_time: validation.data.start_time,
                     end_time: validation.data.end_time,
                     effective_from: validation.data.effective_from,
-                    effective_until: validation.data.effective_until,
                     rrule_string: validation.data.rrule_string,
                     notes: validation.data.notes,
                 },
@@ -418,7 +415,6 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
         start_time: formData.get('start-time'),
         end_time: formData.get('end-time'),
         effective_from: formData.get('effective-from'),
-        effective_until: formData.get('effective-until'),
         rrule_string: formData.get('rrule_string'),
         is_active: formData.get('is-active'),
         cancellation_reason: formData.get('cancellation-reason'),
@@ -433,7 +429,6 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
             start_time: validation.data.start_time,
             end_time: validation.data.end_time,
             effective_from: validation.data.effective_from,
-            effective_until: validation.data.effective_until,
             rrule_string: validation.data.rrule_string,
             is_active: validation.data.is_active === 'true',
             cancellation_reason: validation.data.cancellation_reason,
@@ -468,7 +463,6 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
                     start_time: validation.data.start_time,
                     end_time: validation.data.end_time,
                     effective_from: validation.data.effective_from,
-                    effective_until: validation.data.effective_until,
                     rrule_string: validation.data.rrule_string,
                     is_active: validation.data.is_active === 'true',
                     cancellation_reason: validation.data.cancellation_reason,
@@ -915,26 +909,24 @@ export async function markInvoiceAsPaid(state: PayInvoiceFormState, formData: Fo
 export async function createLesson(state: CreateLessonFormState, formData: FormData): Promise<CreateLessonFormState> {
     const validation = CreatLessonSchema.safeParse({
         student_id: formData.get('student_id'),
+        schedule_id: formData.get('schedule_id'),
         sheikh_notes: formData.get('sheikh_notes'),
         student_notes: formData.get('student_notes'),
         date: formData.get('date'),
-        type: formData.get('type'),
         attendance: formData.get('attendance'),
-        absence_reason: formData.get('absence_reason'),
         what_is_heard_from_sheikh: formData.get('what_is_heard_from_sheikh'),
         homework: formData.get('homework'),
     })
 
     if (!validation.success) {
-        return { error: validation.error.flatten().fieldErrors }
+        return { message: 'fail' }
     }
     try {
         const data: openApi.LessonCreate = {
             student_id: Number(validation.data.student_id),
+            schedule_id: Number(validation.data.schedule_id),
             date: validation.data.date,
-            type: validation.data.type,
             attendance: validation.data.attendance,
-            absence_reason: validation.data.absence_reason,
             student_notes: validation.data.student_notes,
             sheikh_notes: validation.data.sheikh_notes,
             what_is_heard_from_sheikh: validation.data.what_is_heard_from_sheikh,
@@ -969,10 +961,9 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
                 operation: openApi.SyncOperation.Create,
                 payload: {
                     student_id: Number(validation.data.student_id),
+                    schedule_id: Number(validation.data.schedule_id),
                     date: validation.data.date,
-                    type: validation.data.type,
                     attendance: validation.data.attendance,
-                    absence_reason: validation.data.absence_reason,
                     student_notes: validation.data.student_notes,
                     sheikh_notes: validation.data.sheikh_notes,
                     what_is_heard_from_sheikh: validation.data.what_is_heard_from_sheikh,
@@ -992,9 +983,7 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
         sheikh_notes: formData.get('sheikh_notes'),
         student_notes: formData.get('student_notes'),
         date: formData.get('date'),
-        type: formData.get('type'),
         attendance: formData.get('attendance'),
-        absence_reason: formData.get('absence_reason'),
         what_is_heard_from_sheikh: formData.get('what_is_heard_from_sheikh'),
         homework: formData.get('homework'),
     })
@@ -1005,9 +994,7 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
     try {
         const data: openApi.LessonUpdate = {
             date: validation.data.date,
-            type: validation.data.type,
             attendance: validation.data.attendance,
-            absence_reason: validation.data.absence_reason,
             student_notes: validation.data.student_notes,
             sheikh_notes: validation.data.sheikh_notes,
             what_is_heard_from_sheikh: validation.data.what_is_heard_from_sheikh,
@@ -1040,9 +1027,7 @@ export async function updateLesson(state: UpdateLessonFormState, formData: FormD
                 operation: openApi.SyncOperation.Update,
                 payload: {
                     date: validation.data.date,
-                    type: validation.data.type,
                     attendance: validation.data.attendance,
-                    absence_reason: validation.data.absence_reason,
                     student_notes: validation.data.student_notes,
                     sheikh_notes: validation.data.sheikh_notes,
                     what_is_heard_from_sheikh: validation.data.what_is_heard_from_sheikh,

@@ -33,15 +33,16 @@ export default function SignIn() {
     <form action={Studentaction} className="w-xs lg:w-lg mx-auto my-10 border-2 border-slate-800 p-6 rounded-lg shadow-lg bg-slate-800 text-slate-100">
     <FieldGroup>
       <Field>
-        <FieldLabel htmlFor="user_id">{t('auth.user_id_label')}</FieldLabel>
+        <FieldLabel htmlFor="student_code">{t('auth.student_code_label')}</FieldLabel>
         <Input
-          id="user_id"
-          name="user_id"
+          id="student_code"
+          name="student_code"
           type="text"
           className="bg-slate-100 text-slate-800"
           disabled={Studentpending}
+          placeholder={t('auth.student_code_placeholder')}
         />
-        {(Studentstate?.error?.user_id && <p className="text-red-500 text-sm">{Studentstate.error.user_id}</p>)}
+        {(Studentstate?.error?.student_code && <p className="text-red-500 text-sm">{Studentstate.error.student_code}</p>)}
       </Field>
       <Field orientation="horizontal">
         <Button type="reset" variant="outline" className="text-slate-800 border-2 border-slate-800" disabled={Studentpending}>
