@@ -49,10 +49,12 @@ export default function TitleElement({
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
     const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
+    const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>([])
 
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
         formData.append("student_id", selectedStudentId?.toString() || "")
+        formData.append("student_ids", selectedStudentIds.join(","))
         createAction(formData)
     }
 
@@ -81,10 +83,7 @@ export default function TitleElement({
                                     <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
                                     {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
                                 </div>
-                                <div className="flex flex-col">
-                                    {fieldInput(t('invoices.student_ids_optional'),"student_ids", "", "text")}
-                                    {createFormSubmitted && createState?.error?.student_ids && <p className="text-red-500 text-sm">{createState.error.student_ids}</p>}
-                                </div>
+                                <StudentMenu isMulti onStudentsSelect={setSelectedStudentIds}></StudentMenu>
                                 <div className="flex flex-col">
                                     {fieldInput(t('invoices.period_from'),"period_from", "", "date")}
                                     {createFormSubmitted && createState?.error?.period_from && <p className="text-red-500 text-sm">{createState.error.period_from}</p>}

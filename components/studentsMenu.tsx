@@ -3,18 +3,20 @@
 import * as React from "react"
 import { Field } from "./ui/field";
 import { Label } from "./ui/label";
-import Select from "react-select";
+import Select, { MultiValue, SingleValue, ActionMeta } from "react-select";
 import { useLocalization } from "@/lib/localization-context";
 
 interface studentData { student_id: number, full_name_arabic: string, full_name_english: string }
 
 type StudentOption = { value: number; label: string };
 type StudentMenuProps = {
-    onStudentSelect: (studentId: number) => void;
+    onStudentSelect?: (studentId: number) => void;
+    onStudentsSelect?: (studentIds: number[]) => void;
+    isMulti?: boolean;
 }
 
-export default function StudentMenu({onStudentSelect}: StudentMenuProps) {
-    const [studentName, setStudentName] = React.useState<StudentOption | null>(null)
+export default function StudentMenu({onStudentSelect, onStudentsSelect, isMulti = false}: StudentMenuProps) {
+    const [studentName, setStudentName] = React.useState<StudentOption | StudentOption[] | null>(null)
     const studentsArray = localStorage.getItem('students') ? JSON.parse(localStorage.getItem('students') as string) as Array<studentData> : [];
     const [filteredArray, setFilteredArray] = React.useState<Array<{id: number, name: string}>>([]);
     const { language } = useLocalization()
@@ -31,10 +33,19 @@ export default function StudentMenu({onStudentSelect}: StudentMenuProps) {
         setFilteredArray([...en, ...ar])
     }, [])
     
-    const handleSearchStudent = (selectedOption: StudentOption | null) => {
-        setStudentName(selectedOption || null);
-        if (selectedOption && onStudentSelect) {
-            onStudentSelect(selectedOption.value);
+    const handleSearchStudent = (newValue: MultiValue<StudentOption> | SingleValue<StudentOption>, actionMeta: ActionMeta<StudentOption>) => {
+        if (isMulti) {
+            const selectedArray = (newValue as MultiValue<StudentOption>) || [];
+            setStudentName(selectedArray.length > 0 ? [...selectedArray] : null);
+            if (onStudentsSelect) {
+                onStudentsSelect(selectedArray.map(opt => opt.value));
+            }
+        } else {
+            const selectedOption = (newValue as SingleValue<StudentOption>) || null;
+            setStudentName(selectedOption);
+            if (selectedOption && onStudentSelect) {
+                onStudentSelect(selectedOption.value);
+            }
         }
     }
 
@@ -42,10 +53,11 @@ export default function StudentMenu({onStudentSelect}: StudentMenuProps) {
         <div>
             <Field orientation="vertical" className='w-full inline'>
                 <Label htmlFor='stu_name'>{language === 'ar' ? 'اسم الطالب' : 'Student Name'}</Label>
-                <Select<StudentOption>
+                <Select<StudentOption, boolean>
                     options={filteredArray.map((e)=>({value: e.id, label: e.name}))}
                     isSearchable
                     isClearable
+                    isMulti={isMulti}
                     onChange={handleSearchStudent}
                     value={studentName}></Select>
             </Field>
