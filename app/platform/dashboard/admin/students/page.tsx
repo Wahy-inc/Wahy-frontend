@@ -159,8 +159,8 @@ export default function Students() {
                     <ItemMedia variant="icon">
                         <User />
                     </ItemMedia>
-                <ItemTitle>ID: {student.id} | {language === 'ar' ? student.full_name_arabic : student.full_name_english}</ItemTitle>
-                    {t('students.registration_status')}: {getRegistrationStatusLabel(student.registration_status)} <br />
+                <ItemTitle>{language === 'ar' ? student.full_name_arabic : student.full_name_english}</ItemTitle>
+                    {t('students.status')}: {getRegistrationStatusLabel(student.status)} | {t('auth.student_code_label')}: {student.student_code} <br />
                     <div id="accordion-data">
                         <Accordion
                         type="single"
@@ -171,10 +171,14 @@ export default function Students() {
                             <AccordionTrigger>{t('common.edit')}</AccordionTrigger>
                             <AccordionContent>
                                 <div className={`space-y-6 pt-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                                  {/* Contact Information */}
+                                  {/* Identifiers & Contact */}
                                   <div className="bg-linear-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
-                                    <h3 className="font-semibold text-blue-900 mb-3 text-sm">{t('students.phone')} • {t('students.status')}</h3>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <h3 className="font-semibold text-blue-900 mb-3 text-sm">{t('auth.student_code_label')} • {t('students.phone')} • {t('students.status')}</h3>
+                                    <div className="grid grid-cols-3 gap-4">
+                                      <div className="flex flex-col">
+                                        <span className="text-xs text-blue-700 font-medium">{t('auth.student_code_label')}</span>
+                                        <span className="text-sm text-slate-800 font-semibold">{student.student_code}</span>
+                                      </div>
                                       <div className="flex flex-col">
                                         <span className="text-xs text-blue-700 font-medium">{t('students.phone')}</span>
                                         <span className="text-sm text-slate-800 font-semibold">{student.phone}</span>
@@ -222,12 +226,6 @@ export default function Students() {
 
                                   {/* Notes */}
                                   <div className="space-y-3">
-                                    {student.private_notes && (
-                                      <div className="bg-gray-50 border-l-4 border-gray-400 p-3 rounded">
-                                        <span className="text-xs text-gray-700 font-medium">{t('students.private_notes')}</span>
-                                        <p className="text-sm text-slate-700 mt-1">{student.private_notes}</p>
-                                      </div>
-                                    )}
                                     {student.special_notes && (
                                       <div className="bg-gray-50 border-l-4 border-gray-400 p-3 rounded">
                                         <span className="text-xs text-gray-700 font-medium">{t('students.special_notes')}</span>
@@ -241,17 +239,7 @@ export default function Students() {
                         </Accordion>
                     </div>
                 </ItemContent>
-                    {student.registration_status === openApi.RegistrationStatus.Pending ? (
-                        <ItemActions>
-                            <Button onClick={() => void handleApproveStudent(student.id)} size="sm" variant="outline" className="transition duration-300 border-green-500 border text-green-500 bg-transparent hover:bg-green-500 hover:text-white">
-                                {t('students.approve')}
-                            </Button>
-                            <Button onClick={() => void handleRejectStudent(student.id)} size="sm" variant="outline" className="transition duration-300 border-red-500 border text-red-500 bg-transparent hover:bg-red-500 hover:text-white">
-                                {t('students.reject')}
-                            </Button>
-                        </ItemActions>
-                    ) : null}
-                    {student.registration_status === openApi.RegistrationStatus.Approved ? (
+                    {(
                     <AlertDialog open={editingStudentId === student.id} onOpenChange={(open: boolean) => setEditingStudentId(open ? student.id : null)}>
                         <AlertDialogTrigger asChild>
                             <ItemActions>
@@ -265,8 +253,12 @@ export default function Students() {
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('students.update_student')}</AlertDialogTitle>
                                 <div className="flex flex-col gap-4 rtl:text-right">
+                                <input type="number" name="id" id="id" hidden value={Number(student.id)} readOnly />
+                                <div className="bg-slate-100 p-3 rounded border border-slate-300">
+                                  <span className="text-xs text-slate-600 font-medium">{t('auth.student_code_label')}</span>
+                                  <p className="text-sm text-slate-800 font-semibold mt-1">{student.student_code}</p>
+                                </div>
                                 <div className="flex flex-row justify-between gap-3">
-                                    <input type="number" name="id" id="id" hidden value={Number(student.id)} readOnly />
                                     <div className='flex flex-col'>
                                         {fieldInput(t('students.name_arabic'),"ar-name", student.full_name_arabic, "text")}
                                         {updateStudentState?.error?.arname && <p className="text-red-500 text-sm">{updateStudentState.error.arname}</p>}
@@ -321,24 +313,6 @@ export default function Students() {
                                 <div className="flex flex-row justify-between gap-3 items-center">
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
-                                            <label htmlFor="registeration-status" className="text-sm font-medium">{t('students.registration_status')}</label>
-                                            <Select name="registeration-status" defaultValue={student.registration_status}>
-                                                <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder={t('common.submit')} />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectLabel>{t('students.registration_status')}</SelectLabel>
-                                                        <SelectItem value={openApi.RegistrationStatus.Approved}>{t('common.yes')}</SelectItem>
-                                                        <SelectItem value={openApi.RegistrationStatus.Pending}>{t('common.no')}</SelectItem>
-                                                        <SelectItem value={openApi.RegistrationStatus.Rejected}>{t('students.reject')}</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        <div className="flex flex-col">
                                             <label htmlFor="status" className="text-sm font-medium">{t('students.status')}</label>
                                             <Select name="status" defaultValue={student.status}>
                                                 <SelectTrigger className="w-full max-w-48">
@@ -359,10 +333,6 @@ export default function Students() {
                                     </div>
                                 </div>
                                 <div className='flex flex-col'>
-                                    {fieldInput(t('students.private_notes'),"private-notes", String(student.private_notes), "text")}
-                                    {updateStudentState?.error?.privateNotes && <p className="text-red-500 text-sm">{updateStudentState.error.privateNotes}</p>}
-                                </div>
-                                <div className='flex flex-col'>
                                     {fieldInput(t('students.special_notes'),"special-notes", String(student.special_notes), "text")}
                                     {updateStudentState?.error?.specialNotes && <p className="text-red-500 text-sm">{updateStudentState.error.specialNotes}</p>}
                                 </div>
@@ -375,7 +345,7 @@ export default function Students() {
                             </form>
                         </AlertDialogContent>
                     </AlertDialog>
-                    ) : null}
+                    )}
             </Item>
         </div>
     )
@@ -392,18 +362,7 @@ export default function Students() {
 
     if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.loading')}</p></DashboardPage>
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!students || students.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('students.no_students_found')}</p></DashboardPage>
-
-    // const pendingStudents = students?.filter((student: openApi.StudentRead) => {
-    //     return student.registration_status === openApi.RegistrationStatus.Pending;
-    // })
-    const approvedStudents = students?.filter((student: openApi.StudentRead) => {
-        return student.registration_status === openApi.RegistrationStatus.Approved;
-    })
-    
-    const rejectedStudents = students?.filter((student: openApi.StudentRead) => {
-        return student.registration_status === openApi.RegistrationStatus.Rejected;
-    })
+    if (!students || students.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('students.no_students_found')}</p></DashboardPage>    
 
     const content = (
         <div className="flex flex-col gap-12 w-full">
@@ -422,31 +381,13 @@ export default function Students() {
                             : t('messages.success')}
                 </div>
             )}
-            {/* <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">{t('students.pending_students')}</p>
-                {pendingStudents && pendingStudents.length > 0 ? pendingStudents.map((student: openApi.StudentRead) => (
-                    <div key={student.id}>
-                        {studentElement(student, '')}
-                    </div>
-                )) : <p className="text-slate-700 text-xl">{t('students.no_pending_students')}</p>}
-            </div> */}
-            <div className="w-full h-1 bg-gray-400"></div>
             <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">{t('students.approved_students')}</p>
-                {approvedStudents && approvedStudents.length > 0 ? approvedStudents.map((student: openApi.StudentRead) => (
+                {students && students.length > 0 ? students.map((student: openApi.StudentRead) => (
                     <div key={student.id}>
                         {studentElement(student, '#6a7282')}
                     </div>
                 )) : <p className="text-slate-700 text-xl">{t('students.no_approved_students')}</p>}
-            </div>
-            <div className="w-full h-1 bg-gray-400"></div>
-            <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">{t('students.rejected_students')}</p>
-                {rejectedStudents && rejectedStudents.length > 0 ? rejectedStudents.map((student: openApi.StudentRead) => (
-                    <div key={student.id}>
-                        {studentElement(student, 'rgba(242,70,70,0.95)')}
-                    </div>
-                )) : <p className="text-slate-700 text-xl">{t('students.no_rejected_students')}</p>}
             </div>
         </div>
     )

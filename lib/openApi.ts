@@ -1802,6 +1802,7 @@ export interface StudentRead {
    * Linked User account ID, or ``null`` for offline-only students.
    */
   user_id: number | null;
+  student_code: string;
   /**
    * Sheikh Id
    * ID of the owning sheikh.
@@ -1832,8 +1833,6 @@ export interface StudentRead {
    * IANA timezone identifier.
    */
   timezone: string;
-  /** Approval workflow status. Values: ``pending``, ``approved``, ``rejected``. */
-  registration_status: RegistrationStatus;
   /** Operational status. Values: ``active``, ``on_hold``, ``graduated``, ``inactive``. */
   status: StudentStatus;
   /**
@@ -1848,11 +1847,6 @@ export interface StudentRead {
   lesson_rate: number | null;
   /** Invoice frequency: ``weekly`` or ``monthly``. */
   billing_cycle: BillingCycle;
-  /**
-   * Private Notes
-   * Internal sheikh-only notes, or ``null``.
-   */
-  private_notes: string | null;
   /**
    * Special Notes
    * Notes visible to the student, or ``null``.
