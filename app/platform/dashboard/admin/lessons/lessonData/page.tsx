@@ -70,7 +70,7 @@ function LessonDataContent() {
         }
         if (uploadFileState?.message === 'success' && uploadFileState.data) {
             listUploadClassFile(Number(scheduleID)).then((res) => {
-                setFiles(res?.data || null);
+                setFiles(res?.data || null);                
             });
         }
     }, [attendanceState, uploadFileState, scheduleID]);

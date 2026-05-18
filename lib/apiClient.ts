@@ -41,9 +41,9 @@ baseApi.request = async function (config: any) {
   }
 
   try {
-    // Check if this is a binary file endpoint - force blob format to prevent JSON parsing
-    const isBinaryEndpoint = path?.includes('/pdf') || path?.includes('/files') || path?.includes('/download');
-    
+    // Check if this is a binary file endpoint - force blob format to prevent JSON parsing 
+    //not include || path?.includes('/files') because some file endpoints return JSON responses (e.g. file metadata)
+    const isBinaryEndpoint = path?.includes('/pdf') || path?.includes('/download');
     const requestConfig = {
       ...config,
       cancelToken,
@@ -51,12 +51,12 @@ baseApi.request = async function (config: any) {
       ...(isBinaryEndpoint && { format: 'blob' }),
     };
 
-    console.log('[apiClient] Request:', { path, isBinaryEndpoint, format: requestConfig.format });
+    // console.log('[apiClient] Request:', { path, isBinaryEndpoint, format: requestConfig.format });
 
     // Execute request with the cancel token
     const result = await originalRequest(requestConfig as any);
     
-    console.log('[apiClient] Response:', { path, status: result.status, dataType: typeof result.data, dataIsBlob: result.data instanceof Blob, dataSize: result.data?.size });
+    // console.log('[apiClient] Response:', { path, status: result.status, dataType: typeof result.data, dataIsBlob: result.data instanceof Blob, dataSize: result.data?.size });
 
     cleanup();
     return result;
@@ -64,9 +64,9 @@ baseApi.request = async function (config: any) {
     cleanup();
 
     // Check if this is an abort error (expected when cancelling duplicate requests)
-    if (error instanceof Error && error.name === 'AbortError') {
-      console.log(`[API] Request cancelled: ${method} ${path}`);
-    }
+    // if (error instanceof Error && error.name === 'AbortError') {
+    //   console.log(`[API] Request cancelled: ${method} ${path}`);
+    // }
 
     throw error;
   }

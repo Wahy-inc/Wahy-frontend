@@ -1144,15 +1144,8 @@ export async function listMyUploadClassFile(scheduleId: number): Promise<ListUpl
 
 export async function downloadClassFile(scheduleId: number, fileId: number): Promise<boolean> {
     try {
-        const response = await api.api.downloadClassFileApiV2ClassFilesScheduleIdFilesFileIdGet(scheduleId, fileId)
+        const response = await api.api.downloadClassFileApiV2ClassFilesScheduleIdFilesFileIdGet(scheduleId, fileId, {format: 'blob'})
         
-        console.log('[downloadClassFile] Response:', {
-            status: response.status,
-            dataType: typeof response.data,
-            isBlob: response.data instanceof Blob,
-            size: response.data?.size,
-        });
-
         if (response.status === 200 && response.data instanceof Blob) {
             const blob = response.data;
 
