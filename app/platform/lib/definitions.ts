@@ -248,7 +248,7 @@ export const createStudentSchema = zod.object({
     arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
     enname: zod.string().min(1, { error: 'Name is required' }).regex(/^[A-Za-z\s]+$/, { error: 'Name must be in English' }).trim(),
     phone: zod.string().trim().optional(),
-    student_code: zod.string().min(1, { error: 'Student code is required' }).trim(),
+    // student_code: zod.string().min(1, { error: 'Student code is required' }).trim(),
     dateOfBirth: zod.string().trim().optional(),
     timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
     lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
@@ -269,7 +269,7 @@ export type CreateStudentFormState =
             lessonRate?: string[];
             billingCycle?: string[];
             specialNotes?: string[];
-            student_code?: string[];
+            // student_code?: string[];
         }
         message?: string;
     }

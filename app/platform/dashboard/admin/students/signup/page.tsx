@@ -55,6 +55,18 @@ export default function SignUp() {
       {state?.error?.enname && <p className="text-red-500 text-sm">{state.error.enname}</p>}
       </Field>
       </div>
+      {/* <Field>
+        <FieldLabel htmlFor="student_code">{t('auth.student_code_label')}</FieldLabel>
+        <Input
+          id="student_code"
+          name="student_code"
+          type="text"
+          placeholder={t('auth.student_code_placeholder')}
+          className="bg-slate-100 text-slate-800"
+          disabled={pending}
+        />
+        {state?.error?.student_code && <p className="text-red-500 text-sm">{state.error.student_code}</p>}
+      </Field> */}
       <Field>
       <FieldLabel htmlFor="phone">{t('auth.phone_optional_label')}</FieldLabel>
         <Input 
