@@ -39,6 +39,7 @@ export default function Schedules() {
     const [createLibraryDialogOpen, setCreateLibraryDialogOpen] = React.useState(false)
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
     const [isOffline, setIsOffline] = React.useState(false)
+    const [isPending, startTransition] = React.useTransition()
     const { isAdmin, isLoading: authLoading } = useAuth()
     const { t , language} = useLocalization()
 
@@ -131,7 +132,7 @@ export default function Schedules() {
     const handleUploadFile = (formData: FormData, itemID: number, file: File) => {
         formData.append('itemID', itemID.toString())
         formData.append('file', file)
-        uploadFileAction(formData)
+        startTransition(() => uploadFileAction(formData))
     }
 
     if (!isAdmin) {
