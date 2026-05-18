@@ -1871,6 +1871,7 @@ export interface StudentSelfRead {
    * Linked User account ID, or ``null``.
    */
   user_id: number | null;
+  student_code: string;
   /**
    * Full Name Arabic
    * Full name in Arabic script.
@@ -1896,8 +1897,6 @@ export interface StudentSelfRead {
    * IANA timezone identifier.
    */
   timezone: string;
-  /** Approval workflow status. Values: ``pending``, ``approved``, ``rejected``. */
-  registration_status: RegistrationStatus;
   /** Operational status. Values: ``active``, ``on_hold``, ``graduated``, ``inactive``. */
   status: StudentStatus;
   /**

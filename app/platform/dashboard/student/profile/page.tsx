@@ -7,7 +7,7 @@ import DashboardPage from "../page"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { User, Phone, Calendar, Clock, BookOpen, DollarSign, FileText } from 'lucide-react'
+import { User, Phone, Calendar, Clock, DollarSign, FileText } from 'lucide-react'
 import { useAuth } from "@/lib/auth-context"
 import { useLocalization } from "@/lib/localization-context"
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache"
@@ -44,7 +44,7 @@ export default function Profile() {
             }
         }
         fetchProfile()
-    }, [authLoading])
+    }, [authLoading, t])
 
     const getStatusBadgeVariant = (status: openApi.StudentStatus): "default" | "secondary" | "destructive" | "outline" => {
         switch (status) {
@@ -111,12 +111,20 @@ export default function Profile() {
                 <CardContent className="pt-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-1">
-                            <p className="text-sm text-slate-500">{t('profile.name_arabic')}</p>
-                            <p className="text-lg font-medium text-slate-800" dir="rtl">{profile.full_name_arabic}</p>
+                            <p className="text-sm text-slate-500">{t('auth.student_code_label')}</p>
+                            <p className="text-lg font-medium text-slate-800">{profile.student_code}</p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm text-slate-500">{t('profile.student_id')}</p>
+                            <p className="text-lg font-medium text-slate-800">#{profile.id}</p>
                         </div>
                         <div className="space-y-1">
                             <p className="text-sm text-slate-500">{t('profile.name_english')}</p>
                             <p className="text-lg font-medium text-slate-800">{profile.full_name_english}</p>
+                        </div>
+                        <div className="space-y-1">
+                            <p className="text-sm text-slate-500">{t('profile.name_arabic')}</p>
+                            <p className="text-lg font-medium text-slate-800" dir="rtl">{profile.full_name_arabic}</p>
                         </div>
                         <div className="space-y-1">
                             <div className="flex items-center gap-2">
@@ -139,10 +147,6 @@ export default function Profile() {
                             </div>
                             <p className="text-lg font-medium text-slate-800">{profile.timezone}</p>
                         </div>
-                        <div className="space-y-1">
-                            <p className="text-sm text-slate-500">{t('profile.student_id')}</p>
-                            <p className="text-lg font-medium text-slate-800">#{profile.id}</p>
-                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -159,13 +163,6 @@ export default function Profile() {
                             <span className="text-sm text-slate-500">{t('profile.account_status')}:</span>
                             <Badge variant={getStatusBadgeVariant(profile.status)}>
                                 {profile.status.replace('_', ' ').toUpperCase()}
-                            </Badge>
-                        </div>
-                        <Separator orientation="vertical" className="h-6" />
-                        <div className="flex items-center gap-2">
-                            <span className="text-sm text-slate-500">{t('profile.registration_label')}:</span>
-                            <Badge variant={getRegistrationBadgeVariant(profile.registration_status)}>
-                                {profile.registration_status.toUpperCase()}
                             </Badge>
                         </div>
                     </div>

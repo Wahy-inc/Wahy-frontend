@@ -27,7 +27,7 @@ const baseApi = new openApi.Api<unknown>({
 // Get the original request method
 const originalRequest = baseApi.request.bind(baseApi);
 
-// Override request method to handle request deduplication
+// Override request method to handle request deduplication and binary formats
 baseApi.request = async function (config: any) {
   const { path, method = 'GET', query } = config;
 
@@ -41,18 +41,22 @@ baseApi.request = async function (config: any) {
   }
 
   try {
-    // Check if this is a binary file endpoint - set response type to blob
-    const isBinaryEndpoint = path?.includes('/pdf') || path?.includes('/files') || path?.includes('/feed');
-    if (isBinaryEndpoint && config.params) {
-      config.params.responseType = 'blob';
-    }
-
-    // Execute request with the cancel token
-    const result = await originalRequest({
+    // Check if this is a binary file endpoint - force blob format to prevent JSON parsing
+    const isBinaryEndpoint = path?.includes('/pdf') || path?.includes('/files') || path?.includes('/download');
+    
+    const requestConfig = {
       ...config,
       cancelToken,
-      ...(isBinaryEndpoint && { responseType: 'blob' }),
-    } as any);
+      // Override format to 'blob' for binary endpoints to prevent JSON parsing
+      ...(isBinaryEndpoint && { format: 'blob' }),
+    };
+
+    console.log('[apiClient] Request:', { path, isBinaryEndpoint, format: requestConfig.format });
+
+    // Execute request with the cancel token
+    const result = await originalRequest(requestConfig as any);
+    
+    console.log('[apiClient] Response:', { path, status: result.status, dataType: typeof result.data, dataIsBlob: result.data instanceof Blob, dataSize: result.data?.size });
 
     cleanup();
     return result;

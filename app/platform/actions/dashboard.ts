@@ -794,23 +794,19 @@ export async function overrideInvoice(state: OverrideInvoiceFormState, formData:
 
 export async function downloadInvoicePDF(id: number): Promise<boolean> {
     try {
-        const response = await api.api.getPdfApiV1InvoicesInvoiceIdPdfGet(id)
+        const response = await api.api.getPdfApiV1InvoicesInvoiceIdPdfGet(id)        
 
-        if (response.status === 200 && response.data) {
-            // Ensure we have a Blob
-            let blob: Blob;
-            if (response.data instanceof Blob) {
-                blob = response.data;
-            } else if (typeof response.data === 'string') {
-                blob = new Blob([response.data], { type: 'application/pdf' });
-            } else if (response.data instanceof ArrayBuffer) {
-                blob = new Blob([response.data], { type: 'application/pdf' });
-            } else {
-                // Try to convert object to blob
-                blob = new Blob([JSON.stringify(response.data)], { type: 'application/pdf' });
-            }
+        console.log('[downloadInvoicePDF] Response:', {
+            status: response.status,
+            dataType: typeof response.data,
+            isBlob: response.data instanceof Blob,
+            size: response.data?.size,
+        });
 
-            // Verify blob has reasonable size (PDFs should be > 1KB)
+        if (response.status === 200 && response.data instanceof Blob) {
+            const blob = response.data;
+
+            // Verify blob has reasonable size
             if (blob.size < 100) {
                 console.error('PDF blob too small:', blob.size, 'bytes');
                 return false;
@@ -824,8 +820,10 @@ export async function downloadInvoicePDF(id: number): Promise<boolean> {
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
+            console.log('[downloadInvoicePDF] Download triggered successfully');
             return true;
         }
+        console.error('Invalid response:', response.status, response.data);
         return false
     } catch (error) {
         console.error('Error downloading invoice PDF:', error);
@@ -837,21 +835,17 @@ export async function downloadInvoicePDFMe(id: number): Promise<boolean> {
     try {
         const response = await api.api.getMyPdfApiV1InvoicesMeInvoiceIdPdfGet(id)
 
-        if (response.status === 200 && response.data) {
-            // Ensure we have a Blob
-            let blob: Blob;
-            if (response.data instanceof Blob) {
-                blob = response.data;
-            } else if (typeof response.data === 'string') {
-                blob = new Blob([response.data], { type: 'application/pdf' });
-            } else if (response.data instanceof ArrayBuffer) {
-                blob = new Blob([response.data], { type: 'application/pdf' });
-            } else {
-                // Try to convert object to blob
-                blob = new Blob([JSON.stringify(response.data)], { type: 'application/pdf' });
-            }
+        console.log('[downloadInvoicePDFMe] Response:', {
+            status: response.status,
+            dataType: typeof response.data,
+            isBlob: response.data instanceof Blob,
+            size: response.data?.size,
+        });
 
-            // Verify blob has reasonable size (PDFs should be > 1KB)
+        if (response.status === 200 && response.data instanceof Blob) {
+            const blob = response.data;
+
+            // Verify blob has reasonable size
             if (blob.size < 100) {
                 console.error('PDF blob too small:', blob.size, 'bytes');
                 return false;
@@ -865,8 +859,10 @@ export async function downloadInvoicePDFMe(id: number): Promise<boolean> {
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
+            console.log('[downloadInvoicePDFMe] Download triggered successfully');
             return true;
         }
+        console.error('Invalid response:', response.status, response.data);
         return false
     } catch (error) {
         console.error('Error downloading invoice PDF:', error);
@@ -1150,20 +1146,17 @@ export async function downloadClassFile(scheduleId: number, fileId: number): Pro
     try {
         const response = await api.api.downloadClassFileApiV2ClassFilesScheduleIdFilesFileIdGet(scheduleId, fileId)
         
-        if (response.status === 200 && response.data) {
-            // Ensure we have a Blob
-            let blob: Blob;
-            if (response.data instanceof Blob) {
-                blob = response.data;
-            } else if (typeof response.data === 'string') {
-                blob = new Blob([response.data]);
-            } else if (response.data instanceof ArrayBuffer) {
-                blob = new Blob([response.data]);
-            } else {
-                blob = new Blob([JSON.stringify(response.data)]);
-            }
+        console.log('[downloadClassFile] Response:', {
+            status: response.status,
+            dataType: typeof response.data,
+            isBlob: response.data instanceof Blob,
+            size: response.data?.size,
+        });
 
-            // Verify blob has reasonable size (files should be > 100 bytes)
+        if (response.status === 200 && response.data instanceof Blob) {
+            const blob = response.data;
+
+            // Verify blob has reasonable size
             if (blob.size < 50) {
                 console.error('File blob too small:', blob.size, 'bytes');
                 return false;
@@ -1177,8 +1170,10 @@ export async function downloadClassFile(scheduleId: number, fileId: number): Pro
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
+            console.log('[downloadClassFile] Download triggered successfully');
             return true;
         }
+        console.error('Invalid response:', response.status, response.data);
         return false
     } catch (error) {
         console.error('Error downloading class file:', error);
