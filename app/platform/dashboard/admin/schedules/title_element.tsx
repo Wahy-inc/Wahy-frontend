@@ -240,10 +240,10 @@ export default function TitleElement({
                             <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">{t('schedules.create_schedule')}</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
-                            <form action={handleCreateSubmit}>
+                            <form action={handleCreateSubmit} className="w-full">
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('schedules.create_title')}</AlertDialogTitle>
-                                <div className="grid grid-cols-3 gap-4 rtl:text-right">
+                                <div className="w-full grid grid-cols-3 gap-4 rtl:text-right">
                                     <div className='flex flex-col col-start-1 col-end-4 row-start-1 row-end-2'>
                                         <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
                                     </div>

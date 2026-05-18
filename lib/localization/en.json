@@ -318,8 +318,7 @@
   "analytics": {
     "title": "Analytics",
     "attendance_analytics": "Attendance Analytics",
-    "attendance_student_analytics": "Student Attendance Analytics",
-    "performance_analytics": "Performance Analytics",
+    "attendance_student_analytics": "Student Attendance Analytics",    "attendance_class_analytics": "Class Attendance Analytics",    "performance_analytics": "Performance Analytics",
     "financial_analytics": "Financial Analytics",
     "operational_analytics": "Operational Analytics",
     "start_time": "Start Time",

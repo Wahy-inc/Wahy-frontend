@@ -338,6 +338,8 @@
   "analytics": {
     "title": "Аналитика",
     "attendance_analytics": "Аналитика посещаемости",
+    "attendance_student_analytics": "Аналитика посещаемости студента",
+    "attendance_class_analytics": "Аналитика посещаемости класса",
     "performance_analytics": "Аналитика производительности",
     "financial_analytics": "Финансовая аналитика",
     "operational_analytics": "Рабочая аналитика",

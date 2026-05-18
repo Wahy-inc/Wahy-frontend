@@ -339,6 +339,7 @@
     "title": "Analytik",
     "attendance_analytics": "Anwesenheitsanalytik",
     "attendance_student_analytics": "Schüleranwesenheitsanalytik",
+    "attendance_class_analytics": "Klassenbesuchsanalytik",
     "performance_analytics": "Leistungsanalytik",
     "financial_analytics": "Finanzanalytik",
     "operational_analytics": "Betriebsanalytik",

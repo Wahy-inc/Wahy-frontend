@@ -339,6 +339,7 @@
     "title": "Analytiques",
     "attendance_analytics": "Analytiques de présence",
     "attendance_student_analytics": "Analytiques de présence de l'étudiant",
+    "attendance_class_analytics": "Analytiques de présence de classe",
     "performance_analytics": "Analytiques de performance",
     "financial_analytics": "Analytiques financières",
     "operational_analytics": "Analytiques opérationnelles",
