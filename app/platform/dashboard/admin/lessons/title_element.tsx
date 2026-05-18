@@ -56,6 +56,7 @@ export default function TitleElement({
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
     const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
+    const [scheduleID, setScheduleID] = useState<number | null>(null)
     const { t } = useLocalization()
 
     const handleCreateSubmit = (formData: FormData) => {
@@ -148,8 +149,8 @@ export default function TitleElement({
                                                         <SelectGroup>
                                                             <SelectLabel>{t('lessons.date')}</SelectLabel>
                                                             {getLocalSchedules(selectedStudentId)?.flatMap((schedules) =>
-                                                                schedules?.schedules.map((sched) => sched?.map((sch) => (
-                                                                    <SelectItem key={`date-${sch}-${new Date().getTime()}`} value={getDayFromSchedule(sch) || ""}>
+                                                                schedules?.schedules.map((sched) => sched?.['rrule']?.map((sch) => (
+                                                                    <SelectItem key={`date-${sch}-${new Date().getTime()}`} value={getDayFromSchedule(sch) || ""} onSelect={() => setScheduleID(sched?.['schedule_id'] || null)}>
                                                                         {sch}
                                                                     </SelectItem>
                                                                 )))

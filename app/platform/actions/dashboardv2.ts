@@ -271,7 +271,7 @@ export async function addLocalSchedules(): Promise<boolean> {
             const ids:number[] = [];
             schedules.map((schedule) => ids.includes(schedule.student_id) ? null : ids.push(schedule.student_id));
 
-            const storeData: { id: number; schedules: (string[] | undefined)[] }[] = [];
+            const storeData: { id: number; schedules: ({ schedule_id: number; rrule: string[] | undefined } | undefined)[] }[] = [];
             ids.forEach((id) => {
                 const data = {
                     id: id,
@@ -283,7 +283,8 @@ export async function addLocalSchedules(): Promise<boolean> {
                                 : `RRULE:${sch.rrule_string}`;
                             const rrule = RRule.fromString(rruleString);
                             const store = rrule.byweekday?.map((weekday) => `${weekday} | ${sch.start_time.slice(0, 5)} : ${sch.end_time.slice(0, 5)}`);
-                            return store;
+                            const schedule_id = sch.id;
+                            return { schedule_id, rrule: store };
                         } catch (err) {
                             console.warn("Invalid RRULE string:", sch.rrule_string, err);
                             return undefined;
@@ -302,7 +303,7 @@ export async function addLocalSchedules(): Promise<boolean> {
     }
 }
 
-export function getLocalSchedules(id: number | null): { id: number; schedules: (string[] | undefined)[] }[] | null {
+export function getLocalSchedules(id: number | null): { id: number; schedules: ({ schedule_id: number; rrule: string[] | undefined } | undefined)[] }[] | null {
     if (id === undefined) return null;
     try {
         const data = localStorage.getItem('schedules');
@@ -310,7 +311,7 @@ export function getLocalSchedules(id: number | null): { id: number; schedules: (
             return null;
         }
         const schedulesData = JSON.parse(data);
-        const schedules = schedulesData.filter((schedule: { id: number; schedules: (string[] | undefined)[] }) => schedule.id === id);
+        const schedules = schedulesData.filter((schedule: { id: number; schedules: ({ schedule_id: number; rrule: string[] | undefined } | undefined)[] }) => schedule.id === id);
         return schedules;
     } catch (error) {
         console.error("Error parsing local schedules:", error);

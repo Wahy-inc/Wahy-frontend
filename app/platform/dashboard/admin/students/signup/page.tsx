@@ -20,7 +20,7 @@ export default function SignUp() {
     const [state, action, pending] = useActionState(signup, undefined)
     const router = useRouter()
 
-    useToastListener(state, {functionName: "Sign Up", successMessage: "Signup successful", errorMessage: "Failed to sign up"})
+    useToastListener(state, {functionName: "Sign Up", successMessage: "Added Student Successfully", errorMessage: "Failed to add student"})
 
     React.useEffect(() => {
         if (state?.message === 'Signup successful') {

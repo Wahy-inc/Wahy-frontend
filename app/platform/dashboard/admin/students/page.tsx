@@ -32,16 +32,12 @@ export default function Students() {
     const [error, setError] = React.useState<string | null>(null)
     const updateStudentActionState = (state: UpdateStudentFormState, formData: FormData) => updateStudent(state, formData, Number(formData.get('id')))
     const [updateStudentState, updateStudentAction, updateStudentPending] = React.useActionState(updateStudentActionState, undefined)
-    const [createStudentState, createStudentAction, createStudentPending] = React.useActionState(createStudent, undefined)
     const [getStudentState, getStudentAction, getStudentPending] = React.useActionState(getStudent, undefined)
-    const [createStudentDialogOpen, setCreateStudentDialogOpen] = React.useState(false)
-    const [getStudentDialogOpen, setGetStudentDialogOpen] = React.useState(false)
     const [editingStudentId, setEditingStudentId] = React.useState<number | null>(null)
     const [approvalStatus, setApprovalStatus] = React.useState<'success' | 'queued' | 'fail' | null>(null)
     const { isAdmin, isLoading: authLoading } = useAuth()
     const { t, language } = useLocalization()
 
-    useToastListener(createStudentState, {functionName: "Create Student", successMessage: t('students.create_success'), errorMessage: t('students.create_error')})
     useToastListener(updateStudentState, {functionName: "Update Student", successMessage: t('students.update_success'), errorMessage: t('students.update_error')})
     useToastListener(getStudentState, {functionName: "Get Student", successMessage: t('students.create_success'), errorMessage: t('students.create_error')})
     
@@ -50,8 +46,6 @@ export default function Students() {
             setStudents([getStudentState.data])
         }
         if (
-            createStudentState?.message === 'success' ||
-            createStudentState?.message === 'queued' ||
             updateStudentState?.message === 'success' ||
             updateStudentState?.message === 'queued'
         ) {
@@ -70,7 +64,7 @@ export default function Students() {
             }
             fetchStudents()
         }
-    }, [getStudentState, createStudentState, updateStudentState, isAdmin])
+    }, [getStudentState, updateStudentState, isAdmin])
 
     React.useEffect(() => {
         if (updateStudentState?.message === 'success' || updateStudentState?.message === 'queued') {
@@ -389,17 +383,10 @@ export default function Students() {
     const title = (
         <TitleElement
             title={t('students.title')}
-            createAction={createStudentAction}
-            createState={createStudentState}
-            createPending={createStudentPending}
             getStudentAction={getStudentAction}
             getStudentState={getStudentState}
             getStudentPending={getStudentPending}
             fieldInput={fieldInput}
-            createStudentDialogOpen={createStudentDialogOpen}
-            setcreateStudentDialogOpen={setCreateStudentDialogOpen}
-            getStudentDialogOpen={getStudentDialogOpen}
-            setgetStudentDialogOpen={setGetStudentDialogOpen}
         />
     )
 
@@ -407,9 +394,9 @@ export default function Students() {
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
     if (!students || students.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('students.no_students_found')}</p></DashboardPage>
 
-    const pendingStudents = students?.filter((student: openApi.StudentRead) => {
-        return student.registration_status === openApi.RegistrationStatus.Pending;
-    })
+    // const pendingStudents = students?.filter((student: openApi.StudentRead) => {
+    //     return student.registration_status === openApi.RegistrationStatus.Pending;
+    // })
     const approvedStudents = students?.filter((student: openApi.StudentRead) => {
         return student.registration_status === openApi.RegistrationStatus.Approved;
     })
@@ -420,29 +407,29 @@ export default function Students() {
 
     const content = (
         <div className="flex flex-col gap-12 w-full">
-            {(createStudentState?.message || updateStudentState?.message || approvalStatus) && (
+            {(updateStudentState?.message || approvalStatus) && (
                 <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
-                    createStudentState?.message === 'queued' || updateStudentState?.message === 'queued' || approvalStatus === 'queued'
+                    updateStudentState?.message === 'queued' || approvalStatus === 'queued'
                         ? 'border-amber-200 bg-amber-50 text-amber-800'
-                        : createStudentState?.message === 'fail' || updateStudentState?.message === 'fail' || approvalStatus === 'fail'
+                        : updateStudentState?.message === 'fail' || approvalStatus === 'fail'
                             ? 'border-red-200 bg-red-50 text-red-800'
                             : 'border-emerald-200 bg-emerald-50 text-emerald-800'
                 }`}>
-                    {createStudentState?.message === 'queued' || updateStudentState?.message === 'queued' || approvalStatus === 'queued'
+                    {updateStudentState?.message === 'queued' || approvalStatus === 'queued'
                         ? t('schedules.offline_sync')
-                        : createStudentState?.message === 'fail' || updateStudentState?.message === 'fail' || approvalStatus === 'fail'
+                        : updateStudentState?.message === 'fail' || approvalStatus === 'fail'
                             ? t('schedules.offline_error')
                             : t('messages.success')}
                 </div>
             )}
-            <div className="flex flex-col gap-4">
+            {/* <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">{t('students.pending_students')}</p>
                 {pendingStudents && pendingStudents.length > 0 ? pendingStudents.map((student: openApi.StudentRead) => (
                     <div key={student.id}>
                         {studentElement(student, '')}
                     </div>
                 )) : <p className="text-slate-700 text-xl">{t('students.no_pending_students')}</p>}
-            </div>
+            </div> */}
             <div className="w-full h-1 bg-gray-400"></div>
             <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">{t('students.approved_students')}</p>
@@ -467,17 +454,10 @@ export default function Students() {
     return <DashboardPage title={(
         <TitleElement
             title={t('students.title')}
-            createAction={createStudentAction}
-            createState={createStudentState}
-            createPending={createStudentPending}
             getStudentAction={getStudentAction}
             getStudentState={getStudentState}
             getStudentPending={getStudentPending}
             fieldInput={fieldInput}
-            createStudentDialogOpen={createStudentDialogOpen}
-            setcreateStudentDialogOpen={setCreateStudentDialogOpen}
-            getStudentDialogOpen={getStudentDialogOpen}
-            setgetStudentDialogOpen={setGetStudentDialogOpen}
         />
     )}><div className="flex flex-col gap-4 w-full">{content}</div></DashboardPage>
 }

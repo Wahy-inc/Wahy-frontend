@@ -3,7 +3,7 @@ import { CreateInvoiceFormState, createInvoiceSchema, CreateLessonFormState, Cre
 import { createIdempotencyKey, enqueueOfflineMutation, isClientOnline, shouldQueueMutation } from "@/lib/offlineSync"
 import { getCachedData, offlineCacheKeys, setCachedData } from "@/lib/offlineCache"
 import { getApi } from "@/lib/apiClient"
-import { DeleteClassFileResponseState, DownloadClassFileResponseState, ListUploadedClassFilesResponseState, uploadClassFileResponseState } from "../lib/definitionsv2"
+import { DeleteClassFileResponseState, ListUploadedClassFilesResponseState, uploadClassFileResponseState } from "../lib/definitionsv2"
 
 const api = getApi()
 
