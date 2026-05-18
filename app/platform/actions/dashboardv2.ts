@@ -319,11 +319,11 @@ export function getLocalSchedules(id: number | null): { id: number; schedules: (
     }
 }
 
-export async function uploadLibraryFile(state: uploadLibraryFileResponseState, formData: FormData): Promise<uploadLibraryFileResponseState> {
-    const itemID = Number(formData.get('itemID'))
-    const file = formData.get('file') as File
-    
-    if (!file) {
+export async function uploadLibraryFile(state: uploadLibraryFileResponseState, formData: FormData): Promise<uploadLibraryFileResponseState> {    
+    const file = formData.get('file') as File;
+    const itemID =Number(formData.get('itemID'));    
+
+    if (!file || !itemID) {
         return { message: 'fail'}
     }
     
