@@ -40,6 +40,9 @@ export default function Schedules() {
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
     const [isOffline, setIsOffline] = React.useState(false)
     const [isPending, startTransition] = React.useTransition()
+    const [uploadProgress, setUploadProgress] = React.useState(0)
+    const progressIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
+    const abortControllerRef = React.useRef<AbortController | null>(null)
     const { isAdmin, isLoading: authLoading } = useAuth()
     const { t , language} = useLocalization()
 
@@ -102,6 +105,18 @@ export default function Schedules() {
     }, [getLibraryItemState, createLibraryItemState, uploadFileState])
 
     React.useEffect(() => {
+        // When upload completes (uploadFilePending becomes false)
+        if (!uploadFilePending && uploadProgress > 0) {
+            if (progressIntervalRef.current) {
+                clearInterval(progressIntervalRef.current)
+                progressIntervalRef.current = null
+            }
+            setUploadProgress(100)
+            setTimeout(() => setUploadProgress(0), 800)
+        }
+    }, [uploadFilePending])
+
+    React.useEffect(() => {
         if (authLoading) return // Wait until auth is loaded
 
         const cachedLibraryItems = getCachedData<openApi.LibraryItemRead[]>(
@@ -132,7 +147,51 @@ export default function Schedules() {
     const handleUploadFile = (formData: FormData, itemID: number, file: File) => {
         formData.append('itemID', itemID.toString())
         formData.append('file', file)
-        startTransition(() => uploadFileAction(formData))
+        
+        const totalSize = file.size
+        const fileSizeInMB = totalSize / (1024 * 1024)
+        
+        // Estimate upload time based on file size (assuming ~1MB per 500ms as baseline)
+        const estimatedUploadTimeMs = Math.max(fileSizeInMB * 500, 1000)
+        
+        setUploadProgress(0)
+        const startTime = Date.now()
+        
+        // Create abort controller for this upload
+        const abortController = new AbortController()
+        abortControllerRef.current = abortController
+        
+        const interval = setInterval(() => {
+            const elapsedTime = Date.now() - startTime
+            const progress = Math.min((elapsedTime / estimatedUploadTimeMs) * 100, 95)
+            setUploadProgress(progress)
+        }, 100)
+        
+        progressIntervalRef.current = interval
+        
+        // Make the fetch request with abort signal
+        fetch(`/api/v1/library/${itemID}/files`, {
+            method: 'POST',
+            body: formData,
+            signal: abortController.signal
+        })
+        .then(res => res.json())
+        .then(() => {
+            clearInterval(interval)
+            progressIntervalRef.current = null
+            setUploadProgress(100)
+            setTimeout(() => setUploadProgress(0), 800)
+            // Refresh files after successful upload
+            fetchFilesForItems()
+        })
+        .catch((err) => {
+            if (err.name !== 'AbortError') {
+                console.error('Upload failed:', err)
+            }
+            clearInterval(interval)
+            progressIntervalRef.current = null
+            setUploadProgress(0)
+        })
     }
 
     if (!isAdmin) {
@@ -188,6 +247,39 @@ export default function Schedules() {
                         <input type="file" disabled={uploadFilePending} onChange={(e) => {
                             handleUploadFile(new FormData(e.currentTarget.form!), item.id, e.currentTarget.files![0])
                         }} className="w-full h-10 bg-yellow-300 transition duration-300 rounded-lg text-white text-sm hover:bg-yellow-500 cursor-pointer" />
+                        {uploadProgress > 0 && (
+                            <div className="w-full mt-2">
+                                <div className="flex items-center gap-2 justify-between">
+                                    <div className="flex-1 bg-gray-200 rounded-lg h-2 overflow-hidden">
+                                        <div 
+                                            className="bg-yellow-500 h-full transition-all duration-300 ease-out"
+                                            style={{width: `${uploadProgress}%`}}
+                                        />
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            // Abort the fetch request
+                                            if (abortControllerRef.current) {
+                                                abortControllerRef.current.abort()
+                                                abortControllerRef.current = null
+                                            }
+                                            // Clear the progress interval
+                                            if (progressIntervalRef.current) {
+                                                clearInterval(progressIntervalRef.current)
+                                                progressIntervalRef.current = null
+                                            }
+                                            setUploadProgress(0)
+                                        }}
+                                        className="p-1 hover:bg-gray-300 rounded transition"
+                                        title="Cancel upload"
+                                    >
+                                        <icon.X className="w-4 h-4 text-gray-600" />
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-600 mt-1 text-center">{Math.round(uploadProgress)}%</p>
+                            </div>
+                        )}
                     </form>
                     <Button disabled={isOffline} onClick={() => {
                         if (isOffline) {

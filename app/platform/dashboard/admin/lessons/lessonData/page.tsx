@@ -39,6 +39,9 @@ function LessonDataContent() {
     const [updateFormSubmitted, setUpdateFormSubmitted] = useState(false);
     const [updateState, updateAction, updatePending] = useActionState(updateLesson, undefined);
     const [uploadFileState, uploadFileAction, uploadFilePending] = useActionState(uploadClassFile, undefined);
+    const [uploadProgress, setUploadProgress] = React.useState(0)
+    const progressIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
+    const abortControllerRef = React.useRef<AbortController | null>(null)
     const { t, language } = useLocalization();
     const isRTL = language === 'ar';
     const date = new Date();
@@ -75,6 +78,18 @@ function LessonDataContent() {
         }
     }, [attendanceState, uploadFileState, scheduleID]);
 
+    React.useEffect(() => {
+        // When upload completes (uploadFilePending becomes false)
+        if (!uploadFilePending && uploadProgress > 0) {
+            if (progressIntervalRef.current) {
+                clearInterval(progressIntervalRef.current)
+                progressIntervalRef.current = null
+            }
+            setUploadProgress(100)
+            setTimeout(() => setUploadProgress(0), 800)
+        }
+    }, [uploadFilePending])
+
     const handleAttendanceSubmit = (formData: FormData) => {
         formData.append('schedule_id', scheduleID || '')
         attendanceAction(formData)
@@ -82,7 +97,58 @@ function LessonDataContent() {
 
     const handleFileUploadSubmit = (formData: FormData) => {
         formData.append('schedule_id', scheduleID || '')
-        uploadFileAction(formData)
+        
+        const fileInput = document.querySelector('input[name="file"]') as HTMLInputElement
+        const file = fileInput?.files?.[0]
+        
+        if (!file) return
+        
+        const totalSize = file.size
+        const fileSizeInMB = totalSize / (1024 * 1024)
+        
+        // Estimate upload time based on file size (assuming ~1MB per 500ms as baseline)
+        const estimatedUploadTimeMs = Math.max(fileSizeInMB * 500, 1000)
+        
+        setUploadProgress(0)
+        const startTime = new Date().getTime()
+        
+        // Create abort controller for this upload
+        const abortController = new AbortController()
+        abortControllerRef.current = abortController
+        
+        const interval = setInterval(() => {
+            const elapsedTime = new Date().getTime() - startTime
+            const progress = Math.min((elapsedTime / estimatedUploadTimeMs) * 100, 95)
+            setUploadProgress(progress)
+        }, 100)
+        
+        progressIntervalRef.current = interval
+        
+        // Make the fetch request with abort signal
+        fetch(`/api/v2/class-files/${scheduleID}/files`, {
+            method: 'POST',
+            body: formData,
+            signal: abortController.signal
+        })
+        .then(res => res.json())
+        .then(() => {
+            clearInterval(interval)
+            progressIntervalRef.current = null
+            setUploadProgress(100)
+            setTimeout(() => setUploadProgress(0), 800)
+            // Refresh files after successful upload
+            listUploadClassFile(Number(scheduleID)).then((res) => {
+                setFiles(res?.data || null)
+            })
+        })
+        .catch((err) => {
+            if (err.name !== 'AbortError') {
+                console.error('Upload failed:', err)
+            }
+            clearInterval(interval)
+            progressIntervalRef.current = null
+            setUploadProgress(0)
+        })
     }
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
@@ -526,6 +592,39 @@ function LessonDataContent() {
                         <Input id="file" name="file" type="file" className=" text-slate-800 border border-slate-800 rounded-lg px-4 py-2 cursor-pointer" required />
                     </form>
                 </div>
+                {uploadProgress > 0 && (
+                    <div className="px-30 mt-3">
+                        <div className="flex items-center gap-3 justify-between">
+                            <div className="flex-1 bg-slate-300 rounded-lg h-3 overflow-hidden">
+                                <div 
+                                    className="bg-slate-800 h-full transition-all duration-300 ease-out"
+                                    style={{width: `${uploadProgress}%`}}
+                                />
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    // Abort the fetch request
+                                    if (abortControllerRef.current) {
+                                        abortControllerRef.current.abort()
+                                        abortControllerRef.current = null
+                                    }
+                                    // Clear the progress interval
+                                    if (progressIntervalRef.current) {
+                                        clearInterval(progressIntervalRef.current)
+                                        progressIntervalRef.current = null
+                                    }
+                                    setUploadProgress(0)
+                                }}
+                                className="p-1 hover:bg-slate-200 rounded transition"
+                                title="Cancel upload"
+                            >
+                                <Icon.X className="w-5 h-5 text-slate-600" />
+                            </button>
+                        </div>
+                        <p className="text-sm text-slate-600 mt-2 text-center font-medium">{t('common.uploading')} {Math.round(uploadProgress)}%</p>
+                    </div>
+                )}
             </div>
             {content}
         </DashboardPage>
