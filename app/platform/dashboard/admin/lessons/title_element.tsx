@@ -133,6 +133,7 @@ export default function TitleElement({
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('lessons.create_lesson')}</AlertDialogTitle>
                                 <div className="flex flex-col gap-4 rtl:text-right">
+                                    <input type="text" id="schedule_id" name="schedule_id" value={scheduleID || ""} hidden/>
                                     <div className='flex flex-col'>
                                         <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
                                         {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
