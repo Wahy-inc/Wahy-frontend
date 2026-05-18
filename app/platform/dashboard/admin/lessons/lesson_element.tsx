@@ -2,9 +2,8 @@ import * as openApi from "@/lib/openApi"
 import { Card, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import * as Icon from '@deemlol/next-icons'
-import { Power, RefreshCw } from "lucide-react"
+import { Power } from "lucide-react"
 import { useLocalization } from "@/lib/localization-context"
-import { getLocalStudent } from "@/app/platform/actions/dashboard"
 
 export default function LessonElement({lesson}: {lesson: openApi.ClassGroupItem}) {
     const { t, language } = useLocalization()

@@ -41,10 +41,17 @@ baseApi.request = async function (config: any) {
   }
 
   try {
+    // Check if this is a binary file endpoint - set response type to blob
+    const isBinaryEndpoint = path?.includes('/pdf') || path?.includes('/files') || path?.includes('/feed');
+    if (isBinaryEndpoint && config.params) {
+      config.params.responseType = 'blob';
+    }
+
     // Execute request with the cancel token
     const result = await originalRequest({
       ...config,
       cancelToken,
+      ...(isBinaryEndpoint && { responseType: 'blob' }),
     } as any);
 
     cleanup();

@@ -796,21 +796,39 @@ export async function downloadInvoicePDF(id: number): Promise<boolean> {
     try {
         const response = await api.api.getPdfApiV1InvoicesInvoiceIdPdfGet(id)
 
-        if (response.status === 200) {
-            // Handle response.data as binary blob to prevent PDF corruption
-            const blob = response.data instanceof Blob ? response.data : new Blob([response.data], { type: 'application/pdf' })
-            const url = window.URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = url
-            link.setAttribute('download', `invoice_${id}.pdf`)
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-            window.URL.revokeObjectURL(url)
-            return true
+        if (response.status === 200 && response.data) {
+            // Ensure we have a Blob
+            let blob: Blob;
+            if (response.data instanceof Blob) {
+                blob = response.data;
+            } else if (typeof response.data === 'string') {
+                blob = new Blob([response.data], { type: 'application/pdf' });
+            } else if (response.data instanceof ArrayBuffer) {
+                blob = new Blob([response.data], { type: 'application/pdf' });
+            } else {
+                // Try to convert object to blob
+                blob = new Blob([JSON.stringify(response.data)], { type: 'application/pdf' });
+            }
+
+            // Verify blob has reasonable size (PDFs should be > 1KB)
+            if (blob.size < 100) {
+                console.error('PDF blob too small:', blob.size, 'bytes');
+                return false;
+            }
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `invoice_${id}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            return true;
         }
         return false
     } catch (error) {
+        console.error('Error downloading invoice PDF:', error);
         return false
     }
 }
@@ -819,21 +837,39 @@ export async function downloadInvoicePDFMe(id: number): Promise<boolean> {
     try {
         const response = await api.api.getMyPdfApiV1InvoicesMeInvoiceIdPdfGet(id)
 
-        if (response.status === 200) {
-            // Handle response.data as binary blob to prevent PDF corruption
-            const blob = response.data instanceof Blob ? response.data : new Blob([response.data], { type: 'application/pdf' })
-            const url = window.URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = url
-            link.setAttribute('download', `invoice_${id}.pdf`)
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-            window.URL.revokeObjectURL(url)
-            return true
+        if (response.status === 200 && response.data) {
+            // Ensure we have a Blob
+            let blob: Blob;
+            if (response.data instanceof Blob) {
+                blob = response.data;
+            } else if (typeof response.data === 'string') {
+                blob = new Blob([response.data], { type: 'application/pdf' });
+            } else if (response.data instanceof ArrayBuffer) {
+                blob = new Blob([response.data], { type: 'application/pdf' });
+            } else {
+                // Try to convert object to blob
+                blob = new Blob([JSON.stringify(response.data)], { type: 'application/pdf' });
+            }
+
+            // Verify blob has reasonable size (PDFs should be > 1KB)
+            if (blob.size < 100) {
+                console.error('PDF blob too small:', blob.size, 'bytes');
+                return false;
+            }
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `invoice_${id}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            return true;
         }
         return false
     } catch (error) {
+        console.error('Error downloading invoice PDF:', error);
         return false
     }
 }
@@ -1113,21 +1149,39 @@ export async function listMyUploadClassFile(scheduleId: number): Promise<ListUpl
 export async function downloadClassFile(scheduleId: number, fileId: number): Promise<boolean> {
     try {
         const response = await api.api.downloadClassFileApiV2ClassFilesScheduleIdFilesFileIdGet(scheduleId, fileId)
-        if (response.status === 200) {
-            // Handle response.data as binary blob to prevent file corruption
-            const blob = response.data instanceof Blob ? response.data : new Blob([response.data])
-            const url = window.URL.createObjectURL(blob)
-            const link = document.createElement('a')
-            link.href = url
-            link.setAttribute('download', `classfile_${fileId}`)
-            document.body.appendChild(link)
-            link.click()
-            document.body.removeChild(link)
-            window.URL.revokeObjectURL(url)
-            return true
+        
+        if (response.status === 200 && response.data) {
+            // Ensure we have a Blob
+            let blob: Blob;
+            if (response.data instanceof Blob) {
+                blob = response.data;
+            } else if (typeof response.data === 'string') {
+                blob = new Blob([response.data]);
+            } else if (response.data instanceof ArrayBuffer) {
+                blob = new Blob([response.data]);
+            } else {
+                blob = new Blob([JSON.stringify(response.data)]);
+            }
+
+            // Verify blob has reasonable size (files should be > 100 bytes)
+            if (blob.size < 50) {
+                console.error('File blob too small:', blob.size, 'bytes');
+                return false;
+            }
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `classfile_${fileId}`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            return true;
         }
         return false
     } catch (error) {
+        console.error('Error downloading class file:', error);
         return false
     }
 }

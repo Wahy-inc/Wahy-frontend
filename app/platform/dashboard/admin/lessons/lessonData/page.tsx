@@ -278,9 +278,8 @@ function LessonDataContent() {
                             <div className="flex items-center gap-2 mt-1">
                                 <Badge variant="outline" className="text-xs">
                                     <Icon.BookOpen className="w-3 h-3 mr-1" />
-                                    {t(`lessons.${lesson.type}`)}
+                                    {`Schedule: ${lesson.schedule_id || 'N/A'}`}
                                 </Badge>
-                                <span className="text-slate-400 text-sm">Schedule: {lesson.schedule_id || 'N/A'}</span>
                             </div>
                         </div>
                     </div>
