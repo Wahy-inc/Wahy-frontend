@@ -13,6 +13,18 @@ export interface UploadedClassFile {
    "updated_at": string
  }
 
+export interface UploadedLibraryFile {
+    "id": number,
+    "library_item_id": number,
+    "sheikh_id": number,
+    "original_filename": string,
+    "file_size_bytes": number,
+    "mime_type": string,
+    "download_count": number,
+    "created_at": string,
+    "updated_at": string
+}
+
 export type GetCalendarGridResponseState = 
 | {
     data?: openApi.CalendarGridResponse;
@@ -67,6 +79,29 @@ export type DeleteClassFileResponseState =
 } | undefined;
 
 export type DownloadClassFileResponseState =
+| {
+    data?: Blob;
+    message: string;
+} | undefined;
+
+export type uploadLibraryFileResponseState =
+| {
+    data?: UploadedLibraryFile;
+    message: string;
+} | undefined;
+
+export type ListUploadedLibraryFilesResponseState =
+| {
+    data?: UploadedLibraryFile[];
+    message: string;
+} | undefined;
+
+export type DeleteLibraryFileResponseState =
+| {
+    message: string;
+} | undefined;
+
+export type DownloadLibraryFileResponseState =
 | {
     data?: Blob;
     message: string;

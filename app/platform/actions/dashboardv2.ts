@@ -1,5 +1,5 @@
 import { getApi } from "@/lib/apiClient"
-import { DownloadICSFeedResponseState, EnableFeedResponseState, GenerateFeedResponseState, GetCalendarDayDataResponseState, GetCalendarGridResponseState, RotateFeedResponseState } from "../lib/definitionsv2";
+import { DeleteLibraryFileResponseState, DownloadICSFeedResponseState, DownloadLibraryFileResponseState, EnableFeedResponseState, GenerateFeedResponseState, GetCalendarDayDataResponseState, GetCalendarGridResponseState, ListUploadedLibraryFilesResponseState, RotateFeedResponseState, uploadLibraryFileResponseState } from "../lib/definitionsv2";
 import * as openApi from "@/lib/openApi"
 import { RRule, WeekdayValue } from '@martinhipp/rrule'
 
@@ -316,5 +316,84 @@ export function getLocalSchedules(id: number | null): { id: number; schedules: (
     } catch (error) {
         console.error("Error parsing local schedules:", error);
         return null;
+    }
+}
+
+export async function uploadLibraryFile(state: uploadLibraryFileResponseState, formData: FormData): Promise<uploadLibraryFileResponseState> {
+    const itemID = Number(formData.get('itemID'))
+    const file = formData.get('file') as File
+    
+    if (!file) {
+        return { message: 'fail'}
+    }
+    
+    const data = {
+        file: file,
+    }
+    try {
+        const response = await api.api.uploadLibraryFileApiV1LibraryItemIdFilesPost(itemID, data)
+        if (response.status === 201) {
+            return { message: 'success' , data: response.data }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function listUploadLibraryFile(itemID: number): Promise<ListUploadedLibraryFilesResponseState> {
+    try {
+        const response = await api.api.listLibraryFilesApiV1LibraryItemIdFilesGet(itemID)
+        if (response.status === 200) {
+            return { message: 'success' , data: response.data }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
+    }
+}
+
+export async function downloadLibraryFile(itemID: number, fileId: number): Promise<DownloadLibraryFileResponseState> {
+    try {
+        const response = await api.api.downloadLibraryFileApiV1LibraryItemIdFilesFileIdGet(itemID, fileId, {format: 'blob'})
+        
+        if (response.status === 200 && response.data instanceof Blob) {
+            const blob = response.data;
+
+            // Verify blob has reasonable size
+            if (blob.size < 50) {
+                console.error('File blob too small:', blob.size, 'bytes');
+                return { message: 'fail' };
+            }
+
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `libraryfile_${fileId}`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            console.log('[downloadLibraryFile] Download triggered successfully');
+            return { message: 'success' };
+        }
+        console.error('Invalid response:', response.status, response.data);
+        return { message: 'fail' };
+    } catch (error) {
+        console.error('Error downloading library file:', error);
+        return { message: 'fail' };
+    }
+}
+
+export async function deleteLibraryFile(itemID: number, fileId: number): Promise<DeleteLibraryFileResponseState> {
+    try {
+        const response = await api.api.deleteLibraryFileApiV1LibraryItemIdFilesFileIdDelete(itemID, fileId)
+        if (response.status === 204) {
+            window.location.reload()
+            return { message: 'success' }
+        }
+        return { message: 'fail' }
+    } catch (error) {
+        return { message: 'fail' }
     }
 }

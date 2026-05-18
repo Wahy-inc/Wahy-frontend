@@ -3762,6 +3762,94 @@ export class Api<
       }),
 
     /**
+     * @description Upload a file attached to a library item.
+     *
+     * @tags library
+     * @name UploadLibraryFileApiV1LibraryItemIdFilesPost
+     * @summary Upload library file (sheikh)
+     * @request POST:/api/v1/library/{item_id}/files
+     * @secure
+     */
+    uploadLibraryFileApiV1LibraryItemIdFilesPost: (
+      itemId: number,
+      data: Body_upload_library_file_api_v1_library__item_id__files_post,
+      params: RequestParams = {},
+    ) =>
+      this.request<LibraryFileRead, HTTPValidationError>({
+        path: `/api/v1/library/${itemId}/files`,
+        method: "POST",
+        body: data,
+        secure: true,
+        type: ContentType.FormData,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description List files attached to a library item.
+     *
+     * @tags library
+     * @name ListLibraryFilesApiV1LibraryItemIdFilesGet
+     * @summary List library files
+     * @request GET:/api/v1/library/{item_id}/files
+     * @secure
+     */
+    listLibraryFilesApiV1LibraryItemIdFilesGet: (
+      itemId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<LibraryFileRead[], HTTPValidationError>({
+        path: `/api/v1/library/${itemId}/files`,
+        method: "GET",
+        secure: true,
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * @description Download a file from a library item.
+     *
+     * @tags library
+     * @name DownloadLibraryFileApiV1LibraryItemIdFilesFileIdGet
+     * @summary Download library file
+     * @request GET:/api/v1/library/{item_id}/files/{file_id}
+     * @secure
+     */
+    downloadLibraryFileApiV1LibraryItemIdFilesFileIdGet: (
+      itemId: number,
+      fileId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<any, HTTPValidationError>({
+        path: `/api/v1/library/${itemId}/files/${fileId}`,
+        method: "GET",
+        secure: true,
+        format: "blob",
+        ...params,
+      }),
+
+    /**
+     * @description Delete a file from a library item.
+     *
+     * @tags library
+     * @name DeleteLibraryFileApiV1LibraryItemIdFilesFileIdDelete
+     * @summary Delete library file (sheikh)
+     * @request DELETE:/api/v1/library/{item_id}/files/{file_id}
+     * @secure
+     */
+    deleteLibraryFileApiV1LibraryItemIdFilesFileIdDelete: (
+      itemId: number,
+      fileId: number,
+      params: RequestParams = {},
+    ) =>
+      this.request<void, HTTPValidationError>({
+        path: `/api/v1/library/${itemId}/files/${fileId}`,
+        method: "DELETE",
+        secure: true,
+        ...params,
+      }),
+
+    /**
      * @description Return attendance KPIs aggregated across all students for a date range. Counts lessons by attendance status (``present``, ``late``, ``absent``, ``excused``) and computes the overall attendance rate. Defaults to the **last 30 days** when neither ``start_date`` nor ``end_date`` is provided. ``end_date`` defaults to today; ``start_date`` defaults to 30 days before ``end_date``. Returns ``400`` when ``start_date`` is after ``end_date``. Requires the sheikh role.
      *
      * @tags analytics
