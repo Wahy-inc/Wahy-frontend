@@ -107,7 +107,7 @@ function LessonDataContent() {
         
         // Estimate upload time based on 100 kB/s speed (10 seconds per MB)
         // For 16MB: ~160 seconds
-        const estimatedUploadTimeMs = Math.max(fileSizeInMB * 50000, 3000)
+        const estimatedUploadTimeMs = Math.max(fileSizeInMB * 10000, 3000)
         
         setUploadProgress(0)
         const startTime = new Date().getTime()

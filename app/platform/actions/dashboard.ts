@@ -85,7 +85,7 @@ export async function createStudent(state: CreateStudentFormState, formData: For
     const validation = createStudentSchema.safeParse({
         arname: formData.get('ar-name'),
         enname: formData.get('en-name'),
-        student_code: formData.get('student_code'),
+        // student_code: formData.get('student_code'),
         phone: formData.get('phone'),
         dateOfBirth: formData.get('date-of-birth'),
         timeZone: formData.get('time-zone'),
@@ -101,7 +101,7 @@ export async function createStudent(state: CreateStudentFormState, formData: For
 
     try {
         const data: openApi.StudentSignupRequest = {
-            student_code: validation.data.student_code,
+            // student_code: validation.data.student_code,
             full_name_arabic: validation.data.arname,
             full_name_english: validation.data.enname,
             date_of_birth: validation.data.dateOfBirth,

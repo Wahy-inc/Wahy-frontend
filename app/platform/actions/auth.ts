@@ -4,51 +4,51 @@ import * as openApi from "@/lib/openApi"
 
 const api = getApi()
 
-export async function signup(state: SignupFormState, formData: FormData): Promise<SignupFormState> {
-    const validation = SignUpSchema.safeParse({
-        arname: formData.get('ar-name'),
-        enname: formData.get('en-name'),
-        student_code: formData.get('student_code'),
-        phone: formData.get('phone'),
-        dateOfBirth: formData.get('date-of-birth'),
-        timeZone: formData.get('time-zone'),
-        lessonsPerWeek: formData.get('lessons-per-week'),
-        lessonRate: formData.get('lessons-rate'),
-        billingCycle: formData.get('billingCycle'),
-        specialNotes: formData.get('special-notes'),
-    })
+// export async function signup(state: SignupFormState, formData: FormData): Promise<SignupFormState> {
+//     const validation = SignUpSchema.safeParse({
+//         arname: formData.get('ar-name'),
+//         enname: formData.get('en-name'),
+//         student_code: formData.get('student_code'),
+//         phone: formData.get('phone'),
+//         dateOfBirth: formData.get('date-of-birth'),
+//         timeZone: formData.get('time-zone'),
+//         lessonsPerWeek: formData.get('lessons-per-week'),
+//         lessonRate: formData.get('lessons-rate'),
+//         billingCycle: formData.get('billingCycle'),
+//         specialNotes: formData.get('special-notes'),
+//     })
 
-    if (!validation.success) {
-        return { error: validation.error.flatten().fieldErrors }
-    }
+//     if (!validation.success) {
+//         return { error: validation.error.flatten().fieldErrors }
+//     }
 
-    try {
-        const data: openApi.StudentSignupRequest = {
-            student_code: validation.data.student_code,
-            full_name_arabic: validation.data.arname,
-            full_name_english: validation.data.enname,
-            date_of_birth: validation.data.dateOfBirth,
-            phone: validation.data.phone,
-            timezone: validation.data.timeZone,
-            lessons_per_week: Number(validation.data.lessonsPerWeek),
-            lesson_rate: Number(validation.data.lessonRate),
-            billing_cycle: validation.data.billingCycle as openApi.BillingCycle,
-            special_notes: validation.data.specialNotes,
-        }
-        const response = await api.api.createApiV1StudentsPost(data)
+//     try {
+//         const data: openApi.StudentSignupRequest = {
+//             student_code: validation.data.student_code,
+//             full_name_arabic: validation.data.arname,
+//             full_name_english: validation.data.enname,
+//             date_of_birth: validation.data.dateOfBirth,
+//             phone: validation.data.phone,
+//             timezone: validation.data.timeZone,
+//             lessons_per_week: Number(validation.data.lessonsPerWeek),
+//             lesson_rate: Number(validation.data.lessonRate),
+//             billing_cycle: validation.data.billingCycle as openApi.BillingCycle,
+//             special_notes: validation.data.specialNotes,
+//         }
+//         const response = await api.api.createApiV1StudentsPost(data)
         
-        if (response.status === 201) {
-            return {message: 'Signup successful' }
-        }
-        if (response.status === 422) {
-            return { message: 'Validation error' }
-        }
+//         if (response.status === 201) {
+//             return {message: 'Signup successful' }
+//         }
+//         if (response.status === 422) {
+//             return { message: 'Validation error' }
+//         }
 
-        return {message: response.error?.[0] || 'Signup failed' }
-    } catch (error) {
-        return { message: 'An error occurred during signup' }
-    }
-}
+//         return {message: response.error?.[0] || 'Signup failed' }
+//     } catch (error) {
+//         return { message: 'An error occurred during signup' }
+//     }
+// }
 
 export async function signinStudent(state: SignInStudentFormState, formData: FormData): Promise<SignInStudentFormState> {
     const validation = SignInStudentSchema.safeParse({

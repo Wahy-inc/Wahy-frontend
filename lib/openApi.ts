@@ -1935,7 +1935,7 @@ export interface StudentSignupRequest {
    * User Id
    * Unique identifier for the user account.
    */
-  student_code: string;
+  // student_code: string;
   /**
    * Full Name Arabic
    * Student's full name in Arabic script.
