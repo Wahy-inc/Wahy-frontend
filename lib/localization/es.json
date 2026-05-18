@@ -37,6 +37,8 @@
   },
   "auth": {
     "logout": "Cerrar sesión",
+    "student_code_label": "Código de estudiante",
+    "student_code_placeholder": "Ingrese su código de estudiante (por ejemplo, STU-ABC123)",
     "email_label": "Correo electrónico",
     "email_placeholder": "name@example.com",
     "password_label": "Contraseña",

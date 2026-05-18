@@ -37,6 +37,8 @@
   },
   "auth": {
     "logout": "Abmelden",
+    "student_code_label": "Studentencode",
+    "student_code_placeholder": "Geben Sie Ihren Studentencode ein (z. B. STU-ABC123)",
     "email_label": "E-Mail",
     "email_placeholder": "name@example.com",
     "password_label": "Passwort",

@@ -83,20 +83,16 @@ export function getLocalStudent(id: number) {
 
 export async function createStudent(state: CreateStudentFormState, formData: FormData): Promise<CreateStudentFormState> {
     const validation = createStudentSchema.safeParse({
-        id: formData.get('id'),
         arname: formData.get('ar-name'),
         enname: formData.get('en-name'),
+        student_code: formData.get('student_code'),
         phone: formData.get('phone'),
-        dateOfBirth: formData.get('dateOfBirth'),
-        timeZone: formData.get('timeZone'),
-        currjuz: formData.get('currjuz'),
-        currsurah: formData.get('currsurah'),
-        currayah: formData.get('currayah'),
-        lessonsPerWeek: formData.get('lessonsPerWeek'),
-        lessonRate: formData.get('lessonRate'),
+        dateOfBirth: formData.get('date-of-birth'),
+        timeZone: formData.get('time-zone'),
+        lessonsPerWeek: formData.get('lessons-per-week'),
+        lessonRate: formData.get('lessons-rate'),
         billingCycle: formData.get('billingCycle'),
-        specialNotes: formData.get('specialNotes'),
-        privateNotes: formData.get('privateNotes'),
+        specialNotes: formData.get('special-notes'),
     })
 
     if (!validation.success) {
@@ -104,61 +100,30 @@ export async function createStudent(state: CreateStudentFormState, formData: For
     }
 
     try {
-        const data: openApi.StudentCreate = {
-            user_id: Number(validation.data.id),
+        const data: openApi.StudentSignupRequest = {
+            student_code: validation.data.student_code,
             full_name_arabic: validation.data.arname,
             full_name_english: validation.data.enname,
-            phone: validation.data.phone,
             date_of_birth: validation.data.dateOfBirth,
+            phone: validation.data.phone,
             timezone: validation.data.timeZone,
             lessons_per_week: Number(validation.data.lessonsPerWeek),
             lesson_rate: Number(validation.data.lessonRate),
             billing_cycle: validation.data.billingCycle as openApi.BillingCycle,
             special_notes: validation.data.specialNotes,
-            private_notes: validation.data.privateNotes,
         }
-        console.log(data);
-
-        if (!isClientOnline()) {
-            enqueueOfflineMutation({
-                entity_type: 'student',
-                operation: openApi.SyncOperation.Create,
-                payload: data as unknown as Record<string, unknown>,
-                idempotency_key: createIdempotencyKey(),
-            })
-            return { message: 'queued' }
-        }
-
         const response = await api.api.createApiV1StudentsPost(data)
-
+        
         if (response.status === 201) {
-            listStudents() // Refresh the students list after creating a new student
-            return { message: 'success' }
+            return {message: 'creation successful' }
         }
-        return { message: 'fail' }
+        if (response.status === 422) {
+            return { message: 'Validation error' }
+        }
+
+        return {message: response.error?.[0] || 'creation failed' }
     } catch (error) {
-        if (shouldQueueMutation(error)) {
-            enqueueOfflineMutation({
-                entity_type: 'student',
-                operation: openApi.SyncOperation.Create,
-                payload: {
-                    user_id: Number(validation.data.id),
-                    full_name_arabic: validation.data.arname,
-                    full_name_english: validation.data.enname,
-                    phone: validation.data.phone,
-                    date_of_birth: validation.data.dateOfBirth,
-                    timezone: validation.data.timeZone,
-                    lessons_per_week: Number(validation.data.lessonsPerWeek),
-                    lesson_rate: Number(validation.data.lessonRate),
-                    billing_cycle: validation.data.billingCycle,
-                    special_notes: validation.data.specialNotes,
-                    private_notes: validation.data.privateNotes,
-                },
-                idempotency_key: createIdempotencyKey(),
-            })
-            return { message: 'queued' }
-        }
-        return { message: 'fail' }
+        return { message: 'An error occurred during creation' }
     }
 }
 

@@ -406,6 +406,8 @@
   },
   "auth": {
     "logout": "تسجيل الخروج",
+    "student_code_label": "رمز الطالب",
+    "student_code_placeholder": "أدخل رمز الطالب (مثل: STU-ABC123)",
     "email_label": "البريد الإلكتروني",
     "email_placeholder": "name@example.com",
     "password_label": "كلمة المرور",

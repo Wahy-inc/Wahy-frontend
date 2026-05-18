@@ -5,7 +5,7 @@ import * as openApi from "@/lib/openApi";
 export const SignUpSchema = zod.object({
     arname: zod.string().min(1, { error: 'Name is required' }).trim(),
     enname: zod.string().min(1, { error: 'Name is required' }).trim(),
-    user_id: zod.string().min(1, { error: 'ID is required' }).trim(),
+    student_code: zod.string().min(1, { error: 'ID is required' }).trim(),
     phone: zod.string().trim().optional(),
     dateOfBirth: zod.string().trim().optional(),
     timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
@@ -20,7 +20,7 @@ export type SignupFormState =
         error?: {
             arname?: string[];
             enname?: string[];
-            user_id?: string[];
+            student_code?: string[];
             phone?: string[];
             dateOfBirth?: string[];
             timeZone?: string[];
@@ -247,23 +247,21 @@ export type GetLibraryItemByIDFormState =
     | undefined;
 
 export const createStudentSchema = zod.object({
-    id: zod.string({ error: 'ID must be a number' }),
     arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
     enname: zod.string().min(1, { error: 'Name is required' }).regex(/^[A-Za-z\s]+$/, { error: 'Name must be in English' }).trim(),
     phone: zod.string().trim().optional(),
+    student_code: zod.string().min(1, { error: 'Student code is required' }).trim(),
     dateOfBirth: zod.string().trim().optional(),
     timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
     lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
     lessonRate: zod.string().trim().optional(),
     billingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }),
     specialNotes: zod.string().trim().optional(),
-    privateNotes: zod.string().trim().optional(),
 })
 
 export type CreateStudentFormState =
     | {
         error?: {
-            id?: string[];
             arname?: string[];
             enname?: string[];
             phone?: string[];
@@ -273,7 +271,7 @@ export type CreateStudentFormState =
             lessonRate?: string[];
             billingCycle?: string[];
             specialNotes?: string[];
-            privateNotes?: string[];
+            student_code?: string[];
         }
         message?: string;
     }

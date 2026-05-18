@@ -14,17 +14,18 @@ import {
 import { Input } from "@/components/ui/input"
 import {Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToastListener } from "@/lib/toastListener"
+import { createStudent } from "@/app/platform/actions/dashboard"
 
 export default function SignUp() {
     const { t } = useLocalization()
-    const [state, action, pending] = useActionState(signup, undefined)
+    const [state, action, pending] = useActionState(createStudent, undefined)
     const router = useRouter()
 
-    useToastListener(state, {functionName: "Sign Up", successMessage: "Added Student Successfully", errorMessage: "Failed to add student"})
+    useToastListener(state, {functionName: "Create Student", successMessage: "Added Student Successfully", errorMessage: "Failed to add student"})
 
     React.useEffect(() => {
-        if (state?.message === 'Signup successful') {
-            router.replace('/platform/dashboard/student')
+        if (state?.message === 'creation successful') {
+          router.replace('/platform/dashboard/admin/students')
         }
     }, [state, router])
 
@@ -56,15 +57,16 @@ export default function SignUp() {
       </Field>
       </div>
       <Field>
-        <FieldLabel htmlFor="user_id">{t('auth.user_id_label')}</FieldLabel>
+        <FieldLabel htmlFor="student_code">{t('auth.student_code_label')}</FieldLabel>
         <Input
-          id="user_id"
-          name="user_id"
-          type="number"
+          id="student_code"
+          name="student_code"
+          type="text"
+          placeholder={t('auth.student_code_placeholder')}
           className="bg-slate-100 text-slate-800"
           disabled={pending}
         />
-        {state?.error?.user_id && <p className="text-red-500 text-sm">{state.error.user_id}</p>}
+        {state?.error?.student_code && <p className="text-red-500 text-sm">{state.error.student_code}</p>}
       </Field>
       <Field>
       <FieldLabel htmlFor="phone">{t('auth.phone_optional_label')}</FieldLabel>

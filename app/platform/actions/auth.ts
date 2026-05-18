@@ -8,13 +8,10 @@ export async function signup(state: SignupFormState, formData: FormData): Promis
     const validation = SignUpSchema.safeParse({
         arname: formData.get('ar-name'),
         enname: formData.get('en-name'),
-        user_id: formData.get('user_id'),
+        student_code: formData.get('student_code'),
         phone: formData.get('phone'),
         dateOfBirth: formData.get('date-of-birth'),
         timeZone: formData.get('time-zone'),
-        currjuz: formData.get('current-juz'),
-        currsurah: formData.get('current-surah'),
-        currayah: formData.get('current-ayah'),
         lessonsPerWeek: formData.get('lessons-per-week'),
         lessonRate: formData.get('lessons-rate'),
         billingCycle: formData.get('billingCycle'),
@@ -27,7 +24,7 @@ export async function signup(state: SignupFormState, formData: FormData): Promis
 
     try {
         const data: openApi.StudentSignupRequest = {
-            user_id: validation.data.user_id,
+            student_code: validation.data.student_code,
             full_name_arabic: validation.data.arname,
             full_name_english: validation.data.enname,
             date_of_birth: validation.data.dateOfBirth,
@@ -38,18 +35,16 @@ export async function signup(state: SignupFormState, formData: FormData): Promis
             billing_cycle: validation.data.billingCycle as openApi.BillingCycle,
             special_notes: validation.data.specialNotes,
         }
-        const response = await api.api.studentSignupApiV1AuthStudentSignupPost(data)
+        const response = await api.api.createApiV1StudentsPost(data)
         
-        if (response.status === 201 && response.data.access_token) {
-            localStorage.setItem('access_token', response.data.access_token)
-            localStorage.setItem('expire', response.data.expires_at)
+        if (response.status === 201) {
             return {message: 'Signup successful' }
         }
         if (response.status === 422) {
             return { message: 'Validation error' }
         }
 
-        return {message: response.error?.detail?.[0]?.msg || 'Signup failed' }
+        return {message: response.error?.[0] || 'Signup failed' }
     } catch (error) {
         return { message: 'An error occurred during signup' }
     }
