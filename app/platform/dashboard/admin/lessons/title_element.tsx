@@ -132,7 +132,7 @@ export default function TitleElement({
                             <form action={handleCreateSubmit}>
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('lessons.create_lesson')}</AlertDialogTitle>
-                                <div className="flex flex-col gap-4 rtl:text-right">
+                                <div className="flex flex-col gap-4 rtl:text-right w-full">
                                     <input type="text" id="schedule_id" name="schedule_id" value={scheduleID || ""} hidden/>
                                     <div className='flex flex-col'>
                                         <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
@@ -142,7 +142,19 @@ export default function TitleElement({
                                         <div className='flex flex-col'>
                                             <div className="flex flex-col">
                                                 <label htmlFor="date" className="text-sm font-medium">{t('lessons.date')}</label>
-                                                <Select name="date">
+                                                <Select name="date" onValueChange={(value) => {
+                                                    // Find the schedule_id for the selected date
+                                                    const scheduleList = getLocalSchedules(selectedStudentId);
+                                                    scheduleList?.forEach((schedules) =>
+                                                        schedules?.schedules.forEach((sched) => {
+                                                            sched?.['rrule']?.forEach((sch) => {
+                                                                if (getDayFromSchedule(sch) === value) {
+                                                                    setScheduleID(sched?.['schedule_id'] || null);
+                                                                }
+                                                            });
+                                                        })
+                                                    );
+                                                }}>
                                                     <SelectTrigger className="w-full max-w-48">
                                                         <SelectValue />
                                                     </SelectTrigger>
@@ -151,7 +163,7 @@ export default function TitleElement({
                                                             <SelectLabel>{t('lessons.date')}</SelectLabel>
                                                             {getLocalSchedules(selectedStudentId)?.flatMap((schedules) =>
                                                                 schedules?.schedules.map((sched) => sched?.['rrule']?.map((sch) => (
-                                                                    <SelectItem key={`date-${sch}-${new Date().getTime()}`} value={getDayFromSchedule(sch) || ""} onSelect={() => setScheduleID(sched?.['schedule_id'] || null)}>
+                                                                    <SelectItem key={`date-${sch}-${new Date().getTime()}`} value={getDayFromSchedule(sch) || ""}>
                                                                         {sch}
                                                                     </SelectItem>
                                                                 )))

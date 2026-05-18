@@ -884,6 +884,8 @@ export async function createLesson(state: CreateLessonFormState, formData: FormD
     })
 
     if (!validation.success) {
+        console.log(validation);
+        console.log(validation.error.flatten().fieldErrors);
         return { message: 'fail' }
     }
     try {
