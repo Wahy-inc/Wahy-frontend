@@ -321,10 +321,10 @@ export default function Students() {
                                                 <SelectContent>
                                                     <SelectGroup>
                                                         <SelectLabel>{t('students.status')}</SelectLabel>
-                                                        <SelectItem value={openApi.StudentStatus.Active}>{t('common.yes')}</SelectItem>
-                                                        <SelectItem value={openApi.StudentStatus.Graduated}>{t('students.reject')}</SelectItem>
+                                                        <SelectItem value={openApi.StudentStatus.Active}>{t('schedules.active')}</SelectItem>
+                                                        <SelectItem value={openApi.StudentStatus.Graduated}>{t('students.status_graduated')}</SelectItem>
                                                         <SelectItem value={openApi.StudentStatus.Inactive}>{t('schedules.inactive')}</SelectItem>
-                                                        <SelectItem value={openApi.StudentStatus.OnHold}>{t('common.no')}</SelectItem>
+                                                        <SelectItem value={openApi.StudentStatus.OnHold}>{t('students.status_on_hold')}</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
