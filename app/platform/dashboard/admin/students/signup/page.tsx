@@ -89,6 +89,7 @@ export default function SignUp() {
           className="bg-slate-100 text-slate-800"
           disabled={pending}
           type="date"
+          defaultValue='2000-01-01'
         />
         {state?.error?.dateOfBirth && <p className="text-red-500 text-sm">{state.error.dateOfBirth}</p>}
       </Field>
