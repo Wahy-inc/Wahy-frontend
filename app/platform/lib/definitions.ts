@@ -245,11 +245,11 @@ export type GetLibraryItemByIDFormState =
     | undefined;
 
 export const createStudentSchema = zod.object({
-    arname: zod.string().min(1, { error: 'Name is required' }).regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim(),
-    enname: zod.string().min(1, { error: 'Name is required' }).regex(/^[A-Za-z\s]+$/, { error: 'Name must be in English' }).trim(),
+    arname: zod.string().min(1, { error: 'Name is required' }).trim(),
+    enname: zod.string().min(1, { error: 'Name is required' }).trim(),
     phone: zod.string().trim().optional(),
     // student_code: zod.string().min(1, { error: 'Student code is required' }).trim(),
-    dateOfBirth: zod.string().trim().optional(),
+    dateOfBirth: zod.string().trim(),
     timeZone: zod.string().min(1, { error: 'Time zone is required' }).trim(),
     lessonsPerWeek: zod.string().min(1, { error: 'Lessons per week is required' }).trim(),
     lessonRate: zod.string().trim().optional(),
@@ -290,8 +290,8 @@ export type GetStudentFormState =
     | undefined;
 
 export const updateStudentSchema = zod.object({
-    arname: zod.string().regex(/^[\u0600-\u06FF\s]+$/, { error: 'Name must be in Arabic' }).trim().optional(),
-    enname: zod.string().regex(/^[A-Za-z\s]+$/, { error: 'Name must be in English' }).trim().optional(),
+    arname: zod.string().trim().optional(),
+    enname: zod.string().trim().optional(),
     phone: zod.string().trim().optional(),
     dateOfBirth: zod.string().trim().optional(),
     timeZone: zod.string().trim().optional(),

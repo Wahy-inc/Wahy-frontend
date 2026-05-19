@@ -427,7 +427,7 @@
     "name_english_placeholder": "Ahmed Mohammed",
     "phone_optional_label": "Phone (Optional)",
     "phone_placeholder": "Enter your phone number",
-    "date_of_birth_optional_label": "Date of Birth (Optional)",
+    "date_of_birth_optional_label": "Date of Birth",
     "date_placeholder": "yyyy-mm-dd"
   },
   "access_control": {

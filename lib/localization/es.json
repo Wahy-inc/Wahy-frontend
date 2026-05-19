@@ -52,7 +52,7 @@
     "name_english_placeholder": "Ahmed Mohammed",
     "phone_optional_label": "Teléfono (Opcional)",
     "phone_placeholder": "Ingrese su número de teléfono",
-    "date_of_birth_optional_label": "Fecha de nacimiento (Opcional)",
+    "date_of_birth_optional_label": "Fecha de nacimiento",
     "date_placeholder": "yyyy-mm-dd"
   },
   "dashboard": {

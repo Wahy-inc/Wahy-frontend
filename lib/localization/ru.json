@@ -52,7 +52,7 @@
     "name_english_placeholder": "Ahmed Mohammed",
     "phone_optional_label": "Телефон (опционально)",
     "phone_placeholder": "Введите ваш номер телефона",
-    "date_of_birth_optional_label": "Дата рождения (опционально)",
+    "date_of_birth_optional_label": "Дата рождения",
     "date_placeholder": "yyyy-mm-dd"
   },
   "dashboard": {

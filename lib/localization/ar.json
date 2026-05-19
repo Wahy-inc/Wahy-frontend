@@ -429,7 +429,7 @@
     "name_english_placeholder": "Ahmed Mohammed",
     "phone_optional_label": "الهاتف (اختياري)",
     "phone_placeholder": "أدخل رقم الهاتف",
-    "date_of_birth_optional_label": "تاريخ الميلاد (اختياري)",
+    "date_of_birth_optional_label": "تاريخ الميلاد",
     "date_placeholder": "yyyy-mm-dd"
   },
   "access_control": {
