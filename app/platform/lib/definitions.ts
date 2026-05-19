@@ -300,7 +300,6 @@ export const updateStudentSchema = zod.object({
     lessonRate: zod.string().trim().optional(),
     billingCycle: zod.enum(openApi.BillingCycle, { error: 'Billing cycle is required' }).optional(),
     specialNotes: zod.string().trim().optional(),
-    privateNotes: zod.string().trim().optional(),
 })
 
 export type UpdateStudentFormState =
@@ -316,7 +315,6 @@ export type UpdateStudentFormState =
             lessonRate?: string[];
             billingCycle?: string[];
             specialNotes?: string[];
-            privateNotes?: string[];
         }
         message?: string;
     }

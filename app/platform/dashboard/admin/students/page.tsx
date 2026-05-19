@@ -364,6 +364,9 @@ export default function Students() {
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
     if (!students || students.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('students.no_students_found')}</p></DashboardPage>    
 
+    const inactiveStudents = students.filter(student => student.status.toLowerCase().includes('inactive'))
+    const onHoldStudents = students.filter(student => student.status.toLowerCase().includes('on_hold') || student.status.toLowerCase().includes('onhold'))
+    const activeStudents = students.filter(student => student.status.toLowerCase() === 'active' || student.status.toLowerCase().includes('graduated'))
     const content = (
         <div className="flex flex-col gap-12 w-full">
             {(updateStudentState?.message || approvalStatus) && (
@@ -383,11 +386,29 @@ export default function Students() {
             )}
             <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">{t('students.approved_students')}</p>
-                {students && students.length > 0 ? students.map((student: openApi.StudentRead) => (
+                {activeStudents && activeStudents.length > 0 ? activeStudents.map((student: openApi.StudentRead) => (
                     <div key={student.id}>
                         {studentElement(student, '#6a7282')}
                     </div>
                 )) : <p className="text-slate-700 text-xl">{t('students.no_approved_students')}</p>}
+            </div>
+            <div className="w-full h-1 bg-gray-400 rounded-lg m-2"></div>
+            <div className="flex flex-col gap-4">
+                <p className="text-2xl text-slate-700 font-semibold">{t('students.pending_students')}</p>
+                {onHoldStudents && onHoldStudents.length > 0 ? onHoldStudents.map((student: openApi.StudentRead) => (
+                    <div key={student.id}>
+                        {studentElement(student, '#6a7282')}
+                    </div>
+                )) : <p className="text-slate-700 text-xl">{t('students.no_pending_students')}</p>}
+            </div>
+            <div className="w-full h-1 bg-gray-400 rounded-lg m-2"></div>
+            <div className="flex flex-col gap-4">
+                <p className="text-2xl text-slate-700 font-semibold">{t('students.rejected_students')}</p>
+                {inactiveStudents && inactiveStudents.length > 0 ? inactiveStudents.map((student: openApi.StudentRead) => (
+                    <div key={student.id}>
+                        {studentElement(student, '#6a7282')}
+                    </div>
+                )) : <p className="text-slate-700 text-xl">{t('students.no_rejected_students')}</p>}
             </div>
         </div>
     )

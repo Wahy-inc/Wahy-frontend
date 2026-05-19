@@ -2,17 +2,22 @@
 
 import * as icon from '@deemlol/next-icons'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { signout } from '../../actions/auth'
 import { useAuth } from '@/lib/auth-context'
 import { useLocalization } from '@/lib/localization-context'
 import { OfflineStatusBar } from '@/components/OfflineStatusBar'
+import { listStudents } from '../../actions/dashboard'
 
 export default function DashboardPage({children: children, title: title}: {children: React.ReactNode, title: React.ReactNode}  ) {
     const router = useRouter()
     const { isAdmin } = useAuth()
     const { t } = useLocalization()
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+
+    React.useEffect(() => {
+        listStudents()
+    }, [])
     
     if (!isAdmin) {
         return (

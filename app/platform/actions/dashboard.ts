@@ -43,13 +43,16 @@ export async function listStudents(): Promise<openApi.StudentRead[] | null> {
 
         if (response.status === 200) {
             setCachedData(offlineCacheKeys.studentsList, response.data)
-            const Students = response.data.map((student) => {
+            const data = response.data.filter(stu => stu.status === 'active' || stu.status === 'graduated')
+            const Students = data.map((student) => {
                 return {
                     student_id: student.id,
                     full_name_arabic: student.full_name_arabic,
                     full_name_english: student.full_name_english,
-                }
-            })
+            }})
+            if (localStorage.getItem('students')) {
+                localStorage.removeItem('students')
+            }
             localStorage.setItem('students', JSON.stringify(Students))
             return response.data
         }
@@ -180,7 +183,6 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
             lesson_rate: Number(validation.data.lessonRate),
             billing_cycle: validation.data.billingCycle as openApi.BillingCycle,
             special_notes: validation.data.specialNotes,
-            private_notes: validation.data.privateNotes,
         }
 
         if (!isClientOnline()) {
@@ -218,7 +220,6 @@ export async function updateStudent(state: UpdateStudentFormState, formData: For
                     lesson_rate: Number(validation.data.lessonRate),
                     billing_cycle: validation.data.billingCycle,
                     special_notes: validation.data.specialNotes,
-                    private_notes: validation.data.privateNotes,
                 },
                 idempotency_key: createIdempotencyKey(),
             })
