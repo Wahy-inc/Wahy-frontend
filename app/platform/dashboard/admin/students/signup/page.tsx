@@ -97,7 +97,7 @@ export default function SignUp() {
         <Input 
           id="time-zone" 
           name="time-zone"
-          placeholder="Enter your time zone (e.g., UTC+3)" 
+          placeholder="Enter your time zone (e.g., UTC+3, cairo)" 
           className="bg-slate-100 text-slate-800"
           disabled={pending}
           type="text"
