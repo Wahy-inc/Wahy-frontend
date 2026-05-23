@@ -27,7 +27,11 @@ const baseApi = new openApi.Api<unknown>({
 // Get the original request method
 const originalRequest = baseApi.request.bind(baseApi);
 
-// Override request method to handle request deduplication and binary formats
+// Flag to prevent infinite refresh loops
+let isRefreshing = false;
+let refreshPromise: Promise<void> | null = null;
+
+// Override request method to handle request deduplication, binary formats, and 401 token refresh
 baseApi.request = async function (config: any) {
   const { path, method = 'GET', query } = config;
 
@@ -55,6 +59,39 @@ baseApi.request = async function (config: any) {
 
     // Execute request with the cancel token
     const result = await originalRequest(requestConfig as any);
+    
+    // Handle 401 Unauthorized - refresh token
+    if (result.status === 401) {
+      // Avoid refresh endpoint calling itself
+      if (!path?.includes('/refresh')) {
+        // If a refresh is already in progress, wait for it
+        if (isRefreshing && refreshPromise) {
+          await refreshPromise;
+        } else if (!isRefreshing) {
+          // Start a new refresh
+          isRefreshing = true;
+          refreshPromise = (async () => {
+            try {
+              // Use dynamic import to avoid circular dependency
+              const { refreshAccessToken } = await import('@/app/platform/actions/auth');
+              await refreshAccessToken();
+            } catch (refreshError) {
+              // Refresh failed - redirect to login
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('expire');
+                window.location.href = '/';
+              }
+            } finally {
+              isRefreshing = false;
+              refreshPromise = null;
+            }
+          })();
+
+          await refreshPromise;
+        }
+      }
+    }
     
     // console.log('[apiClient] Response:', { path, status: result.status, dataType: typeof result.data, dataIsBlob: result.data instanceof Blob, dataSize: result.data?.size });
 
