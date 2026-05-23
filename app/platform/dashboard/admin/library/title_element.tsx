@@ -51,6 +51,7 @@ export default function TitleElement({
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
     const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
+    const [specificAccessSelected, setSpecificAccessSelected] = useState(false)
 
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
@@ -105,7 +106,9 @@ export default function TitleElement({
                                     <div className='flex flex-col'>
                                         <div className="flex flex-col">
                                             <label htmlFor="access_level" className="text-sm font-medium">{t('library.access')}</label>
-                                            <Select name="access_level">
+                                            <Select name="access_level" onValueChange={(value) => {
+                                                setSpecificAccessSelected(value === openApi.LibraryAccessLevel.SpecificStudents);
+                                            }}>
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder={t('library.select_access_level')} />
                                                 </SelectTrigger>
@@ -113,7 +116,6 @@ export default function TitleElement({
                                                     <SelectGroup>
                                                         <SelectLabel>{t('library.access_level')}</SelectLabel>
                                                         <SelectItem value={openApi.LibraryAccessLevel.AllStudents}>{t('library.all_students')}</SelectItem>
-                                                        <SelectItem value={openApi.LibraryAccessLevel.Groups}>{t('library.groups')}</SelectItem>
                                                         <SelectItem value={openApi.LibraryAccessLevel.SpecificStudents}>{t('library.specific_students')}</SelectItem>
                                                     </SelectGroup>
                                                 </SelectContent>
@@ -121,14 +123,12 @@ export default function TitleElement({
                                         </div>
                                         {createFormSubmitted && createState?.error?.access_level && <p className="text-red-500 text-sm">{createState.error.access_level}</p>}
                                     </div>
-                                        <div className='flex flex-col'>
-                                            {fieldInput(t('library.thumbnail') + " (Optional)", "thumbnail", "", "text")}
-                                            {createFormSubmitted && createState?.error?.thumbnail && <p className="text-red-500 text-sm">{createState.error.thumbnail}</p>}
+                                    </div>
+                                    {specificAccessSelected && (
+                                        <div id="student_ids" className='flex flex-col'>
+                                            <StudentMenu onStudentSelect={setSelectedStudentId} isMulti={true}></StudentMenu>
                                         </div>
-                                    </div>
-                                    <div id="student_ids" className='flex flex-col'>
-                                        <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
-                                    </div>
+                                    )}
                                     {createFormSubmitted && createState?.message == 'fail'? <p className="text-red-500 text-sm">{t('library.create_failed')}</p> : null}
                                 </div>
                             </AlertDialogHeader>

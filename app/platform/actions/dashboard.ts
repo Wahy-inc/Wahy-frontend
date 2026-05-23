@@ -604,7 +604,6 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
         category: formData.get('category'),
         tags: formData.get('tags'),
         access_level: formData.get('access_level'),
-        thumbnail: formData.get('thumbnail'),
         student_ids: formData.get('student_ids'),
     })
 
@@ -619,7 +618,7 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
             category: validation.data.category,
             tags: validation.data.tags?.split(',').map(tag => tag.trim()) || [],
             access_level: validation.data.access_level,
-            thumbnail_image_path: validation.data.thumbnail,
+            thumbnail_image_path: 'https://example.com/default-thumbnail.jpg',
             student_ids: (validation.data.student_ids === '' || !validation.data.student_ids) 
                 ? null 
                 : validation.data.student_ids.split(',').map(id => Number(id.trim())).filter(id => !isNaN(id)) || null,
@@ -627,7 +626,6 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
         const response = await api.api.createApiV1LibraryPost(data)
 
         if (response.status === 201) {
-            listLibrary() // Refresh the library list after creating a new library item
             return { message: 'success' }
         }
         return { message: 'fail' }

@@ -205,12 +205,11 @@ export type GetSchedualesForStudentFormState =
 
 export const createLibraryItemSchema = zod.object({
     title: zod.string().min(1, { error: 'Title is required' }).trim(),
-    url: zod.string().min(1, { error: 'URL is required' }).trim().optional(),
+    url: zod.string().trim().optional(),
     description: zod.string().trim().optional(),
     category: zod.string().trim().optional(),
     tags: zod.string().trim().optional(),
     access_level: zod.enum(openApi.LibraryAccessLevel, { error: 'Access level is required' }),
-    thumbnail: zod.string().trim().optional(),
     student_ids: zod.string().trim().optional(),
 })
 
@@ -223,7 +222,6 @@ export type CreateLibraryItemFormState =
             category?: string[];
             tags?: string[];
             access_level?: string[];
-            thumbnail?: string[];
             student_ids?: string[];
         }
         message?: string;

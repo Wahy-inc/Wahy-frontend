@@ -38,7 +38,6 @@ export default function Schedules() {
     const [createLibraryDialogOpen, setCreateLibraryDialogOpen] = React.useState(false)
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
     const [isOffline, setIsOffline] = React.useState(false)
-    const [isPending, startTransition] = React.useTransition()
     const [uploadProgress, setUploadProgress] = React.useState(0)
     const progressIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
     const abortControllerRef = React.useRef<AbortController | null>(null)
@@ -91,6 +90,7 @@ export default function Schedules() {
                     setLoading(true)
                     const data = await listLibrary()
                     setLibraryItems(data)
+                    console.log(data);
                     setError(null)
                 } catch (err) {
                     setError('Failed to load library items')
@@ -113,7 +113,7 @@ export default function Schedules() {
             setUploadProgress(100)
             setTimeout(() => setUploadProgress(0), 800)
         }
-    }, [uploadFilePending])
+    }, [uploadFilePending, uploadProgress])
 
     React.useEffect(() => {
         if (authLoading) return // Wait until auth is loaded
@@ -213,7 +213,7 @@ export default function Schedules() {
     )
 
     const libraryItemElement = (item: openApi.LibraryItemRead) => (
-        <Card dir={language == 'ar' ? 'rtl' : 'ltr'} className="relative mx-auto min-w-xl pt-0 overflow-hidden pb-2 h-fit grid grid-rows-[1fr_auto]">
+        <Card dir={language == 'ar' ? 'rtl' : 'ltr'} className="relative mx-auto w-full pt-0 overflow-hidden pb-2 h-fit grid grid-rows-[1fr_auto]">
             <div className="grid grid-cols-[3fr_1fr] row-start-1 row-end-2 cursor-pointer border-b-2 border-slate-300 pb-5">
                 <CardHeader className="col-start-1 col-end-2">
                     <div className="grid grid-rows-3 gap-1 px-1 py-5">
@@ -224,8 +224,8 @@ export default function Schedules() {
                             <Badge variant="secondary" className='mx-1'>{item.download_count || '0'} Downloads</Badge>
                             <Badge variant="secondary" className='mx-1'>{item.view_count || '0'} Views</Badge>
                         </div>
-                        <CardDescription style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '3 !important', gridRowEnd:'4 !important'}}>
-                            {item.description && item.description.length > 100 ? item.description.substring(0, 100) + '...' : (item.description || 'No description')}
+                        <CardDescription className="text-wrap max-w-[90%]" style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '3 !important', gridRowEnd:'4 !important'}}>
+                            {item.description && item.description.length > 300 ? item.description.substring(0, 300) + '...' : (item.description || 'No description')}
                         </CardDescription>
                     </div>
                     <div className="flex -flex-row">
@@ -354,6 +354,6 @@ export default function Schedules() {
 
     return <DashboardPage title={title}><div className="flex flex-col gap-4 w-full">
         {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{t('library.offline_only')}</p> : null}
-        <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-4 md:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>
+        <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>
     </div></DashboardPage>
 }
