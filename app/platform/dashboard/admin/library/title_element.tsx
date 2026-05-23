@@ -88,7 +88,7 @@ export default function TitleElement({
                                         {createFormSubmitted && createState?.error?.description && <p className="text-red-500 text-sm">{createState.error.description}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('library.url'),"url", "", "text")}
+                                        {fieldInput(t('library.url') + '(if you will upload local files, leave this field empty)',"url", "", "text")}
                                         {createFormSubmitted && createState?.error?.url && <p className="text-red-500 text-sm">{createState.error.url}</p>}
                                     </div>
                                     <div className="grid grid-cols-2 gap-4">

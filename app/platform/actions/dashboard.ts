@@ -614,7 +614,7 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
     try {
         const data = {
             title: validation.data.title,
-            external_url: validation.data.url,
+            external_url: validation.data.url || "https://example.com/default-url",
             description: validation.data.description,
             category: validation.data.category,
             tags: validation.data.tags?.split(',').map(tag => tag.trim()) || [],

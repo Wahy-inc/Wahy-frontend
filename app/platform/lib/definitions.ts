@@ -205,7 +205,7 @@ export type GetSchedualesForStudentFormState =
 
 export const createLibraryItemSchema = zod.object({
     title: zod.string().min(1, { error: 'Title is required' }).trim(),
-    url: zod.string().min(1, { error: 'URL is required' }).url({ error: 'Invalid URL format' }).trim(),
+    url: zod.string().min(1, { error: 'URL is required' }).trim().optional(),
     description: zod.string().trim().optional(),
     category: zod.string().trim().optional(),
     tags: zod.string().trim().optional(),
