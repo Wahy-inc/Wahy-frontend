@@ -24,6 +24,8 @@ import React, { JSX, useState } from "react";
 import { useLocalization } from "@/lib/localization-context";
 import { CreateScheduleFormState, GetSchedualesForStudentFormState } from "@/app/platform/lib/definitions";
 import StudentMenu from "@/components/studentsMenu";
+import { listSchedules } from "@/app/platform/actions/dashboard";
+import * as openApi from "../../../../../lib/openApi"
 
 export const weekDaysMap: Record<string, string> = {
     '0': 'saturday',
@@ -101,10 +103,6 @@ export default function TitleElement({
     getSchedualesForStudentPending,
     getSchedualesForStudentState,
     fieldInput,
-    createScheduleDialogOpen,
-    setcreateScheduleDialogOpen,
-    getStudentScheduleDialogOpen,
-    setgetStudentScheduleDialogOpen,
 }: {
         title: string,
         handleSearchStudentId: (e: React.ChangeEvent<HTMLInputElement>) => void,
@@ -117,10 +115,6 @@ export default function TitleElement({
         createAction: (formData: FormData) => void,
         createPending: boolean,
         fieldInput: (label: string, name: string, holder: string, type: string) => JSX.Element,
-        createScheduleDialogOpen: boolean,
-        setcreateScheduleDialogOpen: (open: boolean) => void,
-        getStudentScheduleDialogOpen: boolean,
-        setgetStudentScheduleDialogOpen: (open: boolean) => void,
     }) {
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)

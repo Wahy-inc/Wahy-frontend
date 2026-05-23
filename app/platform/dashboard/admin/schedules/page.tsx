@@ -29,11 +29,10 @@ export default function Schedules() {
     const [hideInActive, setHideInActive] = React.useState(true)
     const [searchStudentId, setSearchStudentId] = React.useState<string>("")
     const [filteredSchedules, setFilteredSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
+    const [getSchedules, setGetSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
     const [createScheduleState, createScheduleAction, createSchedulePending] = React.useActionState(createSchedule, undefined)
     const [updateScheduleState, updateScheduleAction, updateSchedulePending] = React.useActionState(updateSchedule, undefined)
     const [getScheduleState, getScheduleAction, getSchedulePending] = React.useActionState(getSchedulesForStudent, undefined)
-    const [createScheduleDialogOpen, setCreateScheduleDialogOpen] = React.useState(false)
-    const [getScheduleDialogOpen, setGetScheduleDialogOpen] = React.useState(false)
     const [editingScheduleId, setEditingScheduleId] = React.useState<number | null>(null)
     const {isAdmin, isLoading: authLoading } = useAuth()
     const { t, language } = useLocalization()
@@ -51,7 +50,7 @@ export default function Schedules() {
     
     React.useEffect(() => {
         if (getScheduleState?.message == 'success' && getScheduleState.data) {
-            setFilteredSchedules(getScheduleState.data)
+            setGetSchedules(getScheduleState.data)
         }
         if (
             createScheduleState?.message == 'success' ||
@@ -65,6 +64,7 @@ export default function Schedules() {
                     const data = await (listSchedules())
                     console.log('Fetched schedules data:', data);
                     setSchedules(data)
+                    setGetSchedules(null)
                     console.log(data);
                     setError(null)
                 } catch (err) {
@@ -143,10 +143,12 @@ export default function Schedules() {
         
         if (studentId === "") {
             setFilteredSchedules(null)
+            setGetSchedules(null)
         } else if (schedules) {
             const filtered = schedules.filter((schedule: openApi.ScheduleRead) => 
                 schedule.student_id.toString().startsWith(studentId)
             )
+            setGetSchedules(null)
             setFilteredSchedules(filtered)
         }
     }
@@ -154,6 +156,7 @@ export default function Schedules() {
     const handleClearFilter = () => {
         setSearchStudentId("")
         setFilteredSchedules(null)
+        setGetSchedules(null)
         const searchInput = document.getElementById("student-id-search") as HTMLInputElement
         if (searchInput) {
             searchInput.value = ""
@@ -499,17 +502,16 @@ export default function Schedules() {
             getSchedualesForStudentState={getScheduleState}
             getSchedualesForStudentPending={getSchedulePending}
             fieldInput={fieldInput}
-            createScheduleDialogOpen={createScheduleDialogOpen}
-            setcreateScheduleDialogOpen={setCreateScheduleDialogOpen}
-            getStudentScheduleDialogOpen={getScheduleDialogOpen}
-            setgetStudentScheduleDialogOpen={setGetScheduleDialogOpen}
         />
     )
 
     if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('schedules.loading_schedules')}</p></DashboardPage>
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
     if (!schedules || schedules.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('schedules.no_schedules_found')}</p></DashboardPage>
-    const displaySchedules = filteredSchedules || schedules
+    const displayedSchedules = getSchedules?.length ? getSchedules : (filteredSchedules ? filteredSchedules : schedules);
+    console.log('dis',displayedSchedules);
+    console.log('get',getSchedules);
+    
     const content = (
         <div className='flex flex-col gap-4'>
             {(createScheduleState?.message || updateScheduleState?.message) && (
@@ -527,7 +529,7 @@ export default function Schedules() {
                             : t('messages.success')}
                 </div>
             )}
-            {displaySchedules?.map((schedule: openApi.ScheduleRead) => (
+            {displayedSchedules?.map((schedule: openApi.ScheduleRead) => (
                 <div key={schedule.id}>
                     {schedulesElement(schedule)}
                 </div>
