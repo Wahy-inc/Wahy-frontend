@@ -16,7 +16,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
-import {User} from 'lucide-react'
+import {Tag, User} from 'lucide-react'
 import { UpdateStudentFormState } from "../../../lib/definitions";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -25,6 +25,7 @@ import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
 import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
+import { Badge } from "@/components/ui/badge";
 
 export default function Students() {
     const [students, setStudents] = React.useState<openApi.StudentRead[] | null>(null)
@@ -159,7 +160,7 @@ export default function Students() {
                     <ItemMedia variant="icon">
                         <User />
                     </ItemMedia>
-                <ItemTitle>{language === 'ar' ? student.full_name_arabic : student.full_name_english}</ItemTitle>
+                <ItemTitle>{language === 'ar' ? student.full_name_arabic : student.full_name_english} <Badge variant="default" className="bg-slate-800 text-white text-[13px] px-1 py-0 mx-1 my-0">ID: {student.id}</Badge></ItemTitle>
                     {t('students.status')}: {getRegistrationStatusLabel(student.status)} | {t('auth.student_code_label')}: {student.student_code} <br />
                     <div id="accordion-data">
                         <Accordion
