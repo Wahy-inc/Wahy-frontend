@@ -33,7 +33,9 @@
     "deleting": "جاري الحذف...",
     "loading_error": "خطأ في التحميل",
     "no_data_found": "لم يتم العثور على بيانات.",
-    "not_provided": "لم يتم تقديمه"
+    "not_provided": "لم يتم تقديمه",
+    "drop_files_here": "اسقط الملفات هنا",
+    "uploading": "جاري التحميل"
   },
   "dashboard": {
     "title": "لوحة التحكم"

@@ -33,7 +33,9 @@
     "deleting": "Deleting...",
     "loading_error": "Load Error",
     "no_data_found": "No data found.",
-    "not_provided": "Not provided"
+    "not_provided": "Not provided",
+    "drop_files_here": "Drop files here",
+    "uploading": "Uploading"
   },
   "dashboard": {
     "title": "Dashboard"

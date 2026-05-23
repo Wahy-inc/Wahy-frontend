@@ -33,7 +33,9 @@
     "deleting": "Eliminando...",
     "loading_error": "Error de carga",
     "no_data_found": "No se encontraron datos.",
-    "not_provided": "No proporcionado"
+    "not_provided": "No proporcionado",
+    "drop_files_here": "Suelta los archivos aquí",
+    "uploading": "Cargando"
   },
   "auth": {
     "logout": "Cerrar sesión",

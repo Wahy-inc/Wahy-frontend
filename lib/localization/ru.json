@@ -33,7 +33,9 @@
     "deleting": "Удаление...",
     "loading_error": "Ошибка загрузки",
     "no_data_found": "Данные не найдены.",
-    "not_provided": "Не указано"
+    "not_provided": "Не указано",
+    "drop_files_here": "Отпустите файлы здесь",
+    "uploading": "Загрузка"
   },
   "auth": {
     "logout": "Выход",

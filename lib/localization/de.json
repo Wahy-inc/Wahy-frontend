@@ -33,7 +33,9 @@
     "deleting": "Wird gelöscht...",
     "loading_error": "Ladefehler",
     "no_data_found": "Keine Daten gefunden.",
-    "not_provided": "Nicht angegeben"
+    "not_provided": "Nicht angegeben",
+    "drop_files_here": "Dateien hier ablegen",
+    "uploading": "Wird hochgeladen"
   },
   "auth": {
     "logout": "Abmelden",

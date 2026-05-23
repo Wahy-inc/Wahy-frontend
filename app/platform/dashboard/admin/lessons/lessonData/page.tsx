@@ -40,8 +40,10 @@ function LessonDataContent() {
     const [updateState, updateAction, updatePending] = useActionState(updateLesson, undefined);
     const [uploadFileState, uploadFileAction, uploadFilePending] = useActionState(uploadClassFile, undefined);
     const [uploadProgress, setUploadProgress] = React.useState(0)
+    const [isDraggingOver, setIsDraggingOver] = React.useState(false)
     const progressIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
     const abortControllerRef = React.useRef<AbortController | null>(null)
+    const fileInputRef = React.useRef<HTMLInputElement | null>(null)
     const { t, language } = useLocalization();
     const isRTL = language === 'ar';
 
@@ -87,7 +89,7 @@ function LessonDataContent() {
             setUploadProgress(100)
             setTimeout(() => setUploadProgress(0), 800)
         }
-    }, [uploadFilePending])
+    }, [uploadFilePending, uploadProgress])
 
     const handleAttendanceSubmit = (formData: FormData) => {
         formData.append('schedule_id', scheduleID || '')
@@ -149,6 +151,29 @@ function LessonDataContent() {
             progressIntervalRef.current = null
             setUploadProgress(0)
         })
+    }
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDraggingOver(true)
+    }
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDraggingOver(false)
+    }
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault()
+        e.stopPropagation()
+        setIsDraggingOver(false)
+        
+        const droppedFiles = e.dataTransfer.files
+        if (droppedFiles && droppedFiles.length > 0 && fileInputRef.current) {
+            fileInputRef.current.files = droppedFiles
+        }
     }
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
@@ -578,20 +603,30 @@ function LessonDataContent() {
                 })}
             </div>}
             <div className="flex flex-col justify-center border-dashed border-2 border-slate-800 bg-slate-300 rounded-lg p-4 my-6">
-                <div className="w-full overflow-y-scroll max-h-100">
-                    {files && files.length > 0 ? files.map((file) => uploadedFileElement(file)) : (
-                        <div className="flex items-center justify-center min-h-50">
-                            <p className="text-slate-500 text-lg">{t('lessons.no_files_found')}</p>
-                        </div>
-                    )}
-                </div>
-                <Separator className="my-4 bg-slate-800" />
-                <div className="flex flex-row gap-2 px-30">
+                <div 
+                    className={`flex flex-col gap-2 px-10 transition-all duration-200 rounded-lg p-2 ${isDraggingOver ? 'bg-slate-400 border-2 border-slate-600' : ''}`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                >
+                    <div className="w-full overflow-y-scroll max-h-100">
+                        {files && files.length > 0 ? files.map((file) => uploadedFileElement(file)) : (
+                            <div className="flex items-center justify-center min-h-50">
+                                <p className="text-slate-500 text-lg">{t('lessons.no_files_found')}</p>
+                            </div>
+                        )}
+                    </div>
+                    <Separator className="my-4 bg-slate-800" />
                     <form action={handleFileUploadSubmit} className="flex flex-row gap-2 w-full">
                         <Button disabled={uploadFilePending} type="submit" variant="default" className="px-2 w-30 bg-slate-800 py-1 text-slate-200 rounded-lg cursor-pointer hover:bg-slate-700">Upload File</Button>
-                        <Input id="file" name="file" type="file" className=" text-slate-800 border border-slate-800 rounded-lg px-4 py-2 cursor-pointer" required />
+                        <Input ref={fileInputRef} id="file" name="file" type="file" className=" text-slate-800 border border-slate-800 rounded-lg px-4 py-2 cursor-pointer" required />
                     </form>
                 </div>
+                {isDraggingOver && (
+                    <div className="mt-2 text-center text-slate-600 text-sm font-medium">
+                        {t('common.drop_files_here')}
+                    </div>
+                )}
                 {uploadProgress > 0 && (
                     <div className="px-30 mt-3">
                         <div className="flex items-center gap-3 justify-between">
