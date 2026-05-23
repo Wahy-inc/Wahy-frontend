@@ -244,9 +244,12 @@ export default function Schedules() {
                 </CardHeader>
                 <div id="buttons" className="p-4 flex flex-col justify-between col-start-2 col-end-3">
                     <form action={uploadFileAction}>
-                        <input type="file" disabled={uploadFilePending} onChange={(e) => {
-                            handleUploadFile(new FormData(e.currentTarget.form!), item.id, e.currentTarget.files![0])
-                        }} className="w-full h-10 bg-yellow-300 transition duration-300 rounded-lg text-white text-sm hover:bg-yellow-500 cursor-pointer" />
+                        <div className="flex justify-center items-center">
+                            <icon.Upload className="w-5 h-5 text-white z-10 relative top-[50%] left-[45%] right-[45%]"></icon.Upload>
+                            <input type="file" disabled={uploadFilePending} onChange={(e) => {
+                                handleUploadFile(new FormData(e.currentTarget.form!), item.id, e.currentTarget.files![0])
+                            }} className="text-[0px] w-full h-10 bg-yellow-300 transition duration-300 rounded-lg text-white text-sm hover:bg-yellow-500 cursor-pointer" />
+                        </div>
                         {uploadProgress > 0 && (
                             <div className="w-full mt-2">
                                 <div className="flex items-center gap-2 justify-between">
@@ -286,7 +289,7 @@ export default function Schedules() {
                             return
                         }
                         deleteLibraryItem(item.id)
-                    }} variant='destructive' className="transition duration-300 hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed">
+                    }} variant='destructive' className="ml-5 transition duration-300 hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed">
                         <icon.Trash className="text-white cursor-pointer" size={16}/>
                     </Button>
                 </div>
