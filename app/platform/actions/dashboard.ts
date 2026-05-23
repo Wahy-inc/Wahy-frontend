@@ -443,7 +443,7 @@ export async function updateSchedule(state: UpdateScheduleFormState, formData: F
 }
 
 export async function getSchedulesForStudent(state: GetSchedualesForStudentFormState, formData: FormData): Promise<GetSchedualesForStudentFormState> {
-    const studentId = Number(formData.get('student-id'))
+    const studentId = Number(formData.get('student_id'))
     if (isNaN(studentId)) {
         return { message: 'fail', error: { student_id: ['Student ID must be a number'] } }
     }

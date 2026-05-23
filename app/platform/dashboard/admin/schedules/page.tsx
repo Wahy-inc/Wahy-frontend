@@ -499,9 +499,9 @@ export default function Schedules() {
             createState={createScheduleState}
             createPending={createSchedulePending}
             getSchedualesForStudentAction={getScheduleAction}
-            getSchedualesForStudentState={getScheduleState}
             getSchedualesForStudentPending={getSchedulePending}
             fieldInput={fieldInput}
+            setGetSchedules={setGetSchedules}
         />
     )
 

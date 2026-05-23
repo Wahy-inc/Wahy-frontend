@@ -22,10 +22,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import React, { JSX, useState } from "react";
 import { useLocalization } from "@/lib/localization-context";
-import { CreateScheduleFormState, GetSchedualesForStudentFormState } from "@/app/platform/lib/definitions";
+import { CreateScheduleFormState } from "@/app/platform/lib/definitions";
 import StudentMenu from "@/components/studentsMenu";
-import { listSchedules } from "@/app/platform/actions/dashboard";
-import * as openApi from "../../../../../lib/openApi"
+import * as openApi from "../../../../../lib/openApi";
 
 export const weekDaysMap: Record<string, string> = {
     '0': 'saturday',
@@ -101,25 +100,26 @@ export default function TitleElement({
     createState,
     getSchedualesForStudentAction,
     getSchedualesForStudentPending,
-    getSchedualesForStudentState,
     fieldInput,
+    setGetSchedules
 }: {
         title: string,
         handleSearchStudentId: (e: React.ChangeEvent<HTMLInputElement>) => void,
         searchStudentId: string,
         handleClearFilter: () => void,
-        getSchedualesForStudentState: GetSchedualesForStudentFormState,
         getSchedualesForStudentAction: (formData: FormData) => void,
         getSchedualesForStudentPending: boolean,
         createState: CreateScheduleFormState,
         createAction: (formData: FormData) => void,
         createPending: boolean,
         fieldInput: (label: string, name: string, holder: string, type: string) => JSX.Element,
+        setGetSchedules: (schedules: openApi.ScheduleRead[]) => void
     }) {
     // Track if forms have been submitted in current dialog session
     const [createFormSubmitted, setCreateFormSubmitted] = useState(false)
     const [getFormSubmitted, setGetFormSubmitted] = useState(false)
     const [selectedStudentId, setSelectedStudentId] = useState<number | null>(null)
+    const [selectedGetStudentId, setSelectedGetStudentId] = useState<number | string | null>(null)
     const { t } = useLocalization()
     const [isRecurring, setIsRecurring] = useState<string>('')
     const [isRecurringPeriod, setIsRecurringPeriod] = useState<string>('')
@@ -156,6 +156,8 @@ export default function TitleElement({
 
     const handleGetSubmit = (formData: FormData) => {
         setGetFormSubmitted(true)
+        formData.append("student_id", selectedGetStudentId?.toString() || "")
+        console.log("Selected getstudent ID:", formData.get("student_id"));
         getSchedualesForStudentAction(formData)
     }
 
@@ -324,29 +326,38 @@ export default function TitleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     </div>
-                    <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button className="transition duration-300 col-start-3 col-end-4 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('schedules.get_schedules')}</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <form action={handleGetSubmit}>
-                        <AlertDialogHeader>
-                        <AlertDialogTitle>{t('schedules.get_schedules_title')}</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t('schedules.get_schedules_desc')}
-                        </AlertDialogDescription>
-                        <div className="flex flex-col gap-4 w-full">
-                            {fieldInput(t('schedules.student_id'), "student-id", t('schedules.enter_student_id'), "number")}
-                            {getFormSubmitted && getSchedualesForStudentState?.message == 'fail'? <p className="text-red-500 text-sm">{t('schedules.get_error')}</p> : null}
-                        </div>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter className="mt-4">
-                            <AlertDialogCancel type="reset" disabled={getSchedualesForStudentPending}>{t('common.cancel')}</AlertDialogCancel>
-                            <Button type="submit" disabled={getSchedualesForStudentPending}>{getSchedualesForStudentPending? t('common.loading') : t('common.submit')}</Button>
-                        </AlertDialogFooter>
-                        </form>
-                    </AlertDialogContent>
-                    </AlertDialog>
+                    <div className="col-start-3 col-end-4 justify-end flex flex-row gap-2 items-center">
+                        <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button className="transition duration-300 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('schedules.get_schedules')}</Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <form action={handleGetSubmit}>
+                            <AlertDialogHeader>
+                            <AlertDialogTitle>{t('schedules.get_schedules_title')}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                {t('schedules.get_schedules_desc')}
+                            </AlertDialogDescription>
+                            <div className="flex flex-col gap-4 w-full">
+                                <StudentMenu onStudentSelect={setSelectedGetStudentId}></StudentMenu>
+                            </div>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter className="mt-4">
+                                <AlertDialogCancel type="reset" disabled={getSchedualesForStudentPending}>{t('common.cancel')}</AlertDialogCancel>
+                                <Button type="submit" disabled={getSchedualesForStudentPending}>{getSchedualesForStudentPending? t('common.loading') : t('common.submit')}</Button>
+                            </AlertDialogFooter>
+                            </form>
+                        </AlertDialogContent>
+                        </AlertDialog>
+                        {selectedGetStudentId && (
+                            <Button className="inline border-red-500 text-red-500" variant="outline" onClick={() => {
+                                setGetSchedules([]);
+                                setSelectedGetStudentId(null);
+                            }}>
+                                {t('common.clear')}
+                            </Button>
+                        )}
+                    </div>
                 </div>
             </div>
     )
