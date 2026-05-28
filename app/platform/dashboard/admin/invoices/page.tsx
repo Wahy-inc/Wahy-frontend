@@ -353,7 +353,7 @@ export default function Invoices() {
                 page <span className="font-bold text-slate-800">{invoices.page}</span> of <span className="font-bold text-slate-800">{Math.ceil((invoices.total || 0) / invoices.per_page)}</span>
             </div>
             <div className="flex flex-row justify-end items-center gap-2 col-start-3 col-end-4">
-                <Button variant="outline" onClick={
+                <Button variant="outline" disabled={invoices.page === 1 || invoices.items.length === 0} onClick={
                     () => listInvoices(10, invoices.page - 1).then((data) => {
                         if (data) {
                             setInvoices(data)

@@ -365,7 +365,7 @@ export default function Schedules() {
                 page <span className="font-bold text-slate-800">{libraryItems.page}</span> of <span className="font-bold text-slate-800">{Math.ceil((libraryItems.total || 0) / libraryItems.per_page)}</span>
             </div>
             <div className="flex flex-row justify-end items-center gap-2 col-start-3 col-end-4">
-                <Button variant="outline" onClick={
+                <Button variant="outline" disabled={libraryItems.page === 1 || libraryItems.items.length === 0} onClick={
                     () => listLibrary(10, libraryItems.page - 1).then((data) => {
                         if (data) {
                             setLibraryItems(data)

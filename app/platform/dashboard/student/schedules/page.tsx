@@ -232,7 +232,7 @@ export default function Schedules() {
             <Input id="hide-inactive-schedules" name="hide-inactive-schedules" type="checkbox" onClick={() => setHideInActive(!hideInActive)} className="inline w-4 h-4" />
             <Label htmlFor="hide-inactive-schedules" className="text-slate-800 text-lg cursor-pointer hover:text-slate-600">Hide Inactive Schedules</Label>
         </div>
-        <div className="min-h-full">
+        <div className="min-h-fit">
             {content}
         </div>
         <div id="pagination" className="grid grid-cols-3 text-sm my-4">
@@ -241,7 +241,7 @@ export default function Schedules() {
                 page <span className="font-bold text-slate-800">{schedules.page}</span> of <span className="font-bold text-slate-800">{Math.ceil((schedules.total || 0) / schedules.per_page)}</span>
             </div>
             <div className="flex flex-row justify-end items-center gap-2 col-start-3 col-end-4">
-                <Button variant="outline" onClick={
+                <Button variant="outline" disabled={schedules.page === 1 || schedules.items.length === 0} onClick={
                     () => listSchedulesMe(10, schedules.page - 1).then((data) => {
                         if (data) {
                             setSchedules(data)

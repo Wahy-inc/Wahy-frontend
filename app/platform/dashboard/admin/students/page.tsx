@@ -52,7 +52,7 @@ export default function Students() {
             const fetchStudents = async () => {
                 try {
                     setLoading(true)
-                    const data = await listStudents()
+                    const data = await listStudents(10,1)
                     setStudents(data)
                     setError(null)
                 } catch (err) {
@@ -84,7 +84,7 @@ export default function Students() {
         const fetchStudents = async () => {
                 try {
                     setLoading(true)
-                    const data = await listStudents()
+                    const data = await listStudents(10, 1)
                     setStudents(data)
                     setError(null)
                 } catch (err) {
@@ -401,5 +401,29 @@ export default function Students() {
             getStudentPending={getStudentPending}
             fieldInput={fieldInput}
         />
-    )}><div className="flex flex-col gap-4 w-full">{content}</div></DashboardPage>
+    )}>
+        <div className="flex flex-col gap-4 w-full">{content}</div>
+                <div id="pagination" className="grid grid-cols-3 text-sm my-4">
+            <div className="col-start-1 col-end-2"></div>
+            <div className="col-start-2 col-end-3">
+                page <span className="font-bold text-slate-800">{students.page}</span> of <span className="font-bold text-slate-800">{Math.ceil((students.total || 0) / students.per_page)}</span>
+            </div>
+            <div className="flex flex-row justify-end items-center gap-2 col-start-3 col-end-4">
+                <Button variant="outline" disabled={students.page === 1 || students.items.length === 0} onClick={
+                    () => listStudents(10, students.page - 1).then((data) => {
+                        if (data) {
+                            setStudents(data)
+                        }
+                    })
+                }>Previous</Button>
+                <Button variant="outline" disabled={!students.has_next || students.items.length === 0} onClick={
+                    () => listStudents(10, students.page + 1).then((data) => {
+                        if (data) {
+                            setStudents(data)
+                        }
+                    })
+                }>Next</Button>
+            </div>
+        </div>
+    </DashboardPage>
 }

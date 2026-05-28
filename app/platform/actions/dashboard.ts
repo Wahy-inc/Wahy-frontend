@@ -496,7 +496,7 @@ export async function listLessons(): Promise<openApi.ClassGroupItem[]> {
     }
 }
 
-export async function listLessonsMe(per_page: number, page: number): Promise<openApi.ClassGroupItem[]> {
+export async function listLessonsMe(): Promise<openApi.ClassGroupItem[]> {
     try {
         const response = await api.api.listMyClassesApiV2ClassesMeGet()
 
