@@ -172,21 +172,21 @@ export default function Lessons() {
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
     if (!lessons || lessons.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.no_data_found')}</p></DashboardPage>
 
-    const actionStatusBanner = (createState?.message) ? (
-        <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
-            createState?.message === 'queued'
-                ? 'border-amber-200 bg-amber-50 text-amber-800'
-                : createState?.message === 'fail'
-                    ? 'border-red-200 bg-red-50 text-red-800'
-                    : 'border-emerald-200 bg-emerald-50 text-emerald-800'
-        }`}>
-            {createState?.message === 'queued'
-                ? t('lessons.offline_sync')
-                : createState?.message === 'fail'
-                    ? t('lessons.offline_error')
-                    : t('messages.success')}
-        </div>
-    ) : null
+    // const actionStatusBanner = (createState?.message) ? (
+    //     <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
+    //         createState?.message === 'queued'
+    //             ? 'border-amber-200 bg-amber-50 text-amber-800'
+    //             : createState?.message === 'fail'
+    //                 ? 'border-red-200 bg-red-50 text-red-800'
+    //                 : 'border-emerald-200 bg-emerald-50 text-emerald-800'
+    //     }`}>
+    //         {createState?.message === 'queued'
+    //             ? t('lessons.offline_sync')
+    //             : createState?.message === 'fail'
+    //                 ? t('lessons.offline_error')
+    //                 : t('messages.success')}
+    //     </div>
+    // ) : null
 
     if (fetchedLessons && getLessonState?.message == 'success') {
         return <DashboardPage title={(
@@ -204,7 +204,7 @@ export default function Lessons() {
                 getLessonPending={getLessonPending}
             />
         )}>
-            <div className='mx-10'>{actionStatusBanner}</div>
+            {/* <div className='mx-10'>{actionStatusBanner}</div> */}
             <div className='flex flex-row justify-end'>
                 <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLessons([])}}>{t('common.clear')}</Button>
             </div>
@@ -222,7 +222,7 @@ export default function Lessons() {
         </DashboardPage>
     } else {
         return <DashboardPage title={title}>
-            <div>{actionStatusBanner}</div>
+            {/* <div>{actionStatusBanner}</div> */}
             <div>{displayContent}</div>
         </DashboardPage>
     }

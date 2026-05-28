@@ -28,12 +28,11 @@ import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
 import { useToastListener } from "@/lib/toastListener";
-import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 import { isClientOnline } from "@/lib/offlineSync";
 
 export default function Invoices() {
     const { isAdmin, isLoading: authLoading } = useAuth()
-    const [invoices, setInvoices] = React.useState<openApi.InvoiceRead[] | null>(null)
+    const [invoices, setInvoices] = React.useState<openApi.PaginatedResponse<openApi.InvoiceRead> | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const [overrideInvoiceState, overrideInvoiceAction, overrideInvoicePending] = React.useActionState(overrideInvoice, undefined)
@@ -69,14 +68,14 @@ export default function Invoices() {
 
     React.useEffect(() => {
         if (getInvoiceState?.message === 'success' && getInvoiceState.data) {
-            setInvoices([getInvoiceState.data])
+            setInvoices({ items: [getInvoiceState.data], total: 1, page: 1, per_page: 1, has_next: false })
         }
         if (createInvoiceState?.message === 'success' || overrideInvoiceState?.message === 'success' || payInvoiceState?.message === 'success') {
         const fetchInvoices = async () => {
             try {
                 setLoading(true)
                 const data = await listInvoices()
-                setInvoices(data.items)
+                setInvoices(data)
                 setError(null)
             } catch (err) {
                 setError(t('invoices.get_error'))
@@ -92,19 +91,19 @@ export default function Invoices() {
     React.useEffect(() => {
         if (authLoading) return
 
-        const cachedInvoices = getCachedData<openApi.InvoiceRead[]>(
-            offlineCacheKeys.invoicesListAdmin,
-        )
-        if (cachedInvoices && cachedInvoices.length > 0) {
-            setInvoices(cachedInvoices)
-            setLoading(false)
-        }
+        // const cachedInvoices = getCachedData<openApi.InvoiceRead[]>(
+        //     offlineCacheKeys.invoicesListAdmin,
+        // )
+        // if (cachedInvoices && cachedInvoices.length > 0) {
+        //     setInvoices(cachedInvoices)
+        //     setLoading(false)
+        // }
         
         const fetchInvoices = async () => {
             try {
                 setLoading(true)
                 const data = await listInvoices()
-                setInvoices(data.items)
+                setInvoices(data)
                 setError(null)
             } catch (err) {
                 setError(t('invoices.get_error'))
@@ -276,27 +275,27 @@ export default function Invoices() {
 
     if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.loading')}</p></DashboardPage>
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!invoices || invoices.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('invoices.no_invoices_found')}</p></DashboardPage>
+    if (!invoices || invoices.items.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('invoices.no_invoices_found')}</p></DashboardPage>
 
-    const paidInvoices = invoices?.filter((invoice) => {
+    const paidInvoices = invoices?.items.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Paid;
     })
-    const generatedInvoices = invoices?.filter((invoice) => {
+    const generatedInvoices = invoices?.items.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Generated;
     })
-    const cancelledInvoices = invoices?.filter((invoice) => {
+    const cancelledInvoices = invoices?.items.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Cancelled;
     })
-    const overDueInvoices = invoices?.filter((invoice) => {
+    const overDueInvoices = invoices?.items.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Overdue;
     })
-    const sentInvoices = invoices?.filter((invoice) => {
+    const sentInvoices = invoices?.items.filter((invoice) => {
         return invoice.status === openApi.InvoiceStatus.Sent;
     })
 
     const content = (
         <div className="flex flex-col gap-12 w-full">
-            {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{t('invoices.offline_notice')}</p> : null}
+            {/* {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{t('invoices.offline_notice')}</p> : null} */}
             <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">{t('invoices.generated_invoices_title')}</p>
                 {generatedInvoices && generatedInvoices.length > 0 ? generatedInvoices.map((invoice) => (

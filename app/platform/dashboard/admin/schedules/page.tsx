@@ -18,12 +18,11 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useToastListener } from "@/lib/toastListener";
-import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 import { useLocalization } from "@/lib/localization-context";
 import { RRule } from "rrule";
 
 export default function Schedules() {
-    const [schedules, setSchedules] = React.useState<openApi.ScheduleRead[] | null>(null)
+    const [schedules, setSchedules] = React.useState<openApi.PaginatedResponse<openApi.ScheduleRead> | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const [hideInActive, setHideInActive] = React.useState(true)
@@ -63,7 +62,7 @@ export default function Schedules() {
                     setLoading(true)
                     const data = await (listSchedules())
                     console.log('Fetched schedules data:', data);
-                    setSchedules(data?.items || [])
+                    setSchedules(data)
                     setGetSchedules(null)
                     console.log(data);
                     setError(null)
@@ -77,7 +76,7 @@ export default function Schedules() {
             fetchSchedules()
         }
         if (hideInActive && schedules) {
-            setFilteredSchedules(schedules.filter((schedule: openApi.ScheduleRead) => schedule.is_active))
+            setFilteredSchedules(schedules.items.filter((schedule: openApi.ScheduleRead) => schedule.is_active))
         } else if (!hideInActive && schedules) {
             setFilteredSchedules(null)
         }
@@ -86,13 +85,13 @@ export default function Schedules() {
     React.useEffect(() => {
         if (authLoading) return
 
-            const cachedSchedules = getCachedData<openApi.ScheduleRead[]>(
-                offlineCacheKeys.schedulesListAdmin,
-            )
-            if (cachedSchedules && cachedSchedules.length > 0) {
-                setSchedules(cachedSchedules)
-                setLoading(false)
-            }
+            // const cachedSchedules = getCachedData<openApi.ScheduleRead[]>(
+            //     offlineCacheKeys.schedulesListAdmin,
+            // )
+            // if (cachedSchedules && cachedSchedules.length > 0) {
+            //     setSchedules({ items: cachedSchedules, total: cachedSchedules.length })
+            //     setLoading(false)
+            // }
 
             const fetchSchedules = async () => {
                 try {
@@ -100,7 +99,7 @@ export default function Schedules() {
                     const data = await listSchedules()
                     listStudents()
                     console.log('Fetched schedules data:', data);
-                    setSchedules(data?.items || [])
+                    setSchedules(data)
                     console.log(data);
                     setError(null)
                 } catch (err) {
@@ -145,7 +144,7 @@ export default function Schedules() {
             setFilteredSchedules(null)
             setGetSchedules(null)
         } else if (schedules) {
-            const filtered = schedules.filter((schedule: openApi.ScheduleRead) => 
+            const filtered = schedules.items.filter((schedule: openApi.ScheduleRead) => 
                 schedule.student_id.toString().startsWith(studentId)
             )
             setGetSchedules(null)
@@ -507,14 +506,12 @@ export default function Schedules() {
 
     if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('schedules.loading_schedules')}</p></DashboardPage>
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!schedules || schedules.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('schedules.no_schedules_found')}</p></DashboardPage>
-    const displayedSchedules = getSchedules?.length ? getSchedules : (filteredSchedules ? filteredSchedules : schedules);
-    console.log('dis',displayedSchedules);
-    console.log('get',getSchedules);
+    if (!schedules?.items || schedules.items.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('schedules.no_schedules_found')}</p></DashboardPage>
+    const displayedSchedules = getSchedules?.length ? getSchedules : (filteredSchedules ? filteredSchedules : schedules.items);
     
     const content = (
         <div className='flex flex-col gap-4'>
-            {(createScheduleState?.message || updateScheduleState?.message) && (
+            {/* {(createScheduleState?.message || updateScheduleState?.message) && (
                 <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
                     createScheduleState?.message === 'queued' || updateScheduleState?.message === 'queued'
                         ? 'border-amber-200 bg-amber-50 text-amber-800'
@@ -528,7 +525,7 @@ export default function Schedules() {
                             ? t('schedules.offline_error')
                             : t('messages.success')}
                 </div>
-            )}
+            )} */}
             {displayedSchedules?.map((schedule: openApi.ScheduleRead) => (
                 <div key={schedule.id}>
                     {schedulesElement(schedule)}

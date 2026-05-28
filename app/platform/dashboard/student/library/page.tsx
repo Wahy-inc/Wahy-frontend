@@ -19,7 +19,6 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
-import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 import { isClientOnline } from "@/lib/offlineSync";
 import { UploadedLibraryFile } from "@/app/platform/lib/definitionsv2";
 import { downloadLibraryFile, listUploadLibraryFile } from "@/app/platform/actions/dashboardv2";
@@ -29,13 +28,13 @@ import * as icon from "lucide-react"
 
 export default function Schedules() {
 
-    const [libraryItems, setLibraryItems] = React.useState<openApi.LibraryItemRead[] | null>(null)
+    const [libraryItems, setLibraryItems] = React.useState<openApi.PaginatedResponse<openApi.LibraryItemRead> | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [libraryFiles, setLibraryFiles] = React.useState<Record<number, UploadedLibraryFile[]>>({})
     const [error, setError] = React.useState<string | null>(null)
     const [getLibraryItemState, getLibraryItemAction, getLibraryItemPending] = React.useActionState(getLibraryItemMe, undefined)
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
-    const [isOffline, setIsOffline] = React.useState(false)
+    // const [isOffline, setIsOffline] = React.useState(false)
     const { isLoading: authLoading } = useAuth()
     const { t , language} = useLocalization()
 
@@ -43,7 +42,7 @@ export default function Schedules() {
         if (!libraryItems) return
         const filesMap: Record<number, UploadedLibraryFile[]> = {}
         
-        for (const item of libraryItems) {
+        for (const item of libraryItems.items) {
             try {
                 const res = await listUploadLibraryFile(item.id)
                 filesMap[item.id] = res?.data || []
@@ -57,40 +56,40 @@ export default function Schedules() {
     }
 
     useToastListener(getLibraryItemState, {functionName: "Get Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
-    React.useEffect(() => {
-        const refreshOffline = () => setIsOffline(!isClientOnline())
-        refreshOffline()
-        window.addEventListener('online', refreshOffline)
-        window.addEventListener('offline', refreshOffline)
+    // React.useEffect(() => {
+    //     // const refreshOffline = () => setIsOffline(!isClientOnline())
+    //     // refreshOffline()
+    //     // window.addEventListener('online', refreshOffline)
+    //     // window.addEventListener('offline', refreshOffline)
 
-        return () => {
-            window.removeEventListener('online', refreshOffline)
-            window.removeEventListener('offline', refreshOffline)
-        }
-    }, [])
+    //     return () => {
+    //         window.removeEventListener('online', refreshOffline)
+    //         window.removeEventListener('offline', refreshOffline)
+    //     }
+    // }, [])
 
     React.useEffect(() => {        
         if (getLibraryItemState?.message === 'success' && getLibraryItemState.data) {
-            setLibraryItems([getLibraryItemState.data])
+            setLibraryItems({ items: [getLibraryItemState.data] , total: 1, page: 1, per_page: 1, has_next: false}) // Wrap in paginated response format
         }
     }, [getLibraryItemState])
 
     React.useEffect(() => {
         if (authLoading) return // Wait until auth is loaded
 
-        const cachedLibraryItems = getCachedData<openApi.LibraryItemRead[]>(
-            offlineCacheKeys.libraryListMe,
-        )
-        if (cachedLibraryItems && cachedLibraryItems.length > 0) {
-            setLibraryItems(cachedLibraryItems)
-            setLoading(false)
-        }
+        // const cachedLibraryItems = getCachedData<openApi.PaginatedResponse<openApi.LibraryItemRead>>(
+        //     offlineCacheKeys.libraryListMe,
+        // )
+        // if (cachedLibraryItems && cachedLibraryItems.length > 0) {
+        //     setLibraryItems(cachedLibraryItems)
+        //     setLoading(false)
+        // }
         
         const fetchLibraryItems = async () => {
             try {
                 setLoading(true)
                 const data = await listLibraryMe()
-                setLibraryItems(data?.items || [])
+                setLibraryItems(data)
                 await fetchFilesForItems()
                 setError(null)
             } catch (err) {
@@ -187,16 +186,16 @@ export default function Schedules() {
 
     if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.loading')}</p></DashboardPage>
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!libraryItems || libraryItems.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('library.no_books_found')}</p></DashboardPage>
+    if (!libraryItems || libraryItems.items.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('library.no_books_found')}</p></DashboardPage>
 
-    const content = libraryItems?.map((item) => (
+    const content = libraryItems.items?.map((item) => (
         <div key={item.id} className="w-full">
             {libraryItemElement(item)}
         </div>
     ))
 
     return <DashboardPage title={title}><div className="flex flex-col gap-4 w-full">
-        {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{t('library.offline_only')}</p> : null}
+        {/* {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{t('library.offline_only')}</p> : null} */}
         <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-4 md:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>
     </div></DashboardPage>
 }

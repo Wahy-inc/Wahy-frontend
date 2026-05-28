@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { approveStudent, createStudent, getStudent, listStudents, rejectStudent, updateStudent } from "@/app/platform/actions/dashboard";
+import { getStudent, listStudents, updateStudent } from "@/app/platform/actions/dashboard";
 import DashboardPage from "../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
@@ -16,7 +16,7 @@ import {
   ItemMedia,
   ItemTitle,
 } from "@/components/ui/item"
-import {Tag, User} from 'lucide-react'
+import { User} from 'lucide-react'
 import { UpdateStudentFormState } from "../../../lib/definitions";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -24,18 +24,17 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
-import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 import { Badge } from "@/components/ui/badge";
 
 export default function Students() {
-    const [students, setStudents] = React.useState<openApi.StudentRead[] | null>(null)
+    const [students, setStudents] = React.useState<openApi.PaginatedResponse<openApi.StudentRead> | null>(null)
     const [loading, setLoading] = React.useState(true)
     const [error, setError] = React.useState<string | null>(null)
     const updateStudentActionState = (state: UpdateStudentFormState, formData: FormData) => updateStudent(state, formData, Number(formData.get('id')))
     const [updateStudentState, updateStudentAction, updateStudentPending] = React.useActionState(updateStudentActionState, undefined)
     const [getStudentState, getStudentAction, getStudentPending] = React.useActionState(getStudent, undefined)
     const [editingStudentId, setEditingStudentId] = React.useState<number | null>(null)
-    const [approvalStatus, setApprovalStatus] = React.useState<'success' | 'queued' | 'fail' | null>(null)
+    // const [approvalStatus, setApprovalStatus] = React.useState<'success' | 'queued' | 'fail' | null>(null)
     const { isAdmin, isLoading: authLoading } = useAuth()
     const { t, language } = useLocalization()
 
@@ -44,7 +43,7 @@ export default function Students() {
     
     React.useEffect(() => {
         if (getStudentState?.message === 'success' && getStudentState.data) {
-            setStudents([getStudentState.data])
+            setStudents({ items: [getStudentState.data], total: 1, page: 1, per_page: 1, has_next: false })
         }
         if (
             updateStudentState?.message === 'success' ||
@@ -54,7 +53,7 @@ export default function Students() {
                 try {
                     setLoading(true)
                     const data = await listStudents()
-                    setStudents(data?.items || [])
+                    setStudents(data)
                     setError(null)
                 } catch (err) {
                     setError('Failed to load students')
@@ -76,17 +75,17 @@ export default function Students() {
     React.useEffect(() => {
         if (authLoading) return
 
-        const cachedStudents = getCachedData<openApi.StudentRead[]>(offlineCacheKeys.studentsList)
-        if (cachedStudents && cachedStudents.length > 0) {
-            setStudents(cachedStudents)
-            setLoading(false)
-        }
+            // const cachedStudents = getCachedData<openApi.StudentRead[]>(offlineCacheKeys.studentsList)
+            // if (cachedStudents && cachedStudents.length > 0) {
+            //     setStudents(cachedStudents)
+            //     setLoading(false)
+            // }
 
         const fetchStudents = async () => {
                 try {
                     setLoading(true)
                     const data = await listStudents()
-                    setStudents(data?.items || [])
+                    setStudents(data)
                     setError(null)
                 } catch (err) {
                     setError('Failed to load students')
@@ -115,26 +114,6 @@ export default function Students() {
             <Input id={name} name={name} type={type} placeholder={holder} defaultValue={holder}></Input>
         </Field>
     )
-
-    const handleApproveStudent = async (studentId: number) => {
-        const status = await approveStudent(studentId, {})
-        setApprovalStatus(status)
-
-        if (status !== 'success') {
-            const data = await listStudents()
-            setStudents(data?.items || [])
-        }
-    }
-
-    const handleRejectStudent = async (studentId: number) => {
-        const status = await rejectStudent(studentId, {})
-        setApprovalStatus(status)
-
-        if (status !== 'success') {
-            const data = await listStudents()
-            setStudents(data?.items || [])
-        }
-    }
 
     const getRegistrationStatusLabel = (status: string): string => {
         const statusLower = status?.toLowerCase() || ''
@@ -363,14 +342,14 @@ export default function Students() {
 
     if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.loading')}</p></DashboardPage>
     if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!students || students.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('students.no_students_found')}</p></DashboardPage>    
+    if (!students || students.items.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('students.no_students_found')}</p></DashboardPage>    
 
-    const inactiveStudents = students.filter(student => student.status.toLowerCase().includes('inactive'))
-    const onHoldStudents = students.filter(student => student.status.toLowerCase().includes('on_hold') || student.status.toLowerCase().includes('onhold'))
-    const activeStudents = students.filter(student => student.status.toLowerCase() === 'active' || student.status.toLowerCase().includes('graduated'))
+    const inactiveStudents = students.items.filter(student => student.status.toLowerCase().includes('inactive'))
+    const onHoldStudents = students.items.filter(student => student.status.toLowerCase().includes('on_hold') || student.status.toLowerCase().includes('onhold'))
+    const activeStudents = students.items.filter(student => student.status.toLowerCase() === 'active' || student.status.toLowerCase().includes('graduated'))
     const content = (
         <div className="flex flex-col gap-12 w-full">
-            {(updateStudentState?.message || approvalStatus) && (
+            {/* {(updateStudentState?.message || approvalStatus) && (
                 <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
                     updateStudentState?.message === 'queued' || approvalStatus === 'queued'
                         ? 'border-amber-200 bg-amber-50 text-amber-800'
@@ -384,7 +363,7 @@ export default function Students() {
                             ? t('schedules.offline_error')
                             : t('messages.success')}
                 </div>
-            )}
+            )} */}
             <div className="flex flex-col gap-4">
                 <p className="text-2xl text-slate-700 font-semibold">{t('students.approved_students')}</p>
                 {activeStudents && activeStudents.length > 0 ? activeStudents.map((student: openApi.StudentRead) => (

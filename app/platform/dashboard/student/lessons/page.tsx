@@ -13,7 +13,6 @@ import TitleElement from "./title_element";
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
-import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
 import { useRouter } from "next/navigation";
 
 
@@ -32,13 +31,13 @@ export default function Lessons() {
     React.useEffect(() => {
         if (authLoading) return
 
-        const cachedLessons = getCachedData<openApi.ClassGroupItem[]>(
-            offlineCacheKeys.lessonsListMe,
-        )
-        if (cachedLessons && cachedLessons.length > 0) {
-            setLessons(cachedLessons)
-            setLoading(false)
-        }
+        // const cachedLessons = getCachedData<openApi.ClassGroupItem[]>(
+        //     offlineCacheKeys.lessonsListMe,
+        // )
+        // if (cachedLessons && cachedLessons.length > 0) {
+        //     setLessons(cachedLessons)
+        //     setLoading(false)
+        // }
         
         const fetchLessons = async () => {
             try {
