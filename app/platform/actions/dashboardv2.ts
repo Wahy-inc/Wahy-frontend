@@ -43,7 +43,7 @@ export async function calenderGetDayData(dayID: string[]): Promise<GetCalendarDa
         }
         if (response.status == 200) {
             console.log("Received calendar day data", response.data);
-            const filteredData = response.data.filter((lesson) => dayID.includes(lesson.id.toString()));
+            const filteredData = response.data.items.filter((lesson) => dayID.includes(lesson.id.toString()));
             return { data: filteredData, message: 'success' }
         }
         return { message: 'fail' }
@@ -212,7 +212,7 @@ export async function notificationsGetAll(): Promise<openApi.NotificationRead[] 
         }
         if (response.status == 200) {
             console.log("Received notifications", response.data);
-            return response.data
+            return response.data.items
         }
         return null
     } catch (error) {
@@ -267,7 +267,7 @@ export async function addLocalSchedules(): Promise<boolean> {
             return false
         }
         if (response.status == 200) {
-            const schedules = response.data;
+            const schedules = response.data.items;
             const ids:number[] = [];
             schedules.map((schedule) => ids.includes(schedule.student_id) ? null : ids.push(schedule.student_id));
 

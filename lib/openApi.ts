@@ -93,6 +93,23 @@ export enum AttendanceStatus {
 }
 
 /**
+ * PaginatedResponse
+ * Generic paginated response wrapper for list endpoints.
+ */
+export interface PaginatedResponse<T> {
+  /** Array of items in the current page */
+  items: T[];
+  /** Total number of items across all pages */
+  total: number;
+  /** Current page number (1-indexed) */
+  page: number;
+  /** Number of items per page */
+  per_page: number;
+  /** Whether there is a next page */
+  has_next: boolean;
+}
+
+/**
  * AdminSignupRequest
  * Request body for the initial sheikh admin account creation.
  *
@@ -3010,10 +3027,19 @@ export class Api<
      * @request GET:/api/v1/students
      * @secure
      */
-    listAllApiV1StudentsGet: (params: RequestParams = {}) =>
-      this.request<StudentRead[], void | HTTPValidationError>({
+    listAllApiV1StudentsGet: (
+      query?: {
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<PaginatedResponse<StudentRead>, void | HTTPValidationError>({
         path: `/api/v1/students`,
         method: "GET",
+        query: query,
         secure: true,
         format: "json",
         ...params,
@@ -3180,10 +3206,19 @@ export class Api<
      * @request GET:/api/v1/schedules/me
      * @secure
      */
-    listMyScheduleApiV1SchedulesMeGet: (params: RequestParams = {}) =>
-      this.request<ScheduleRead[], HTTPValidationError>({
+    listMyScheduleApiV1SchedulesMeGet: (
+      query?: {
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<PaginatedResponse<ScheduleRead>, HTTPValidationError>({
         path: `/api/v1/schedules/me`,
         method: "GET",
+        query: query,
         secure: true,
         format: "json",
         ...params,
@@ -3198,10 +3233,19 @@ export class Api<
      * @request GET:/api/v1/schedules
      * @secure
      */
-    listAllApiV1SchedulesGet: (params: RequestParams = {}) =>
-      this.request<ScheduleRead[], HTTPValidationError>({
+    listAllApiV1SchedulesGet: (
+      query?: {
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<PaginatedResponse<ScheduleRead>, HTTPValidationError>({
         path: `/api/v1/schedules`,
         method: "GET",
+        query: query,
         secure: true,
         format: "json",
         ...params,
@@ -3241,11 +3285,18 @@ export class Api<
      */
     listForStudentApiV1SchedulesStudentStudentIdGet: (
       studentId: number,
+      query?: {
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
+      },
       params: RequestParams = {},
     ) =>
-      this.request<ScheduleRead[], HTTPValidationError>({
+      this.request<PaginatedResponse<ScheduleRead>, HTTPValidationError>({
         path: `/api/v1/schedules/student/${studentId}`,
         method: "GET",
+        query: query,
         secure: true,
         format: "json",
         ...params,
@@ -3311,10 +3362,14 @@ export class Api<
          * Max lessons to return. Defaults to sheikh's preference.
          */
         limit?: number | null;
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
       },
       params: RequestParams = {},
     ) =>
-      this.request<LessonRead[], void | HTTPValidationError>({
+      this.request<PaginatedResponse<LessonRead>, void | HTTPValidationError>({
         path: `/api/v1/lessons/me`,
         method: "GET",
         query: query,
@@ -3365,10 +3420,14 @@ export class Api<
          * Max lessons to return. Defaults to sheikh's preference.
          */
         limit?: number | null;
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
       },
       params: RequestParams = {},
     ) =>
-      this.request<LessonRead[], void | HTTPValidationError>({
+      this.request<PaginatedResponse<LessonRead>, void | HTTPValidationError>({
         path: `/api/v1/lessons`,
         method: "GET",
         query: query,
@@ -3451,10 +3510,19 @@ export class Api<
      * @request GET:/api/v1/invoices/me
      * @secure
      */
-    listMyInvoicesApiV1InvoicesMeGet: (params: RequestParams = {}) =>
-      this.request<InvoiceRead[], HTTPValidationError>({
+    listMyInvoicesApiV1InvoicesMeGet: (
+      query?: {
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<PaginatedResponse<InvoiceRead>, HTTPValidationError>({
         path: `/api/v1/invoices/me`,
         method: "GET",
+        query: query,
         secure: true,
         format: "json",
         ...params,
@@ -3541,10 +3609,14 @@ export class Api<
          * Optional student ID filter.
          */
         student_id?: number | null;
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
       },
       params: RequestParams = {},
     ) =>
-      this.request<InvoiceRead[], HTTPValidationError>({
+      this.request<PaginatedResponse<InvoiceRead>, HTTPValidationError>({
         path: `/api/v1/invoices`,
         method: "GET",
         query: query,
@@ -3652,10 +3724,19 @@ export class Api<
      * @request GET:/api/v1/library
      * @secure
      */
-    listAllApiV1LibraryGet: (params: RequestParams = {}) =>
-      this.request<LibraryItemRead[], HTTPValidationError>({
+    listAllApiV1LibraryGet: (
+      query?: {
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<PaginatedResponse<LibraryItemRead>, HTTPValidationError>({
         path: `/api/v1/library`,
         method: "GET",
+        query: query,
         secure: true,
         format: "json",
         ...params,
@@ -3693,10 +3774,19 @@ export class Api<
      * @request GET:/api/v1/library/me
      * @secure
      */
-    listMyLibraryApiV1LibraryMeGet: (params: RequestParams = {}) =>
-      this.request<LibraryItemRead[], HTTPValidationError>({
+    listMyLibraryApiV1LibraryMeGet: (
+      query?: {
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
+      },
+      params: RequestParams = {},
+    ) =>
+      this.request<PaginatedResponse<LibraryItemRead>, HTTPValidationError>({
         path: `/api/v1/library/me`,
         method: "GET",
+        query: query,
         secure: true,
         format: "json",
         ...params,
@@ -4107,10 +4197,14 @@ export class Api<
         student_id?: number | null;
         /** Status */
         status?: WirdAssignmentStatus | null;
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
       },
       params: RequestParams = {},
     ) =>
-      this.request<WirdAssignmentRead[], HTTPValidationError>({
+      this.request<PaginatedResponse<WirdAssignmentRead>, HTTPValidationError>({
         path: `/api/v2/wird`,
         method: "GET",
         query: query,
@@ -4751,10 +4845,14 @@ export class Api<
          * @default 0
          */
         offset?: number;
+        /** Page number (1-indexed) */
+        page?: number;
+        /** Items per page (max 100) */
+        per_page?: number;
       },
       params: RequestParams = {},
     ) =>
-      this.request<NotificationRead[], HTTPValidationError>({
+      this.request<PaginatedResponse<NotificationRead>, HTTPValidationError>({
         path: `/api/v2/notifications`,
         method: "GET",
         query: query,
