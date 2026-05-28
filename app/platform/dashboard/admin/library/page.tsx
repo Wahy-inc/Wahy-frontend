@@ -87,7 +87,7 @@ export default function Schedules() {
             const fetchLibraryItems = async () => {
                 try {
                     setLoading(true)
-                    const data = await listLibrary()
+                    const data = await listLibrary(10, 1)
                     setLibraryItems(data)
                     console.log(data);
                     setError(null)
@@ -128,7 +128,7 @@ export default function Schedules() {
         const fetchLibraryItems = async () => {
             try {
                 setLoading(true)
-                const data = await listLibrary()
+                const data = await listLibrary(10, 1)
                 setLibraryItems(data)
                 await fetchFilesForItems()
                 setError(null)
@@ -354,8 +354,32 @@ export default function Schedules() {
         </div>
     ))
 
-    return <DashboardPage title={title}><div className="flex flex-col gap-4 w-full">
+    return <DashboardPage title={title}>
+        <div className="flex flex-col gap-4 w-full">
         {/* {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{t('library.offline_only')}</p> : null} */}
         <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>
-    </div></DashboardPage>
+        </div>
+        <div id="pagination" className="grid grid-cols-3 text-sm my-4">
+            <div className="col-start-1 col-end-2"></div>
+            <div className="col-start-2 col-end-3">
+                page <span className="font-bold text-slate-800">{libraryItems.page}</span> of <span className="font-bold text-slate-800">{Math.ceil((libraryItems.total || 0) / libraryItems.per_page)}</span>
+            </div>
+            <div className="flex flex-row justify-end items-center gap-2 col-start-3 col-end-4">
+                <Button variant="outline" onClick={
+                    () => listLibrary(10, libraryItems.page - 1).then((data) => {
+                        if (data) {
+                            setLibraryItems(data)
+                        }
+                    })
+                }>Previous</Button>
+                <Button variant="outline" disabled={!libraryItems.has_next || libraryItems.items.length === 0} onClick={
+                    () => listLibrary(10, libraryItems.page + 1).then((data) => {
+                        if (data) {
+                            setLibraryItems(data)
+                        }
+                    })
+                }>Next</Button>
+            </div>
+        </div>
+    </DashboardPage>
 }

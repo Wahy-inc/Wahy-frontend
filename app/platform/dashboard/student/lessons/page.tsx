@@ -42,7 +42,7 @@ export default function Lessons() {
         const fetchLessons = async () => {
             try {
                 setLoading(true)
-                const data = await listLessonsMe()
+                const data = await listLessonsMe(10, 1)
                 setLessons(data)
                 setError(null)
             } catch (err) {

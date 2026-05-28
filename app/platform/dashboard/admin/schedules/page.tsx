@@ -60,7 +60,7 @@ export default function Schedules() {
             const fetchSchedules = async () => {
                 try {
                     setLoading(true)
-                    const data = await (listSchedules())
+                    const data = await (listSchedules(10, 1))
                     console.log('Fetched schedules data:', data);
                     setSchedules(data)
                     setGetSchedules(null)
@@ -96,8 +96,8 @@ export default function Schedules() {
             const fetchSchedules = async () => {
                 try {
                     setLoading(true)
-                    const data = await listSchedules()
-                    listStudents()
+                    const data = await listSchedules(10, 1)
+                    listStudents(10000,1)
                     console.log('Fetched schedules data:', data);
                     setSchedules(data)
                     console.log(data);
@@ -539,6 +539,30 @@ export default function Schedules() {
             <Input id="hide-inactive-schedules" name="hide-inactive-schedules" type="checkbox" onClick={() => setHideInActive(!hideInActive)} className="inline w-4 h-4" />
             <Label htmlFor="hide-inactive-schedules" className="text-slate-800 text-lg cursor-pointer hover:text-slate-600">Hide Inactive Schedules</Label>
         </div>
-        {content}
+        <div className="min-h-full">
+            {content}
+        </div>
+        <div id="pagination" className="grid grid-cols-3 text-sm my-4">
+            <div className="col-start-1 col-end-2"></div>
+            <div className="col-start-2 col-end-3">
+                page <span className="font-bold text-slate-800">{schedules.page}</span> of <span className="font-bold text-slate-800">{Math.ceil((schedules.total || 0) / schedules.per_page)}</span>
+            </div>
+            <div className="flex flex-row justify-end items-center gap-2 col-start-3 col-end-4">
+                <Button variant="outline" onClick={
+                    () => listSchedules(10, schedules.page - 1).then((data) => {
+                        if (data) {
+                            setSchedules(data)
+                        }
+                    })
+                }>Previous</Button>
+                <Button variant="outline" disabled={!schedules.has_next || schedules.items.length === 0} onClick={
+                    () => listSchedules(10, schedules.page + 1).then((data) => {
+                        if (data) {
+                            setSchedules(data)
+                        }
+                    })
+                }>Next</Button>
+            </div>
+        </div>
         </DashboardPage>
 }

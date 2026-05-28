@@ -74,7 +74,7 @@ export default function Invoices() {
         const fetchInvoices = async () => {
             try {
                 setLoading(true)
-                const data = await listInvoices()
+                const data = await listInvoices(10,1)
                 setInvoices(data)
                 setError(null)
             } catch (err) {
@@ -102,7 +102,7 @@ export default function Invoices() {
         const fetchInvoices = async () => {
             try {
                 setLoading(true)
-                const data = await listInvoices()
+                const data = await listInvoices(10,1)
                 setInvoices(data)
                 setError(null)
             } catch (err) {
@@ -345,5 +345,29 @@ export default function Invoices() {
         </div>
     )
 
-    return <DashboardPage title={title}><div className="flex flex-col gap-4 w-full">{content}</div></DashboardPage>
+    return <DashboardPage title={title}>
+        <div className="flex flex-col gap-4 w-full">{content}</div>
+        <div id="pagination" className="grid grid-cols-3 text-sm my-4">
+            <div className="col-start-1 col-end-2"></div>
+            <div className="col-start-2 col-end-3">
+                page <span className="font-bold text-slate-800">{invoices.page}</span> of <span className="font-bold text-slate-800">{Math.ceil((invoices.total || 0) / invoices.per_page)}</span>
+            </div>
+            <div className="flex flex-row justify-end items-center gap-2 col-start-3 col-end-4">
+                <Button variant="outline" onClick={
+                    () => listInvoices(10, invoices.page - 1).then((data) => {
+                        if (data) {
+                            setInvoices(data)
+                        }
+                    })
+                }>Previous</Button>
+                <Button variant="outline" disabled={!invoices.has_next || invoices.items.length === 0} onClick={
+                    () => listInvoices(10, invoices.page + 1).then((data) => {
+                        if (data) {
+                            setInvoices(data)
+                        }
+                    })
+                }>Next</Button>
+            </div>
+        </div>
+    </DashboardPage>
 }
