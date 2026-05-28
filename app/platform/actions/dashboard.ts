@@ -37,13 +37,13 @@ export async function getStudentMe(): Promise<openApi.StudentSelfRead | null> {
     }
 }
 
-export async function listStudents(): Promise<openApi.StudentRead[] | null> {
+export async function listStudents(): Promise<openApi.PaginatedResponse<openApi.StudentRead> | null> {
     try {
         const response = await api.api.listAllApiV1StudentsGet()
 
         if (response.status === 200) {
             const data = response.data
-            setCachedData(offlineCacheKeys.studentsList, data.items)
+            setCachedData(offlineCacheKeys.studentsList, data)
             const filteredData = data.items.filter(stu => stu.status === 'active' || stu.status === 'graduated')
             const Students = filteredData.map((student) => {
                 return {
@@ -55,11 +55,11 @@ export async function listStudents(): Promise<openApi.StudentRead[] | null> {
                 localStorage.removeItem('students')
             }
             localStorage.setItem('students', JSON.stringify(Students))
-            return data.items
+            return data
         }
         return null
     } catch (error) {
-        const cached = getCachedData<openApi.StudentRead[]>(offlineCacheKeys.studentsList)
+        const cached = getCachedData<openApi.PaginatedResponse<openApi.StudentRead>>(offlineCacheKeys.studentsList)
         if (cached) {
             return cached
         }
@@ -278,17 +278,17 @@ export async function rejectStudent(id: number, note: openApi.StudentApprovalReq
     }
 }
 
-export async function listSchedules(): Promise<openApi.ScheduleRead[] | null> {
+export async function listSchedules(): Promise<openApi.PaginatedResponse<openApi.ScheduleRead> | null> {
     try {
         const response = await api.api.listAllApiV1SchedulesGet()
 
         if (response.status === 200) {
-            setCachedData(offlineCacheKeys.schedulesListAdmin, response.data.items)
-            return response.data.items
+            setCachedData(offlineCacheKeys.schedulesListAdmin, response.data)
+            return response.data
         }
         return null
     } catch (error) {
-        const cached = getCachedData<openApi.ScheduleRead[]>(offlineCacheKeys.schedulesListAdmin)
+        const cached = getCachedData<openApi.PaginatedResponse<openApi.ScheduleRead>>(offlineCacheKeys.schedulesListAdmin)
         if (cached) {
             return cached
         }
@@ -296,17 +296,17 @@ export async function listSchedules(): Promise<openApi.ScheduleRead[] | null> {
     }
 }
 
-export async function listSchedulesMe(): Promise<openApi.ScheduleRead[] | null> {
+export async function listSchedulesMe(): Promise<openApi.PaginatedResponse<openApi.ScheduleRead> | null> {
     try {
         const response = await api.api.listMyScheduleApiV1SchedulesMeGet()
 
         if (response.status === 200) {
-            setCachedData(offlineCacheKeys.schedulesListMe, response.data.items)
-            return response.data.items
+            setCachedData(offlineCacheKeys.schedulesListMe, response.data)
+            return response.data
         }
         return null
     } catch (error) {
-        const cached = getCachedData<openApi.ScheduleRead[]>(offlineCacheKeys.schedulesListMe)
+        const cached = getCachedData<openApi.PaginatedResponse<openApi.ScheduleRead>>(offlineCacheKeys.schedulesListMe)
         if (cached) {
             return cached
         }
@@ -456,7 +456,7 @@ export async function getSchedulesForStudent(state: GetSchedualesForStudentFormS
         const response = await api.api.listForStudentApiV1SchedulesStudentStudentIdGet(studentId)
 
         if (response.status === 200) {
-            return { message: 'success', data: response.data.items }
+            return { message: 'success', data: response.data }
         }
         return { message: 'fail' }
     } catch (error) {
@@ -527,17 +527,17 @@ export async function listLessonsMe(): Promise<openApi.ClassGroupItem[]> {
     }
 }
 
-export async function listLibrary(): Promise<openApi.LibraryItemRead[] | null> {
+export async function listLibrary(): Promise<openApi.PaginatedResponse<openApi.LibraryItemRead> | null> {
     try {
         const response = await api.api.listAllApiV1LibraryGet()
 
         if (response.status === 200) {
-            setCachedData(offlineCacheKeys.libraryListAdmin, response.data.items)
-            return response.data.items
+            setCachedData(offlineCacheKeys.libraryListAdmin, response.data)
+            return response.data
         }
         return null
     } catch (error) {
-        const cached = getCachedData<openApi.LibraryItemRead[]>(offlineCacheKeys.libraryListAdmin)
+        const cached = getCachedData<openApi.PaginatedResponse<openApi.LibraryItemRead>>(offlineCacheKeys.libraryListAdmin)
         if (cached) {
             return cached
         }
@@ -545,17 +545,17 @@ export async function listLibrary(): Promise<openApi.LibraryItemRead[] | null> {
     }
 }
 
-export async function listLibraryMe(): Promise<openApi.LibraryItemRead[] | null> {
+export async function listLibraryMe(): Promise<openApi.PaginatedResponse<openApi.LibraryItemRead> | null> {
     try {
         const response = await api.api.listMyLibraryApiV1LibraryMeGet()
 
         if (response.status === 200) {
-            setCachedData(offlineCacheKeys.libraryListMe, response.data.items)
-            return response.data.items
+            setCachedData(offlineCacheKeys.libraryListMe, response.data)
+            return response.data
         }
         return null
     } catch (error) {
-        const cached = getCachedData<openApi.LibraryItemRead[]>(offlineCacheKeys.libraryListMe)
+        const cached = getCachedData<openApi.PaginatedResponse<openApi.LibraryItemRead>>(offlineCacheKeys.libraryListMe)
         if (cached) {
             return cached
         }
@@ -650,39 +650,39 @@ export async function deleteLibraryItem(id: number): Promise<boolean> {
 
 }
 
-export async function listInvoices(): Promise<openApi.InvoiceRead[]> {
+export async function listInvoices(): Promise<openApi.PaginatedResponse<openApi.InvoiceRead>> {
     try {
         const response = await api.api.listAllApiV1InvoicesGet()
 
         if (response.status === 200) {
-            setCachedData(offlineCacheKeys.invoicesListAdmin, response.data.items)
-            return response.data.items
+            setCachedData(offlineCacheKeys.invoicesListAdmin, response.data)
+            return response.data
         }
-        return []
+        return { items: [], total: 0 , has_next: false, page: 1, per_page: 10}
     } catch (error) {
-        const cached = getCachedData<openApi.InvoiceRead[]>(offlineCacheKeys.invoicesListAdmin)
+        const cached = getCachedData<openApi.PaginatedResponse<openApi.InvoiceRead>>(offlineCacheKeys.invoicesListAdmin)
         if (cached) {
             return cached
         }
-        return []
+        return { items: [], total: 0 , has_next: false, page: 1, per_page: 10}
     }
 }
 
-export async function listInvoicesMe(): Promise<openApi.InvoiceRead[]> {
+export async function listInvoicesMe(): Promise<openApi.PaginatedResponse<openApi.InvoiceRead>> {
     try {
         const response = await api.api.listMyInvoicesApiV1InvoicesMeGet()
 
         if (response.status === 200) {
-            setCachedData(offlineCacheKeys.invoicesListMe, response.data.items)
-            return response.data.items
+            setCachedData(offlineCacheKeys.invoicesListMe, response.data)
+            return response.data
         }
-        return []
+        return { items: [], total: 0 , has_next: false, page: 1, per_page: 10}
     } catch (error) {
-        const cached = getCachedData<openApi.InvoiceRead[]>(offlineCacheKeys.invoicesListMe)
+        const cached = getCachedData<openApi.PaginatedResponse<openApi.InvoiceRead>>(offlineCacheKeys.invoicesListMe)
         if (cached) {
             return cached
         }
-        return []
+        return { items: [], total: 0 , has_next: false, page: 1, per_page: 10}
     }
 }
 

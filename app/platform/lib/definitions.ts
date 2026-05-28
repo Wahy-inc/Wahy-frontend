@@ -199,7 +199,7 @@ export type GetSchedualesForStudentFormState =
             student_id?: string[];
         }
         message?: string;
-        data?: openApi.ScheduleRead[];
+        data?: openApi.PaginatedResponse<openApi.ScheduleRead>;
     }
     | undefined;
 
