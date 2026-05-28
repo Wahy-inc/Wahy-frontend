@@ -54,7 +54,7 @@ export default function Students() {
                 try {
                     setLoading(true)
                     const data = await listStudents()
-                    setStudents(data)
+                    setStudents(data?.items || [])
                     setError(null)
                 } catch (err) {
                     setError('Failed to load students')
@@ -86,7 +86,7 @@ export default function Students() {
                 try {
                     setLoading(true)
                     const data = await listStudents()
-                    setStudents(data)
+                    setStudents(data?.items || [])
                     setError(null)
                 } catch (err) {
                     setError('Failed to load students')
@@ -122,7 +122,7 @@ export default function Students() {
 
         if (status !== 'success') {
             const data = await listStudents()
-            setStudents(data)
+            setStudents(data?.items || [])
         }
     }
 
@@ -132,7 +132,7 @@ export default function Students() {
 
         if (status !== 'success') {
             const data = await listStudents()
-            setStudents(data)
+            setStudents(data?.items || [])
         }
     }
 

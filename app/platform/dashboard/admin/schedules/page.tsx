@@ -50,7 +50,7 @@ export default function Schedules() {
     
     React.useEffect(() => {
         if (getScheduleState?.message == 'success' && getScheduleState.data) {
-            setGetSchedules(getScheduleState.data)
+            setGetSchedules(getScheduleState.data.items || [])
         }
         if (
             createScheduleState?.message == 'success' ||
@@ -63,7 +63,7 @@ export default function Schedules() {
                     setLoading(true)
                     const data = await (listSchedules())
                     console.log('Fetched schedules data:', data);
-                    setSchedules(data)
+                    setSchedules(data?.items || [])
                     setGetSchedules(null)
                     console.log(data);
                     setError(null)
@@ -100,7 +100,7 @@ export default function Schedules() {
                     const data = await listSchedules()
                     listStudents()
                     console.log('Fetched schedules data:', data);
-                    setSchedules(data)
+                    setSchedules(data?.items || [])
                     console.log(data);
                     setError(null)
                 } catch (err) {

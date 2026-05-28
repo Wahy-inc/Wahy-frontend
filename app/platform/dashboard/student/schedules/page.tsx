@@ -33,7 +33,7 @@ export default function Schedules() {
     
     React.useEffect(() => {
         if (getScheduleState?.message == 'success' && getScheduleState.data) {
-            setFilteredSchedules(getScheduleState.data)
+            setFilteredSchedules(getScheduleState.data.items || [])
         }
         if (hideInActive && schedules) {
             setFilteredSchedules(schedules.filter((schedule: openApi.ScheduleRead) => schedule.is_active))
@@ -58,7 +58,7 @@ export default function Schedules() {
                     setLoading(true)
                     const data = await listSchedulesMe()
                     console.log('Fetched schedules data:', data);
-                    setSchedules(data)
+                    setSchedules(data?.items || []  )
                     console.log(data);
                     setError(null)
                 } catch (err) {

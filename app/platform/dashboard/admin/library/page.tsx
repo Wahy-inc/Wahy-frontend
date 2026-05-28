@@ -89,7 +89,7 @@ export default function Schedules() {
                 try {
                     setLoading(true)
                     const data = await listLibrary()
-                    setLibraryItems(data)
+                    setLibraryItems(data?.items || [])
                     console.log(data);
                     setError(null)
                 } catch (err) {
@@ -130,7 +130,7 @@ export default function Schedules() {
             try {
                 setLoading(true)
                 const data = await listLibrary()
-                setLibraryItems(data)
+                setLibraryItems(data?.items || [])
                 await fetchFilesForItems()
                 setError(null)
             } catch (err) {

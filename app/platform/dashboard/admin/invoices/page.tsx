@@ -76,7 +76,7 @@ export default function Invoices() {
             try {
                 setLoading(true)
                 const data = await listInvoices()
-                setInvoices(data)
+                setInvoices(data.items)
                 setError(null)
             } catch (err) {
                 setError(t('invoices.get_error'))
@@ -104,7 +104,7 @@ export default function Invoices() {
             try {
                 setLoading(true)
                 const data = await listInvoices()
-                setInvoices(data)
+                setInvoices(data.items)
                 setError(null)
             } catch (err) {
                 setError(t('invoices.get_error'))

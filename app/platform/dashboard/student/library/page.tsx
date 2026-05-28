@@ -90,7 +90,7 @@ export default function Schedules() {
             try {
                 setLoading(true)
                 const data = await listLibraryMe()
-                setLibraryItems(data)
+                setLibraryItems(data?.items || [])
                 await fetchFilesForItems()
                 setError(null)
             } catch (err) {
