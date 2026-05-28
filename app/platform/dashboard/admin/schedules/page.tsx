@@ -51,6 +51,9 @@ export default function Schedules() {
         if (getScheduleState?.message == 'success' && getScheduleState.data) {
             setGetSchedules(getScheduleState.data.items || [])
         }
+    }, [getScheduleState])
+
+    React.useEffect(() => {
         if (
             createScheduleState?.message == 'success' ||
             createScheduleState?.message == 'queued' ||
@@ -75,12 +78,15 @@ export default function Schedules() {
             }
             fetchSchedules()
         }
+    }, [createScheduleState, updateScheduleState])
+
+    React.useEffect(() => {
         if (hideInActive && schedules) {
             setFilteredSchedules(schedules.items.filter((schedule: openApi.ScheduleRead) => schedule.is_active))
         } else if (!hideInActive && schedules) {
             setFilteredSchedules(null)
         }
-    }, [getScheduleState, createScheduleState, updateScheduleState, hideInActive, schedules])
+    }, [hideInActive, schedules])
 
     React.useEffect(() => {
         if (authLoading) return

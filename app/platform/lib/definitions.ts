@@ -145,7 +145,7 @@ export const createScheduleSchema = zod.object({
     end_time: zod.string().min(1, { error: 'End time is required' }).trim(),
     effective_from: zod.string().min(1, { error: 'Effective from is required' }).trim(),
     effective_until: zod.string().trim().optional(),
-    rrule_string: zod.string().min(0).trim().optional(),
+    rrule_string: zod.string().trim().optional(),
     notes: zod.string().trim().optional(),
 })
 export type CreateScheduleFormState =

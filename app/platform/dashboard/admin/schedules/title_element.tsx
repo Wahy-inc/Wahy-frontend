@@ -140,6 +140,9 @@ export default function TitleElement({
 
     const handleCreateSubmit = (formData: FormData) => {
         setCreateFormSubmitted(true)
+        if (isRecurring == 'false') {
+            formData.append("rrule_string", "FREQ=ONETIME;INTERVAL=0")
+        }
         formData.append("student_id", selectedStudentId?.toString() || "")
         console.log("Selected student ID:", formData.get("student_id"));
         
