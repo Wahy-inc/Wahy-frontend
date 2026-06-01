@@ -29,6 +29,8 @@ import { useLocalization } from "@/lib/localization-context";
 import { GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
 import { useToastListener } from "@/lib/toastListener";
 import { isClientOnline } from "@/lib/offlineSync";
+import { checkHealth } from "@/app/platform/actions/auth";
+import { toast } from "sonner";
 
 export default function Invoices() {
     const { isAdmin, isLoading: authLoading } = useAuth()
@@ -50,6 +52,13 @@ export default function Invoices() {
     const { t } = useLocalization()
 
     React.useEffect(() => {
+        checkHealth().then((res) => {
+            if (res.message == 'API is healthy') {
+                toast.success(res.message)
+            } else {
+                toast.warning(res.message)
+            }
+        })
         const refreshOffline = () => setIsOffline(!isClientOnline())
         refreshOffline()
         window.addEventListener('online', refreshOffline)

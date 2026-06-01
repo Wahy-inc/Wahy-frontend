@@ -129,6 +129,22 @@ export async function refreshAccessToken() {
     }
 }
 
+export async function checkHealth(): Promise<{ message: string }> {
+    try {
+        const response = await api.health.healthHealthGet()
+
+        if (response.data.status == 'ok') {
+            return {message: 'API is healthy' }
+        }
+        if (response.data.status == 'degraded') {
+            return { message: 'SERVER IS UNAVAILABLE' }
+        }
+        return {message: 'API health status: ' + response.data.status }
+    } catch (error) {
+        return { message: 'An error occurred while checking API health' }
+    }
+}
+
 export async function signout() {
     try {
         const response = await api.api.logoutApiV1AuthLogoutPost()
