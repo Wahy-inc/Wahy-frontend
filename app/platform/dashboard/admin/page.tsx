@@ -16,7 +16,7 @@ export default function DashboardPage({children: children, title: title}: {child
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
     React.useEffect(() => {
-        listStudents()
+        listStudents(1000,1)
     }, [])
     
     if (!isAdmin) {
@@ -61,7 +61,7 @@ export default function DashboardPage({children: children, title: title}: {child
                 </div>
             </div>
             <div id="content" className="mx-3 my-4 lg:m-10 xl:m-20 w-full bg-slate-100 min-h-full flex flex-col rounded-xl">
-                <div className='flex items-center gap-2 px-4 pt-4 lg:hidden'>
+                <div className='z-30 sticky w-full h-fit top-0 flex items-center gap-2 px-4 pt-4 lg:hidden'>
                     <button
                         type='button'
                         className='inline-flex items-center gap-2 rounded-md bg-slate-900 px-3 py-2 text-sm font-medium text-slate-100'
@@ -71,7 +71,7 @@ export default function DashboardPage({children: children, title: title}: {child
                         {t('access_control.menu_button_text')}
                     </button>
                 </div>
-                <div id='title' className='sticky top-0 z-20 bg-slate-100 pt-4 lg:pt-10 px-4 lg:px-10 rounded-xl pb-4 flex flex-col gap-3'>
+                <div id='title' className='md:sticky top-0 z-20 bg-slate-100 pt-4 lg:pt-10 px-4 lg:px-10 rounded-xl pb-4 flex flex-col gap-3'>
                     <OfflineStatusBar />
                     {title}
                 </div>

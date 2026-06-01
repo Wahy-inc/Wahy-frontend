@@ -37,7 +37,7 @@ export default function TitleElement({
 
     return (
             <div className="flex flex-col justify-center">
-                <div className='flex flex-row justify-between items-center'>
+                <div className='flex flex-col md:flex-row justify-between items-center'>
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>
                 <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">

@@ -31,13 +31,13 @@ export default function SignUp() {
     return (
     <form action={action} className="w-xs lg:w-5xl mx-auto my-30 border-2 border-slate-800 p-6 rounded-lg shadow-lg bg-slate-800 text-slate-100">
     <FieldGroup>
-      <div className="flex flex-row justify-between gap-3">
+      <div className="flex flex-col md:flex-row justify-between gap-3">
       <Field>
         <FieldLabel htmlFor="ar-name">{t('auth.name_arabic_label')}</FieldLabel>
         <Input 
           id="ar-name" 
           name="ar-name"
-          placeholder={t('auth.name_arabic_placeholder')} 
+          placeholder="احمد محمد" 
           className="bg-slate-100 text-slate-800"
           disabled={pending}
         />

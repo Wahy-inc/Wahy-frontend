@@ -104,7 +104,7 @@ export default function TitleElement({
 
     return (
             <div className="flex flex-col justify-center">
-                <div className='flex flex-row justify-between items-center'>
+                <div className='flex flex-col md:flex-row justify-between items-center'>
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
                     <div className='flex flex-row gap-2 items-center'>
                         <Field orientation="horizontal" className='w-80'>

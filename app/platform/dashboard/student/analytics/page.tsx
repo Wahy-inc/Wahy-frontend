@@ -31,7 +31,7 @@ export default function Home() {
     }) => {
         return (
                 <div className="bg-linear-to-r from-slate-50 to-slate-100 rounded-xl">
-                    <div className="flex items-center justify-center gap-8">
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-8">
                         <div className="text-center">
                             <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('analytics.start_time')}</p>
                             <div className="flex items-center gap-2">
@@ -41,7 +41,7 @@ export default function Home() {
                         </div>
                         <div className={`flex items-center ${language === 'ar' ? 'rotate-180' : 'rotate-0'}`}>
                             <div className="w-12 h-0.5 bg-slate-300" />
-                            <icon.ChevronRight className="w-5 h-5 text-slate-400" />
+                            <icon.ChevronRight className="w-5 h-5 rotate-90 md:rotate-0 text-slate-400" />
                             <div className="w-12 h-0.5 bg-slate-300" />
                         </div>
                         <div className="text-center">
@@ -58,7 +58,7 @@ export default function Home() {
 
     const titleElement = (title: string, action: (formData: FormData) => void, pending: boolean) => {
         return (
-            <div className="flex flex-row justify-between my-3">
+            <div className="flex flex-col md:flex-row justify-between my-3">
                 <div id="title">
                     <p className='text-4xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>

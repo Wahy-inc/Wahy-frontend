@@ -214,7 +214,7 @@ export default function TitleElement({
 
     return (
             <div className="flex flex-col justify-center">
-                <div className='flex flex-row justify-between items-center'>
+                <div className='flex flex-col md:flex-row justify-between items-center'>
                     <p className='text-5xl text-slate-950 font-bold mb-5'>{title}</p>
                     <div className='flex flex-row gap-2 items-center'>
                         <Field orientation="horizontal" className='w-80'>
@@ -232,11 +232,11 @@ export default function TitleElement({
                         )}
                     </div>
                 </div>
-                <div className="w-full grid grid-cols-3 gap-4 mt-4 mb-2">
+                <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 mb-2">
                     <div>
                     <AlertDialog onOpenChange={handleCreateDialogOpenChange}>
                         <AlertDialogTrigger asChild>
-                            <Button className="transition duration-300 col-start-1 col-end-2 cursor-pointer">{t('schedules.create_schedule')}</Button>
+                            <Button className="transition duration-300 md:col-start-1 md:col-end-2 cursor-pointer">{t('schedules.create_schedule')}</Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                             <form action={handleCreateSubmit} className="w-full">
@@ -329,7 +329,7 @@ export default function TitleElement({
                         </AlertDialogContent>
                     </AlertDialog>
                     </div>
-                    <div className="col-start-3 col-end-4 justify-end flex flex-row gap-2 items-center">
+                    <div className="md:col-start-3 md:col-end-4 justify-start md:justify-end flex flex-row gap-2 items-center">
                         <AlertDialog>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 cursor-pointer bg-slate-100 border border-slate-950 text-slate-950 hover:bg-slate-950 hover:text-slate-100">{t('schedules.get_schedules')}</Button>

@@ -58,7 +58,7 @@ export default function Home() {
     }) => {
         return (
                 <div className="bg-linear-to-r from-slate-50 to-slate-100 rounded-xl">
-                    <div className="flex items-center justify-center gap-8">
+                    <div className="flex flex-col md:flex-row items-center justify-center gap-8">
                         <div className="text-center">
                             <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('analytics.start_time')}</p>
                             <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export default function Home() {
                         </div>
                         <div className={`flex items-center ${language === 'ar' ? 'rotate-180' : 'rotate-0'}`}>
                             <div className="w-12 h-0.5 bg-slate-300" />
-                            <icon.ChevronRight className="w-5 h-5 text-slate-400" />
+                            <icon.ChevronRight className="w-5 h-5 rotate-90 md:rotate-0 text-slate-400" />
                             <div className="w-12 h-0.5 bg-slate-300" />
                         </div>
                         <div className="text-center">
@@ -90,21 +90,21 @@ export default function Home() {
 
     const titleElement = (title: string, action: (formData: FormData) => void, pending: boolean) => {
         return (
-            <div className="flex flex-row justify-between my-3">
+            <div className="flex flex-col md:flex-row justify-between my-3">
                 <div id="title">
                     <p className='text-4xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>
-                <div id="period" className="flex flex-row items-center">
-                    <form action={action} className="grid grid-cols-3 gap-0">
-                        <div className="flex flex-row items-center col-start-1 col-end-2">
+                <div id="period" className="flex items-center">
+                    <form action={action} className="grid grid-cols-1 md:grid-cols-3 gap-0">
+                        <div className="flex flex-row items-center md:col-start-1 md:col-end-2">
                             <p className="inline px-1">{t('analytics.period_from')}</p>
                             <Input className="w-32" type="date" name="period_start" id="period_start"></Input>
                         </div>
-                        <div className="flex flex-row items-center col-start-2 col-end-3">
+                        <div className="flex flex-row items-center md:col-start-2 md:col-end-3">
                             <p className="inline px-1">{t('analytics.period_to')}</p>
                             <Input className="w-32 mr-2" type="date" name="period_end" id="period_end"></Input>
                         </div>
-                        <Button disabled={pending} id="submit" type="submit" className="col-start-3 col-end-4 bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800 hover:border-slate-800 border-2">{t('common.submit')}</Button>
+                        <Button disabled={pending} id="submit" type="submit" className="md:col-start-3 md:col-end-4 bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800 hover:border-slate-800 border-2">{t('common.submit')}</Button>
                     </form>
                 </div>
             </div>
@@ -113,26 +113,24 @@ export default function Home() {
 
     const studentTitleElement = (title: string, pending: boolean) => {
         return (
-            <div className="flex flex-row justify-between my-3">
+            <div className="flex flex-col md:flex-row justify-between my-3">
                 <div id="title">
                     <p className='text-4xl text-slate-950 font-bold mb-5'>{title}</p>
                 </div>
                 <div id="period" className="flex flex-row items-center">
-                    <form action={handleAttendanceSubmit} className="grid grid-cols-3 grid-rows-2 gap-1 items-center">
-                        <div className="flex flex-row items-center col-start-1 col-end-2 row-start-2 row-end-3">
+                    <form action={handleAttendanceSubmit} className="grid grid-cols-1 md:grid-cols-3 grid-rows-2 gap-1 items-center">
+                        <div className="flex flex-row items-center md:col-start-1 md:col-end-2 md:row-start-2 md:row-end-3">
                             <p className="inline px-1">{t('analytics.period_from')}</p>
                             <Input className="w-32" type="date" name="period_start" id="period_start"></Input>
                         </div>
-                        <div className="flex flex-row items-center col-start-2 col-end-3 row-start-2 row-end-3">
+                        <div className="flex flex-row items-center md:col-start-2 md:col-end-3 md:row-start-2 md:row-end-3">
                             <p className="inline px-1">{t('analytics.period_to')}</p>
                             <Input className="w-32" type="date" name="period_end" id="period_end"></Input>
                         </div>
-                        {/* <p className="inline px-1">{t('students.student_id')}</p>
-                        <Input className="w-32 mr-2" type="text" name="student_id" id="student_id"></Input> */}
-                        <div className="col-start-1 col-end-3 row-start-1 row-end-2 w-full">
+                        <div className="md:col-start-1 md:col-end-3 md:row-start-1 md:row-end-2 w-full">
                             <StudentMenu onStudentSelect={setSelectedStudentId}/>
                         </div>
-                        <Button disabled={pending} id="submit" type="submit" className="col-start-3 col-end-4 row-start-1 row-end-3 bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800 hover:border-slate-800 border-2">{t('common.submit')}</Button>
+                        <Button disabled={pending} id="submit" type="submit" className="md:col-start-3 md:col-end-4 md:row-start-1 md:row-end-3 bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800 hover:border-slate-800 border-2">{t('common.submit')}</Button>
                     </form>
                 </div>
             </div>
@@ -249,9 +247,9 @@ export default function Home() {
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 grid grid-cols-3 w-full p-0">
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">{t('analytics.pass_rate')}</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.attendance_rate')}</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-3 col-end-4">{t('analytics.timeliness_rate')}</p>
+                            <p className="text-gray-500 text-md md:text-xl font-bold text-center col-start-1 col-end-2">{t('analytics.pass_rate')}</p>
+                            <p className="text-gray-500 text-md md:text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.attendance_rate')}</p>
+                            <p className="text-gray-500 text-md md:text-xl font-bold text-center col-start-3 col-end-4">{t('analytics.timeliness_rate')}</p>
                         </CardHeader>
                         <CardDescription className="grid grid-cols-3">
                             <p className="text-gray-300 text-4xl font-bold col-start-1 col-end-2 text-center">{analytic.pass_rate}</p>
