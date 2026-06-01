@@ -2947,6 +2947,7 @@ export class Api<
         method: "POST",
         secure: true,
         format: "json",
+        credentials: "include",
         ...params,
       }),
 
@@ -2964,6 +2965,7 @@ export class Api<
         path: `/api/v1/auth/logout`,
         method: "POST",
         secure: true,
+        credentials: "include",
         ...params,
       }),
 

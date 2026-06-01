@@ -115,6 +115,10 @@ export async function refreshAccessToken() {
     try {
         const response = await api.api.refreshApiV1AuthRefreshPost()
 
+        if (!response.ok) {
+            window.location.href = '/platform/auth/login'
+        }
+
         if (response.status === 200 && response.data.access_token) {
             localStorage.setItem('access_token', response.data.access_token)
             localStorage.setItem('expire', response.data.expires_at)
