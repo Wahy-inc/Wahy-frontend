@@ -812,7 +812,7 @@ export interface InvoiceRead {
    * Total Amount
    * Sum of all **billable** line items. Recalculated whenever an override changes a line item's ``billable`` flag.
    */
-  total_amount: number;
+  total_amount: string;
   /**
    * Currency
    * ISO 4217 currency code (e.g. ``USD``, ``SAR``). Defaults to ``USD``.
@@ -908,7 +908,7 @@ export interface InvoiceWithItemsRead {
    * Total Amount
    * Sum of all **billable** line items. Recalculated whenever an override changes a line item's ``billable`` flag.
    */
-  total_amount: number;
+  total_amount: string;
   /**
    * Currency
    * ISO 4217 currency code (e.g. ``USD``, ``SAR``). Defaults to ``USD``.
@@ -2880,6 +2880,7 @@ export class Api<
         body: data,
         secure: true,
         type: ContentType.Json,
+        credentials: "include",
         format: "json",
         ...params,
       }),
@@ -2927,6 +2928,7 @@ export class Api<
         secure: true,
         type: ContentType.Json,
         format: "json",
+        credentials: "include",
         ...params,
       }),
 

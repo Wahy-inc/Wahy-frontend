@@ -104,7 +104,7 @@ export default function Invoices() {
                         <DollarSign />
                     </ItemMedia>
                 <ItemTitle>{t('invoices.invoice_id_label')}: {invoice.invoice_number} , {t('students.student_id')}: {t('invoices.me')}</ItemTitle>
-                    {t('invoices.amount')}: {invoice.total_amount} {invoice.currency} , {t('invoices.status')}: {invoice.status} <br />
+                    {t('invoices.amount')}: {parseFloat(invoice.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {invoice.currency} , {t('invoices.status')}: {invoice.status} <br />
                     <div id="accordion-data" className="text-sm">
                         <Accordion
                         type="single"
