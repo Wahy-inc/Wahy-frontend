@@ -52,13 +52,18 @@ export default function Invoices() {
     const { t } = useLocalization()
 
     React.useEffect(() => {
-        checkHealth().then((res) => {
-            if (res.message == 'API is healthy') {
-                toast.success(res.message)
-            } else {
-                toast.warning(res.message)
-            }
-        })
+        try {
+            checkHealth().then((res) => {
+                if (res.message == 'API is healthy') {
+                    toast.success(res.message)
+                } else {
+                    toast.warning(res.message)
+                }
+            })
+        } catch (err) {
+            console.error("API health check failed")
+        }
+
         const refreshOffline = () => setIsOffline(!isClientOnline())
         refreshOffline()
         window.addEventListener('online', refreshOffline)
