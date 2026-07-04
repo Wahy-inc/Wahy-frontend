@@ -50,7 +50,7 @@ USER nextjs
 EXPOSE 3000
 
 # Health check
-HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=12 \
-  CMD wget -q -T 5 -O - http://localhost:3000/api/health >/dev/null
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD curl -f http://localhost:3000/health || exit 1
 
 CMD ["node", "server.js"]
