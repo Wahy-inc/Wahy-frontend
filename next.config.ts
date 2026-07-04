@@ -53,7 +53,7 @@ const nextConfig: NextConfig = {
     ]
   },
   async rewrites() {
-    const backendUrl = 'http://r11xxxsewe44s3thut5shsft.46.225.235.0.sslip.io';
+    const backendUrl = 'http://vop115gj2yucvmygcpr4pkuw.46.225.235.0.sslip.io';
     return {
       beforeFiles: [
         {
