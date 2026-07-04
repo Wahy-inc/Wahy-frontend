@@ -50,7 +50,7 @@ USER nextjs
 EXPOSE 3000
 
 # Health check
-HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "require('http').get('http://127.0.0.1:3000/api/health', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})" || exit 1
+HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=12 \
+  CMD wget -q -T 5 -O - http://127.0.0.1:3000/api/health >/dev/null
 
 CMD ["node", "server.js"]
