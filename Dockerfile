@@ -19,8 +19,8 @@ RUN npm ci
 COPY . .
 
 # Disable Next.js telemetry during build
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_ENV=production
 
 RUN npm run build
 
@@ -28,10 +28,10 @@ RUN npm run build
 FROM node:20-alpine AS runtime
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV NEXT_TELEMETRY_DISABLED 1
-ENV PORT 3000
-ENV HOSTNAME 0.0.0.0
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
 # Security: Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
