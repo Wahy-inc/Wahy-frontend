@@ -51,6 +51,6 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=10s --timeout=5s --start-period=60s --retries=12 \
-  CMD wget -q -T 5 -O - http://vop115gj2yucvmygcpr4pkuw.46.225.235.0.sslip.io/api/health >/dev/null
+  CMD wget -q -T 5 -O - http://127.0.0.1:3000/api/health >/dev/null
 
 CMD ["node", "server.js"]
