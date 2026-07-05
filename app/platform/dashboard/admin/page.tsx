@@ -16,7 +16,7 @@ export default function DashboardPage({children: children, title: title}: {child
     const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
 
     React.useEffect(() => {
-        listStudents(1000,1)
+        listStudents(100,1)
     }, [])
     
     if (!isAdmin) {
