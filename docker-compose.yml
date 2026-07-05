@@ -11,6 +11,7 @@ services:
       args:
         # Build-time arguments can be passed here
         NODE_ENV: production
+        BACKEND_URL: ${BACKEND_URL:-http://vop115gj2yucvmygcpr4pkuw.46.225.235.0.sslip.io}
 
     container_name: wahy-frontend
 
@@ -25,6 +26,7 @@ services:
       HOSTNAME: 0.0.0.0
 
       # API Configuration - Update these for your deployment
+      BACKEND_URL: ${BACKEND_URL:-http://vop115gj2yucvmygcpr4pkuw.46.225.235.0.sslip.io}
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:9000}
       NEXT_PUBLIC_API_TIMEOUT: ${NEXT_PUBLIC_API_TIMEOUT:-30000}
 

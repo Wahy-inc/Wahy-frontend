@@ -53,7 +53,7 @@ const nextConfig: NextConfig = {
     ]
   },
   async rewrites() {
-    const backendUrl = 'http://vop115gj2yucvmygcpr4pkuw.46.225.235.0.sslip.io';
+    const backendUrl = process.env.BACKEND_URL || 'http://vop115gj2yucvmygcpr4pkuw.46.225.235.0.sslip.io';
     return {
       beforeFiles: [
         {

@@ -13,6 +13,9 @@ WORKDIR /app
 # Install build dependencies
 RUN apk add --no-cache libc6-compat
 
+ARG BACKEND_URL
+ENV BACKEND_URL=${BACKEND_URL}
+
 COPY package.json package-lock.json ./
 RUN npm ci
 

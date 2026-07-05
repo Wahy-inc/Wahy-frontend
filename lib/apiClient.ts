@@ -25,15 +25,17 @@ const baseApi = new openApi.Api<unknown>({
 });
 
 // Get the original request method
-const originalRequest = baseApi.request.bind(baseApi);
+const originalRequest: typeof baseApi.request = baseApi.request.bind(baseApi);
 
 // Flag to prevent infinite refresh loops
 let isRefreshing = false;
 let refreshPromise: Promise<void> | null = null;
 
 // Override request method to handle request deduplication, binary formats, and 401 token refresh
-baseApi.request = async function (config: any) {
+baseApi.request = (async function <T = unknown, E = unknown>(config: openApi.FullRequestParams): Promise<openApi.HttpResponse<T, E>> {
   const { path, method = 'GET', query } = config;
+  const isRefreshEndpoint = path?.includes('/refresh');
+  const isBinaryEndpoint = path?.includes('/pdf') || path?.includes('/download');
 
   // Register the request
   const { cancelToken, cleanup, shouldCancel } = requestManager.registerRequest(method, path, query);
@@ -47,27 +49,34 @@ baseApi.request = async function (config: any) {
   try {
     // Check if this is a binary file endpoint - force blob format to prevent JSON parsing 
     //not include || path?.includes('/files') because some file endpoints return JSON responses (e.g. file metadata)
-    const isBinaryEndpoint = path?.includes('/pdf') || path?.includes('/download');
     const requestConfig = {
       ...config,
       cancelToken,
       // Override format to 'blob' for binary endpoints to prevent JSON parsing
       ...(isBinaryEndpoint && { format: 'blob' }),
-    };
+    } satisfies openApi.FullRequestParams;
 
     // console.log('[apiClient] Request:', { path, isBinaryEndpoint, format: requestConfig.format });
 
     // Execute request with the cancel token
-    const result = await originalRequest(requestConfig as any);
-    
-    // Handle 401 Unauthorized - refresh token
-    if (result.status === 401) {
-      // Avoid refresh endpoint calling itself
-      if (!path?.includes('/refresh')) {
+    const result = await originalRequest<T, E>(requestConfig);
+
+    // console.log('[apiClient] Response:', { path, status: result.status, dataType: typeof result.data, dataIsBlob: result.data instanceof Blob, dataSize: result.data?.size });
+
+    cleanup();
+    return result;
+  } catch (error) {
+    const status =
+      typeof error === 'object' && error !== null && 'status' in error
+        ? (error as { status?: number }).status
+        : undefined;
+
+    if (status === 401 && !isRefreshEndpoint) {
+      try {
         // If a refresh is already in progress, wait for it
         if (isRefreshing && refreshPromise) {
           await refreshPromise;
-        } else if (!isRefreshing) {
+        } else {
           // Start a new refresh
           isRefreshing = true;
           refreshPromise = (async () => {
@@ -82,6 +91,7 @@ baseApi.request = async function (config: any) {
                 localStorage.removeItem('expire');
                 window.location.href = '/';
               }
+              throw refreshError;
             } finally {
               isRefreshing = false;
               refreshPromise = null;
@@ -90,14 +100,22 @@ baseApi.request = async function (config: any) {
 
           await refreshPromise;
         }
+
+        const retryRequestConfig = {
+          ...config,
+          cancelToken,
+          ...(isBinaryEndpoint ? { format: 'blob' } : {}),
+        } satisfies openApi.FullRequestParams;
+
+        const retriedResult = await originalRequest<T, E>(retryRequestConfig);
+        cleanup();
+        return retriedResult;
+      } catch (refreshOrRetryError) {
+        cleanup();
+        throw refreshOrRetryError;
       }
     }
-    
-    // console.log('[apiClient] Response:', { path, status: result.status, dataType: typeof result.data, dataIsBlob: result.data instanceof Blob, dataSize: result.data?.size });
 
-    cleanup();
-    return result;
-  } catch (error) {
     cleanup();
 
     // Check if this is an abort error (expected when cancelling duplicate requests)
@@ -107,7 +125,7 @@ baseApi.request = async function (config: any) {
 
     throw error;
   }
-} as any;
+}) as typeof baseApi.request;
 
 /**
  * Get the deduplicated API instance

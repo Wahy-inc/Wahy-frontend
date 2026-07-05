@@ -21,7 +21,7 @@
 ### 3. Set Environment Variables
 In Coolify dashboard, add:
 ```
-BACKEND_URL=https://your-api-backend.com  (required)
+BACKEND_URL=https://your-api-backend.com  (build-time required for rewrites)
 NODE_ENV=production                         (optional, defaults to production)
 PORT=3000                                   (optional, defaults to 3000)
 ```
@@ -43,6 +43,7 @@ PORT=3000                                   (optional, defaults to 3000)
 ## Important Notes
 - The app builds inside Docker (not pre-built)
 - `.env.local` on server is not used; use Coolify environment variables
+- `BACKEND_URL` must be available during the build because `next.config.ts` uses it for `/api` rewrites
 - Consider setting up a reverse proxy (Nginx) in front for:
   - SSL/HTTPS
   - Caching static assets
