@@ -46,24 +46,7 @@ export default function Schedules() {
     useToastListener(createLibraryItemState, {functionName: "Create Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
     useToastListener(getLibraryItemState, {functionName: "Get Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
     useToastListener(uploadFileState, {functionName: "Upload File", successMessage: t('messages.file_uploaded'), errorMessage: t('messages.error')})
-    
-    const fetchFilesForItems = async () => {
-        if (!libraryItems) return
-        const filesMap: Record<number, UploadedLibraryFile[]> = {}
         
-        for (const item of libraryItems.items) {
-            try {
-                const res = await listUploadLibraryFile(item.id)
-                filesMap[item.id] = res?.data || []
-            } catch (err) {
-                console.error(`Failed to load files for item ${item.id}:`, err)
-                filesMap[item.id] = []
-            }
-        }
-        
-        return filesMap
-    }
-    
     React.useEffect(() => {
         const refreshOffline = () => setIsOffline(!isClientOnline())
         refreshOffline()
@@ -81,6 +64,22 @@ export default function Schedules() {
             setLibraryItems({ items: [getLibraryItemState.data], total: 1, page: 1, per_page: 1, has_next: false })
         }
         if (uploadFileState?.message === 'success' && uploadFileState.data) {
+            const fetchFilesForItems = async () => {
+                if (!libraryItems) return
+                const filesMap: Record<number, UploadedLibraryFile[]> = {}
+                
+                for (const item of libraryItems.items) {
+                    try {
+                        const res = await listUploadLibraryFile(item.id)
+                        filesMap[item.id] = res?.data || []
+                    } catch (err) {
+                        console.error(`Failed to load files for item ${item.id}:`, err)
+                        filesMap[item.id] = []
+                    }
+                }
+                
+                setLibraryFiles(filesMap)
+            }
             fetchFilesForItems()
         }
         if (createLibraryItemState?.message === 'success') {
@@ -100,7 +99,7 @@ export default function Schedules() {
             }
             fetchLibraryItems()
         }
-    }, [getLibraryItemState, createLibraryItemState, uploadFileState])
+    }, [getLibraryItemState, createLibraryItemState, uploadFileState, libraryItems])
 
     React.useEffect(() => {
         // When upload completes (uploadFilePending becomes false)
@@ -126,12 +125,27 @@ export default function Schedules() {
         // }
         
         const fetchLibraryItems = async () => {
+            const fetchFilesForItems = async () => {
+                if (!libraryItems) return
+                const filesMap: Record<number, UploadedLibraryFile[]> = {}
+                
+                for (const item of libraryItems.items) {
+                    try {
+                        const res = await listUploadLibraryFile(item.id)
+                        filesMap[item.id] = res?.data || []
+                    } catch (err) {
+                        console.error(`Failed to load files for item ${item.id}:`, err)
+                        filesMap[item.id] = []
+                    }
+                }
+                
+                setLibraryFiles(filesMap)
+            }
             try {
                 setLoading(true)
                 const data = await listLibrary(10, 1)
                 setLibraryItems(data)
-                const filesMap = await fetchFilesForItems()
-                setLibraryFiles(filesMap || {})
+                await fetchFilesForItems()
                 setError(null)
             } catch (err) {
                 setError('Failed to load library items')
@@ -141,7 +155,7 @@ export default function Schedules() {
             }
         }
         fetchLibraryItems()
-    }, [authLoading])
+    }, [authLoading, libraryItems]) // Re-run if the number of items changes
 
     const handleUploadFile = (formData: FormData, itemID: number, file: File) => {
         formData.append('itemID', itemID.toString())
@@ -182,6 +196,22 @@ export default function Schedules() {
             setUploadProgress(100)
             setTimeout(() => setUploadProgress(0), 800)
             // Refresh files after successful upload
+                        const fetchFilesForItems = async () => {
+                if (!libraryItems) return
+                const filesMap: Record<number, UploadedLibraryFile[]> = {}
+                
+                for (const item of libraryItems.items) {
+                    try {
+                        const res = await listUploadLibraryFile(item.id)
+                        filesMap[item.id] = res?.data || []
+                    } catch (err) {
+                        console.error(`Failed to load files for item ${item.id}:`, err)
+                        filesMap[item.id] = []
+                    }
+                }
+                
+                setLibraryFiles(filesMap)
+            }
             fetchFilesForItems()
         })
         .catch((err) => {
