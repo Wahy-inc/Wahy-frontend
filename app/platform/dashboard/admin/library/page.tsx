@@ -43,6 +43,22 @@ export default function Schedules() {
     const { isAdmin, isLoading: authLoading } = useAuth()
     const { t , language} = useLocalization()
 
+    const refreshLibraryFiles = React.useCallback(async (items: openApi.LibraryItemRead[]) => {
+        const filesMap: Record<number, UploadedLibraryFile[]> = {}
+
+        for (const item of items) {
+            try {
+                const res = await listUploadLibraryFile(item.id)
+                filesMap[item.id] = res?.data || []
+            } catch (err) {
+                console.error(`Failed to load files for item ${item.id}:`, err)
+                filesMap[item.id] = []
+            }
+        }
+
+        setLibraryFiles(filesMap)
+    }, [])
+
     useToastListener(createLibraryItemState, {functionName: "Create Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
     useToastListener(getLibraryItemState, {functionName: "Get Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
     useToastListener(uploadFileState, {functionName: "Upload File", successMessage: t('messages.file_uploaded'), errorMessage: t('messages.error')})
@@ -64,31 +80,20 @@ export default function Schedules() {
             setLibraryItems({ items: [getLibraryItemState.data], total: 1, page: 1, per_page: 1, has_next: false })
         }
         if (uploadFileState?.message === 'success' && uploadFileState.data) {
-            const fetchFilesForItems = async () => {
-                if (!libraryItems) return
-                const filesMap: Record<number, UploadedLibraryFile[]> = {}
-                
-                for (const item of libraryItems.items) {
-                    try {
-                        const res = await listUploadLibraryFile(item.id)
-                        filesMap[item.id] = res?.data || []
-                    } catch (err) {
-                        console.error(`Failed to load files for item ${item.id}:`, err)
-                        filesMap[item.id] = []
-                    }
-                }
-                
-                setLibraryFiles(filesMap)
+            if (libraryItems) {
+                refreshLibraryFiles(libraryItems.items)
             }
-            fetchFilesForItems()
         }
         if (createLibraryItemState?.message === 'success') {
             const fetchLibraryItems = async () => {
                 try {
                     setLoading(true)
                     const data = await listLibrary(10, 1)
-                    setLibraryItems(data)
-                    console.log(data);
+                    if (data) {
+                        setLibraryItems(data)
+                        await refreshLibraryFiles(data.items)
+                        console.log(data);
+                    }
                     setError(null)
                 } catch (err) {
                     setError('Failed to load library items')
@@ -99,7 +104,7 @@ export default function Schedules() {
             }
             fetchLibraryItems()
         }
-    }, [getLibraryItemState, createLibraryItemState, uploadFileState])
+    }, [getLibraryItemState, createLibraryItemState, uploadFileState, libraryItems, refreshLibraryFiles])
 
     React.useEffect(() => {
         // When upload completes (uploadFilePending becomes false)
@@ -125,27 +130,13 @@ export default function Schedules() {
         // }
         
         const fetchLibraryItems = async () => {
-            const fetchFilesForItems = async () => {
-                if (!libraryItems) return
-                const filesMap: Record<number, UploadedLibraryFile[]> = {}
-                
-                for (const item of libraryItems.items) {
-                    try {
-                        const res = await listUploadLibraryFile(item.id)
-                        filesMap[item.id] = res?.data || []
-                    } catch (err) {
-                        console.error(`Failed to load files for item ${item.id}:`, err)
-                        filesMap[item.id] = []
-                    }
-                }
-                
-                setLibraryFiles(filesMap)
-            }
             try {
                 setLoading(true)
                 const data = await listLibrary(10, 1)
-                setLibraryItems(data)
-                await fetchFilesForItems()
+                if (data) {
+                    setLibraryItems(data)
+                    await refreshLibraryFiles(data.items)
+                }
                 setError(null)
             } catch (err) {
                 setError('Failed to load library items')
@@ -155,10 +146,9 @@ export default function Schedules() {
             }
         }
         fetchLibraryItems()
-    }, [authLoading]) // Re-run if the number of items changes
+    }, [authLoading, refreshLibraryFiles]) // Re-run if auth status changes
 
     const handleUploadFile = (formData: FormData, itemID: number, file: File) => {
-        formData.append('itemID', itemID.toString())
         formData.append('file', file)
         
         const totalSize = file.size
@@ -182,14 +172,26 @@ export default function Schedules() {
         }, 100)
         
         progressIntervalRef.current = interval
+
+        const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
         
         // Make the fetch request with abort signal
         fetch(`/api/v1/library/${itemID}/files`, {
             method: 'POST',
             body: formData,
-            signal: abortController.signal
+            signal: abortController.signal,
+            headers: {
+                ...(token ? { Authorization: `Bearer ${token}` } : {}),
+            },
         })
-        .then(res => res.json())
+        .then(async (res) => {
+            if (!res.ok) {
+                const errorText = await res.text().catch(() => '')
+                throw new Error(errorText || `Upload failed with status ${res.status}`)
+            }
+
+            return res.json().catch(() => null)
+        })
         .then(() => {
             clearInterval(interval)
             progressIntervalRef.current = null
