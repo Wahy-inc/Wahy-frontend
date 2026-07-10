@@ -103,7 +103,7 @@ export default function Schedules() {
                 try {
                     setLoading(true)
                     const data = await listSchedules(10, 1)
-                    listStudents(10000,1)
+                    listStudents(100,1)
                     console.log('Fetched schedules data:', data);
                     setSchedules(data)
                     console.log(data);
