@@ -57,6 +57,6 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD-SHELL curl -fsS "http://127.0.0.1:${PORT:-3000}/health" || exit 1
+  CMD curl -fsS "http://127.0.0.1:${PORT:-3000}/health" || exit 1
 
 CMD ["node", "server.js"]
