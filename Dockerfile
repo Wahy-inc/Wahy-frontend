@@ -36,6 +36,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PORT=3000
 ENV HOSTNAME=0.0.0.0
 
+# Healthcheck support
+RUN apk add --no-cache curl
+
 # Security: Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
@@ -54,6 +57,6 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-  CMD node -e "fetch('http://localhost:3000/health').then((r) => { if (!r.ok) process.exit(1); }).catch(() => process.exit(1))"
+  CMD-SHELL curl -fsS "http://127.0.0.1:${PORT:-3000}/health" || exit 1
 
 CMD ["node", "server.js"]
