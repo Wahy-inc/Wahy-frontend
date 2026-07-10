@@ -61,7 +61,7 @@ export default function Schedules() {
             }
         }
         
-        setLibraryFiles(filesMap)
+        return filesMap
     }
     
     React.useEffect(() => {
@@ -130,7 +130,8 @@ export default function Schedules() {
                 setLoading(true)
                 const data = await listLibrary(10, 1)
                 setLibraryItems(data)
-                await fetchFilesForItems()
+                const filesMap = await fetchFilesForItems()
+                setLibraryFiles(filesMap || {})
                 setError(null)
             } catch (err) {
                 setError('Failed to load library items')
