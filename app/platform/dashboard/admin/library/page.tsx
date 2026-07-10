@@ -99,7 +99,7 @@ export default function Schedules() {
             }
             fetchLibraryItems()
         }
-    }, [getLibraryItemState, createLibraryItemState, uploadFileState, libraryItems])
+    }, [getLibraryItemState, createLibraryItemState, uploadFileState])
 
     React.useEffect(() => {
         // When upload completes (uploadFilePending becomes false)
@@ -155,7 +155,7 @@ export default function Schedules() {
             }
         }
         fetchLibraryItems()
-    }, [authLoading, libraryItems]) // Re-run if the number of items changes
+    }, [authLoading]) // Re-run if the number of items changes
 
     const handleUploadFile = (formData: FormData, itemID: number, file: File) => {
         formData.append('itemID', itemID.toString())
