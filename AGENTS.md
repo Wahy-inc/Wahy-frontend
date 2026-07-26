@@ -74,4 +74,13 @@ npx eslint --max-warnings=0 .
 
 # Production build
 npm run build
+
+# Run Development Container (Next.js hot reload)
+docker compose -f docker-compose.dev.yml up --build
+
+# Run Full Stack Development Containers (Backend + DB + Frontend)
+docker compose -f ../docker-compose.dev.yml up --build
+
+# Production Deployment (Coolify / Traefik)
+docker compose up -d --build
 ```
