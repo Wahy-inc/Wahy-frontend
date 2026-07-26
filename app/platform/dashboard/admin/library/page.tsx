@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createLibraryItem, deleteLibraryItem, getLibraryItem, listLibrary } from "@/app/platform/actions/dashboard";
+import { createLibraryItem, deleteLibraryItem, getLibraryItem, listLibrary, deleteLibraryFile, downloadLibraryFile, listUploadLibraryFile, uploadLibraryFile } from "@/app/platform/actions/library";
 import DashboardPage from "../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
@@ -21,9 +21,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
-import { isClientOnline } from "@/lib/offlineSync";
-import { deleteLibraryFile, downloadLibraryFile, listUploadLibraryFile, uploadLibraryFile } from "@/app/platform/actions/dashboardv2";
-import { UploadedLibraryFile } from "@/app/platform/lib/definitionsv2";
+import { UploadedLibraryFile } from "@/app/platform/lib/definitions";
 
 
 export default function Schedules() {
@@ -36,44 +34,27 @@ export default function Schedules() {
     const [getLibraryItemState, getLibraryItemAction, getLibraryItemPending] = React.useActionState(getLibraryItem, undefined)
     const [createLibraryDialogOpen, setCreateLibraryDialogOpen] = React.useState(false)
     const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
-    const [isOffline, setIsOffline] = React.useState(false)
-    const [uploadProgress, setUploadProgress] = React.useState(0)
-    const progressIntervalRef = React.useRef<NodeJS.Timeout | null>(null)
-    const abortControllerRef = React.useRef<AbortController | null>(null)
     const { isAdmin, isLoading: authLoading } = useAuth()
     const { t , language} = useLocalization()
 
     const refreshLibraryFiles = React.useCallback(async (items: openApi.LibraryItemRead[]) => {
         const filesMap: Record<number, UploadedLibraryFile[]> = {}
-
-        for (const item of items) {
-            try {
-                const res = await listUploadLibraryFile(item.id)
-                filesMap[item.id] = res?.data || []
-            } catch (err) {
-                console.error(`Failed to load files for item ${item.id}:`, err)
-                filesMap[item.id] = []
-            }
-        }
-
+        await Promise.all(
+            items.map(async (item) => {
+                try {
+                    const res = await listUploadLibraryFile(item.id)
+                    filesMap[item.id] = res?.data || []
+                } catch {
+                    filesMap[item.id] = []
+                }
+            })
+        )
         setLibraryFiles(filesMap)
     }, [])
 
     useToastListener(createLibraryItemState, {functionName: "Create Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
     useToastListener(getLibraryItemState, {functionName: "Get Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
     useToastListener(uploadFileState, {functionName: "Upload File", successMessage: t('messages.file_uploaded'), errorMessage: t('messages.error')})
-        
-    React.useEffect(() => {
-        const refreshOffline = () => setIsOffline(!isClientOnline())
-        refreshOffline()
-        window.addEventListener('online', refreshOffline)
-        window.addEventListener('offline', refreshOffline)
-
-        return () => {
-            window.removeEventListener('online', refreshOffline)
-            window.removeEventListener('offline', refreshOffline)
-        }
-    }, [])
 
     React.useEffect(() => {        
         if (getLibraryItemState?.message === 'success' && getLibraryItemState.data) {
@@ -107,28 +88,8 @@ export default function Schedules() {
     }, [getLibraryItemState, createLibraryItemState, uploadFileState, libraryItems, refreshLibraryFiles])
 
     React.useEffect(() => {
-        // When upload completes (uploadFilePending becomes false)
-        if (!uploadFilePending && uploadProgress > 0) {
-            if (progressIntervalRef.current) {
-                clearInterval(progressIntervalRef.current)
-                progressIntervalRef.current = null
-            }
-            setUploadProgress(100)
-            setTimeout(() => setUploadProgress(0), 800)
-        }
-    }, [uploadFilePending, uploadProgress])
+        if (authLoading) return
 
-    React.useEffect(() => {
-        if (authLoading) return // Wait until auth is loaded
-
-        // const cachedLibraryItems = getCachedData<openApi.LibraryItemRead[]>(
-        //     offlineCacheKeys.libraryListAdmin,
-        // )
-        // if (cachedLibraryItems && cachedLibraryItems.length > 0) {
-        //     setLibraryItems(cachedLibraryItems)
-        //     setLoading(false)
-        // }
-        
         const fetchLibraryItems = async () => {
             try {
                 setLoading(true)
@@ -138,7 +99,7 @@ export default function Schedules() {
                     await refreshLibraryFiles(data.items)
                 }
                 setError(null)
-            } catch (err) {
+            } catch {
                 setError('Failed to load library items')
                 setLibraryItems(null)
             } finally {
@@ -146,85 +107,7 @@ export default function Schedules() {
             }
         }
         fetchLibraryItems()
-    }, [authLoading, refreshLibraryFiles]) // Re-run if auth status changes
-
-    const handleUploadFile = (formData: FormData, itemID: number, file: File) => {
-        formData.append('file', file)
-        
-        const totalSize = file.size
-        const fileSizeInMB = totalSize / (1024 * 1024)
-        
-        // Estimate upload time based on 100 kB/s speed (10 seconds per MB)
-        // For 16MB: ~160 seconds
-        const estimatedUploadTimeMs = Math.max(fileSizeInMB * 10000, 3000)
-        
-        setUploadProgress(0)
-        const startTime = Date.now()
-        
-        // Create abort controller for this upload
-        const abortController = new AbortController()
-        abortControllerRef.current = abortController
-        
-        const interval = setInterval(() => {
-            const elapsedTime = Date.now() - startTime
-            const progress = Math.min((elapsedTime / estimatedUploadTimeMs) * 100, 95)
-            setUploadProgress(progress)
-        }, 100)
-        
-        progressIntervalRef.current = interval
-
-        const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null
-        
-        // Make the fetch request with abort signal
-        fetch(`/api/v1/library/${itemID}/files`, {
-            method: 'POST',
-            body: formData,
-            signal: abortController.signal,
-            headers: {
-                ...(token ? { Authorization: `Bearer ${token}` } : {}),
-            },
-        })
-        .then(async (res) => {
-            if (!res.ok) {
-                const errorText = await res.text().catch(() => '')
-                throw new Error(errorText || `Upload failed with status ${res.status}`)
-            }
-
-            return res.json().catch(() => null)
-        })
-        .then(() => {
-            clearInterval(interval)
-            progressIntervalRef.current = null
-            setUploadProgress(100)
-            setTimeout(() => setUploadProgress(0), 800)
-            // Refresh files after successful upload
-                        const fetchFilesForItems = async () => {
-                if (!libraryItems) return
-                const filesMap: Record<number, UploadedLibraryFile[]> = {}
-                
-                for (const item of libraryItems.items) {
-                    try {
-                        const res = await listUploadLibraryFile(item.id)
-                        filesMap[item.id] = res?.data || []
-                    } catch (err) {
-                        console.error(`Failed to load files for item ${item.id}:`, err)
-                        filesMap[item.id] = []
-                    }
-                }
-                
-                setLibraryFiles(filesMap)
-            }
-            fetchFilesForItems()
-        })
-        .catch((err) => {
-            if (err.name !== 'AbortError') {
-                console.error('Upload failed:', err)
-            }
-            clearInterval(interval)
-            progressIntervalRef.current = null
-            setUploadProgress(0)
-        })
-    }
+    }, [authLoading, refreshLibraryFiles])
 
     if (!isAdmin) {
             return (
@@ -276,50 +159,17 @@ export default function Schedules() {
                 </CardHeader>
                 <div id="buttons" className="p-4 flex flex-col justify-between col-start-2 col-end-3">
                     <form action={uploadFileAction}>
+                        <input type="hidden" name="itemID" value={item.id} />
                         <div className="flex justify-center items-center">
                             <icon.Upload className="w-5 h-5 text-white z-10 relative top-[50%] left-[45%] right-[45%]"></icon.Upload>
-                            <input type="file" disabled={uploadFilePending} onChange={(e) => {
-                                handleUploadFile(new FormData(e.currentTarget.form!), item.id, e.currentTarget.files![0])
+                            <input type="file" name="file" disabled={uploadFilePending} onChange={(e) => {
+                                if (e.currentTarget.files?.[0]) {
+                                    e.currentTarget.form?.requestSubmit()
+                                }
                             }} className="text-[0px] w-full h-10 bg-yellow-300 transition duration-300 rounded-lg text-white text-sm hover:bg-yellow-500 cursor-pointer" />
                         </div>
-                        {uploadProgress > 0 && (
-                            <div className="w-full mt-2">
-                                <div className="flex items-center gap-2 justify-between">
-                                    <div className="flex-1 bg-gray-200 rounded-lg h-2 overflow-hidden">
-                                        <div 
-                                            className="bg-yellow-500 h-full transition-all duration-300 ease-out"
-                                            style={{width: `${uploadProgress}%`}}
-                                        />
-                                    </div>
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            // Abort the fetch request
-                                            if (abortControllerRef.current) {
-                                                abortControllerRef.current.abort()
-                                                abortControllerRef.current = null
-                                            }
-                                            // Clear the progress interval
-                                            if (progressIntervalRef.current) {
-                                                clearInterval(progressIntervalRef.current)
-                                                progressIntervalRef.current = null
-                                            }
-                                            setUploadProgress(0)
-                                        }}
-                                        className="p-1 hover:bg-gray-300 rounded transition"
-                                        title="Cancel upload"
-                                    >
-                                        <icon.X className="w-4 h-4 text-gray-600" />
-                                    </button>
-                                </div>
-                                <p className="text-xs text-gray-600 mt-1 text-center">{Math.round(uploadProgress)}%</p>
-                            </div>
-                        )}
                     </form>
-                    <Button disabled={isOffline} onClick={() => {
-                        if (isOffline) {
-                            return
-                        }
+                    <Button onClick={() => {
                         deleteLibraryItem(item.id)
                     }} variant='destructive' className="ml-5 transition duration-300 hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed">
                         <icon.Trash className="text-white cursor-pointer" size={16}/>
@@ -373,7 +223,6 @@ export default function Schedules() {
             setcreateLibraryDialogOpen={setCreateLibraryDialogOpen}
             getLibraryDialogOpen={getLibraryDialogOpen}
             setgetLibraryDialogOpen={setGetLibraryDialogOpen}
-            disableCreate={isOffline}
         />
     )
 
@@ -387,12 +236,10 @@ export default function Schedules() {
         </div>
     ))
 
-    return <DashboardPage title={title}>
-        <div className="flex flex-col gap-4 w-full">
-        {/* {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{t('library.offline_only')}</p> : null} */}
-        <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>
-        </div>
-        <div id="pagination" className="grid grid-cols-3 text-sm my-4">
+    return (
+        <DashboardPage title={title}>
+            <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>
+            <div id="pagination" className="grid grid-cols-3 text-sm my-4">
             <div className="col-start-1 col-end-2"></div>
             <div className="col-start-2 col-end-3">
                 page <span className="font-bold text-slate-800">{libraryItems.page}</span> of <span className="font-bold text-slate-800">{Math.ceil((libraryItems.total || 0) / libraryItems.per_page)}</span>
@@ -414,5 +261,6 @@ export default function Schedules() {
                 }>Next</Button>
             </div>
         </div>
-    </DashboardPage>
+        </DashboardPage>
+    )
 }

@@ -1,54 +1,8 @@
-import { SignupFormState, SignInFormState, SignUpSchema, SignInSchema, SignInStudentFormState, SignInStudentSchema } from "@/app/platform/lib/definitions"
+import { SignInFormState, SignInSchema, SignInStudentFormState, SignInStudentSchema } from "@/app/platform/lib/definitions"
 import { getApi } from "@/lib/apiClient"
 import * as openApi from "@/lib/openApi"
 
 const api = getApi()
-
-// export async function signup(state: SignupFormState, formData: FormData): Promise<SignupFormState> {
-//     const validation = SignUpSchema.safeParse({
-//         arname: formData.get('ar-name'),
-//         enname: formData.get('en-name'),
-//         student_code: formData.get('student_code'),
-//         phone: formData.get('phone'),
-//         dateOfBirth: formData.get('date-of-birth'),
-//         timeZone: formData.get('time-zone'),
-//         lessonsPerWeek: formData.get('lessons-per-week'),
-//         lessonRate: formData.get('lessons-rate'),
-//         billingCycle: formData.get('billingCycle'),
-//         specialNotes: formData.get('special-notes'),
-//     })
-
-//     if (!validation.success) {
-//         return { error: validation.error.flatten().fieldErrors }
-//     }
-
-//     try {
-//         const data: openApi.StudentSignupRequest = {
-//             student_code: validation.data.student_code,
-//             full_name_arabic: validation.data.arname,
-//             full_name_english: validation.data.enname,
-//             date_of_birth: validation.data.dateOfBirth,
-//             phone: validation.data.phone,
-//             timezone: validation.data.timeZone,
-//             lessons_per_week: Number(validation.data.lessonsPerWeek),
-//             lesson_rate: Number(validation.data.lessonRate),
-//             billing_cycle: validation.data.billingCycle as openApi.BillingCycle,
-//             special_notes: validation.data.specialNotes,
-//         }
-//         const response = await api.api.createApiV1StudentsPost(data)
-        
-//         if (response.status === 201) {
-//             return {message: 'Signup successful' }
-//         }
-//         if (response.status === 422) {
-//             return { message: 'Validation error' }
-//         }
-
-//         return {message: response.error?.[0] || 'Signup failed' }
-//     } catch (error) {
-//         return { message: 'An error occurred during signup' }
-//     }
-// }
 
 export async function signinStudent(state: SignInStudentFormState, formData: FormData): Promise<SignInStudentFormState> {
     const validation = SignInStudentSchema.safeParse({
@@ -68,17 +22,19 @@ export async function signinStudent(state: SignInStudentFormState, formData: For
         if (response.status === 200 && response.data.access_token) {
             localStorage.setItem('access_token', response.data.access_token)
             localStorage.setItem('expire', response.data.expires_at)
-            return {message: 'Signin successful' }
+            localStorage.setItem('role', 'student')
+            return { message: 'Signin successful' }
         }
         if (response.status === 422) {
             return { message: 'Validation error' }
         }
 
-        return {message: response.error?.detail?.[0]?.msg || 'Signin failed' }
-    } catch (error) {
+        return { message: response.error?.detail?.[0]?.msg || 'Signin failed' }
+    } catch {
         return { message: 'An error occurred during signin' }
     }
 }
+
 export async function signinAdmin(state: SignInFormState, formData: FormData): Promise<SignInFormState> {
     const validation = SignInSchema.safeParse({
         email: formData.get('email'),
@@ -99,14 +55,15 @@ export async function signinAdmin(state: SignInFormState, formData: FormData): P
         if (response.status === 200 && response.data.access_token) {
             localStorage.setItem('access_token', response.data.access_token)
             localStorage.setItem('expire', response.data.expires_at)
-            return {message: 'Signin successful' }
+            localStorage.setItem('role', 'admin')
+            return { message: 'Signin successful' }
         }
         if (response.status === 422) {
             return { message: 'Validation error' }
         }
 
-        return {message: response.error?.detail?.[0]?.msg || 'Signin failed' }
-    } catch (error) {
+        return { message: response.error?.detail?.[0]?.msg || 'Signin failed' }
+    } catch {
         return { message: 'An error occurred during signin' }
     }
 }
@@ -115,16 +72,24 @@ export async function refreshAccessToken() {
     try {
         const response = await api.api.refreshApiV1AuthRefreshPost()
 
-        if (!response.ok) {
-            window.location.href = '/platform/auth/login'
-        }
-
         if (response.status === 200 && response.data.access_token) {
             localStorage.setItem('access_token', response.data.access_token)
             localStorage.setItem('expire', response.data.expires_at)
-            return {message: 'Token refreshed successfully' }
+            return { message: 'Token refreshed successfully' }
         }
-    } catch (error) {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('expire')
+            localStorage.removeItem('role')
+            window.location.href = '/platform/auth/login'
+        }
+    } catch {
+        if (typeof window !== 'undefined') {
+            localStorage.removeItem('access_token')
+            localStorage.removeItem('expire')
+            localStorage.removeItem('role')
+            window.location.href = '/platform/auth/login'
+        }
         return { message: 'An error occurred during token refresh' }
     }
 }
@@ -133,14 +98,14 @@ export async function checkHealth(): Promise<{ message: string }> {
     try {
         const response = await api.health.healthHealthGet()
 
-        if (response.data.status == 'ok') {
-            return {message: 'API is healthy' }
+        if (response.data.status === 'ok') {
+            return { message: 'API is healthy' }
         }
-        if (response.data.status == 'degraded') {
+        if (response.data.status === 'degraded') {
             return { message: 'SERVER IS UNAVAILABLE' }
         }
-        return {message: 'API health status: ' + response.data.status }
-    } catch (error) {
+        return { message: 'API health status: ' + response.data.status }
+    } catch {
         return { message: 'An error occurred while checking API health' }
     }
 }
@@ -152,10 +117,17 @@ export async function signout() {
         if (response.status === 204) {
             localStorage.removeItem('access_token')
             localStorage.removeItem('expire')
+            localStorage.removeItem('role')
             window.location.href = '/'
-            return {message: 'Signout successful' }
+            return { message: 'Signout successful' }
         }
-    } catch (error) {
+    } catch {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('expire')
+        localStorage.removeItem('role')
+        if (typeof window !== 'undefined') {
+            window.location.href = '/'
+        }
         return { message: 'An error occurred during signout' }
     }
 }

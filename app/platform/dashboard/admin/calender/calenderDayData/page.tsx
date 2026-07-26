@@ -1,6 +1,6 @@
 'use client'
 
-import { calenderGetDayData } from "@/app/platform/actions/dashboardv2";
+import { calenderGetDayData } from "@/app/platform/actions/calendar";
 import { LessonRead } from "@/lib/openApi";
 import { useSearchParams } from "next/navigation";
 import * as React from "react";
@@ -19,7 +19,7 @@ import { Field } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import * as Icon from '@deemlol/next-icons';
-import { updateLesson } from "@/app/platform/actions/dashboard";
+import { updateLesson } from "@/app/platform/actions/lessons";
 
 function CalendarDayDataContent() {
   const searchParams = useSearchParams();

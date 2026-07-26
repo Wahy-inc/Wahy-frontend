@@ -15,11 +15,12 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { attendanceClassMEAnalytics, downloadClassFile, getMeMyLessonHistory, listMyUploadClassFile } from "@/app/platform/actions/dashboard";
+import { getAttendanceClassMEAnalytics as attendanceClassMEAnalytics } from "@/app/platform/actions/analytics";
+import { downloadClassFile, getMeMyLessonHistory, listClassFiles as listMyUploadClassFile } from "@/app/platform/actions/lessons";
 import { useToastListener } from "@/lib/toastListener";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { UploadedClassFile } from "@/app/platform/lib/definitionsv2";
+import { UploadedClassFile } from "@/app/platform/lib/definitions";
 import moment from "moment";
 
 function LessonDataContent() {

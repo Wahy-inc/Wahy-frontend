@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { signout } from '../../actions/auth'
 import { useLocalization } from '@/lib/localization-context'
-import { OfflineStatusBar } from '@/components/OfflineStatusBar'
 
 export default function DashboardPage({children: children, title: title}: {children: React.ReactNode, title: React.ReactNode}  ) {
     const router = useRouter()
@@ -53,7 +52,6 @@ export default function DashboardPage({children: children, title: title}: {child
                     </button>
                 </div>
                 <div id='title' className='sticky top-0 z-20 bg-slate-100 pt-4 lg:pt-10 px-4 lg:px-10 rounded-xl pb-4 flex flex-col gap-3'>
-                    <OfflineStatusBar />
                     {title}
                 </div>
                 <div id='children' className='px-4 lg:px-10 flex flex-col gap-8 mb-10'>

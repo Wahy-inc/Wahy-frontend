@@ -25,7 +25,7 @@ import { useLocalization } from "@/lib/localization-context";
 import React, { JSX, useState } from "react";
 import { CreateLessonFormState, GetLessonByDayFormState } from "../../../lib/definitions";
 import StudentMenu from "@/components/studentsMenu";
-import { getLocalSchedules } from "@/app/platform/actions/dashboardv2";
+import { getLocalSchedules } from "@/app/platform/actions/schedules";
 
 export default function TitleElement({
     title,

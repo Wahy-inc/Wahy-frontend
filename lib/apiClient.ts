@@ -18,9 +18,14 @@ const securityWorker = async (): Promise<{ headers: { Authorization?: string } }
   };
 };
 
-// Create the API instance once
+// Create the API instance once.
+// Use NEXT_PUBLIC_BACKEND_URL for direct cross-origin calls to the backend.
+// Bypasses the Next.js server-side rewrite proxy, which strips client
+// cookies and can drop Authorization headers on POST (causing 401).
+const backendUrl = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_BACKEND_URL) || '';
+
 const baseApi = new openApi.Api<unknown>({
-  baseUrl: '',
+  baseUrl: backendUrl,
   securityWorker,
 });
 

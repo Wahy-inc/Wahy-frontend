@@ -2,7 +2,8 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createSchedule, deleteSchedule, getLocalStudent, getSchedulesForStudent, listSchedules, listStudents, updateSchedule } from "@/app/platform/actions/dashboard";
+import { createSchedule, deleteSchedule, getSchedulesForStudent, listSchedules, updateSchedule } from "@/app/platform/actions/schedules";
+import { getLocalStudent, listStudents } from "@/app/platform/actions/students";
 import DashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
 import TitleElement, { generateRRule, monthDays, weekDaysMap } from "./title_element";

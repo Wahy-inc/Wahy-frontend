@@ -2,15 +2,15 @@
 
 import React from "react"
 import * as openApi from "@/lib/openApi"
-import { getStudentMe } from "@/app/platform/actions/dashboard"
+import { getStudentMe } from "@/app/platform/actions/students"
 import DashboardPage from "../page"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+
 import { User, Phone, Calendar, Clock, DollarSign, FileText } from 'lucide-react'
 import { useAuth } from "@/lib/auth-context"
 import { useLocalization } from "@/lib/localization-context"
-import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache"
+
 
 export default function Profile() {
     const [profile, setProfile] = React.useState<openApi.StudentSelfRead | null>(null)
@@ -22,11 +22,7 @@ export default function Profile() {
     React.useEffect(() => {
         if (authLoading) return
 
-        const cachedProfile = getCachedData<openApi.StudentSelfRead>(offlineCacheKeys.studentProfileMe)
-        if (cachedProfile) {
-            setProfile(cachedProfile)
-            setLoading(false)
-        }
+
 
         const fetchProfile = async () => {
             try {

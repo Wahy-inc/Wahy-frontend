@@ -460,14 +460,6 @@
     "uploaded_at_prefix": "تم التحميل في: ",
     "schedule_prefix": "الجدول: "
   },
-  "sync_status": {
-    "sync_needs_attention": "المزامنة تحتاج اهتمام: {count} عنصر بتضارب/خطأ",
-    "offline_mode_queued": "وضع دون اتصال: {count} تغيير في الانتظار",
-    "back_online_syncing": "العودة للاتصال: مزامنة {count} تغيير في الانتظار",
-    "view_sync_details": "عرض تفاصيل المشكلة",
-    "showing_issues": "يتم عرض {count} من {total} مشاكل.",
-    "clear_button": "مسح"
-  },
   "error_messages": {
     "error_fetching_sessions": "خطأ في جلب الجلسات القادمة:",
     "error_fetching_lesson_history": "خطأ في جلب سجل الدروس:",

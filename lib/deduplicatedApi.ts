@@ -3,10 +3,9 @@
  * Automatically cancels previous pending requests for the same endpoint
  */
 
-import { Api, RequestParams } from './openApi';
+import { Api } from './openApi';
 import { requestManager } from './requestManager';
 
-type MethodNames = keyof Api<unknown>['api'];
 /**
  * Wraps API methods to automatically cancel duplicate pending requests
  */
@@ -14,7 +13,8 @@ export function createDeduplicatedApiClient(apiInstance: Api<unknown>) {
   const originalRequest = apiInstance.request.bind(apiInstance);
 
   // Override the request method to handle deduplication
-  apiInstance.request = async function (config: {path: string; method?: string; query?: any}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  apiInstance.request = async function (config: any) {
     const { path, method = 'GET', query } = config;
 
     // Register request and get cancel token
@@ -35,11 +35,9 @@ export function createDeduplicatedApiClient(apiInstance: Api<unknown>) {
       if (error instanceof Error && error.name !== 'AbortError') {
         throw error;
       }
-      // Abort errors are expected when cancelling, so we suppress them
-      console.log('[API] Request was cancelled');
       throw error;
     }
-  } as any;
+  } as unknown as typeof apiInstance.request;
 
   return apiInstance;
 }

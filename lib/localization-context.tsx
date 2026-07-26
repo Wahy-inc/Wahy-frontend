@@ -18,7 +18,7 @@ interface LocalizationContextType {
 
 const LocalizationContext = createContext<LocalizationContextType | undefined>(undefined)
 
-const translations: Record<Language, any> = {
+const translations: Record<Language, Record<string, unknown>> = {
   en,
   ar,
   ru,
@@ -28,27 +28,21 @@ const translations: Record<Language, any> = {
 }
 
 export function LocalizationProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>('en')
-  const [isHydrated, setIsHydrated] = useState(false)
-
-  // Sync with localStora['en', 'ar', 'ru', 'fr', 'de', 'es'].includes(savedLanguage
-  useEffect(() => {
-    const savedLanguage = localStorage.getItem('language') as Language | null
-    if (savedLanguage && (savedLanguage === 'en' || savedLanguage === 'ar')) {
-      setLanguageState(savedLanguage)
+  const [language, setLanguageState] = useState<Language>(() => {
+    if (typeof window !== 'undefined') {
+      const savedLanguage = localStorage.getItem('language') as Language | null
+      if (savedLanguage && (['en', 'ar', 'ru', 'fr', 'de', 'es'] as const).includes(savedLanguage)) {
+        return savedLanguage
+      }
     }
-    document.documentElement.lang = savedLanguage || 'en'
-    document.documentElement.dir = (savedLanguage || 'en') === 'ar' ? 'rtl' : 'ltr'
-    setIsHydrated(true)
-  }, [])
+    return 'en'
+  })
 
   // Update DOM when language changes
   useEffect(() => {
-    if (isHydrated) {
-      document.documentElement.lang = language
-      document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'
-    }
-  }, [language, isHydrated])
+    document.documentElement.lang = language
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'
+  }, [language])
 
   const setLanguage = (newLanguage: Language) => {
     setLanguageState(newLanguage)
@@ -59,10 +53,14 @@ export function LocalizationProvider({ children }: { children: ReactNode }) {
 
   const t = (key: string): string => {
     const keys = key.split('.')
-    let value: any = translations[language]
+    let value: unknown = translations[language]
 
     for (const k of keys) {
-      value = value?.[k]
+      if (value && typeof value === 'object' && k in value) {
+        value = (value as Record<string, unknown>)[k]
+      } else {
+        return key
+      }
     }
 
     return typeof value === 'string' ? value : key
@@ -78,7 +76,6 @@ export function LocalizationProvider({ children }: { children: ReactNode }) {
 export function useLocalization() {
   const context = useContext(LocalizationContext)
   if (!context) {
-    // Return a default context for SSR compatibility
     return {
       language: 'en' as Language,
       setLanguage: () => {},

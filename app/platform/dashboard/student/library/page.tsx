@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { getLibraryItemMe, listLibraryMe } from "@/app/platform/actions/dashboard";
+import { downloadLibraryFile, getLibraryItemMe, listLibraryMe, listUploadLibraryFile } from "@/app/platform/actions/library";
 import DashboardPage from "../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
@@ -19,9 +19,7 @@ import {
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
-import { isClientOnline } from "@/lib/offlineSync";
-import { UploadedLibraryFile } from "@/app/platform/lib/definitionsv2";
-import { downloadLibraryFile, listUploadLibraryFile } from "@/app/platform/actions/dashboardv2";
+import { UploadedLibraryFile } from "@/app/platform/lib/definitions";
 import { Button } from "@/components/ui/button";
 import * as icon from "lucide-react"
 
