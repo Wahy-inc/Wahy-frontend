@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { getStudent, listStudents, updateStudent } from "@/app/platform/actions/dashboard";
+import { getStudent, listStudents, updateStudent } from "@/app/platform/actions/students";
 import DashboardPage from "../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";

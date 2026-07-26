@@ -2,7 +2,7 @@
 
 import React, { useActionState } from "react";
 import * as openApi from "@/lib/openApi"
-import { createLesson, getLessonByDay, listLessons } from "@/app/platform/actions/dashboard";
+import { createLesson, getLessonByDay, listLessons } from "@/app/platform/actions/lessons";
 import DashboardPage from "../page";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,9 @@ import TitleElement from "./title_element";
 import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { useToastListener } from "@/lib/toastListener";
-import { getCachedData, offlineCacheKeys } from "@/lib/offlineCache";
+
 import { useRouter } from "next/navigation";
-import { addLocalSchedules } from "@/app/platform/actions/dashboardv2";
+import { addLocalSchedules } from "@/app/platform/actions/schedules";
 
 
 export default function Lessons() {
@@ -37,13 +37,7 @@ export default function Lessons() {
     React.useEffect(() => {
         if (authLoading) return
 
-        const cachedLessons = getCachedData<openApi.ClassGroupItem[]>(
-            offlineCacheKeys.lessonsListAdmin,
-        )
-        if (cachedLessons && cachedLessons?.length > 0) {
-            setLessons(cachedLessons)
-            setLoading(false)
-        }
+
         
         const fetchLessons = async () => {
             try {

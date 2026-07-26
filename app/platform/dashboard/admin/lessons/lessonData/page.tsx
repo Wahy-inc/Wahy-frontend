@@ -16,7 +16,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import { attendanceClassAnalytics, deleteClassFile, downloadClassFile, getLessonHistory, listUploadClassFile, updateLesson, uploadClassFile } from "@/app/platform/actions/dashboard";
+import { getAttendanceAnalytics as attendanceClassAnalytics } from "@/app/platform/actions/analytics";
+import { deleteClassFile, downloadClassFile, getLessonHistory, listClassFiles as listUploadClassFile, updateLesson, uploadClassFile } from "@/app/platform/actions/lessons";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -25,13 +26,13 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToastListener } from "@/lib/toastListener";
-import { UploadedClassFile } from "@/app/platform/lib/definitionsv2";
-import moment from "moment/moment";
+import { UploadedClassFile } from "@/app/platform/lib/definitions";
+import moment from "moment";
 
 function LessonDataContent() {
     const searchData = useSearchParams();
     const scheduleID = searchData.get('scheduleID');
-    const [attendance, setattendance] = React.useState<openApi.ClassAttendanceSummary | null>(null);
+    const [attendance, setattendance] = React.useState<openApi.AttendanceAnalytics | null>(null);
     const [files, setFiles] = React.useState<UploadedClassFile[] | null>(null);
     const [attendanceState, attendanceAction, attendancePending] = React.useActionState(attendanceClassAnalytics, undefined);
     const [history, setHistory] = useState<openApi.ClassHistoryResponse>();
@@ -590,17 +591,17 @@ function LessonDataContent() {
     return (
         <DashboardPage title={titleElement}>
             {<div className="flex flex-col items-center">
-                {attendance? attendanceAnalyticsElement(attendance) : attendanceAnalyticsElement({
-                period_start: "____-__-__",
-                period_end: "____-__-__",
-                expected_sessions: 0,
-                attended_sessions: 0,
-                absent_sessions: 0,
-                attendance_rate: 0,
-                schedule_id: Number(scheduleID),
-                student_name_ar: "",
-                student_name_en: "",
-                })}
+                {attendance ? attendanceAnalyticsElement(attendance as unknown as openApi.ClassAttendanceSummary) : attendanceAnalyticsElement({
+                    period_start: "____-__-__",
+                    period_end: "____-__-__",
+                    expected_sessions: 0,
+                    attended_sessions: 0,
+                    absent_sessions: 0,
+                    attendance_rate: 0,
+                    schedule_id: Number(scheduleID),
+                    student_name_ar: "",
+                    student_name_en: "",
+                } as unknown as openApi.ClassAttendanceSummary)}
             </div>}
             <div className="flex flex-col justify-center border-dashed border-2 border-slate-800 bg-slate-300 rounded-lg p-4 my-6">
                 <div 

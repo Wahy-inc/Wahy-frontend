@@ -7,7 +7,7 @@
 type RequestKey = string;
 
 interface PendingRequest {
-  cancelToken: Symbol;
+  cancelToken: symbol;
   abortController: AbortController;
   timestamp: number;
 }
@@ -18,8 +18,7 @@ class RequestManager {
   /**
    * Generate a unique key for a request based on method and path
    */
-  private generateRequestKey(method: string, path: string, query?: Record<string, any>): RequestKey {
-    // Include query params in the key to differentiate requests with different filters
+  private generateRequestKey(method: string, path: string, query?: Record<string, unknown>): RequestKey {
     const queryString = query ? JSON.stringify(query) : '';
     return `${method}:${path}:${queryString}`;
   }
@@ -32,21 +31,16 @@ class RequestManager {
   public registerRequest(
     method: string,
     path: string,
-    query?: Record<string, any>,
+    query?: Record<string, unknown>,
   ): {
-    cancelToken: Symbol;
+    cancelToken: symbol;
     cleanup: () => void;
     shouldCancel: boolean;
   } {
     const requestKey = this.generateRequestKey(method, path, query);
-
-    // Check if a request for the same endpoint already exists
     const existingRequest = this.pendingRequests.get(requestKey);
     
     if (existingRequest) {
-      // Request already pending - this new request should be cancelled
-      console.log(`[RequestManager] Request already pending, cancelling new request: ${requestKey}`);
-      
       const cancelToken = Symbol(`${requestKey}:${Date.now()}:cancelled`);
       return {
         cancelToken,
@@ -55,18 +49,15 @@ class RequestManager {
       };
     }
 
-    // No existing request - proceed with this one
     const cancelToken = Symbol(`${requestKey}:${Date.now()}`);
     const abortController = new AbortController();
 
-    // Store the pending request
     this.pendingRequests.set(requestKey, {
       cancelToken,
       abortController,
       timestamp: Date.now(),
     });
 
-    // Return cleanup function to be called when request completes
     const cleanup = () => {
       this.pendingRequests.delete(requestKey);
     };
@@ -77,12 +68,11 @@ class RequestManager {
   /**
    * Cancel a specific request by its key
    */
-  public cancelRequest(method: string, path: string, query?: Record<string, any>): void {
+  public cancelRequest(method: string, path: string, query?: Record<string, unknown>): void {
     const requestKey = this.generateRequestKey(method, path, query);
     const request = this.pendingRequests.get(requestKey);
 
     if (request) {
-      console.log(`[RequestManager] Manually cancelling request: ${requestKey}`);
       request.abortController.abort();
       this.pendingRequests.delete(requestKey);
     }
@@ -92,7 +82,6 @@ class RequestManager {
    * Cancel all pending requests
    */
   public cancelAll(): void {
-    console.log(`[RequestManager] Cancelling all ${this.pendingRequests.size} pending requests`);
     this.pendingRequests.forEach((request) => {
       request.abortController.abort();
     });

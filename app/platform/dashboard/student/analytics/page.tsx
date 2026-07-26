@@ -6,7 +6,7 @@ import * as openApi from "../../../../../lib/openApi"
 import { Card, CardDescription, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import React from "react";
-import { attendanceMEAnalytics } from "../../../actions/dashboard";
+import { getAttendanceMEAnalytics as attendanceMEAnalytics } from "../../../actions/analytics";
 import { Button } from "@/components/ui/button";
 import { useToastListener } from "@/lib/toastListener";
 import { useLocalization } from "@/lib/localization-context";

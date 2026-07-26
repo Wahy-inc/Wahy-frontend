@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./style/globals.css";
 import { TokenRefresher } from "@/components/TokenRefresher";
-import { PwaBootstrap } from "@/components/PwaBootstrap";
 import { LocalizationProvider } from "@/lib/localization-context";
 import { Footer } from "@/components/Footer";
 
@@ -35,10 +34,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        style={{ backgroundColor: "#F1F5F9", color: "#1E293B" , display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', flexDirection: 'column'}}
+        style={{ backgroundColor: "#F1F5F9", color: "#1E293B", display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', flexDirection: 'column' }}
       >
         <LocalizationProvider>
-          <PwaBootstrap />
           <TokenRefresher />
           {children}
           <Footer />

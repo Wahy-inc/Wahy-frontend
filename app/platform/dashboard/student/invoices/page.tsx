@@ -2,7 +2,7 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { downloadInvoicePDFMe, getInvoiceMe, listInvoicesMe } from "@/app/platform/actions/dashboard";
+import { downloadInvoicePDFMe, getInvoiceMe, listInvoicesMe } from "@/app/platform/actions/invoices";
 import DashboardPage from "../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
@@ -27,7 +27,6 @@ import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
 import { useToastListener } from "@/lib/toastListener";
-import { isClientOnline } from "@/lib/offlineSync";
 
 export default function Invoices() {
     const { isLoading: authLoading } = useAuth()
@@ -39,20 +38,7 @@ export default function Invoices() {
     }
     const [getInvoiceState, getInvoiceFormAction, getInvoicePending] = React.useActionState(getInvoiceAction, undefined)
     const [getInvoiceDialogOpen, setGetInvoiceDialogOpen] = React.useState(false)
-    const [isOffline, setIsOffline] = React.useState(false)
     const { t } = useLocalization()
-
-    React.useEffect(() => {
-        const refreshOffline = () => setIsOffline(!isClientOnline())
-        refreshOffline()
-        window.addEventListener('online', refreshOffline)
-        window.addEventListener('offline', refreshOffline)
-
-        return () => {
-            window.removeEventListener('online', refreshOffline)
-            window.removeEventListener('offline', refreshOffline)
-        }
-    }, [])
 
     useToastListener(getInvoiceState, {functionName: 'Get Invoice', successMessage: t('invoices.get_success'), errorMessage: t('invoices.get_error')})
 
@@ -124,10 +110,7 @@ export default function Invoices() {
                     </div>
                 </ItemContent>
                 <ItemActions>
-                    <Button disabled={isOffline} size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => {
-                        if (isOffline) {
-                            return
-                        }
+                    <Button size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => {
                         downloadInvoicePDFMe(invoice.id)
                     }}>
                         {t('invoices.download_pdf')}

@@ -4,7 +4,7 @@ import DashboardPage from "../page";
 import * as icon from '@deemlol/next-icons'
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { notificationsGetAll, notificationsGetUpcoming, notificationsMarkAsRead, notificationsMarkAllAsRead } from "@/app/platform/actions/dashboardv2";
+import { notificationsGetAll, notificationsGetUpcoming, notificationsMarkAsRead, notificationsMarkAllAsRead } from "@/app/platform/actions/notifications";
 import {
   Carousel,
   CarouselContent,

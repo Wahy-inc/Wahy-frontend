@@ -460,14 +460,6 @@
     "uploaded_at_prefix": "Hochgeladen am: ",
     "schedule_prefix": "Zeitplan: "
   },
-  "sync_status": {
-    "sync_needs_attention": "Synchronisierung erfordert Aufmerksamkeit: {count} Element{s} mit Konflikt/Fehler",
-    "offline_mode_queued": "Offline-Modus: {count} Änderung{s} in der Warteschlange",
-    "back_online_syncing": "Zurück online: Synchronisierung von {count} ausstehenden Änderung{s}",
-    "view_sync_details": "Synchronisierungsproblemdetails anzeigen",
-    "showing_issues": "Zeige {count} von {total} Problemen.",
-    "clear_button": "Löschen"
-  },
   "error_messages": {
     "error_fetching_sessions": "Fehler beim Abrufen bevorstehender Sitzungen:",
     "error_fetching_lesson_history": "Fehler beim Abrufen des Unterrichtsverlaufs:",

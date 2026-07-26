@@ -456,14 +456,6 @@
     "uploaded_at_prefix": "Загружено: ",
     "schedule_prefix": "Расписание: "
   },
-  "sync_status": {
-    "sync_needs_attention": "Синхронизация требует внимания: {count} элемент{s} с конфликтом/ошибкой",
-    "offline_mode_queued": "Автономный режим: {count} изменение{s} в очереди",
-    "back_online_syncing": "Соединение восстановлено: синхронизация {count} отложенного изменения{s}",
-    "view_sync_details": "Посмотреть детали проблемы синхронизации",
-    "showing_issues": "Показаны {count} из {total} проблем.",
-    "clear_button": "Очистить"
-  },
   "error_messages": {
     "error_fetching_sessions": "Ошибка при получении предстоящих сеансов:",
     "error_fetching_lesson_history": "Ошибка при получении истории уроков:",

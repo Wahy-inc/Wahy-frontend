@@ -2,7 +2,7 @@
 
 import React, { useActionState } from "react";
 import * as openApi from "@/lib/openApi"
-import { getLessonByDayMe, listLessonsMe } from "@/app/platform/actions/dashboard";
+import { getLessonByDayMe, listLessonsMe } from "@/app/platform/actions/lessons";
 import DashboardPage from "../page";
 import { Field } from "@/components/ui/field";
 import { Button } from "@/components/ui/button";

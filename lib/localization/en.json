@@ -320,7 +320,9 @@
   "analytics": {
     "title": "Analytics",
     "attendance_analytics": "Attendance Analytics",
-    "attendance_student_analytics": "Student Attendance Analytics",    "attendance_class_analytics": "Class Attendance Analytics",    "performance_analytics": "Performance Analytics",
+    "attendance_student_analytics": "Student Attendance Analytics",
+    "attendance_class_analytics": "Class Attendance Analytics",
+    "performance_analytics": "Performance Analytics",
     "financial_analytics": "Financial Analytics",
     "operational_analytics": "Operational Analytics",
     "start_time": "Start Time",
@@ -457,14 +459,6 @@
     "created_at_prefix": "Created at: ",
     "uploaded_at_prefix": "Uploaded at: ",
     "schedule_prefix": "Schedule: "
-  },
-  "sync_status": {
-    "sync_needs_attention": "Sync needs attention: {count} conflict/error item{s}",
-    "offline_mode_queued": "Offline mode: {count} change{s} queued",
-    "back_online_syncing": "Back online: syncing {count} queued change{s}",
-    "view_sync_details": "View sync issue details",
-    "showing_issues": "Showing {count} of {total} issues.",
-    "clear_button": "Clear"
   },
   "error_messages": {
     "error_fetching_sessions": "Error fetching upcoming sessions:",

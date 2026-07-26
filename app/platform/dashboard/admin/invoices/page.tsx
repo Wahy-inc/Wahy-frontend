@@ -2,7 +2,8 @@
 
 import React from "react";
 import * as openApi from "@/lib/openApi"
-import { createInvoices, downloadInvoicePDF, getInvoice, getLocalStudent, listInvoices, markInvoiceAsPaid, overrideInvoice } from "@/app/platform/actions/dashboard";
+import { createInvoices, downloadInvoicePDF, getInvoice, listInvoices, markInvoiceAsPaid, overrideInvoice } from "@/app/platform/actions/invoices";
+import { getLocalStudent } from "@/app/platform/actions/students";
 import DashboardPage from "../page";
 import TitleElement from "./title_element";
 import { Field } from "@/components/ui/field";
@@ -28,7 +29,6 @@ import { useAuth } from "@/lib/auth-context";
 import { useLocalization } from "@/lib/localization-context";
 import { GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
 import { useToastListener } from "@/lib/toastListener";
-import { isClientOnline } from "@/lib/offlineSync";
 import { checkHealth } from "@/app/platform/actions/auth";
 import { toast } from "sonner";
 
@@ -48,7 +48,6 @@ export default function Invoices() {
     const [getInvoiceDialogOpen, setGetInvoiceDialogOpen] = React.useState(false)
     const [overrideInvoiceDialogOpen, setOverrideInvoiceDialogOpen] = React.useState(false)
     const [paidInvoiceDialogOpen, setPaidInvoiceDialogOpen] = React.useState(false)
-    const [isOffline, setIsOffline] = React.useState(false)
     const { t } = useLocalization()
 
     React.useEffect(() => {
@@ -62,16 +61,6 @@ export default function Invoices() {
             })
         } catch (err) {
             console.error("API health check failed")
-        }
-
-        const refreshOffline = () => setIsOffline(!isClientOnline())
-        refreshOffline()
-        window.addEventListener('online', refreshOffline)
-        window.addEventListener('offline', refreshOffline)
-
-        return () => {
-            window.removeEventListener('online', refreshOffline)
-            window.removeEventListener('offline', refreshOffline)
         }
     }, [])
 
@@ -176,10 +165,7 @@ export default function Invoices() {
                 </ItemContent>
                 <div className="grid grid-cols-3 gap-1 place-items-center">
                     <ItemActions className="col-start-1 col-end-2">
-                        <Button disabled={isOffline} size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => {
-                            if (isOffline) {
-                                return
-                            }
+                        <Button size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => {
                             downloadInvoicePDF(invoice.id)
                         }}>
                             {t('invoices.download_pdf')}
@@ -283,7 +269,6 @@ export default function Invoices() {
             setcreateInvoicesDialogOpen={setCreateInvoiceDialogOpen}
             getInvoicesDialogOpen={getInvoiceDialogOpen}
             setgetInvoicesDialogOpen={setGetInvoiceDialogOpen}
-            disableGenerate={isOffline}
         />
     )
 

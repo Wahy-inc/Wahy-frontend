@@ -460,14 +460,6 @@
     "uploaded_at_prefix": "Téléchargé le: ",
     "schedule_prefix": "Planning: "
   },
-  "sync_status": {
-    "sync_needs_attention": "La synchronisation nécessite une attention: {count} élément{s} avec conflit/erreur",
-    "offline_mode_queued": "Mode hors ligne: {count} changement{s} en attente",
-    "back_online_syncing": "Reconnecté: synchronisation de {count} changement{s} en attente",
-    "view_sync_details": "Voir les détails du problème de synchronisation",
-    "showing_issues": "Affichage de {count} sur {total} problèmes.",
-    "clear_button": "Effacer"
-  },
   "error_messages": {
     "error_fetching_sessions": "Erreur lors de la récupération des sessions à venir:",
     "error_fetching_lesson_history": "Erreur lors de la récupération de l'historique des cours:",
