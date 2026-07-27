@@ -36,6 +36,15 @@ export const SignInSchema = zod.object({
     password: zod.string().min(6, { error: 'Password invalid' }).trim(),
 })
 
+// export type DeleteLibraryItemFormState = 
+//     | {
+//         error?: {
+//             item_id?: string[];
+//         }
+//         message?: string;
+//     }
+//     | undefined;
+
 export type SignInFormState =
     | {
         error?: {

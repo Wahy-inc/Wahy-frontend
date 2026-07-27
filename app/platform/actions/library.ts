@@ -65,9 +65,9 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
     return { message: res.message }
 }
 
-export async function deleteLibraryItem(id: number): Promise<boolean> {
+export async function deleteLibraryItem(id: number): Promise<string> {
     const res = await handleApiCall(() => api.api.deleteApiV1LibraryItemIdDelete(id), 204)
-    return res.message === 'success'
+    return res.message
 }
 
 export async function uploadLibraryFile(state: uploadLibraryFileResponseState, formData: FormData): Promise<uploadLibraryFileResponseState> {    
@@ -110,5 +110,8 @@ export async function downloadLibraryFile(itemID: number, fileId: number): Promi
 
 export async function deleteLibraryFile(itemID: number, fileId: number): Promise<DeleteLibraryFileResponseState> {
     const res = await handleApiCall(() => api.api.deleteLibraryFileApiV1LibraryItemIdFilesFileIdDelete(itemID, fileId), 204)
+    if (!res.data) {
+        window.location.reload()
+    }
     return { message: res.message }
 }

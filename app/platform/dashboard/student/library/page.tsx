@@ -108,7 +108,7 @@ export default function Schedules() {
     )
 
     const libraryItemElement = (item: openApi.LibraryItemRead) => (
-        <Card dir={language == 'ar' ? 'rtl' : 'ltr'} className="relative mx-auto min-w-xl pt-0 overflow-hidden pb-2 h-fit grid grid-rows-[1fr_auto]">
+        <Card dir={language == 'ar' ? 'rtl' : 'ltr'} className="relative mx-auto w-full pt-0 overflow-hidden pb-2 h-fit grid grid-rows-[1fr_auto]">
             <div className="grid grid-cols-[3fr_1fr] row-start-1 row-end-2 cursor-pointer border-b-2 border-slate-300 pb-5">
                 <CardHeader className="col-start-1 col-end-2">
                     <div className="grid grid-rows-3 gap-1 px-1 py-5">
@@ -119,8 +119,8 @@ export default function Schedules() {
                             <Badge variant="secondary" className='mx-1'>{item.download_count || '0'} Downloads</Badge>
                             <Badge variant="secondary" className='mx-1'>{item.view_count || '0'} Views</Badge>
                         </div>
-                        <CardDescription style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '3 !important', gridRowEnd:'4 !important'}}>
-                            {item.description && item.description.length > 100 ? item.description.substring(0, 100) + '...' : (item.description || 'No description')}
+                        <CardDescription className="text-wrap max-w-[90%]" style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '3 !important', gridRowEnd:'4 !important'}}>
+                            {item.description && item.description.length > 300 ? item.description.substring(0, 300) + '...' : (item.description || 'No description')}
                         </CardDescription>
                     </div>
                     <div className="flex -flex-row">
@@ -137,8 +137,6 @@ export default function Schedules() {
                         })() : null}
                     </div>
                 </CardHeader>
-                <div id="buttons" className="p-4 flex flex-col justify-between col-start-2 col-end-3">
-                </div>
             </div>
             <CardContent className="w-full row-start-2 row-end-3 overflow-y-auto max-h-50">
                 {(libraryFiles[item.id] || []).map((file: UploadedLibraryFile) => (

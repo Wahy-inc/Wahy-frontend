@@ -86,6 +86,9 @@ import { RRule } from '@martinhipp/rrule'
 
 export async function deleteSchedule(scheduleId: number): Promise<boolean> {
     const res = await handleApiCall(() => api.api.deleteApiV1SchedulesScheduleIdDelete(scheduleId), 204)
+    if (!res.data) {
+        window.location.reload()
+    }
     return res.message === 'success'
 }
 
