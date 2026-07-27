@@ -301,7 +301,7 @@ function LessonDataContent() {
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.total_sessions')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.total_lessons')}</p>
                         </CardHeader>
                         <CardDescription className="flex flex-col items-center justify-center">
                             <p className="text-gray-300 text-4xl font-bold">{analytic.total_lessons}</p>

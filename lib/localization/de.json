@@ -362,6 +362,7 @@
     "attended_sessions": "Besuchte Sitzungen",
     "expected_sessions": "Erwartete Sitzungen",
     "absent_sessions": "Fehlende Sitzungen",
+    "excused_sessions": "Entschuldigte Sitzungen",
     "attended_count": "Besuchte Anzahl",
     "passed_count": "Bestandene Anzahl",
     "pass_rate": "Bestehensquote",

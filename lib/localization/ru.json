@@ -358,6 +358,7 @@
     "attended_sessions": "Посещённые сеансы",
     "expected_sessions": "Ожидаемые сеансы",
     "absent_sessions": "Отсутствующие сеансы",
+    "excused_sessions": "Оправданные сеансы",
     "attended_count": "Количество присутствовавших",
     "passed_count": "Количество прошедших",
     "pass_rate": "Процент успеха",

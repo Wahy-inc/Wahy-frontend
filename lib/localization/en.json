@@ -342,6 +342,7 @@
     "attended_sessions": "Attended Sessions",
     "expected_sessions": "Expected Sessions",
     "absent_sessions": "Absent Sessions",
+    "excused_sessions": "Excused Sessions",
     "attended_count": "Attended Count",
     "passed_count": "Passed Count",
     "pass_rate": "Pass Rate",

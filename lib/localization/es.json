@@ -362,6 +362,7 @@
     "attended_sessions": "Sesiones asistidas",
     "expected_sessions": "Sesiones esperadas",
     "absent_sessions": "Sesiones ausentes",
+    "excused_sessions": "Sesiones justificadas",
     "attended_count": "Recuento de asistencia",
     "passed_count": "Recuento de aprobados",
     "pass_rate": "Tasa de aprobación",

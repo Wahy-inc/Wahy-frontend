@@ -197,6 +197,7 @@
     "attended_sessions": "الجلسات المحضورة",
     "expected_sessions": "الجلسات المتوقعة",
     "absent_sessions": "الجلسات الغائبة",
+    "excused_sessions": "الجلسات المعتذر عنها",
     "attended_count": "عدد الحضور",
     "passed_count": "عدد الناجحين",
     "pass_rate": "معدل النجاح",
