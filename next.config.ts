@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const backendUrlRaw = process.env.BACKEND_URL || '';
+const backendUrlRaw = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || '';
 
 const nextConfig: NextConfig = {
   // Expose the backend URL to the browser bundle so API calls can bypass the
