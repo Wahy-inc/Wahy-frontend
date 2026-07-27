@@ -227,16 +227,24 @@ export default function Schedules() {
     const getDate = (rrule: string | null, short: boolean): string => {
         const dayKeys = ['schedules.saturday', 'schedules.sunday', 'schedules.monday', 'schedules.tuesday', 'schedules.wednesday', 'schedules.thursday', 'schedules.friday']
         const shortDayKeys = ['schedules.sat', 'schedules.sun', 'schedules.mon', 'schedules.tue', 'schedules.wed', 'schedules.thu', 'schedules.fri']
-        const days = rrule && RRule.fromString(rrule).options.byweekday
-            ? RRule.fromString(rrule).options.byweekday.map((d: number) => (d + 2) % 7).sort()
-            : null
+        const daily = rrule && RRule.fromString(rrule).options.freq == RRule.DAILY
+        const monthly = rrule && RRule.fromString(rrule).options.freq == RRule.MONTHLY
+        const weekly = rrule && RRule.fromString(rrule).options.freq == RRule.WEEKLY
         let date = ''
-        if (days) {
+        if (weekly) {
+            const days = RRule.fromString(rrule).options.byweekday.map((d: number) => (d + 2) % 7).sort()
             for (let i = 0; i < days.length; i++) {
                 const weekday = days[i]
                 if (weekday !== undefined) {
                     date = date + t(short ? shortDayKeys[weekday] : dayKeys[weekday]) + (i < days.length - 1 ? ", " : "")
                 }
+            }
+        } else if (daily) {
+            date = 'Daily'
+        } else if (monthly) {
+            const daysOfMonth = RRule.fromString(rrule).options.bymonthday
+            if (daysOfMonth && daysOfMonth.length > 0) {
+                date = daysOfMonth.join(", ")
             }
         }
         return date
