@@ -36,7 +36,7 @@ export default function Schedules() {
     const [editingScheduleId, setEditingScheduleId] = React.useState<number | null>(null)
     const {isAdmin, isLoading: authLoading } = useAuth()
     const { t, language } = useLocalization()
-    const [isRecurring, setIsRecurring] = React.useState<string>('')
+    const [isRecurring, setIsRecurring] = React.useState<string>('true')
     const [isRecurringPeriod, setIsRecurringPeriod] = React.useState<string>('')
     const [selectedDayOfWeek, setSelectedDayOfWeek] = React.useState<string>('')
     const [selectedDaysOfWeek, setSelectedDaysOfWeek] = React.useState<string[]>([])
@@ -170,7 +170,8 @@ export default function Schedules() {
     }
 
     const weekElement = (type: string) => weekDaysMap && Object.entries(weekDaysMap).map(([key, value]) => (
-        <div key={key} className={`flex text-center items-center justify-center text-sm py-2 px-2 rounded-xl transition duration-300 cursor-pointer border border-slate-800 ${(selectedDayOfWeek === key || selectedDaysOfWeek.includes(key)) ? 'bg-slate-800 text-slate-100' : 'bg-white text-slate-800'}`} onClick={() => {
+        <div key={key} className={`flex text-center items-center justify-center text-sm py-2 px-2 rounded-xl transition duration-300 cursor-pointer border border-slate-800 ${((selectedDayOfWeek === key && type === 'weekly') || (selectedDaysOfWeek.includes(key) && type === 'customWeekly')) ? 'bg-slate-800 text-slate-100' : 'bg-white text-slate-800'}`}
+        onClick={() => {
             if (type === 'weekly') {
                 if (selectedDayOfWeek === key) {
                     setSelectedDayOfWeek('')
@@ -193,29 +194,30 @@ export default function Schedules() {
         </div>
     ))
 
-    const monthElement = (type:string) => monthDays.map((day) => (
-        <div key={day} className={`flex text-center items-center justify-center text-sm h-8 w-8 rounded-xl transition duration-300 cursor-pointer border border-slate-800 ${(selectedDayOfMonth === day.toString() || selectedDaysOfMonth.includes(day.toString())) ? 'bg-slate-800 text-slate-100' : 'bg-white text-slate-800'}`} onClick={() => {
-            if (type === 'monthly') {
-                if (selectedDayOfMonth === day.toString()) {
-                    setSelectedDayOfMonth('')
-                } else {
-                    setSelectedDayOfMonth(day.toString())
-                }
-            } else if (type === 'customMonthly') {
-                if (selectedDaysOfMonth.includes(day.toString())) {
-                    if (selectedDaysOfMonth.length === 1) {
-                        setSelectedDaysOfMonth([])
-                    } else {
-                    setSelectedDaysOfMonth(selectedDaysOfMonth.filter((d: string) => d !== day.toString()))
-                    }
-                } else {
-                    setSelectedDaysOfMonth([...selectedDaysOfMonth, day.toString()])
-                }
-            }
-        }}>
-            {day}
-        </div>
-    ))
+
+    // const monthElement = (type:string) => monthDays.map((day) => (
+    //     <div key={day} className={`flex text-center items-center justify-center text-sm h-8 w-8 rounded-xl transition duration-300 cursor-pointer border border-slate-800 ${(selectedDayOfMonth === day.toString() || selectedDaysOfMonth.includes(day.toString())) ? 'bg-slate-800 text-slate-100' : 'bg-white text-slate-800'}`} onClick={() => {
+    //         if (type === 'monthly') {
+    //             if (selectedDayOfMonth === day.toString()) {
+    //                 setSelectedDayOfMonth('')
+    //             } else {
+    //                 setSelectedDayOfMonth(day.toString())
+    //             }
+    //         } else if (type === 'customMonthly') {
+    //             if (selectedDaysOfMonth.includes(day.toString())) {
+    //                 if (selectedDaysOfMonth.length === 1) {
+    //                     setSelectedDaysOfMonth([])
+    //                 } else {
+    //                 setSelectedDaysOfMonth(selectedDaysOfMonth.filter((d: string) => d !== day.toString()))
+    //                 }
+    //             } else {
+    //                 setSelectedDaysOfMonth([...selectedDaysOfMonth, day.toString()])
+    //             }
+    //         }
+    //     }}>
+    //         {day}
+    //     </div>
+    // ))
 
     const fieldInput = (label: string, name: string, holder: string, type: string) => (        
         <Field orientation="vertical" className='w-full inline'>
@@ -248,6 +250,41 @@ export default function Schedules() {
             }
         }
         return date
+    }
+
+    const getRRULEInfo = (rrule: string ): {freq: string, byweekday: string[], bymonthday: number[]} => {
+        const rule = RRule.fromString(rrule)
+        const freqMap: {[key: number]: string} = {
+            [RRule.DAILY]: 'daily',
+            [RRule.WEEKLY]: 'weekly',
+            [RRule.MONTHLY]: 'monthly',
+        }
+        // const dayKeys = ['saturday', 'sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday']
+        const isWeekly = rule.options.freq === RRule.WEEKLY
+        const weekDays: string[] = []
+
+        if (isWeekly) {
+            const days = rule.options.byweekday.map((d: number) => (d + 2) % 7).sort()
+            for (let i = 0; i < days.length; i++) {
+                const weekDay = days[i].toString()
+                if (weekDay !== undefined) {
+                    weekDays.push(weekDay)
+                }
+            }
+        }
+
+        console.log(
+            {
+            freq: rule.options.byweekday?.length > 1 ? 'customWeekly' : freqMap[rule.options.freq],
+            byweekday: weekDays,
+            bymonthday: rule.options.bymonthday || [],
+        }
+        )
+        return {
+            freq: rule.options.byweekday?.length > 1 ? 'customWeekly' : freqMap[rule.options.freq],
+            byweekday: weekDays,
+            bymonthday: rule.options.bymonthday || [],
+        }
     }
 
     const schedulesElement = (schedule: openApi.ScheduleRead) => (
@@ -359,7 +396,20 @@ export default function Schedules() {
                 {/* Actions */}
                         <Separator className="my-4" />
                         <div className="flex justify-end gap-3">
-                    <AlertDialog open={editingScheduleId === schedule.id} onOpenChange={(open: boolean) => setEditingScheduleId(open ? schedule.id : null)}>
+                    <AlertDialog open={editingScheduleId === schedule.id} onOpenChange={(open: boolean) => {
+                        setEditingScheduleId(open ? schedule.id : null)
+                        const sch = schedules?.items.find((s) => s.id == schedule.id)
+                        const ruleInfo = getRRULEInfo(sch?.rrule_string?? '')
+                        console.log(editingScheduleId)
+                        console.log('type' + ruleInfo.freq)
+                        console.log('prevalues' + ruleInfo.byweekday)
+                        setIsRecurringPeriod(ruleInfo.freq)
+                        if (ruleInfo.freq === 'weekly') {
+                            setSelectedDayOfWeek(ruleInfo.byweekday[0])
+                        } else if (ruleInfo.freq === 'customWeekly') {
+                            setSelectedDaysOfWeek(ruleInfo.byweekday)
+                        }
+                    }}>
                         <AlertDialogTrigger asChild>
                             <Button className="transition duration-300 cursor-pointer bg-slate-400 hover:bg-slate-600">{t('schedules.update_schedule')}</Button>
                         </AlertDialogTrigger>
@@ -394,7 +444,7 @@ export default function Schedules() {
                                             <label htmlFor="is-recurring" className="text-sm font-medium">{t('schedules.recurring')}</label>
                                             <Select name="is-recurring" onValueChange={(value: string) => {
                                                 setIsRecurring(value)
-                                            }}>
+                                            }} value={isRecurring}>
                                                 <SelectTrigger className="w-full max-w-48">
                                                     <SelectValue placeholder={t('schedules.recurring')} />
                                                 </SelectTrigger>
@@ -407,17 +457,18 @@ export default function Schedules() {
                                                 </SelectContent>
                                             </Select>
                                         </div>
-                                        {isRecurring === 'true' && (<div className='flex flex-col col-start-2 col-end-3'>
-                                            <div className="flex flex-col">
-                                                <label htmlFor="is-recurring-period" className="text-sm font-medium">Period</label>
-                                                <Select name="is-recurring-period" onValueChange={(value: string) => {
-                                                    setIsRecurringPeriod(value)
-                                                    setSelectedDayOfWeek('')
-                                                    setSelectedDaysOfWeek([])
-                                                    setSelectedDayOfMonth('')
-                                                    setSelectedDaysOfMonth([])
-                                                }}>
-                                                    <SelectTrigger className="w-full max-w-48">
+                                        {isRecurring === 'true' && (
+                                            <div className='flex flex-col col-start-2 col-end-3'>
+                                                <div className="flex flex-col">
+                                                    <label htmlFor="is-recurring-period" className="text-sm font-medium">Period</label>
+                                                    <Select name="is-recurring-period" value={isRecurringPeriod} onValueChange={(value: string) => {
+                                                        setIsRecurringPeriod(value)
+                                                        setSelectedDayOfWeek('')
+                                                        setSelectedDaysOfWeek([])
+                                                        setSelectedDayOfMonth('')
+                                                        setSelectedDaysOfMonth([])
+                                                    }}>
+                                                        <SelectTrigger className="w-full max-w-48">
                                                         <SelectValue id="selected-recurr-value" placeholder={t('schedules.recurring')} />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -435,7 +486,7 @@ export default function Schedules() {
                                         </div>)}
                                     </div>
                                     <div className="col-start-1 col-end-4 row-start-5 row-end-6 flex-wrap flex flex-row gap-1 rounded-xl justify-start">
-                                        {isRecurring === 'true' && (isRecurringPeriod === 'weekly' || isRecurringPeriod === 'customWeekly') && (
+                                        {isRecurring === 'true' && (isRecurringPeriod === 'weekly' || isRecurringPeriod === 'customWeekly') && (                                                
                                                 weekElement(isRecurringPeriod)
                                             )}
                                         {/* {isRecurring === 'true' && (isRecurringPeriod === 'monthly' || isRecurringPeriod === 'customMonthly') && (
