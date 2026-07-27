@@ -111,7 +111,7 @@ export default function Lessons() {
                     <p className="text-slate-700 text-xl">{t('lessons.no_lessons_found')}</p>
                 ) : (
                     Array.isArray(fetchedLessons) && fetchedLessons.map((lesson) => (
-                        <div className="my-3" key={`lesson-${lesson.student_id}-${lesson.schedule_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}`)}>
+                        <div className="my-3" key={`lesson-${lesson.student_id}-${lesson.schedule_id}`} onClick={() => router.push(`/platform/dashboard/student/lessons/lessonData?scheduleID=${lesson.schedule_id}`)}>
                             <LessonElement lesson={lesson}/>
                         </div>
                     ))
