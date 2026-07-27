@@ -85,7 +85,7 @@ export default function Schedules() {
             }
             fetchLibraryItems()
         }
-    }, [getLibraryItemState, createLibraryItemState, uploadFileState, libraryItems, refreshLibraryFiles])
+    }, [getLibraryItemState, createLibraryItemState, uploadFileState, refreshLibraryFiles])
 
     React.useEffect(() => {
         if (authLoading) return
