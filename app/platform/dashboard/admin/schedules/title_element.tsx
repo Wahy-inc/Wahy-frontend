@@ -298,9 +298,9 @@ export default function TitleElement({
                                                         <SelectLabel>Period</SelectLabel>
                                                         <SelectItem value='daily'>Daily</SelectItem>
                                                         <SelectItem value='weekly'>Weekly</SelectItem>
-                                                        <SelectItem value='monthly'>Monthly</SelectItem>
+                                                        {/* <SelectItem value='monthly'>Monthly</SelectItem> */}
                                                         <SelectItem value='customWeekly'>Custom Weekly</SelectItem>
-                                                        <SelectItem value='customMonthly'>Custom Monthly</SelectItem>
+                                                        {/* <SelectItem value='customMonthly'>Custom Monthly</SelectItem> */}
                                                     </SelectGroup>
                                                 </SelectContent>
                                             </Select>
@@ -310,9 +310,9 @@ export default function TitleElement({
                                         {isRecurring === 'true' && (isRecurringPeriod === 'weekly' || isRecurringPeriod === 'customWeekly') && (
                                                 weekElement(isRecurringPeriod)
                                             )}
-                                        {isRecurring === 'true' && (isRecurringPeriod === 'monthly' || isRecurringPeriod === 'customMonthly') && (
+                                        {/* {isRecurring === 'true' && (isRecurringPeriod === 'monthly' || isRecurringPeriod === 'customMonthly') && (
                                                 monthElement(isRecurringPeriod)
-                                            )}
+                                            )} */}
                                     </div>
                                     <div className='flex flex-col col-start-1 col-end-4 row-start-6 row-end-7'>
                                         {fieldInput(t('schedules.notes') + " (Optional)", "notes", "", "text")}
