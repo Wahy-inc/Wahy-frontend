@@ -13,6 +13,7 @@ import React, { JSX, useState } from "react";
 import { CreateInvoiceFormState, GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
 import { useLocalization } from "@/lib/localization-context";
 import StudentMenu from "@/components/studentsMenu";
+import { getLocalStudent } from "@/app/platform/actions/students";
 
 
 export default function TitleElement({
@@ -79,10 +80,6 @@ export default function TitleElement({
                             <AlertDialogHeader>
                             <AlertDialogTitle>{t('invoices.generate_invoice')}</AlertDialogTitle>
                                 <div className="w-full flex flex-col gap-4 rtl:text-right">
-                                <div className="flex flex-col">
-                                    <StudentMenu onStudentSelect={setSelectedStudentId}></StudentMenu>
-                                    {createFormSubmitted && createState?.error?.student_id && <p className="text-red-500 text-sm">{createState.error.student_id}</p>}
-                                </div>
                                 <StudentMenu isMulti onStudentsSelect={setSelectedStudentIds}></StudentMenu>
                                 <div className="flex flex-col">
                                     {fieldInput(t('invoices.period_from'),"period_from", "", "date")}
