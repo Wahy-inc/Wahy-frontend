@@ -51,8 +51,8 @@ export async function createLibraryItem(state: CreateLibraryItemFormState, formD
 
     const data = {
         title: validation.data.title,
-        external_url: validation.data.url ?? "",
-        description: validation.data.description,
+        external_url: validation.data.url ?? "https://www.google.com/",
+        description: validation.data.description ?? "No description",
         category: validation.data.category,
         tags: validation.data.tags?.split(',').map(tag => tag.trim()) || [],
         access_level: validation.data.access_level,
