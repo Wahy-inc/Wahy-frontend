@@ -16,6 +16,7 @@ services:
       - HOSTNAME=0.0.0.0
       - BACKEND_URL=http://wahy-backend-dev:9000
       - NEXT_PUBLIC_API_URL=http://localhost:9000
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:9000
     networks:
       - wahy-network
 

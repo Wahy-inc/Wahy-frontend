@@ -22,7 +22,7 @@ const securityWorker = async (): Promise<{ headers: { Authorization?: string } }
 // Use NEXT_PUBLIC_BACKEND_URL for direct cross-origin calls to the backend.
 // Bypasses the Next.js server-side rewrite proxy, which strips client
 // cookies and can drop Authorization headers on POST (causing 401).
-const backendUrl = (typeof process !== 'undefined' && process.env.NEXT_PUBLIC_BACKEND_URL) || '';
+const backendUrl = (typeof process !== 'undefined' && (process.env.NEXT_PUBLIC_BACKEND_URL || process.env.NEXT_PUBLIC_API_URL)) || '';
 
 const baseApi = new openApi.Api<unknown>({
   baseUrl: backendUrl,
