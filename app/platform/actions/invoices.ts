@@ -35,7 +35,6 @@ export async function getInvoiceMe(state: GetInvoiceByIDFormState, formData: For
 
 export async function createInvoices(state: CreateInvoiceFormState, formData: FormData): Promise<CreateInvoiceFormState> {
     const validation = createInvoiceSchema.safeParse({
-        student_id: formData.get('student_id'),
         student_ids: formData.get('student_ids'),
         period_from: formData.get('period_from'),
         period_to: formData.get('period_to'),
@@ -46,17 +45,16 @@ export async function createInvoices(state: CreateInvoiceFormState, formData: Fo
         return { error: validation.error.flatten().fieldErrors }
     }
 
-    const selectedIds = (validation.data.student_ids || validation.data.student_id || '')
+    const selectedIds = (validation.data.student_ids || '')
         .split(',')
         .map((value) => Number(value.trim()))
         .filter((value) => !Number.isNaN(value))
     const uniqueIds = Array.from(new Set(selectedIds))
     if (uniqueIds.length === 0) {
-        return { error: { student_id: ['At least one student is required'] } }
+        return { error: { student_ids: ['At least one student is required'] } }
     }
 
     const data: openApi.InvoiceGenerateRequest = {
-        student_id: Number(validation.data.student_id),
         student_ids: selectedIds,
         period_from: validation.data.period_from,
         period_to: validation.data.period_to,

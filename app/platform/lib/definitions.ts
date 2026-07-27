@@ -328,7 +328,6 @@ export type UpdateStudentFormState =
     | undefined;
 
 export const createInvoiceSchema = zod.object({
-    student_id: zod.string().optional(),
     student_ids: zod.string().optional(),
     period_from: zod.string().min(1, { error: 'Period from is required' }).trim(),
     period_to: zod.string().min(1, { error: 'Period to is required' }).trim(),
@@ -338,7 +337,6 @@ export const createInvoiceSchema = zod.object({
 export type CreateInvoiceFormState =
     | {
         error?: {
-            student_id?: string[];
             student_ids?: string[];
             period_from?: string[];
             period_to?: string[];

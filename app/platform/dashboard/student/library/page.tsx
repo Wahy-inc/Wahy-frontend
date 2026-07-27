@@ -193,7 +193,7 @@ export default function Schedules() {
     return <DashboardPage title={title}>
         <div className="flex flex-col gap-4 w-full">
             {/* {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{t('library.offline_only')}</p> : null} */}
-            <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-4 md:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>
+            <div className="grid grid-cols-1 gap-2 items-stretch content-stretch justify-stretch">{content}</div>
         </div>
         <div id="pagination" className="grid grid-cols-3 text-sm my-4">
             <div className="col-start-1 col-end-2"></div>
