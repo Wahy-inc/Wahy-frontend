@@ -553,7 +553,7 @@ export default function Schedules() {
 
     return <DashboardPage title={title}>
         <div className="flex justify-start items-center gap-2">
-            <Input id="hide-inactive-schedules" name="hide-inactive-schedules" type="checkbox" onClick={() => setHideInActive(!hideInActive)} className="inline w-4 h-4" />
+            <Input id="hide-inactive-schedules" name="hide-inactive-schedules" type="checkbox" checked={hideInActive} onChange={() => setHideInActive(!hideInActive)} className="inline w-4 h-4" />
             <Label htmlFor="hide-inactive-schedules" className="text-slate-800 text-lg cursor-pointer hover:text-slate-600">Hide Inactive Schedules</Label>
         </div>
         <div className="min-h-fit">
