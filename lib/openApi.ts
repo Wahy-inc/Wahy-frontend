@@ -394,21 +394,24 @@ export interface ClassAttendanceSummary {
    * Expected Sessions
    * Number of scheduled sessions in the period.
    */
-  expected_sessions: number;
+  total_lessons: number;
   /**
-   * Attended Sessions
-   * Sessions attended (present or late).
+   * Total Sessions
    */
-  attended_sessions: number;
+  present_count: number;
   /**
    * Absent Sessions
    * Sessions missed (absent).
    */
-  absent_sessions: number;
+  late_count: number;
+
+  absent_count: number;
   /**
    * Attendance Rate
    * Fraction of sessions attended. Range 0.0 - 1.0.
    */
+  excused_count: number;
+
   attendance_rate: number;
 }
 

@@ -273,13 +273,6 @@ export default function Schedules() {
             }
         }
 
-        console.log(
-            {
-            freq: rule.options.byweekday?.length > 1 ? 'customWeekly' : freqMap[rule.options.freq],
-            byweekday: weekDays,
-            bymonthday: rule.options.bymonthday || [],
-        }
-        )
         return {
             freq: rule.options.byweekday?.length > 1 ? 'customWeekly' : freqMap[rule.options.freq],
             byweekday: weekDays,
@@ -400,9 +393,6 @@ export default function Schedules() {
                         setEditingScheduleId(open ? schedule.id : null)
                         const sch = schedules?.items.find((s) => s.id == schedule.id)
                         const ruleInfo = getRRULEInfo(sch?.rrule_string?? '')
-                        console.log(editingScheduleId)
-                        console.log('type' + ruleInfo.freq)
-                        console.log('prevalues' + ruleInfo.byweekday)
                         setIsRecurringPeriod(ruleInfo.freq)
                         if (ruleInfo.freq === 'weekly') {
                             setSelectedDayOfWeek(ruleInfo.byweekday[0])

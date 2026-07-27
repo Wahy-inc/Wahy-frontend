@@ -288,21 +288,23 @@ function LessonDataContent() {
                         </CardDescription>
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 grid grid-cols-2 w-full p-0">
+                        <CardHeader className="border-b-2 border-gray-500 grid grid-cols-3 w-full p-0">
                             <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">{t('analytics.attended_sessions')}</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.expected_sessions')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.excused_sessions')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center col-start-3 col-end-4">{t('analytics.absent_sessions')}</p>
                         </CardHeader>
-                        <CardDescription className="grid grid-cols-2">
-                            <p className="text-gray-300 text-4xl font-bold col-start-1 col-end-2 text-center">{analytic.attended_sessions}</p>
-                            <p className="text-gray-300 text-4xl font-bold col-start-2 col-end-3 text-center">{analytic.expected_sessions}</p>
+                        <CardDescription className="grid grid-cols-3">
+                            <p className="text-gray-300 text-4xl font-bold col-start-1 col-end-2 text-center">{analytic.present_count}</p>
+                            <p className="text-gray-300 text-4xl font-bold col-start-2 col-end-3 text-center">{analytic.excused_count}</p>
+                            <p className="text-gray-300 text-4xl font-bold col-start-3 col-end-4 text-center">{analytic.absent_count}</p>
                         </CardDescription>
                     </Card>
                     <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
                         <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.absent_sessions')}</p>
+                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.total_sessions')}</p>
                         </CardHeader>
                         <CardDescription className="flex flex-col items-center justify-center">
-                            <p className="text-gray-300 text-4xl font-bold">{analytic.absent_sessions}</p>
+                            <p className="text-gray-300 text-4xl font-bold">{analytic.total_lessons}</p>
                         </CardDescription>
                     </Card>
                 </div>
