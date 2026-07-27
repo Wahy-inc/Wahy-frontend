@@ -461,11 +461,11 @@ export default function Schedules() {
                                         {updateScheduleState?.error?.is_active && <p className="text-red-500 text-sm">{updateScheduleState.error.is_active}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('schedules.cancellation_reason'), "cancellation-reason", schedule.cancellation_reason ?? t('schedules.enter_notes'), "text")}
+                                        {fieldInput(t('schedules.cancellation_reason'), "cancellation-reason", schedule.cancellation_reason ?? '', "text")}
                                         {updateScheduleState?.error?.cancellation_reason && <p className="text-red-500 text-sm">{updateScheduleState.error.cancellation_reason}</p>}
                                     </div>
                                     <div className='flex flex-col'>
-                                        {fieldInput(t('schedules.notes'), "notes", schedule.notes ?? t('schedules.enter_notes'), "text")}
+                                        {fieldInput(t('schedules.notes'), "notes", schedule.notes ?? '', "text")}
                                         {updateScheduleState?.error?.notes && <p className="text-red-500 text-sm">{updateScheduleState.error.notes}</p>}
                                     </div>
                                     {updateScheduleState?.message == 'fail'? <p className="text-red-500 text-sm">{t('schedules.update_failed')}</p> : null}
