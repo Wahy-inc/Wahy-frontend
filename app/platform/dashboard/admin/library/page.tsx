@@ -1,266 +1,599 @@
-'use client'
-
-import React from "react";
-import * as openApi from "@/lib/openApi"
-import { createLibraryItem, deleteLibraryItem, getLibraryItem, listLibrary, deleteLibraryFile, downloadLibraryFile, listUploadLibraryFile, uploadLibraryFile } from "@/app/platform/actions/library";
-import DashboardPage from "../page";
-import TitleElement from "./title_element";
-import { Field } from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge"
-import * as icon from "lucide-react"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/auth-context";
+"use client";
 import { useLocalization } from "@/lib/localization-context";
-import { useToastListener } from "@/lib/toastListener";
-import { UploadedLibraryFile } from "@/app/platform/lib/definitions";
 
+import { useZodResolver } from "@/app/platform/lib/use-zod-resolver";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
+import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useRef, useState, type ChangeEvent } from "react";
+import { z } from "zod";
+import {
+	BookOpen,
+	Download,
+	ExternalLink,
+	Eye,
+	FileText,
+	Library as LibraryIcon,
+	Plus,
+	Trash2,
+	Upload,
+} from "lucide-react";
 
-export default function Schedules() {
-    const [libraryItems, setLibraryItems] = React.useState<openApi.PaginatedResponse<openApi.LibraryItemRead> | null>(null)
-    const [loading, setLoading] = React.useState(true)
-    const [error, setError] = React.useState<string | null>(null)
-    const [libraryFiles, setLibraryFiles] = React.useState<Record<number, UploadedLibraryFile[]>>({})
-    const [uploadFileState, uploadFileAction, uploadFilePending] = React.useActionState(uploadLibraryFile, undefined)
-    const [createLibraryItemState, createLibraryItemAction, createLibraryItemPending] = React.useActionState(createLibraryItem, undefined)
-    const [getLibraryItemState, getLibraryItemAction, getLibraryItemPending] = React.useActionState(getLibraryItem, undefined)
-    const [createLibraryDialogOpen, setCreateLibraryDialogOpen] = React.useState(false)
-    const [getLibraryDialogOpen, setGetLibraryDialogOpen] = React.useState(false)
-    const { isAdmin, isLoading: authLoading } = useAuth()
-    const { t , language} = useLocalization()
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
+import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorBanner } from "@/components/shared/error-banner";
+import { FieldInput } from "@/components/shared/field-input";
+import { LoadingSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
+import { Pagination } from "@/components/shared/pagination";
+import {
+	StatusBadge,
+	type BadgeVariant,
+} from "@/components/shared/status-badge";
+import { ApiError, BACKEND_URL } from "@/lib/api/client";
+import {
+	createLibraryItem,
+	deactivateLibraryItem,
+	deleteLibraryFile,
+	downloadLibraryFile,
+	listLibrary,
+	listLibraryFiles,
+	uploadLibraryFile,
+} from "@/lib/api/library";
+import { listStudents } from "@/lib/api/students";
+import { formatBytes } from "@/lib/format";
+import {
+	libraryItemSchema,
+	type LibraryItemValues,
+} from "@/app/platform/lib/schemas/library";
+import type {
+	BodyCreateApiV1LibraryPost,
+	LibraryAccessLevel,
+	LibraryFileRead,
+	LibraryItemRead,
+	StudentRead,
+} from "@/lib/data-contracts";
 
-    const refreshLibraryFiles = React.useCallback(async (items: openApi.LibraryItemRead[]) => {
-        const filesMap: Record<number, UploadedLibraryFile[]> = {}
-        await Promise.all(
-            items.map(async (item) => {
-                try {
-                    const res = await listUploadLibraryFile(item.id)
-                    filesMap[item.id] = res?.data || []
-                } catch {
-                    filesMap[item.id] = []
-                }
-            })
-        )
-        setLibraryFiles(filesMap)
-    }, [])
+const PAGE_SIZE = 12;
+const STUDENTS_PAGE_SIZE = 100;
 
-    useToastListener(createLibraryItemState, {functionName: "Create Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
-    useToastListener(getLibraryItemState, {functionName: "Get Library Item", successMessage: t('messages.success'), errorMessage: t('messages.error')})
-    useToastListener(uploadFileState, {functionName: "Upload File", successMessage: t('messages.file_uploaded'), errorMessage: t('messages.error')})
+const accessVariant: Record<LibraryAccessLevel, BadgeVariant> = {
+	all_students: "success",
+	specific_students: "warning",
+	groups: "secondary",
+};
 
-    React.useEffect(() => {        
-        if (getLibraryItemState?.message === 'success' && getLibraryItemState.data) {
-            setLibraryItems({ items: [getLibraryItemState.data], total: 1, page: 1, per_page: 1, has_next: false })
-        }
-        if (uploadFileState?.message === 'success' && uploadFileState.data) {
-            if (libraryItems) {
-                refreshLibraryFiles(libraryItems.items)
-            }
-        }
-        if (createLibraryItemState?.message === 'success') {
-            const fetchLibraryItems = async () => {
-                try {
-                    setLoading(true)
-                    const data = await listLibrary(10, 1)
-                    if (data) {
-                        setLibraryItems(data)
-                        await refreshLibraryFiles(data.items)
-                        console.log(data);
-                    }
-                    setError(null)
-                } catch (err) {
-                    setError('Failed to load library items')
-                    setLibraryItems(null)
-                } finally {
-                    setLoading(false)
-                }
-            }
-            fetchLibraryItems()
-        }
-    }, [getLibraryItemState, createLibraryItemState, uploadFileState, refreshLibraryFiles])
+const accessLabel: Record<LibraryAccessLevel, string> = {
+	all_students: "All students",
+	specific_students: "Specific students",
+	groups: "Groups",
+};
 
-    React.useEffect(() => {
-        if (authLoading) return
+function errorText(err: unknown, t: (key: string) => string): string {
+	return err instanceof ApiError
+		? err.message
+		: t("common.something_went_wrong");
+}
 
-        const fetchLibraryItems = async () => {
-            try {
-                setLoading(true)
-                const data = await listLibrary(10, 1)
-                if (data) {
-                    setLibraryItems(data)
-                    await refreshLibraryFiles(data.items)
-                }
-                setError(null)
-            } catch {
-                setError('Failed to load library items')
-                setLibraryItems(null)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchLibraryItems()
-    }, [authLoading, refreshLibraryFiles])
+function studentName(student: StudentRead): string {
+	return student.full_name_english || student.full_name_arabic;
+}
 
-    if (!isAdmin) {
-            return (
-                <div className="flex items-center justify-center min-h-screen">
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold">Access Denied</h1>
-                        <p className="text-lg">You do not have permission to view this page.</p>
-                    </div>
-                </div>
-            )
-        }
+function thumbnailUrl(path: string): string {
+	if (/^https?:\/\//i.test(path)) {
+		return path;
+	}
+	return `${BACKEND_URL}${path}`;
+}
 
-    const fieldInput = (label: string, name: string, holder: string, type: string) => (        
-        <Field orientation="vertical" className='w-full inline'>
-            <Label htmlFor={name}>{label}</Label>
-            <Input id={name} name={name} type={type} placeholder={holder} defaultValue={holder}></Input>
-        </Field>
-    )
+interface LibraryCardProps {
+	item: LibraryItemRead;
+}
 
-    const libraryItemElement = (item: openApi.LibraryItemRead) => (
-        <Card dir={language == 'ar' ? 'rtl' : 'ltr'} className="relative mx-auto w-full pt-0 overflow-hidden pb-2 h-fit grid grid-rows-[1fr_auto]">
-            <div className="grid grid-cols-[3fr_1fr] row-start-1 row-end-2 cursor-pointer border-b-2 border-slate-300 pb-5">
-                <CardHeader className="col-start-1 col-end-2">
-                    <div className="grid grid-rows-3 gap-1 px-1 py-5">
-                        <CardTitle onClick={() => window.location.href=item.external_url} className="cursor-pointer hover:text-slate-500" style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '2 !important', gridRowEnd:'3 !important'}}>{item.title}</CardTitle>
-                        <div className='mb-1' style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '1 !important', gridRowEnd:'2 !important'}}>
-                            <Badge variant="secondary" className='mx-1'>{item.category || 'Uncategorized'}</Badge>
-                            <Badge variant="secondary" className='mx-1'>{item.access_level || 'No Access Level'}</Badge>
-                            <Badge variant="secondary" className='mx-1'>{item.download_count || '0'} Downloads</Badge>
-                            <Badge variant="secondary" className='mx-1'>{item.view_count || '0'} Views</Badge>
-                        </div>
-                        <CardDescription className="text-wrap max-w-[90%]" style={{gridColumnStart: '1 !important', gridColumnEnd:'2 !important', gridRowStart: '3 !important', gridRowEnd:'4 !important'}}>
-                            {item.description && item.description.length > 300 ? item.description.substring(0, 300) + '...' : (item.description || 'No description')}
-                        </CardDescription>
-                    </div>
-                    <div className="flex -flex-row">
-                        <p className="text-sm text-muted-foreground">Tags:</p>
-                        {item.tags && item.tags.length > 0 ? (() => {
-                            try {
-                                const parsedTags = JSON.parse(item.tags[0])
-                                return parsedTags.map((tag: string, index: number) => (
-                                    <Badge key={index} variant="outline" className='mx-1'>{tag}</Badge>
-                                ))
-                            } catch {
-                                return <span>Error parsing tags</span>
-                            }
-                        })() : null}
-                    </div>
-                </CardHeader>
-                <div id="buttons" className="p-4 flex flex-col justify-between col-start-2 col-end-3">
-                    <form action={uploadFileAction}>
-                        <input type="hidden" name="itemID" value={item.id} />
-                        <div className="flex justify-center items-center">
-                            <icon.Upload className="w-5 h-5 text-white z-10 relative top-[50%] left-[45%] right-[45%]"></icon.Upload>
-                            <input type="file" name="file" disabled={uploadFilePending} onChange={(e) => {
-                                if (e.currentTarget.files?.[0]) {
-                                    e.currentTarget.form?.requestSubmit()
-                                }
-                            }} className="text-[0px] w-full h-10 bg-yellow-300 transition duration-300 rounded-lg text-white text-sm hover:bg-yellow-500 cursor-pointer" />
-                        </div>
-                    </form>
-                    <Button onClick={() => {
-                        deleteLibraryItem(item.id)
-                    }} variant='destructive' className="ml-5 transition duration-300 hover:bg-red-800 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <icon.Trash className="text-white cursor-pointer" size={16}/>
-                    </Button>
-                </div>
-            </div>
-            <CardContent className="w-full row-start-2 row-end-3 overflow-y-auto max-h-50">
-                {(libraryFiles[item.id] || []).map((file: UploadedLibraryFile) => (
-                    <div key={file.id} className="flex flex-row items-center justify-between bg-gray-100 rounded-lg p-2 m-2">
-                        <div className="flex flex-col justify-between">
-                            <div className="flex flex-row gap-2">
-                                <div className="flex items-center gap-2">
-                                    <icon.File className="text-slate-800" size={16} />
-                                    <span className="text-slate-800">{file.original_filename}</span>
-                                </div>
-                                <div>
-                                    <Badge variant="outline" className='mx-1 border-slate-800 text-slate-800'>{(file.file_size_bytes / 1024).toFixed(2)} KB</Badge>
-                                    <Badge variant="default" className='mx-1 bg-slate-800 text-white'>{(file.download_count)} Downloads</Badge>
-                                </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <icon.Clock className="text-slate-500" size={16} />
-                                <span className="text-slate-500 text-sm">Created: {new Date(file.created_at).toLocaleDateString()} | Updated: {new Date(file.updated_at).toLocaleDateString()}</span>
-                            </div>
-                        </div>
-                        <div className="flex flex-col gap-1">
-                            <Button variant="outline" size="sm" onClick={() => downloadLibraryFile(item.id, file.id)}>
-                                <icon.Download className="text-green-500" size={16} />
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => deleteLibraryFile(item.id, file.id)}>
-                                <icon.Trash className="text-red-500" size={16} />
-                            </Button>
-                        </div>
-                    </div>
-                ))}
-            </CardContent>
-        </Card>
-    )
+function LibraryCard({ item }: LibraryCardProps) {
+	const { t } = useLocalization();
+	const queryClient = useQueryClient();
+	const [expanded, setExpanded] = useState(false);
+	const [thumbnailFailed, setThumbnailFailed] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const title = (
-        <TitleElement
-            title={t('library.title')}
-            createAction={createLibraryItemAction}
-            createState={createLibraryItemState}
-            createPending={createLibraryItemPending}
-            getLibraryAction={getLibraryItemAction}
-            getLibraryState={getLibraryItemState}
-            getLibraryPending={getLibraryItemPending}
-            fieldInput={fieldInput}
-            createLibraryDialogOpen={createLibraryDialogOpen}
-            setcreateLibraryDialogOpen={setCreateLibraryDialogOpen}
-            getLibraryDialogOpen={getLibraryDialogOpen}
-            setgetLibraryDialogOpen={setGetLibraryDialogOpen}
-        />
-    )
+	const filesQuery = useQuery({
+		queryKey: ["library", item.id],
+		queryFn: () => listLibraryFiles(item.id),
+		enabled: expanded,
+	});
 
-    if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.loading')}</p></DashboardPage>
-    if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!libraryItems || libraryItems.items.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('library.no_books_found')}</p></DashboardPage>
+	const uploadMutation = useMutation({
+		mutationFn: (file: File) => uploadLibraryFile(item.id, file),
+		onSuccess: () => {
+			toast.success(t("file_upload.uploaded"));
+			queryClient.invalidateQueries({ queryKey: ["library", item.id] });
+		},
+		onError: (err) => toast.error(errorText(err, t)),
+	});
 
-    const content = libraryItems.items.map((item) => (
-        <div key={item.id} className="w-full">
-            {libraryItemElement(item)}
-        </div>
-    ))
+	const deleteFileMutation = useMutation({
+		mutationFn: (fileId: number) => deleteLibraryFile(item.id, fileId),
+		onSuccess: () => {
+			toast.success(t("file_upload.deleted"));
+			queryClient.invalidateQueries({ queryKey: ["library", item.id] });
+		},
+		onError: (err) => toast.error(errorText(err, t)),
+	});
 
-    return (
-        <DashboardPage title={title}>
-            <div className="grid grid-cols-1 lg:gap-4 gap-2 2xl:grid-cols-2 items-stretch content-stretch justify-stretch">{content}</div>
-            <div id="pagination" className="grid grid-cols-3 text-sm my-4">
-            <div className="col-start-1 col-end-2"></div>
-            <div className="col-start-2 col-end-3">
-                page <span className="font-bold text-slate-800">{libraryItems.page}</span> of <span className="font-bold text-slate-800">{Math.ceil((libraryItems.total || 0) / libraryItems.per_page)}</span>
-            </div>
-            <div className="flex flex-row justify-end items-center gap-2 col-start-3 col-end-4">
-                <Button variant="outline" disabled={libraryItems.page === 1 || libraryItems.items.length === 0} onClick={
-                    () => listLibrary(10, libraryItems.page - 1).then((data) => {
-                        if (data) {
-                            setLibraryItems(data)
-                        }
-                    })
-                }>Previous</Button>
-                <Button variant="outline" disabled={!libraryItems.has_next || libraryItems.items.length === 0} onClick={
-                    () => listLibrary(10, libraryItems.page + 1).then((data) => {
-                        if (data) {
-                            setLibraryItems(data)
-                        }
-                    })
-                }>Next</Button>
-            </div>
-        </div>
-        </DashboardPage>
-    )
+	const deleteItemMutation = useMutation({
+		mutationFn: () => deactivateLibraryItem(item.id),
+		onSuccess: () => {
+			toast.success(t("library.deleted_success"));
+			queryClient.invalidateQueries({ queryKey: ["library"] });
+		},
+		onError: (err) => toast.error(errorText(err, t)),
+	});
+
+	const handleUpload = (event: ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		event.target.value = "";
+		if (file) {
+			uploadMutation.mutate(file);
+		}
+	};
+
+	const handleDownload = async (file: LibraryFileRead) => {
+		try {
+			const blob = await downloadLibraryFile(item.id, file.id);
+			const url = URL.createObjectURL(blob);
+			const a = document.createElement("a");
+			a.href = url;
+			a.download = file.original_filename;
+			a.click();
+			URL.revokeObjectURL(url);
+		} catch (err) {
+			toast.error(errorText(err, t));
+		}
+	};
+
+	return (
+		<Card className="gap-4 py-5">
+			<CardContent className="flex flex-col gap-3 px-5">
+				{item.thumbnail_image_path && !thumbnailFailed ? (
+					<div className="bg-muted relative h-40 w-full overflow-hidden rounded-md">
+						<Image
+							src={thumbnailUrl(item.thumbnail_image_path)}
+							alt={item.title}
+							fill
+							sizes="(max-width: 1024px) 50vw, 33vw"
+							className="object-cover"
+							onError={() => setThumbnailFailed(true)}
+						/>
+					</div>
+				) : (
+					<div className="bg-muted flex h-40 w-full items-center justify-center rounded-md">
+						<BookOpen className="text-muted-foreground size-8" />
+					</div>
+				)}
+
+				<div className="flex flex-col gap-1">
+					<div className="flex items-start justify-between gap-2">
+						<h3 className="font-semibold leading-snug">{item.title}</h3>
+						<a
+							href={item.external_url}
+							target="_blank"
+							rel="noreferrer"
+							aria-label={t("library.open_external_aria")}
+							className="text-muted-foreground hover:text-foreground"
+						>
+							<ExternalLink className="size-4" />
+						</a>
+					</div>
+					{item.description ? (
+						<p className="text-muted-foreground line-clamp-2 text-sm">
+							{item.description}
+						</p>
+					) : null}
+					<div className="flex flex-wrap gap-2 pt-1">
+						{item.category ? (
+							<StatusBadge variant="secondary">{item.category}</StatusBadge>
+						) : null}
+						<StatusBadge variant={accessVariant[item.access_level]}>
+							{accessLabel[item.access_level]}
+						</StatusBadge>
+					</div>
+					<div className="text-muted-foreground flex items-center gap-4 text-xs">
+						<span className="flex items-center gap-1">
+							<Eye className="size-3.5" /> {item.view_count}
+						</span>
+						<span className="flex items-center gap-1">
+							<Download className="size-3.5" /> {item.download_count}
+						</span>
+					</div>
+				</div>
+
+				<div className="flex flex-wrap items-center gap-2 border-t pt-3">
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={() => setExpanded((prev) => !prev)}
+					>
+						<BookOpen className="size-4" />{" "}
+						{expanded ? t("library.hide_files") : t("library.files")}
+					</Button>
+					<Button
+						variant="outline"
+						size="sm"
+						disabled={uploadMutation.isPending}
+						onClick={() => fileInputRef.current?.click()}
+					>
+						<Upload className="size-4" />
+						{uploadMutation.isPending
+							? t("common.uploading")
+							: t("library.upload_file")}
+					</Button>
+					<input
+						ref={fileInputRef}
+						type="file"
+						className="hidden"
+						onChange={handleUpload}
+					/>
+					<div className="ms-auto">
+						<ConfirmDialog
+							title={t("library.delete_item_title")}
+							description={`Remove "${item.title}"? Students will no longer see it.`}
+							confirmLabel={t("common.delete")}
+							destructive
+							onConfirm={() => deleteItemMutation.mutate()}
+							trigger={
+								<Button
+									variant="ghost"
+									size="sm"
+									aria-label={t("library.delete_item_aria")}
+								>
+									<Trash2 className="size-4" />
+								</Button>
+							}
+						/>
+					</div>
+				</div>
+
+				{expanded ? (
+					<div className="flex flex-col gap-2 border-t pt-3">
+						{filesQuery.isLoading ? (
+							<p className="text-muted-foreground text-sm">
+								{t("library.loading_files")}
+							</p>
+						) : null}
+						{filesQuery.isError ? (
+							<ErrorBanner message={t("error_messages.failed_load_files")} />
+						) : null}
+						{filesQuery.isSuccess && filesQuery.data.length === 0 ? (
+							<p className="text-muted-foreground text-sm">
+								{t("library.no_files")}
+							</p>
+						) : null}
+						{filesQuery.data?.map((file) => (
+							<div
+								key={file.id}
+								className="bg-muted/50 flex items-center gap-3 rounded-md px-3 py-2 text-sm"
+							>
+								<FileText className="text-muted-foreground size-4 shrink-0" />
+								<div className="min-w-0 flex-1">
+									<p className="truncate font-medium">
+										{file.original_filename}
+									</p>
+									<p className="text-muted-foreground text-xs">
+										{formatBytes(file.file_size_bytes)} · {file.download_count}{" "}
+										downloads
+									</p>
+								</div>
+								<Button
+									variant="ghost"
+									size="icon-sm"
+									aria-label={`Download ${file.original_filename}`}
+									onClick={() => void handleDownload(file)}
+								>
+									<Download className="size-4" />
+								</Button>
+								<ConfirmDialog
+									title={t("library.delete_file_title")}
+									description={`Delete "${file.original_filename}"?`}
+									confirmLabel={t("common.delete")}
+									destructive
+									onConfirm={() => deleteFileMutation.mutate(file.id)}
+									trigger={
+										<Button
+											variant="ghost"
+											size="icon-sm"
+											aria-label={`Delete ${file.original_filename}`}
+										>
+											<Trash2 className="size-4" />
+										</Button>
+									}
+								/>
+							</div>
+						))}
+					</div>
+				) : null}
+			</CardContent>
+		</Card>
+	);
+}
+
+interface NewItemDialogProps {
+	students: StudentRead[];
+	onClose: () => void;
+}
+
+function NewItemDialog({ students, onClose }: NewItemDialogProps) {
+	const { t } = useLocalization();
+	const queryClient = useQueryClient();
+	const [error, setError] = useState<string | null>(null);
+	const [thumbnail, setThumbnail] = useState<File | null>(null);
+	const [studentIds, setStudentIds] = useState<number[]>([]);
+
+	const {
+		register,
+		handleSubmit,
+		control,
+		watch,
+		formState: { errors },
+	} = useForm<z.input<typeof libraryItemSchema>, unknown, LibraryItemValues>({
+		resolver: useZodResolver(libraryItemSchema),
+		defaultValues: {
+			title: "",
+			external_url: "",
+			description: "",
+			category: "",
+			access_level: "all_students",
+		},
+	});
+
+	const accessLevel = watch("access_level");
+
+	const createMutation = useMutation({
+		mutationFn: (values: LibraryItemValues) => {
+			const payload: BodyCreateApiV1LibraryPost = {
+				title: values.title,
+				external_url: values.external_url,
+				description: values.description || null,
+				category: values.category || null,
+				access_level: values.access_level as LibraryAccessLevel,
+				thumbnail,
+				student_ids:
+					values.access_level === "specific_students" && studentIds.length > 0
+						? studentIds
+						: null,
+			};
+			return createLibraryItem(payload);
+		},
+		onSuccess: () => {
+			toast.success(t("library.created_success"));
+			queryClient.invalidateQueries({ queryKey: ["library"] });
+			onClose();
+		},
+		onError: (err) => setError(errorText(err, t)),
+	});
+
+	const toggleStudent = (id: number, checked: boolean) => {
+		setStudentIds((prev) =>
+			checked ? [...prev, id] : prev.filter((existing) => existing !== id),
+		);
+	};
+
+	return (
+		<Dialog
+			open
+			onOpenChange={(open) => {
+				if (!open) onClose();
+			}}
+		>
+			<DialogContent className="max-h-[85vh] overflow-y-auto">
+				<form
+					onSubmit={handleSubmit((values) => createMutation.mutate(values))}
+					className="flex flex-col gap-4"
+				>
+					<DialogHeader>
+						<DialogTitle>{t("library.new_item")}</DialogTitle>
+						<DialogDescription>{t("library.new_item_desc")}</DialogDescription>
+					</DialogHeader>
+					{error ? <ErrorBanner message={error} /> : null}
+					<FieldInput
+						label={t("library.item_title")}
+						required
+						error={errors.title?.message}
+						{...register("title")}
+					/>
+					<FieldInput
+						label={t("library.url")}
+						type="url"
+						required
+						placeholder={t("library.url_placeholder")}
+						error={errors.external_url?.message}
+						{...register("external_url")}
+					/>
+					<FieldInput
+						label={t("library.description")}
+						error={errors.description?.message}
+						{...register("description")}
+					/>
+					<FieldInput
+						label={t("library.category")}
+						placeholder={t("library.category_placeholder")}
+						error={errors.category?.message}
+						{...register("category")}
+					/>
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="access-level">{t("library.access_level")}</Label>
+						<Controller
+							control={control}
+							name="access_level"
+							render={({ field }) => (
+								<Select value={field.value} onValueChange={field.onChange}>
+									<SelectTrigger id="access-level" className="w-full">
+										<SelectValue
+											placeholder={t("library.select_access_level")}
+										/>
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="all_students">
+											{t("library.all_students")}
+										</SelectItem>
+										<SelectItem value="specific_students">
+											{t("library.specific_students")}
+										</SelectItem>
+										<SelectItem value="groups">
+											{t("library.groups")}
+										</SelectItem>
+									</SelectContent>
+								</Select>
+							)}
+						/>
+					</div>
+					{accessLevel === "specific_students" ? (
+						<div className="flex flex-col gap-2">
+							<Label>{t("common.students")}</Label>
+							<div className="flex max-h-40 flex-col gap-2 overflow-y-auto rounded-md border p-3">
+								{students.map((student) => (
+									<label
+										key={student.id}
+										className="flex cursor-pointer items-center gap-2 text-sm"
+									>
+										<input
+											type="checkbox"
+											checked={studentIds.includes(student.id)}
+											onChange={(event) =>
+												toggleStudent(student.id, event.target.checked)
+											}
+											className="size-4 accent-primary"
+										/>
+										{studentName(student)}
+									</label>
+								))}
+								{students.length === 0 ? (
+									<p className="text-muted-foreground text-sm">
+										{t("library.no_students_available")}
+									</p>
+								) : null}
+							</div>
+							{studentIds.length === 0 ? (
+								<p className="text-muted-foreground text-xs">
+									{t("library.none_selected_warning")}
+								</p>
+							) : null}
+						</div>
+					) : null}
+					<div className="flex flex-col gap-1.5">
+						<Label htmlFor="thumbnail">{t("library.thumbnail")}</Label>
+						<Input
+							id="thumbnail"
+							type="file"
+							accept="image/*"
+							onChange={(event) =>
+								setThumbnail(event.target.files?.[0] ?? null)
+							}
+						/>
+					</div>
+					<DialogFooter>
+						<Button type="button" variant="outline" onClick={onClose}>
+							{t("common.cancel")}
+						</Button>
+						<Button type="submit" disabled={createMutation.isPending}>
+							{createMutation.isPending ? "Creating..." : "Create item"}
+						</Button>
+					</DialogFooter>
+				</form>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+export default function AdminLibraryPage() {
+	const { t } = useLocalization();
+	const [page, setPage] = useState(1);
+	const [createOpen, setCreateOpen] = useState(false);
+
+	const libraryQuery = useQuery({
+		queryKey: ["library", { page }],
+		queryFn: () => listLibrary({ page, perPage: PAGE_SIZE }),
+	});
+
+	const studentsQuery = useQuery({
+		queryKey: ["students"],
+		queryFn: () => listStudents({ perPage: STUDENTS_PAGE_SIZE }),
+	});
+
+	return (
+		<div className="flex flex-col gap-6">
+			<PageHeader
+				title={t("library.title")}
+				description={t("library.description_short")}
+				actions={
+					<Button onClick={() => setCreateOpen(true)}>
+						<Plus className="size-4" />
+						{t("library.new_item")}
+					</Button>
+				}
+			/>
+
+			{libraryQuery.isLoading ? <LoadingSkeleton rows={4} /> : null}
+
+			{libraryQuery.isError ? (
+				<div className="flex flex-col items-start gap-3">
+					<ErrorBanner message={errorText(libraryQuery.error, t)} />
+					<Button variant="outline" onClick={() => void libraryQuery.refetch()}>
+						{t("common.retry")}
+					</Button>
+				</div>
+			) : null}
+
+			{libraryQuery.isSuccess && libraryQuery.data.items.length === 0 ? (
+				<EmptyState
+					icon={LibraryIcon}
+					title={t("library.no_items")}
+					description={t("library.no_items_desc")}
+				/>
+			) : null}
+
+			{libraryQuery.isSuccess && libraryQuery.data.items.length > 0 ? (
+				<div className="flex flex-col gap-4">
+					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						{libraryQuery.data.items.map((item) => (
+							<LibraryCard key={item.id} item={item} />
+						))}
+					</div>
+					<Pagination
+						page={page}
+						perPage={PAGE_SIZE}
+						total={libraryQuery.data.total}
+						onChange={setPage}
+					/>
+				</div>
+			) : null}
+
+			{createOpen ? (
+				<NewItemDialog
+					students={studentsQuery.data?.items ?? []}
+					onClose={() => setCreateOpen(false)}
+				/>
+			) : null}
+		</div>
+	);
 }
