@@ -1,372 +1,498 @@
-'use client'
-
-import React from "react";
-import * as openApi from "@/lib/openApi"
-import { createInvoices, downloadInvoicePDF, getInvoice, listInvoices, markInvoiceAsPaid, overrideInvoice } from "@/app/platform/actions/invoices";
-import { getLocalStudent } from "@/app/platform/actions/students";
-import DashboardPage from "../page";
-import TitleElement from "./title_element";
-import { Field } from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button"
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item"
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion"
-import {DollarSign} from 'lucide-react'
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { useAuth } from "@/lib/auth-context";
+"use client";
 import { useLocalization } from "@/lib/localization-context";
-import { GetInvoiceByIDFormState } from "@/app/platform/lib/definitions";
-import { useToastListener } from "@/lib/toastListener";
-import { checkHealth } from "@/app/platform/actions/auth";
+
+import { useZodResolver } from "@/app/platform/lib/use-zod-resolver";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { z } from "zod";
+import Link from "next/link";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { useMemo, useState } from "react";
+import { Plus, Receipt } from "lucide-react";
 
-export default function Invoices() {
-    const { isAdmin, isLoading: authLoading } = useAuth()
-    const [invoices, setInvoices] = React.useState<openApi.PaginatedResponse<openApi.InvoiceRead> | null>(null)
-    const [loading, setLoading] = React.useState(true)
-    const [error, setError] = React.useState<string | null>(null)
-    const [overrideInvoiceState, overrideInvoiceAction, overrideInvoicePending] = React.useActionState(overrideInvoice, undefined)
-    const [createInvoiceState, createInvoiceAction, createInvoicePending] = React.useActionState(createInvoices, undefined)
-    const getInvoiceAction = async (state: GetInvoiceByIDFormState, formData: FormData) => {
-        return getInvoice(state, formData)
-    }
-    const [getInvoiceState, getInvoiceFormAction, getInvoicePending] = React.useActionState(getInvoiceAction, undefined)
-    const [payInvoiceState, payInvoiceAction, payInvoicePending] = React.useActionState(markInvoiceAsPaid, undefined)
-    const [createInvoiceDialogOpen, setCreateInvoiceDialogOpen] = React.useState(false)
-    const [getInvoiceDialogOpen, setGetInvoiceDialogOpen] = React.useState(false)
-    const [overrideInvoiceDialogOpen, setOverrideInvoiceDialogOpen] = React.useState(false)
-    const [paidInvoiceDialogOpen, setPaidInvoiceDialogOpen] = React.useState(false)
-    const { t } = useLocalization()
+import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { SearchableSelect } from "@/components/shared/searchable-select";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorBanner } from "@/components/shared/error-banner";
+import { errorMessage } from "@/components/shared/error-text";
+import { FieldInput } from "@/components/shared/field-input";
+import { LoadingSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
+import { Pagination } from "@/components/shared/pagination";
+import { InvoiceStatusBadge } from "@/components/shared/status-badge";
+import { listInvoices } from "@/lib/api/invoices";
+import { generateInvoice, getParent, listParents } from "@/lib/api/parents";
+import { formatCurrency } from "@/lib/format";
+import { formatDate, rangeLabel } from "@/lib/dates";
+import {
+	invoiceGenerateSchema,
+	type InvoiceGenerateValues,
+} from "@/app/platform/lib/schemas/parent";
+import type {
+	ChildRead,
+	InvoiceWithItemsRead,
+	ParentInvoiceGenerateRequest,
+} from "@/lib/data-contracts";
 
-    React.useEffect(() => {
-        try {
-            checkHealth().then((res) => {
-                if (res.message == 'API is healthy') {
-                    toast.success(res.message)
-                } else {
-                    toast.warning(res.message)
-                }
-            })
-        } catch (err) {
-            console.error("API health check failed")
-        }
-    }, [])
+const PAGE_SIZE = 20;
+const PARENTS_PAGE_SIZE = 100;
 
-    useToastListener(createInvoiceState, {functionName: 'Create Invoice', successMessage: t('invoices.create_success'), errorMessage: t('invoices.create_error')})
-    useToastListener(overrideInvoiceState, {functionName: 'Override Invoice', successMessage: t('invoices.override_success'), errorMessage: t('invoices.override_error')})
-    useToastListener(payInvoiceState, {functionName: 'Mark Invoice As Paid', successMessage: t('invoices.mark_paid_success'), errorMessage: t('invoices.mark_paid_error')})
-    useToastListener(getInvoiceState, {functionName: 'Get Invoice', successMessage: t('invoices.get_success'), errorMessage: t('invoices.get_error')})
+function generateErrorText(err: unknown): string {
+	const message = errorMessage(err);
+	if (/no rate set/i.test(message)) {
+		return `${message} Set a base rate on the child, then try again.`;
+	}
+	return message;
+}
 
-    React.useEffect(() => {
-        if (getInvoiceState?.message === 'success' && getInvoiceState.data) {
-            setInvoices({ items: [getInvoiceState.data], total: 1, page: 1, per_page: 1, has_next: false })
-        }
-        if (createInvoiceState?.message === 'success' || overrideInvoiceState?.message === 'success' || payInvoiceState?.message === 'success') {
-        const fetchInvoices = async () => {
-            try {
-                setLoading(true)
-                const data = await listInvoices(10,1)
-                setInvoices(data)
-                setError(null)
-            } catch (err) {
-                setError(t('invoices.get_error'))
-                setInvoices(null)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchInvoices()
-        }
-    }, [getInvoiceState, createInvoiceState, overrideInvoiceState, payInvoiceState,t])
+function childName(child: ChildRead): string {
+	return child.full_name_english || child.full_name_arabic;
+}
 
-    React.useEffect(() => {
-        if (authLoading) return
+interface GenerateInvoiceDialogProps {
+	onClose: () => void;
+	onGenerated: (invoice: InvoiceWithItemsRead) => void;
+}
 
-        // const cachedInvoices = getCachedData<openApi.InvoiceRead[]>(
-        //     offlineCacheKeys.invoicesListAdmin,
-        // )
-        // if (cachedInvoices && cachedInvoices.length > 0) {
-        //     setInvoices(cachedInvoices)
-        //     setLoading(false)
-        // }
-        
-        const fetchInvoices = async () => {
-            try {
-                setLoading(true)
-                const data = await listInvoices(10,1)
-                setInvoices(data)
-                setError(null)
-            } catch (err) {
-                setError(t('invoices.get_error'))
-                setInvoices(null)
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchInvoices()
-    }, [authLoading,t])
+function GenerateInvoiceDialog({
+	onClose,
+	onGenerated,
+}: GenerateInvoiceDialogProps) {
+	const { t } = useLocalization();
+	const queryClient = useQueryClient();
+	const [parentId, setParentId] = useState<number | null>(null);
+	const [excludedIds, setExcludedIds] = useState<ReadonlySet<number>>(
+		new Set(),
+	);
+	const [error, setError] = useState<string | null>(null);
 
-    if (!isAdmin) {
-            return (
-                <div className="flex items-center justify-center min-h-screen">
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold">Access Denied</h1>
-                        <p className="text-lg">You do not have permission to view this page.</p>
-                    </div>
-                </div>
-            )
-        }
+	const parentsQuery = useQuery({
+		queryKey: ["parents"],
+		queryFn: () => listParents({ perPage: PARENTS_PAGE_SIZE }),
+	});
 
-    const fieldInput = (label: string, name: string, holder: string, type: string) => (        
-        <Field orientation="vertical" className='w-full inline'>
-            <Label htmlFor={name}>{label}</Label>
-            <Input id={name} name={name} type={type} placeholder={holder} defaultValue={holder}></Input>
-        </Field>
-    )
+	const parentDetailQuery = useQuery({
+		queryKey: ["parents", parentId],
+		queryFn: () => getParent(parentId as number),
+		enabled: parentId !== null,
+	});
 
-    const invoiceElement = (invoice: openApi.InvoiceRead, color: string) => (
-        <div className="flex w-full flex-col gap-6">
-            <Item variant="outline" style={{borderColor: color}}>
-                <ItemContent>
-                    <ItemMedia variant="icon">
-                        <DollarSign />
-                    </ItemMedia>
-                <ItemTitle>{t('invoices.invoice_id_label')}: {invoice.invoice_number} , {t('students.student_id')}: {getLocalStudent(invoice.student_id)?.full_name_english}</ItemTitle>
-                    {t('invoices.amount')}: {parseFloat(invoice.total_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {invoice.currency} , {t('invoices.status')}: {invoice.status} <br />
-                    <div id="accordion-data" className="text-sm">
-                        <Accordion
-                        type="single"
-                        collapsible
-                        className="w-full"
-                        >
-                            <AccordionItem key={invoice.id} value={invoice.id.toString()}>
-                            <AccordionTrigger>{t('invoices.more_details')}</AccordionTrigger>
-                            <AccordionContent>
-                                {t('invoices.period_from_label')}: {invoice.period_from} {t('invoices.to')} {invoice.period_to} <br />
-                                {t('invoices.generated_label')}: {invoice.generated_date}    ,    {t('invoices.due_label')}: {invoice.due_date} <br />
-                                {t('invoices.payment_method')}: {invoice.payment_method}    ,    {t('invoices.reference')}: {invoice.payment_reference} <br /><br />
-                                {t('invoices.payment_notes_label')}: {invoice.payment_notes}
-                            </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
-                    </div>
-                </ItemContent>
-                <div className="grid grid-cols-3 gap-1 place-items-center">
-                    <ItemActions className="col-start-1 col-end-2">
-                        <Button size="sm" variant="outline" className="transition duration-300 border-yellow-500 border text-yellow-500 bg-transparent hover:bg-yellow-500 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed" onClick={() => {
-                            downloadInvoicePDF(invoice.id)
-                        }}>
-                            {t('invoices.download_pdf')}
-                        </Button>
-                    </ItemActions>
-                    {invoice.status === openApi.InvoiceStatus.Generated? (
-                        <ItemActions className="col-start-2 col-end-3">
-                            <AlertDialog open={paidInvoiceDialogOpen} onOpenChange={payInvoiceState?.message == 'success'? () => setPaidInvoiceDialogOpen(false) : setPaidInvoiceDialogOpen}>
-                                <AlertDialogTrigger asChild>
-                                    <ItemActions>
-                                        <Button size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white">
-                                            {t('invoices.mark_paid')}
-                                        </Button>
-                                    </ItemActions>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <form action={payInvoiceAction} id={`pay-${invoice.id.toString()}`}>
-                                    <AlertDialogHeader>
-                                    <AlertDialogTitle>{t('invoices.mark_invoice_as_paid')}</AlertDialogTitle>
-                                        <div className="flex flex-col gap-4 w-full rtl:text-right">
-                                            <input hidden name="invoice_id" value={invoice.id} type="text" />
-                                            <div className='flex flex-col'>
-                                                {fieldInput(t('invoices.date'),"paid_date", '', "date")}
-                                                {payInvoiceState?.error?.paid_date && <p className="text-red-500 text-sm">{payInvoiceState.error.paid_date}</p>}
-                                            </div>
-                                            <div className='flex flex-col'>
-                                                {fieldInput(t('invoices.payment_method') + " (Optional)","payment_method", '', "text")}
-                                                {payInvoiceState?.error?.payment_method && <p className="text-red-500 text-sm">{payInvoiceState.error.payment_method}</p>}
-                                            </div>
-                                            <div className='flex flex-col'>
-                                                {fieldInput(t('invoices.payment_reference') + " (Optional)","payment_reference", '', "text")}
-                                                {payInvoiceState?.error?.payment_reference && <p className="text-red-500 text-sm">{payInvoiceState.error.payment_reference}</p>}
-                                            </div>
-                                            <div className='flex flex-col'>
-                                                {fieldInput(t('invoices.payment_notes') + " (Optional)","payment_notes", '', "text")}
-                                                {payInvoiceState?.error?.payment_notes && <p className="text-red-500 text-sm">{payInvoiceState.error.payment_notes}</p>}
-                                            </div>
-                                        </div>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter className="mt-4">
-                                        <AlertDialogCancel type="reset" disabled={payInvoicePending}>{t('common.cancel')}</AlertDialogCancel>
-                                        <Button type="submit" disabled={payInvoicePending}>{payInvoicePending ? t('common.updating') : t('common.update')}</Button>
-                                    </AlertDialogFooter>
-                                    </form>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        </ItemActions>
-                    ) : null}
-                            {invoice.status === openApi.InvoiceStatus.Paid ? (
-                                <Button disabled={true} size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white col-start-2 col-end-3">
-                                    {t('invoices.paid')}
-                                </Button>
-                            ) : null}
-                        <ItemActions className="col-start-3 col-end-4">
-                            <AlertDialog open={overrideInvoiceDialogOpen} onOpenChange={overrideInvoiceState?.message == 'success'? () => setOverrideInvoiceDialogOpen(false) : setOverrideInvoiceDialogOpen}>
-                                <AlertDialogTrigger asChild>
-                                    <ItemActions>
-                                        <Button size="sm" variant="outline" className="transition duration-300 border-red-500 border text-red-500 bg-transparent hover:bg-red-500 hover:text-white">
-                                            {t('invoices.override')}
-                                        </Button>
-                                    </ItemActions>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                    <form action={overrideInvoiceAction} id={`override-${invoice.id.toString()}`}>
-                                    <AlertDialogHeader>
-                                    <AlertDialogTitle>{t('invoices.override_invoice')}</AlertDialogTitle>
-                                        <div className="flex flex-col gap-4 w-full rtl:text-right">
-                                            <input hidden value={invoice.id} name="invoice_id" type="text" />
-                                            <div className='flex flex-col'>
-                                                {fieldInput(t('invoices.billable'),"billable", t('invoices.yes_or_no'), "text")}
-                                            </div>
-                                            <div className='flex flex-col'>
-                                                {fieldInput(t('invoices.override_reason'),"override_reason", '', "text")}
-                                            </div>
-                                        </div>
-                                    </AlertDialogHeader>
-                                    <AlertDialogFooter className="mt-4">
-                                        <AlertDialogCancel type="reset" disabled={overrideInvoicePending}>{t('common.cancel')}</AlertDialogCancel>
-                                        <Button type="submit" disabled={overrideInvoicePending}>{overrideInvoicePending ? t('invoices.overriding') : t('invoices.override')}</Button>
-                                    </AlertDialogFooter>
-                                    </form>
-                                </AlertDialogContent>
-                            </AlertDialog>
-                        </ItemActions>
-                </div>
-            </Item>
-        </div>
-    )
+	const children = parentDetailQuery.data?.children ?? [];
+	const selectedIds = children
+		.filter((child) => !excludedIds.has(child.id))
+		.map((child) => child.id);
 
-    const title = (
-        <TitleElement
-            title={t('invoices.title')}
-            createAction={createInvoiceAction}
-            createState={createInvoiceState}
-            createPending={createInvoicePending}
-            getInvoiceAction={getInvoiceFormAction}
-            getInvoiceState={getInvoiceState}
-            getInvoicePending={getInvoicePending}
-            fieldInput={fieldInput}
-            createInvoicesDialogOpen={createInvoiceDialogOpen}
-            setcreateInvoicesDialogOpen={setCreateInvoiceDialogOpen}
-            getInvoicesDialogOpen={getInvoiceDialogOpen}
-            setgetInvoicesDialogOpen={setGetInvoiceDialogOpen}
-        />
-    )
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+	} = useForm<
+		z.input<typeof invoiceGenerateSchema>,
+		unknown,
+		InvoiceGenerateValues
+	>({
+		resolver: useZodResolver(invoiceGenerateSchema),
+		defaultValues: {
+			include_absent: false,
+			include_late: false,
+			include_excused: false,
+			due_date: "",
+			currency: "USD",
+		},
+	});
 
-    if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.loading')}</p></DashboardPage>
-    if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!invoices || invoices.items.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('invoices.no_invoices_found')}</p></DashboardPage>
+	const generateMutation = useMutation({
+		mutationFn: (payload: ParentInvoiceGenerateRequest) =>
+			generateInvoice(parentId as number, payload),
+		onSuccess: (invoice) => {
+			toast.success(t("invoices.generated_title"));
+			queryClient.invalidateQueries({ queryKey: ["invoices"] });
+			onClose();
+			onGenerated(invoice);
+		},
+		onError: (err) => setError(generateErrorText(err)),
+	});
 
-    const paidInvoices = invoices?.items.filter((invoice) => {
-        return invoice.status === openApi.InvoiceStatus.Paid;
-    })
-    const generatedInvoices = invoices?.items.filter((invoice) => {
-        return invoice.status === openApi.InvoiceStatus.Generated;
-    })
-    const cancelledInvoices = invoices?.items.filter((invoice) => {
-        return invoice.status === openApi.InvoiceStatus.Cancelled;
-    })
-    const overDueInvoices = invoices?.items.filter((invoice) => {
-        return invoice.status === openApi.InvoiceStatus.Overdue;
-    })
-    const sentInvoices = invoices?.items.filter((invoice) => {
-        return invoice.status === openApi.InvoiceStatus.Sent;
-    })
+	const handleParentChange = (value: string) => {
+		setParentId(Number(value));
+		setExcludedIds(new Set());
+		setError(null);
+	};
 
-    const content = (
-        <div className="flex flex-col gap-12 w-full">
-            {/* {isOffline ? <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">{t('invoices.offline_notice')}</p> : null} */}
-            <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">{t('invoices.generated_invoices_title')}</p>
-                {generatedInvoices && generatedInvoices.length > 0 ? generatedInvoices.map((invoice) => (
-                    <div key={invoice.id}>
-                        {invoiceElement(invoice, '')}
-                    </div>
-                )) : <p className="text-slate-700 text-xl">{t('invoices.no_generated_invoices')}</p>}
-            </div>
-            <div className="w-full h-1 bg-gray-400"></div>
-                {sentInvoices && sentInvoices.length > 0 ? (
-                    <div className="flex flex-col gap-4">
-                        <p className="text-2xl text-slate-700 font-semibold">{t('invoices.sent_invoices_title')}</p>
-                        {sentInvoices.map((invoice) => (
-                            <div key={invoice.id}>
-                                {invoiceElement(invoice, '#6a7282')}
-                            </div>
-                        ))}
-                        <div className="w-full h-1 bg-gray-400"></div>
-                    </div>
-                ) : null}
-            <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">{t('invoices.paid_invoices_title')}</p>
-                {paidInvoices && paidInvoices.length > 0 ? paidInvoices.map((invoice) => (
-                    <div key={invoice.id}>
-                        {invoiceElement(invoice, '#6a7282')}
-                    </div>
-                )) : <p className="text-slate-700 text-xl">{t('invoices.no_paid_invoices')}</p>}
-            </div>
-            <div className="w-full h-1 bg-gray-400"></div>
-            <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">{t('invoices.overdue_invoices_title')}</p>
-                {overDueInvoices && overDueInvoices.length > 0 ? overDueInvoices.map((invoice) => (
-                    <div key={invoice.id}>
-                        {invoiceElement(invoice, 'rgba(242,70,70,0.95)')}
-                    </div>
-                )) : <p className="text-slate-700 text-xl">{t('invoices.no_overdue_invoices')}</p>}
-            </div>
-            <div className="w-full h-1 bg-gray-400"></div>
-            <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">{t('invoices.cancelled_invoices_title')}</p>
-                {cancelledInvoices && cancelledInvoices.length > 0 ? cancelledInvoices.map((invoice) => (
-                    <div key={invoice.id}>
-                        {invoiceElement(invoice, 'rgba(242,70,70,0.95)')}
-                    </div>
-                )) : <p className="text-slate-700 text-xl">{t('invoices.no_cancelled_invoices')}</p>}
-            </div>
-        </div>
-    )
+	const toggleChild = (id: number, checked: boolean) => {
+		setExcludedIds((prev) => {
+			const next = new Set(prev);
+			if (checked) {
+				next.delete(id);
+			} else {
+				next.add(id);
+			}
+			return next;
+		});
+	};
 
-    return <DashboardPage title={title}>
-        <div className="flex flex-col gap-4 w-full">{content}</div>
-        <div id="pagination" className="grid grid-cols-3 text-sm my-4">
-            <div className="col-start-1 col-end-2"></div>
-            <div className="col-start-2 col-end-3">
-                page <span className="font-bold text-slate-800">{invoices.page}</span> of <span className="font-bold text-slate-800">{Math.ceil((invoices.total || 0) / invoices.per_page)}</span>
-            </div>
-            <div className="flex flex-row justify-end items-center gap-2 col-start-3 col-end-4">
-                <Button variant="outline" disabled={invoices.page === 1 || invoices.items.length === 0} onClick={
-                    () => listInvoices(10, invoices.page - 1).then((data) => {
-                        if (data) {
-                            setInvoices(data)
-                        }
-                    })
-                }>Previous</Button>
-                <Button variant="outline" disabled={!invoices.has_next || invoices.items.length === 0} onClick={
-                    () => listInvoices(10, invoices.page + 1).then((data) => {
-                        if (data) {
-                            setInvoices(data)
-                        }
-                    })
-                }>Next</Button>
-            </div>
-        </div>
-    </DashboardPage>
+	const onSubmit = handleSubmit((values) => {
+		if (parentId === null) {
+			setError(t("invoices.select_parent"));
+			return;
+		}
+		if (selectedIds.length === 0) {
+			setError(t("invoices.select_child"));
+			return;
+		}
+		setError(null);
+		generateMutation.mutate({
+			student_ids: selectedIds,
+			include_absent: values.include_absent,
+			include_late: values.include_late,
+			include_excused: values.include_excused,
+			due_date: values.due_date,
+			currency: "USD",
+		});
+	});
+
+	return (
+		<Dialog
+			open
+			onOpenChange={(open) => {
+				if (!open) onClose();
+			}}
+		>
+			<DialogContent className="max-h-[85vh] overflow-y-auto">
+				<form onSubmit={onSubmit} className="flex flex-col gap-4">
+					<DialogHeader>
+						<DialogTitle>{t("invoices.generate_invoice")}</DialogTitle>
+						<DialogDescription>{t("invoices.generate_desc")}</DialogDescription>
+					</DialogHeader>
+					{error ? <ErrorBanner message={error} /> : null}
+					{parentsQuery.isError ? (
+						<ErrorBanner message={t("invoices.failed_load_parents")} />
+					) : null}
+					<div className="flex flex-col gap-1.5">
+						<Label>
+							{t("invoices.parent")}
+							<span className="text-destructive ms-0.5">*</span>
+						</Label>
+						<SearchableSelect
+							value={parentId === null ? undefined : String(parentId)}
+							onValueChange={handleParentChange}
+							options={
+								parentsQuery.data?.items.map((parent) => ({
+									value: String(parent.id),
+									label: parent.full_name,
+								})) ?? []
+							}
+							placeholder={t("invoices.select_parent")}
+						/>
+					</div>
+					{parentId !== null ? (
+						<div className="flex flex-col gap-2">
+							<Label>{t("invoices.children")}</Label>
+							{parentDetailQuery.isLoading ? (
+								<p className="text-muted-foreground text-sm">
+									{t("invoices.loading_children")}
+								</p>
+							) : null}
+							{parentDetailQuery.isError ? (
+								<p className="text-destructive text-sm">
+									{t("invoices.failed_load_children")}
+								</p>
+							) : null}
+							{parentDetailQuery.isSuccess && children.length === 0 ? (
+								<p className="text-muted-foreground text-sm">
+									{t("invoices.parent_no_children")}
+								</p>
+							) : null}
+							{children.length > 0 ? (
+								<div className="flex max-h-40 flex-col gap-2 overflow-y-auto rounded-md border p-3">
+									{children.map((child) => (
+										<label
+											key={child.id}
+											className="flex cursor-pointer items-center gap-2 text-sm"
+										>
+											<input
+												type="checkbox"
+												checked={!excludedIds.has(child.id)}
+												onChange={(event) =>
+													toggleChild(child.id, event.target.checked)
+												}
+												className="size-4 accent-primary"
+											/>
+											{childName(child)}
+										</label>
+									))}
+								</div>
+							) : null}
+						</div>
+					) : null}
+					<div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+						<label className="flex items-center gap-2 text-sm">
+							<input
+								type="checkbox"
+								{...register("include_absent")}
+								className="size-4 accent-primary"
+							/>
+							{t("invoices.include_absent")}
+						</label>
+						<label className="flex items-center gap-2 text-sm">
+							<input
+								type="checkbox"
+								{...register("include_late")}
+								className="size-4 accent-primary"
+							/>
+							{t("invoices.include_late")}
+						</label>
+						<label className="flex items-center gap-2 text-sm">
+							<input
+								type="checkbox"
+								{...register("include_excused")}
+								className="size-4 accent-primary"
+							/>
+							{t("invoices.include_excused")}
+						</label>
+					</div>
+					<FieldInput
+						label="Due date"
+						type="date"
+						required
+						error={errors.due_date?.message}
+						{...register("due_date")}
+					/>
+					<DialogFooter>
+						<Button type="button" variant="outline" onClick={onClose}>
+							{t("common.cancel")}
+						</Button>
+						<Button type="submit" disabled={generateMutation.isPending}>
+							{generateMutation.isPending
+								? "Generating..."
+								: "Generate invoice"}
+						</Button>
+					</DialogFooter>
+				</form>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+interface GeneratedInvoiceDialogProps {
+	invoice: InvoiceWithItemsRead;
+	onClose: () => void;
+}
+
+function GeneratedInvoiceDialog({
+	invoice,
+	onClose,
+}: GeneratedInvoiceDialogProps) {
+	const { t } = useLocalization();
+	return (
+		<Dialog
+			open
+			onOpenChange={(open) => {
+				if (!open) onClose();
+			}}
+		>
+			<DialogContent>
+				<DialogHeader>
+					<DialogTitle>{t("invoices.generated_title")}</DialogTitle>
+					<DialogDescription>
+						Invoice {invoice.invoice_number} for{" "}
+						{formatCurrency(invoice.total_amount)} is ready to view.
+					</DialogDescription>
+				</DialogHeader>
+				<DialogFooter>
+					<Button variant="outline" onClick={onClose}>
+						{t("common.close")}
+					</Button>
+					<Button asChild>
+						<Link href={`/platform/dashboard/admin/invoices/${invoice.id}`}>
+							{t("invoices.view")}
+						</Link>
+					</Button>
+				</DialogFooter>
+			</DialogContent>
+		</Dialog>
+	);
+}
+
+export default function AdminInvoicesPage() {
+	const { t } = useLocalization();
+	const [page, setPage] = useState(1);
+	const [parentFilter, setParentFilter] = useState<string>("all");
+	const [generateOpen, setGenerateOpen] = useState(false);
+	const [generatedInvoice, setGeneratedInvoice] =
+		useState<InvoiceWithItemsRead | null>(null);
+
+	const parentsQuery = useQuery({
+		queryKey: ["parents"],
+		queryFn: () => listParents({ perPage: PARENTS_PAGE_SIZE }),
+	});
+
+	const parentId = parentFilter === "all" ? undefined : Number(parentFilter);
+
+	const invoicesQuery = useQuery({
+		queryKey: ["invoices", { page, parentId }],
+		queryFn: () => listInvoices({ page, perPage: PAGE_SIZE, parentId }),
+	});
+
+	const parentNameById = useMemo(() => {
+		const map = new Map<number, string>();
+		for (const parent of parentsQuery.data?.items ?? []) {
+			map.set(parent.id, parent.full_name);
+		}
+		return map;
+	}, [parentsQuery.data]);
+
+	return (
+		<div className="flex flex-col gap-6">
+			<PageHeader
+				title={t("invoices.title")}
+				description={t("invoices.manage_desc")}
+				actions={
+					<Button onClick={() => setGenerateOpen(true)}>
+						<Plus className="size-4" />
+						{t("invoices.generate_invoice")}
+					</Button>
+				}
+			/>
+
+			<div className="w-full sm:w-64">
+				<Label>{t("invoices.parent")}</Label>
+				<SearchableSelect
+					value={parentFilter}
+					onValueChange={(value) => {
+						setParentFilter(value);
+						setPage(1);
+					}}
+					options={[
+						{ value: "all", label: t("invoices.all_parents") },
+						...(parentsQuery.data?.items.map((parent) => ({
+							value: String(parent.id),
+							label: parent.full_name,
+						})) ?? []),
+					]}
+					placeholder={t("invoices.all_parents")}
+				/>
+			</div>
+
+			{invoicesQuery.isLoading ? <LoadingSkeleton rows={6} /> : null}
+
+			{invoicesQuery.isError ? (
+				<div className="flex flex-col items-start gap-3">
+					<ErrorBanner message={errorMessage(invoicesQuery.error)} />
+					<Button
+						variant="outline"
+						onClick={() => void invoicesQuery.refetch()}
+					>
+						Retry
+					</Button>
+				</div>
+			) : null}
+
+			{invoicesQuery.isSuccess && invoicesQuery.data.items.length === 0 ? (
+				<EmptyState
+					icon={Receipt}
+					title={t("invoices.no_invoices_found")}
+					description={t("invoices.no_invoices_desc")}
+				/>
+			) : null}
+
+			{invoicesQuery.isSuccess && invoicesQuery.data.items.length > 0 ? (
+				<div className="flex flex-col gap-4">
+					<div className="rounded-md border">
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>{t("invoices.invoice")}</TableHead>
+									<TableHead>{t("invoices.parent")}</TableHead>
+									<TableHead>{t("invoices.period")}</TableHead>
+									<TableHead className="text-end">
+										{t("invoices.total")}
+									</TableHead>
+									<TableHead>{t("invoices.status")}</TableHead>
+									<TableHead>{t("invoices.due_date")}</TableHead>
+									<TableHead className="text-end">
+										{t("common.actions")}
+									</TableHead>
+								</TableRow>
+							</TableHeader>
+							<TableBody>
+								{invoicesQuery.data.items.map((invoice) => (
+									<TableRow key={invoice.id}>
+										<TableCell>
+											<Link
+												href={`/platform/dashboard/admin/invoices/${invoice.id}`}
+												className="font-medium hover:underline"
+											>
+												{invoice.invoice_number}
+											</Link>
+										</TableCell>
+										<TableCell>
+											{parentNameById.get(invoice.parent_id) ??
+												`Parent #${invoice.parent_id}`}
+										</TableCell>
+										<TableCell>
+											{rangeLabel(invoice.period_from, invoice.period_to)}
+										</TableCell>
+										<TableCell className="text-end">
+											{formatCurrency(invoice.total_amount)}
+										</TableCell>
+										<TableCell>
+											<InvoiceStatusBadge status={invoice.status} />
+										</TableCell>
+										<TableCell>{formatDate(invoice.due_date)}</TableCell>
+										<TableCell className="text-end">
+											<Button variant="outline" size="sm" asChild>
+												<Link
+													href={`/platform/dashboard/admin/invoices/${invoice.id}`}
+												>
+													{t("common.view")}
+												</Link>
+											</Button>
+										</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+					</div>
+					<Pagination
+						page={page}
+						perPage={PAGE_SIZE}
+						total={invoicesQuery.data.total}
+						onChange={setPage}
+					/>
+				</div>
+			) : null}
+
+			{generateOpen ? (
+				<GenerateInvoiceDialog
+					onClose={() => setGenerateOpen(false)}
+					onGenerated={setGeneratedInvoice}
+				/>
+			) : null}
+
+			{generatedInvoice ? (
+				<GeneratedInvoiceDialog
+					invoice={generatedInvoice}
+					onClose={() => setGeneratedInvoice(null)}
+				/>
+			) : null}
+		</div>
+	);
 }

@@ -1,86 +1,122 @@
 # AGENTS.md - Wahy Frontend Engineering Guide
 
-**Project**: Wahy - Quran Study Management System Frontend  
-**Runtime**: Next.js 16.1.6, React 19.2.3, TypeScript 5, Tailwind CSS 4, shadcn/ui  
-**Backend API**: FastAPI 0.1.0 (Async SQLAlchemy 2.0, PostgreSQL)  
+**Project**: Wahy - Quran Study Management System Frontend
+**Runtime**: Next.js 16 (App Router), React 19, TypeScript 5, Tailwind CSS 4,
+shadcn/ui, TanStack Query v5, react-hook-form + zod
+**Backend API**: FastAPI (async SQLAlchemy 2.0, PostgreSQL) - see `../Wahy`
 
 ---
 
-## 1. Core Architecture & Conventions
+## 1. Core Architecture
 
 ```
 Wahy-frontend/
 ├── app/
-│   ├── platform/                # Main application workspace
-│   │   ├── actions/             # Domain Server Actions (common, auth, students, schedules, lessons, library, invoices, analytics)
-│   │   ├── auth/                # Auth route handlers (login, student login, etc.)
-│   │   ├── dashboard/           # Dashboard routes
-│   │   │   ├── admin/           # Sheikh admin views (students, schedules, lessons, library, invoices, analytics, calendar)
-│   │   │   └── student/         # Student views (profile, schedules, lessons, library, invoices, analytics)
-│   │   └── lib/                 # Zod definitions and TypeScript interfaces
-│   ├── api/                     # Next.js API proxy routes
-│   └── layout.tsx               # Root application layout
-├── components/                  # Shared React UI components (shadcn/ui, NavBar, Footer)
-└── lib/                         # Core utilities
-    ├── apiClient.ts             # Deduplicated OpenAPI client factory
-    ├── auth-context.tsx         # Hydration-safe React auth context provider
-    ├── localization-context.tsx # Multilingual translation context provider
-    └── openApi.ts               # Auto-generated OpenAPI TypeScript SDK
+│   ├── platform/
+│   │   ├── auth/                  # signin, activate, reset-request
+│   │   ├── dashboard/admin/       # Sheikh portal (parents, students, schedules,
+│   │   │                          #   classes, lessons, invoices, library, wird,
+│   │   │                          #   calendar, analytics, reset-requests)
+│   │   ├── dashboard/parent/      # Parent portal (children, schedules, classes,
+│   │   │                          #   wird, library, invoices, profile)
+│   │   └── lib/schemas/           # Per-domain Zod form schemas
+│   ├── layout.tsx                 # Root layout: Providers (localization, query, session, toaster)
+│   └── page.tsx                   # Landing page; redirects by session role
+├── components/
+│   ├── dashboard/                 # AppShell, nav-items, language select, RequireRole
+│   ├── shared/                    # PageHeader, Pagination, EmptyState, ErrorBanner,
+│   │                              #   LoadingSkeleton, StatusBadge family, ConfirmDialog,
+│   │                              #   CopyCodeDialog, FieldInput, DateRangePicker
+│   └── ui/                        # shadcn/ui primitives (button, card, dialog, ...)
+└── lib/
+    ├── api/                       # Typed API domain modules (the ONLY way to call the backend)
+    ├── data-contracts.ts          # Regenerated OpenAPI types (swagger-typescript-api)
+    ├── client.ts                  # Fetch transport: credentials include, 401 single-flight refresh
+    ├── session-context.tsx        # Session from GET /auth/me (HTTP-only cookies)
+    ├── query-provider.tsx         # TanStack Query client
+    ├── dates.ts / format.ts       # date-fns and display formatters
+    └── localization-context.tsx   # t() over 6 locales
 ```
 
 ---
 
-## 2. Server Action Design & Domain Separation
+## 2. Mandatory Conventions
 
-All mutation and query Server Actions are separated into single-responsibility domain modules under `app/platform/actions/`:
-
-- **`common.ts`**: Shared `handleApiCall()` execution wrapper handling errors, HTTP status checking, and type-safe `ActionResponse<T>` returns.
-- **`auth.ts`**: Authentication actions (`signinAdmin`, `signinStudent`, `refreshAccessToken`, `signout`, `checkHealth`).
-- **`students.ts`**: Student management actions (`listStudents`, `getStudent`, `createStudent`, `updateStudent`, `approveStudent`, `rejectStudent`).
-- **`calendar.ts`**: Calendar grid queries, day views, and ICS feed management (`calenderGetData`, `calenderGenerateFeed`, `calenderEnableFeed`).
-- **`notifications.ts`**: Sheikh & student upcoming session notifications and mark-as-read actions (`notificationsGetAll`, `notificationsMarkAsRead`).
-- **`schedules.ts`**: Weekly recurring schedule management actions (`listSchedules`, `createSchedule`, `updateSchedule`, `deleteSchedule`, `addLocalSchedules`).
-- **`lessons.ts`**: Session recording, history tracking, and class file attachments (`listLessons`, `createLesson`, `updateLesson`, `getLessonHistory`).
-- **`library.ts`**: Teaching library items, metadata, and streaming file downloads (`listLibrary`, `createLibraryItem`, `uploadLibraryFile`, `downloadLibraryFile`).
-- **`invoices.ts`**: Invoice generation, item override billing logic, payment marking, and PDF downloads (`listInvoices`, `createInvoices`, `overrideInvoice`, `downloadInvoicePDF`).
-- **`analytics.ts`**: KPI aggregation endpoints (`getAttendanceAnalytics`, `getPerformanceAnalytics`, `getFinancialAnalytics`, `getOperationalAnalytics`).
+1. **Cookie auth only**: never store tokens or roles in `localStorage`.
+   Session state comes from `useSession()`; the transport refreshes silently.
+   (Theme and UI language are the only `localStorage` values.)
+2. **All data through `lib/api/`**: pages use TanStack Query
+   (`useQuery`/`useMutation`) over the typed domain modules. No raw `fetch`
+   in pages, no `useEffect` data-fetching loops.
+3. **State invalidation**: after a mutation, `invalidateQueries` the domain
+   keys. Never use `window.location.reload()`.
+4. **Error handling**: catch `ApiError` (from `lib/api/client.ts`) and show
+   `err.message` (the backend `detail`) via `toast.error` or `ErrorBanner`.
+5. **No debug pollution**: no `console.log`/`console.error` in production code.
+6. **Downloads**: Blob streaming via the domain modules (pdf, class files,
+   library files); create an object URL and click an anchor.
+7. **Pages are `"use client"`**: dynamic routes read ids with `useParams()`.
+8. **Date handling**: `YYYY-MM-DD` dates and `HH:MM:SS` times via `lib/dates.ts`.
+9. **Query keys**: colocated in the feature file, prefixed by domain
+   (e.g. `["parents", id]`, `["my-wird"]`).
+10. **Localized copy only**: every user-facing string goes through `t()`
+    from `lib/localization-context.tsx` (6 locale files; `{variable}`
+    interpolation). Never hardcode UI text. Form validation messages are
+    localized via `useZodResolver` (error codes mapped in
+    `app/platform/lib/use-zod-resolver.ts`).
+11. **RTL-ready layout**: use Tailwind logical utilities (`ms-`/`me-`,
+    `ps-`/`pe-`, `start-`/`end-`, `text-start`/`text-end`) instead of
+    physical ones (`ml-`/`mr-`, `left-`/`right-`, `text-left`/`text-right`);
+    Arabic renders RTL app-wide.
 
 ---
 
-## 3. Best Practices & Quality Directives
+## 3. Adding a Feature
 
-1. **No `window.location.reload()` Hacks**: Page state invalidation MUST use standard React state updates, `useActionState` handlers, or Next.js `router.refresh()`.
-2. **Clean Production Logging**: No `console.log` or `console.error` debug pollution in production action functions.
-3. **HTTP-Only Cookies & Safe Token Handling**: JWT tokens must be stored in secure HTTP-only cookies and forwarded safely via API requests.
-4. **Streaming Downloads**: File downloads (library attachments, PDF invoices, calendar feeds) use binary Blob streams / direct URL triggers without loading unnecessary payloads into client state.
-5. **No Sync Queue Artifacts**: The backend operates as a stateless API; offline queues (`offlineSync.ts`, `offlineCache.ts`) are purged from the architecture.
+1. Add API functions in `lib/api/<domain>.ts` (typed against
+   `lib/data-contracts.ts`); regenerate `data-contracts.ts` whenever the
+   backend spec changes (see section 5).
+2. Add Zod form schemas in `app/platform/lib/schemas/<domain>.ts`.
+3. Create the page under `app/platform/dashboard/<admin|parent>/<feature>/`;
+   use TanStack Query hooks and shared components.
+4. Register the route in `components/dashboard/nav-items.ts` if it needs a
+   sidebar entry.
+5. Validate: `npx tsc --noEmit` and `npx eslint --max-warnings=0 .` - 0/0.
 
 ---
 
-## 4. Key Developer Commands
+## 4. Quality Gates
+
+- Zero TypeScript errors (`npx tsc --noEmit`).
+- Zero ESLint warnings (`npx eslint --max-warnings=0 .`).
+- `npm run build` succeeds.
+- No dead code, unused imports, or unused parameters.
+
+---
+
+## 5. Regenerating the API Client
 
 ```bash
-# Install dependencies
-npm install
+# From the backend repo: export the live spec
+uv run python -c "import json; from app.__main__ import app; json.dump(app.openapi(), open('/tmp/wahy-openapi.json','w'))"
 
-# Start Next.js development server
-npm run dev
-
-# TypeScript type check (0 errors required)
-npx tsc --noEmit
-
-# ESLint lint check (0 warnings required)
-npx eslint --max-warnings=0 .
-
-# Production build
-npm run build
-
-# Run Development Container (Next.js hot reload)
-docker compose -f docker-compose.dev.yml up --build
-
-# Run Full Stack Development Containers (Backend + DB + Frontend)
-docker compose -f ../docker-compose.dev.yml up --build
-
-# Production Deployment (Coolify / Traefik)
-docker compose up -d --build
+# From the frontend repo: regenerate types (then remove the @ts-nocheck line)
+npx swagger-typescript-api generate -p /tmp/wahy-openapi.json -o lib -n data-contracts.ts --modular --no-client
 ```
+
+---
+
+## 6. Backend Caveats (verified against the API)
+
+- Invoice generation 400s with `Lessons [ids] have no rate set` when any
+  unbilled lesson has a NULL rate. Lesson creation now copies
+  `student.base_rate` into `lesson.rate`, so set `base_rate` on children.
+- Analytics rates (`attendance_rate`, `timeliness_rate`,
+  `determination_score`) are **percentages (0-100)**; class attendance
+  `attendance_rate` is a **fraction (0-1)**.
+- `revenue_per_parent[].parent_id` is a parent id (the OpenAPI field name
+  is `revenue_per_student` for legacy wire compatibility).
+- Parent library listing returns all active items (no access filtering).
+- `attendance === null` on a lesson means "not yet held" (not billable).
+- `POST /auth/reset-request` always returns 204 - show the same confirmation
+  to every user.

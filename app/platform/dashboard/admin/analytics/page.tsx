@@ -1,432 +1,400 @@
-'use client'
-
-import { Clock } from "lucide-react"
-import * as icon from "@deemlol/next-icons"
-import * as openApi from "../../../../../lib/openApi"
-import { Card, CardDescription, CardHeader } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import React from "react";
-import { getAttendanceAnalytics as attendanceAnalytics, getAttendanceStudentAnalytics as attendanceStudentAnalytics, getFinancialAnalytics as financialAnalytics, getOperationalAnalytics as operationalAnalytics, getPerformanceAnalytics as performanceAnalytics } from "../../../actions/analytics";
-import { getLocalStudent } from "../../../actions/students";
-import { Button } from "@/components/ui/button";
-import { useToastListener } from "@/lib/toastListener";
+"use client";
 import { useLocalization } from "@/lib/localization-context";
-import DashboardPage from "../page";
-import StudentMenu from "@/components/studentsMenu";
 
-export default function Home() {
-    const [attendance, setattendance] = React.useState<openApi.AttendanceAnalytics | null>(null);
-    const [performance, setPerformance] = React.useState<openApi.PerformanceAnalytics | null>(null);
-    const [financial, setFinancial] = React.useState<openApi.FinancialAnalytics | null>(null);
-    const [operational, setOperational] = React.useState<openApi.OperationalAnalytics | null>(null);
-    const [selectedStudentId, setSelectedStudentId] = React.useState<number | null>(null);
-    const [attendanceStudent, setattendanceStudent] = React.useState<openApi.StudentAttendanceHoursAnalytics | null>(null);
-    const [attendanceState, attendanceAction, attendancePending] = React.useActionState(attendanceAnalytics, undefined);
-    const [attendanceStudentState, attendanceStudentAction, attendanceStudentPending] = React.useActionState(attendanceStudentAnalytics, undefined);
-    const [performanceState, performanceAction, performancePending] = React.useActionState(performanceAnalytics, undefined);
-    const [financialState, financialAction, financialPending] = React.useActionState(financialAnalytics, undefined);
-    const [operationalState, operationalAction, operationalPending] = React.useActionState(operationalAnalytics, undefined);
-    const { t, language } = useLocalization()
+import { useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 
-    useToastListener(attendanceState, { functionName: t('analytics.attendance_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
-    useToastListener(attendanceStudentState, { functionName: t('analytics.attendance_student_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
-    useToastListener(performanceState, { functionName: t('analytics.performance_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
-    useToastListener(financialState, { functionName: t('analytics.financial_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
-    useToastListener(operationalState, { functionName: t('analytics.operational_analytics'), successMessage: t('messages.success'), errorMessage: t('messages.error') })
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { SearchableSelect } from "@/components/shared/searchable-select";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { DateRangePicker } from "@/components/shared/date-range-picker";
+import { ErrorBanner } from "@/components/shared/error-banner";
+import { errorMessage } from "@/components/shared/error-text";
+import { LoadingSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
+import {
+	getAttendanceAnalytics,
+	getFinancialAnalytics,
+	getOperationalAnalytics,
+	getPerformanceAnalytics,
+} from "@/lib/api/analytics";
+import { getStudentAttendanceHours, listStudents } from "@/lib/api/students";
+import { formatCurrency, formatPercent } from "@/lib/format";
+import { shiftDate, todayISO } from "@/lib/dates";
+import type { ReactNode } from "react";
+import type { StudentRead } from "@/lib/data-contracts";
 
-    React.useEffect(() => {
-        if (attendanceState?.message === 'success' && attendanceState.data) {
-            setattendance(attendanceState.data)
-        }
-        if (attendanceStudentState?.message === 'success' && attendanceStudentState.data) {
-            setattendanceStudent(attendanceStudentState.data)
-        }
-        if (performanceState?.message === 'success' && performanceState.data) {
-            setPerformance(performanceState.data)
-        }
-        if (financialState?.message === 'success' && financialState.data) {
-            setFinancial(financialState.data)
-        }
-        if (operationalState?.message === 'success' && operationalState.data) {
-            setOperational(operationalState.data)
-        }
-    }, [attendanceState, attendanceStudentState, performanceState, financialState, operationalState])
+const RANGE_PRESETS = [7, 30, 90];
 
-    const timeElement = (analytic: {
-        period_start: string;
-        period_end: string;
-    }) => {
-        return (
-                <div className="bg-linear-to-r from-slate-50 to-slate-100 rounded-xl">
-                    <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-                        <div className="text-center">
-                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('analytics.start_time')}</p>
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-5 h-5 text-green-500" />
-                                <span className="text-2xl font-bold text-slate-800">{analytic.period_start}</span>
-                            </div>
-                        </div>
-                        <div className={`flex items-center ${language === 'ar' ? 'rotate-180' : 'rotate-0'}`}>
-                            <div className="w-12 h-0.5 bg-slate-300" />
-                            <icon.ChevronRight className="w-5 h-5 rotate-90 md:rotate-0 text-slate-400" />
-                            <div className="w-12 h-0.5 bg-slate-300" />
-                        </div>
-                        <div className="text-center">
-                            <p className="text-xs text-slate-500 uppercase tracking-wide mb-1">{t('analytics.end_time')}</p>
-                            <div className="flex items-center gap-2">
-                                <Clock className="w-5 h-5 text-red-500" />
-                                <span className="text-2xl font-bold text-slate-800">{analytic.period_end}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-        )
-    }
+const STUDENTS_PAGE_SIZE = 100;
 
-    const handleAttendanceSubmit = (formData: FormData) => {
-        formData.append('student_id', selectedStudentId ? String(selectedStudentId) : '')
-        attendanceStudentAction(formData)
-    }
+function studentName(student: StudentRead): string {
+	return student.full_name_english || student.full_name_arabic;
+}
 
-    const titleElement = (title: string, action: (formData: FormData) => void, pending: boolean) => {
-        return (
-            <div className="flex flex-col md:flex-row justify-between my-3">
-                <div id="title">
-                    <p className='text-4xl text-slate-950 font-bold mb-5'>{title}</p>
-                </div>
-                <div id="period" className="flex items-center">
-                    <form action={action} className="grid grid-cols-1 md:grid-cols-3 gap-0">
-                        <div className="flex flex-row items-center md:col-start-1 md:col-end-2">
-                            <p className="inline px-1">{t('analytics.period_from')}</p>
-                            <Input className="w-32" type="date" name="period_start" id="period_start"></Input>
-                        </div>
-                        <div className="flex flex-row items-center md:col-start-2 md:col-end-3">
-                            <p className="inline px-1">{t('analytics.period_to')}</p>
-                            <Input className="w-32 mr-2" type="date" name="period_end" id="period_end"></Input>
-                        </div>
-                        <Button disabled={pending} id="submit" type="submit" className="md:col-start-3 md:col-end-4 bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800 hover:border-slate-800 border-2">{t('common.submit')}</Button>
-                    </form>
-                </div>
-            </div>
-        )
-    }
+function hoursLabel(value: number | null | undefined): string {
+	if (value === null || value === undefined) {
+		return "";
+	}
+	return `${value.toFixed(1)} h`;
+}
 
-    const studentTitleElement = (title: string, pending: boolean) => {
-        return (
-            <div className="flex flex-col md:flex-row justify-between my-3">
-                <div id="title">
-                    <p className='text-4xl text-slate-950 font-bold mb-5'>{title}</p>
-                </div>
-                <div id="period" className="flex flex-row items-center">
-                    <form action={handleAttendanceSubmit} className="grid grid-cols-1 md:grid-cols-3 grid-rows-2 gap-1 items-center">
-                        <div className="flex flex-row items-center md:col-start-1 md:col-end-2 md:row-start-2 md:row-end-3">
-                            <p className="inline px-1">{t('analytics.period_from')}</p>
-                            <Input className="w-32" type="date" name="period_start" id="period_start"></Input>
-                        </div>
-                        <div className="flex flex-row items-center md:col-start-2 md:col-end-3 md:row-start-2 md:row-end-3">
-                            <p className="inline px-1">{t('analytics.period_to')}</p>
-                            <Input className="w-32" type="date" name="period_end" id="period_end"></Input>
-                        </div>
-                        <div className="md:col-start-1 md:col-end-3 md:row-start-1 md:row-end-2 w-full">
-                            <StudentMenu onStudentSelect={setSelectedStudentId}/>
-                        </div>
-                        <Button disabled={pending} id="submit" type="submit" className="md:col-start-3 md:col-end-4 md:row-start-1 md:row-end-3 bg-slate-800 text-slate-100 duration-300 transition hover:bg-slate-100 hover:text-slate-800 hover:border-slate-800 border-2">{t('common.submit')}</Button>
-                    </form>
-                </div>
-            </div>
-        )
-    }
+function KpiCard({ label, value }: { label: string; value: string }) {
+	return (
+		<Card className="gap-1 py-4">
+			<CardContent className="flex flex-col gap-1 px-4">
+				<span className="text-muted-foreground text-sm">{label}</span>
+				<span className="text-2xl font-semibold">{value}</span>
+			</CardContent>
+		</Card>
+	);
+}
 
-    const attendanceAnalyticsElement =  (analytic: openApi.AttendanceAnalytics) => {
-        return (
-            <div className="w-full my-6">
-                {titleElement(t('analytics.attendance_analytics'), attendanceAction, attendancePending)}
-                <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
-                    {timeElement({
-                        period_start: analytic.period_start,
-                        period_end: analytic.period_end
-                    })}
-                </Card>
-                <div className="grid grid-cols-1 xl:grid-cols-5 justify-between gap-2">
-                    <Card className="col-start-1 col-end-2 xl:col-start-1 xl:col-end-2 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.total_lessons')}</p>
-                        </CardHeader>
-                        <CardDescription className="flex flex-col items-center justify-center">
-                            <p className="text-gray-300 text-4xl font-bold text-center">{analytic.total_lessons}</p>
-                        </CardDescription>
-                    </Card>
-                    <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 grid grid-cols-4 w-full p-0">
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">{t('analytics.present')}</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.late')}</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-3 col-end-4">{t('analytics.absent')}</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-4 col-end-5">{t('analytics.excused')}</p>
-                        </CardHeader>
-                        <CardDescription className="grid grid-cols-4">
-                            <p className="text-gray-300 text-4xl font-bold col-start-1 col-end-2 text-center">{analytic.present_count}</p>
-                            <p className="text-gray-300 text-4xl font-bold col-start-2 col-end-3 text-center">{analytic.late_count}</p>
-                            <p className="text-gray-300 text-4xl font-bold col-start-3 col-end-4 text-center">{analytic.absent_count}</p>
-                            <p className="text-gray-300 text-4xl font-bold col-start-4 col-end-5 text-center">{analytic.excused_count}</p>
-                        </CardDescription>
-                    </Card>
-                    <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.attendance_rate')}</p>
-                        </CardHeader>
-                        <CardDescription className="flex flex-col items-center justify-center">
-                            <p className="text-gray-300 text-4xl font-bold">{analytic.attendance_rate}</p>
-                        </CardDescription>
-                    </Card>
-                </div>
-            </div>
-        )
-    }
-    const attendanceStudentAnalyticsElement =  (analytic: openApi.StudentAttendanceHoursAnalytics) => {
-        return (
-            <div className="w-full my-6">
-                {studentTitleElement(t('analytics.attendance_student_analytics'), attendanceStudentPending)}
-                <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
-                    {timeElement({
-                        period_start: analytic.period_start,
-                        period_end: analytic.period_end
-                    })}
-                </Card>
-                <div className="grid grid-cols-1 xl:grid-cols-5 justify-between gap-2">
-                    <Card className="col-start-1 col-end-2 xl:col-start-1 xl:col-end-2 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.hours_per_month')}</p>
-                        </CardHeader>
-                        <CardDescription className="flex flex-col items-center justify-center">
-                            <p className="text-gray-300 text-4xl font-bold text-center">{analytic.hours_per_month}</p>
-                        </CardDescription>
-                    </Card>
-                    <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 grid grid-cols-2 w-full p-0">
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">{t('analytics.hours_attended')}</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.absent_hours')}</p>
-                        </CardHeader>
-                        <CardDescription className="grid grid-cols-2">
-                            <p className="text-gray-300 text-4xl font-bold col-start-1 col-end-2 text-center">{analytic.hours_attended}</p>
-                            <p className="text-gray-300 text-4xl font-bold col-start-2 col-end-3 text-center">{analytic.absent_hours}</p>
-                        </CardDescription>
-                    </Card>
-                    <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.remaining_hours')}</p>
-                        </CardHeader>
-                        <CardDescription className="flex flex-col items-center justify-center">
-                            <p className="text-gray-300 text-4xl font-bold">{analytic.remaining_hours}</p>
-                        </CardDescription>
-                    </Card>
-                </div>
-            </div>
-        )
-    }
+function Section({ title, children }: { title: string; children: ReactNode }) {
+	return (
+		<section className="flex flex-col gap-3">
+			<h2 className="text-lg font-semibold">{title}</h2>
+			{children}
+		</section>
+	);
+}
 
-    const performanceAnalyticsElement =  (analytic: openApi.PerformanceAnalytics) => {
-        return (
-            <div className="w-full my-6">
-                {titleElement(t('analytics.performance_analytics'), performanceAction, performancePending)}
-                <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
-                    {timeElement({
-                        period_start: analytic.period_start,
-                        period_end: analytic.period_end
-                    })}
-                </Card>
-                <div className="grid grid-cols-1 xl:grid-cols-5 justify-between gap-2">
-                    <Card className="col-start-1 col-end-2 xl:col-start-1 xl:col-end-2 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 grid grid-cols-2 w-full p-0">
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-1 col-end-2">{t('analytics.attended_count')}</p>
-                            <p className="text-gray-500 text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.passed_count')}</p>
-                        </CardHeader>
-                        <CardDescription className="grid grid-cols-2">
-                            <p className="text-gray-300 text-4xl font-bold text-center col-start-1 col-end-2">{analytic.attended_count}</p>
-                            <p className="text-gray-300 text-4xl font-bold text-center col-start-2 col-end-3">{analytic.passed_count}</p>
-                        </CardDescription>
-                    </Card>
-                    <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 grid grid-cols-3 w-full p-0">
-                            <p className="text-gray-500 text-md md:text-xl font-bold text-center col-start-1 col-end-2">{t('analytics.pass_rate')}</p>
-                            <p className="text-gray-500 text-md md:text-xl font-bold text-center col-start-2 col-end-3">{t('analytics.attendance_rate')}</p>
-                            <p className="text-gray-500 text-md md:text-xl font-bold text-center col-start-3 col-end-4">{t('analytics.timeliness_rate')}</p>
-                        </CardHeader>
-                        <CardDescription className="grid grid-cols-3">
-                            <p className="text-gray-300 text-4xl font-bold col-start-1 col-end-2 text-center">{analytic.pass_rate}</p>
-                            <p className="text-gray-300 text-4xl font-bold col-start-2 col-end-3 text-center">{analytic.attendance_rate}</p>
-                            <p className="text-gray-300 text-4xl font-bold col-start-3 col-end-4 text-center">{analytic.timeliness_rate}</p>
-                        </CardDescription>
-                    </Card>
-                    <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.determination_score')}</p>
-                        </CardHeader>
-                        <CardDescription className="flex flex-col items-center justify-center">
-                            <p className="text-gray-300 text-4xl font-bold">{analytic.determination_score}</p>
-                        </CardDescription>
-                    </Card>
-                </div>
-            </div>
-        )
-    }
+export default function AdminAnalyticsPage() {
+	const { t } = useLocalization();
+	const queryClient = useQueryClient();
+	const [startDate, setStartDate] = useState(() => shiftDate(todayISO(), -30));
+	const [endDate, setEndDate] = useState(() => todayISO());
+	const [studentFilter, setStudentFilter] = useState("all");
 
-    const financialAnalyticsElement =  (analytic: openApi.FinancialAnalytics) => {
-        return (
-            <div className="w-full my-6">
-                {titleElement(t('analytics.financial_analytics'), financialAction, financialPending)}
-                <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
-                    {timeElement({
-                        period_start: analytic.period_start,
-                        period_end: analytic.period_end
-                    })}
-                </Card>
-                <div className="grid grid-cols-1 xl:grid-cols-5 justify-between gap-2">
-                    <Card className="col-start-1 col-end-2 xl:col-start-1 xl:col-end-2 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.total_revenue')}</p>
-                        </CardHeader>
-                        <CardDescription className="flex flex-col items-center justify-center">
-                            <p className="text-gray-300 text-4xl font-bold text-center">{analytic.total_revenue}</p>
-                        </CardDescription>
-                    </Card>
-                    <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col justify-center items-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.invoice_count_label')}</p>
-                        </CardHeader>
-                        <CardDescription className="flex flex-col justify-center items-center">
-                            <p className="text-gray-300 text-4xl font-bold text-center">{analytic.invoice_count}</p>
-                        </CardDescription>
-                    </Card>
-                    <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.overdue_count')}</p>
-                        </CardHeader>
-                        <CardDescription className="flex flex-col items-center justify-center">
-                            <p className="text-gray-300 text-4xl font-bold text-center">{analytic.overdue_count}</p>
-                        </CardDescription>
-                    </Card>
-                    <Card className="col-start-1 col-end-2 xl:col-start-1 xl:col-end-6">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.revenue_per_student')}</p>
-                        </CardHeader>
-                        <div id="accordion-data">
-                            <Accordion
-                                type="single"
-                                collapsible
-                                className="w-full px-4 py-2 max-h-100 overflow-y-auto"
-                            >
-                            <AccordionItem key='accordion-item-1' value="item-1">
-                            <AccordionTrigger className="text-gray-300 text-xl font-bold text-start">{t('analytics.show_students_revenue')}</AccordionTrigger>
-                            {analytic.revenue_per_student.map((item) => {
-                                return (
-                                        <AccordionContent key={item.student_id} className="bg-slate-50 rounded-xl p-2 text-gray-500 text-lg my-1">
-                                            Name: {getLocalStudent(item.student_id)?.full_name_english || "Unknown"} <br />
-                                            Revenue: {item.total_revenue}
-                                        </AccordionContent>
-                                )
-                            })}
-                                </AccordionItem>
-                            </Accordion>
-                        </div>
-                    </Card>
-                </div>
-            </div>
-        )
-    }
+	const studentsQuery = useQuery({
+		queryKey: ["students"],
+		queryFn: () => listStudents({ perPage: STUDENTS_PAGE_SIZE }),
+	});
 
-    const operationalAnalyticsElement =  (analytic: openApi.OperationalAnalytics) => {
-        return (
-            <div className="w-full my-6">
-                {titleElement(t('analytics.operational_analytics'), operationalAction, operationalPending)}
-                <Card className="mb-2 bg-linear-to-r from-slate-50 to-slate-100">
-                    {timeElement({
-                        period_start: analytic.period_start,
-                        period_end: analytic.period_end
-                    })}
-                </Card>
-                <div className="grid grid-cols-1 xl:grid-cols-5 justify-between gap-2">
-                    <Card className="col-start-1 col-end-2 xl:col-start-1 xl:col-end-2 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.new_registrations')}</p>
-                        </CardHeader>
-                        <CardDescription className="flex flex-col items-center justify-center">
-                            <p className="text-gray-300 text-4xl font-bold text-center">{analytic.new_registrations}</p>
-                        </CardDescription>
-                    </Card>
-                    <Card className="col-start-1 col-end-2 xl:col-start-2 xl:col-end-5 p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col justify-center items-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.active_students')}</p>
-                        </CardHeader>
-                        <CardDescription className="flex flex-col justify-center items-center">
-                            <p className="text-gray-300 text-4xl font-bold text-center">{analytic.active_students}</p>
-                        </CardDescription>
-                    </Card>
-                    <Card className="col-start-1 col-end-2 xl:col-start-5 xl:col-end-6 w-full flex flex-col justify-center p-6 bg-white rounded-xl">
-                        <CardHeader className="border-b-2 border-gray-500 flex flex-col items-center justify-center">
-                            <p className="text-gray-500 text-xl font-bold text-center">{t('analytics.lessons_recorded')}</p>
-                        </CardHeader>
-                        <CardDescription className="flex flex-col items-center justify-center">
-                            <p className="text-gray-300 text-4xl font-bold text-center">{analytic.lessons_recorded}</p>
-                        </CardDescription>
-                    </Card>
-                </div>
-            </div>
-        )
-    }
+	const analytics = useQueries({
+		queries: [
+			{
+				queryKey: ["analytics", startDate, endDate, "attendance"],
+				queryFn: () => getAttendanceAnalytics({ startDate, endDate }),
+			},
+			{
+				queryKey: ["analytics", startDate, endDate, "performance"],
+				queryFn: () => getPerformanceAnalytics({ startDate, endDate }),
+			},
+			{
+				queryKey: ["analytics", startDate, endDate, "financial"],
+				queryFn: () => getFinancialAnalytics({ startDate, endDate }),
+			},
+			{
+				queryKey: ["analytics", startDate, endDate, "operational"],
+				queryFn: () => getOperationalAnalytics({ startDate, endDate }),
+			},
+		],
+	});
 
-    const title = (
-        <p className='text-5xl text-slate-950 font-bold mb-5'>{t('analytics.title')}</p>
-    )
+	const [attendance, performance, financial, operational] = analytics;
 
-    const content =  (
-        <div className="flex flex-col items-center">
-            {attendance? attendanceAnalyticsElement(attendance) : attendanceAnalyticsElement({
-            period_start: "____-__-__",
-            period_end: "____-__-__",
-            total_lessons: 0,
-            present_count: 0,
-            late_count: 0,
-            absent_count: 0,
-            excused_count: 0,
-            attendance_rate: 0
-        })}
-        {attendanceStudent? attendanceStudentAnalyticsElement(attendanceStudent) : attendanceStudentAnalyticsElement({
-            period_start: "____-__-__",
-            period_end: "____-__-__",
-            hours_per_month: 0,
-            hours_attended: 0,
-            absent_hours: 0,
-            remaining_hours: 0
-        })}
-        {performance? performanceAnalyticsElement(performance) : performanceAnalyticsElement({
-            period_start: "____-__-__",
-            period_end: "____-__-__",
-            attended_count: 0,
-            passed_count: 0,
-            pass_rate: 0,
-            attendance_rate: 0,
-            timeliness_rate: 0,
-            determination_score: 0
-        })}
-        {financial? financialAnalyticsElement(financial) : financialAnalyticsElement({
-            period_start: "____-__-__",
-            period_end: "____-__-__",
-            total_revenue: 0,
-            invoice_count: 0,
-            overdue_count: 0,
-            revenue_per_student: []
-        })}
-        {operational? operationalAnalyticsElement(operational) : operationalAnalyticsElement({
-            period_start: "____-__-__",
-            period_end: "____-__-__",
-            new_registrations: 0,
-            active_students: 0,
-            lessons_recorded: 0
-        })}
-        </div>
-)
-            
+	const selectedStudentId =
+		studentFilter === "all" ? null : Number(studentFilter);
 
-    return <DashboardPage title={title}>{content}</DashboardPage>
+	const hoursQuery = useQuery({
+		queryKey: [
+			"analytics",
+			"student-hours",
+			selectedStudentId,
+			startDate,
+			endDate,
+		],
+		queryFn: () =>
+			getStudentAttendanceHours(selectedStudentId as number, {
+				startDate,
+				endDate,
+			}),
+		enabled: selectedStudentId !== null,
+	});
+
+	const analyticsLoading =
+		attendance.isLoading ||
+		performance.isLoading ||
+		financial.isLoading ||
+		operational.isLoading;
+
+	const analyticsError =
+		attendance.error ??
+		performance.error ??
+		financial.error ??
+		operational.error;
+
+	const showAnalytics =
+		!analyticsLoading &&
+		!analyticsError &&
+		attendance.data !== undefined &&
+		performance.data !== undefined &&
+		financial.data !== undefined &&
+		operational.data !== undefined;
+
+	return (
+		<div className="flex flex-col gap-8">
+			<PageHeader
+				title={t("analytics.title")}
+				description={t("analytics.description")}
+			/>
+
+			<Card>
+				<CardHeader>
+					<CardTitle>{t("analytics.period")}</CardTitle>
+					<CardDescription>{t("analytics.period_desc")}</CardDescription>
+				</CardHeader>
+				<CardContent>
+					<div className="mb-3 flex flex-wrap items-center gap-2">
+						{RANGE_PRESETS.map((days) => (
+							<Button
+								key={days}
+								type="button"
+								size="sm"
+								variant={
+									startDate === shiftDate(todayISO(), -days) &&
+									endDate === todayISO()
+										? "default"
+										: "outline"
+								}
+								onClick={() => {
+									setStartDate(shiftDate(todayISO(), -days));
+									setEndDate(todayISO());
+								}}
+							>
+								{t("analytics.last_days", { days })}
+							</Button>
+						))}
+					</div>
+					<DateRangePicker
+						startName="analytics-start"
+						endName="analytics-end"
+						startLabel={t("common.start")}
+						endLabel={t("common.end")}
+						startValue={startDate}
+						endValue={endDate}
+						onChange={(start, end) => {
+							setStartDate(start);
+							setEndDate(end);
+						}}
+					/>
+				</CardContent>
+			</Card>
+
+			{analyticsLoading ? <LoadingSkeleton rows={4} /> : null}
+
+			{!analyticsLoading && analyticsError ? (
+				<div className="flex flex-col items-start gap-3">
+					<ErrorBanner message={errorMessage(analyticsError)} />
+					<Button
+						variant="outline"
+						onClick={() =>
+							void queryClient.invalidateQueries({ queryKey: ["analytics"] })
+						}
+					>
+						{t("common.retry")}
+					</Button>
+				</div>
+			) : null}
+
+			{showAnalytics ? (
+				<>
+					<Section title={t("analytics.attendance_analytics")}>
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+							<KpiCard
+								label={t("analytics.total_lessons")}
+								value={String(attendance.data.total_lessons)}
+							/>
+							<KpiCard
+								label={t("analytics.present")}
+								value={String(attendance.data.present_count)}
+							/>
+							<KpiCard
+								label={t("analytics.late")}
+								value={String(attendance.data.late_count)}
+							/>
+							<KpiCard
+								label={t("analytics.absent")}
+								value={String(attendance.data.absent_count)}
+							/>
+							<KpiCard
+								label={t("analytics.excused")}
+								value={String(attendance.data.excused_count)}
+							/>
+							<KpiCard
+								label={t("analytics.attendance_rate")}
+								value={formatPercent(attendance.data.attendance_rate, false)}
+							/>
+						</div>
+					</Section>
+
+					<Section title={t("analytics.performance_analytics")}>
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+							<KpiCard
+								label={t("analytics.attended_lessons")}
+								value={String(performance.data.attended_count)}
+							/>
+							<KpiCard
+								label={t("analytics.attendance_rate")}
+								value={formatPercent(performance.data.attendance_rate, false)}
+							/>
+							<KpiCard
+								label={t("analytics.timeliness_rate")}
+								value={formatPercent(performance.data.timeliness_rate, false)}
+							/>
+							<KpiCard
+								label={t("analytics.determination_score")}
+								value={formatPercent(
+									performance.data.determination_score,
+									false,
+								)}
+							/>
+						</div>
+					</Section>
+
+					<Section title={t("analytics.financial_analytics")}>
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+							<KpiCard
+								label={t("analytics.total_revenue")}
+								value={formatCurrency(financial.data.total_revenue)}
+							/>
+							<KpiCard
+								label={t("analytics.invoices")}
+								value={String(financial.data.invoice_count)}
+							/>
+							<KpiCard
+								label={t("invoices.overdue")}
+								value={String(financial.data.overdue_count)}
+							/>
+						</div>
+						<Card>
+							<CardHeader>
+								<CardTitle>{t("analytics.revenue_per_parent")}</CardTitle>
+								<CardDescription>{t("analytics.revenue_desc")}</CardDescription>
+							</CardHeader>
+							{financial.data.revenue_per_student.length === 0 ? (
+								<CardContent>
+									<p className="text-muted-foreground text-sm">
+										{t("analytics.no_revenue")}
+									</p>
+								</CardContent>
+							) : (
+								<CardContent className="p-0">
+									<Table>
+										<TableHeader>
+											<TableRow>
+												<TableHead>{t("analytics.parent_id")}</TableHead>
+												<TableHead className="text-end">
+													{t("analytics.revenue")}
+												</TableHead>
+											</TableRow>
+										</TableHeader>
+										<TableBody>
+											{financial.data.revenue_per_student.map((entry) => (
+												<TableRow key={entry.parent_id}>
+													<TableCell>{entry.parent_id}</TableCell>
+													<TableCell className="text-end">
+														{formatCurrency(entry.total_revenue)}
+													</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
+								</CardContent>
+							)}
+						</Card>
+					</Section>
+
+					<Section title={t("analytics.operational_analytics")}>
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+							<KpiCard
+								label={t("analytics.new_registrations")}
+								value={String(operational.data.new_registrations)}
+							/>
+							<KpiCard
+								label={t("analytics.active_students")}
+								value={String(operational.data.active_students)}
+							/>
+							<KpiCard
+								label={t("analytics.lessons_recorded")}
+								value={String(operational.data.lessons_recorded)}
+							/>
+						</div>
+					</Section>
+				</>
+			) : null}
+
+			<Section title={t("analytics.student_attendance_hours")}>
+				<div className="w-full sm:w-72">
+					<Label htmlFor="hours-student">{t("common.student")}</Label>
+					<SearchableSelect
+						value={studentFilter}
+						onValueChange={setStudentFilter}
+						options={
+							studentsQuery.data?.items.map((student) => ({
+								value: String(student.id),
+								label: studentName(student),
+							})) ?? []
+						}
+						placeholder={t("analytics.select_student")}
+					/>
+				</div>
+
+				{selectedStudentId === null ? (
+					<Card className="py-4">
+						<CardContent className="px-4">
+							<p className="text-muted-foreground text-sm">
+								{t("analytics.select_student_hint")}
+							</p>
+						</CardContent>
+					</Card>
+				) : null}
+
+				{selectedStudentId !== null && hoursQuery.isLoading ? (
+					<LoadingSkeleton rows={2} />
+				) : null}
+
+				{selectedStudentId !== null && hoursQuery.isError ? (
+					<ErrorBanner message={errorMessage(hoursQuery.error)} />
+				) : null}
+
+				{selectedStudentId !== null && hoursQuery.data ? (
+					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+						<KpiCard
+							label={t("analytics.hours_per_month")}
+							value={hoursLabel(hoursQuery.data.hours_per_month)}
+						/>
+						<KpiCard
+							label={t("analytics.hours_attended")}
+							value={hoursLabel(hoursQuery.data.hours_attended)}
+						/>
+						<KpiCard
+							label={t("analytics.absent_hours")}
+							value={hoursLabel(hoursQuery.data.absent_hours)}
+						/>
+						<KpiCard
+							label={t("analytics.remaining_hours")}
+							value={hoursLabel(hoursQuery.data.remaining_hours)}
+						/>
+					</div>
+				) : null}
+			</Section>
+		</div>
+	);
 }
