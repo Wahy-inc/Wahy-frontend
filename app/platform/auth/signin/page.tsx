@@ -25,6 +25,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import type { TokenResponse } from "@/lib/data-contracts";
 
 export default function SignInPage() {
 	const { t } = useLocalization();
@@ -40,10 +41,23 @@ export default function SignInPage() {
 		resolver: useZodResolver(signInSchema),
 	});
 
+	async function submitSignIn(values: SignInValues): Promise<TokenResponse> {
+		try {
+			return await signIn(values);
+		} catch (err) {
+			if (err instanceof ApiError) {
+				throw err;
+			}
+			// The first cross-origin attempt can fail with a transient network/CORS
+			// error (common when the backend is on localhost). Retry once.
+			return await signIn(values);
+		}
+	}
+
 	const onSubmit = async (values: SignInValues) => {
 		setFormError(null);
 		try {
-			const response = await signIn(values);
+			const response = await submitSignIn(values);
 			await refreshSession();
 			toast.success(t("auth.signed_in"));
 			router.replace(response.role === "sheikh" ? ADMIN_HOME : PARENT_HOME);

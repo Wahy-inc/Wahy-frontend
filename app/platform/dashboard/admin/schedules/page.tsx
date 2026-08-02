@@ -41,6 +41,7 @@ import { LoadingSkeleton } from "@/components/shared/loading-skeleton";
 import { PageHeader } from "@/components/shared/page-header";
 import { Pagination } from "@/components/shared/pagination";
 import { StatusBadge } from "@/components/shared/status-badge";
+import { cn } from "@/lib/utils";
 import { ApiError } from "@/lib/api/client";
 import {
 	createSchedule,
@@ -77,6 +78,29 @@ const WEEKDAY_LABELS: Record<WeekdayStr, string> = {
 	SU: "schedules.sunday",
 };
 
+type ScheduleFrequency = "once" | "daily" | "weekly" | "monthly";
+
+const FREQUENCIES: { value: ScheduleFrequency; labelKey: string }[] = [
+	{ value: "once", labelKey: "schedules.frequency_once" },
+	{ value: "daily", labelKey: "schedules.frequency_daily" },
+	{ value: "weekly", labelKey: "schedules.frequency_weekly" },
+	{ value: "monthly", labelKey: "schedules.frequency_monthly" },
+];
+
+interface ParsedRrule {
+	freq: ScheduleFrequency;
+	weekdays: WeekdayStr[];
+	monthDays: number[];
+	until: string | null;
+}
+
+const DEFAULT_PARSED_RRULE: ParsedRrule = {
+	freq: "weekly",
+	weekdays: ["MO"],
+	monthDays: [1],
+	until: null,
+};
+
 /** "HH:MM:SS" -> "HH:MM" for time inputs. */
 function toTimeInput(value: string | null | undefined): string {
 	return value ? value.slice(0, 5) : "";
@@ -87,35 +111,69 @@ function toTimeSeconds(value: string): string {
 	return value.length === 5 ? `${value}:00` : value;
 }
 
-/** Build "FREQ=WEEKLY;BYDAY=MO[;UNTIL=...]" from a weekday and optional until date. */
-function buildRruleString(weekday: WeekdayStr, until: string | null): string {
-	const rule = new RRule({
-		freq: RRule.WEEKLY,
-		byweekday: [RRule[weekday]],
-		until: until ? parseDateOnly(until) : undefined,
-	});
-	return rule.toString().replace(/^RRULE:/, "");
+/** Build an RFC 5545 RRULE string from freq, days, and until. Returns null for one-off schedules. */
+function buildRruleString(
+	freq: ScheduleFrequency,
+	weekdays: WeekdayStr[],
+	monthDays: number[],
+	until: string | null,
+): string | null {
+	if (freq === "once") {
+		return null;
+	}
+	const untilDate = until ? parseDateOnly(until) : undefined;
+	try {
+		let rule: RRule;
+		if (freq === "daily") {
+			rule = new RRule({ freq: RRule.DAILY, until: untilDate });
+		} else if (freq === "monthly") {
+			rule = new RRule({
+				freq: RRule.MONTHLY,
+				bymonthday: monthDays,
+				until: untilDate,
+			});
+		} else {
+			rule = new RRule({
+				freq: RRule.WEEKLY,
+				byweekday: weekdays.map((day) => RRule[day]),
+				until: untilDate,
+			});
+		}
+		return rule.toString().replace(/^RRULE:/, "");
+	} catch {
+		// Serialization can fail for edge cases (for example a past UNTIL date); fall back to a one-off schedule.
+		return null;
+	}
 }
 
-/** Extract weekday and until date from an existing RRULE string. */
-function parseRruleString(rruleString: string | null): {
-	weekday: WeekdayStr;
-	until: string | null;
-} {
+/** Extract freq, weekdays, month days, and until from an existing RRULE string. */
+function parseRruleString(rruleString: string | null): ParsedRrule {
 	if (!rruleString) {
-		return { weekday: "MO", until: null };
+		return { ...DEFAULT_PARSED_RRULE };
 	}
 	try {
 		const options = RRule.fromString(rruleString).options;
-		const dayIndex = Array.isArray(options.byweekday)
-			? (options.byweekday[0] ?? 0)
-			: 0;
+		let freq: ScheduleFrequency = "weekly";
+		if (options.freq === RRule.DAILY) {
+			freq = "daily";
+		} else if (options.freq === RRule.MONTHLY) {
+			freq = "monthly";
+		}
+		const weekdays = (options.byweekday ?? [])
+			.map((index) => WEEKDAYS[index])
+			.filter((day): day is WeekdayStr => day !== undefined);
+		const monthDays = (options.bymonthday ?? []).filter(
+			(day) => day >= 1 && day <= 31,
+		);
 		return {
-			weekday: WEEKDAYS[dayIndex] ?? "MO",
+			freq,
+			weekdays: weekdays.length > 0 ? weekdays : DEFAULT_PARSED_RRULE.weekdays,
+			monthDays:
+				monthDays.length > 0 ? monthDays : DEFAULT_PARSED_RRULE.monthDays,
 			until: options.until ? options.until.toISOString().slice(0, 10) : null,
 		};
 	} catch {
-		return { weekday: "MO", until: null };
+		return { ...DEFAULT_PARSED_RRULE };
 	}
 }
 
@@ -139,33 +197,37 @@ function ScheduleDialog({
 		() =>
 			schedule
 				? parseRruleString(schedule.rrule_string)
-				: { weekday: "MO" as WeekdayStr, until: null },
+				: { ...DEFAULT_PARSED_RRULE },
 		[schedule],
 	);
-	const [weekday, setWeekday] = useState<WeekdayStr>(initialRrule.weekday);
+	const [freq, setFreq] = useState<ScheduleFrequency>(initialRrule.freq);
+	const [weekdays, setWeekdays] = useState<WeekdayStr[]>(
+		initialRrule.weekdays,
+	);
+	const [monthDays, setMonthDays] = useState<number[]>(initialRrule.monthDays);
 	const [until, setUntil] = useState(initialRrule.until ?? "");
 
 	const form = useForm<ScheduleFormValues>({
 		resolver: useZodResolver(scheduleFormSchema),
 		defaultValues: isEdit
 			? {
-					student_id: schedule.student_id,
-					start_time: toTimeInput(schedule.start_time),
-					end_time: toTimeInput(schedule.end_time),
-					effective_from: schedule.effective_from,
-					notes: schedule.notes ?? "",
-					is_active: schedule.is_active,
-					cancellation_reason: schedule.cancellation_reason ?? "",
-				}
+				student_id: schedule.student_id,
+				start_time: toTimeInput(schedule.start_time),
+				end_time: toTimeInput(schedule.end_time),
+				effective_from: schedule.effective_from,
+				notes: schedule.notes ?? "",
+				is_active: schedule.is_active,
+				cancellation_reason: schedule.cancellation_reason ?? "",
+			}
 			: {
-					student_id: 0,
-					start_time: "10:00",
-					end_time: "11:00",
-					effective_from: todayISO(),
-					notes: "",
-					is_active: true,
-					cancellation_reason: "",
-				},
+				student_id: 0,
+				start_time: "10:00",
+				end_time: "11:00",
+				effective_from: todayISO(),
+				notes: "",
+				is_active: true,
+				cancellation_reason: "",
+			},
 	});
 
 	const mutation = useMutation({
@@ -190,15 +252,30 @@ function ScheduleDialog({
 			),
 	});
 
-	const handleWeekdayChange = (value: string) => {
-		const found = WEEKDAYS.find((day) => day === value);
-		if (found) {
-			setWeekday(found);
-		}
+	const toggleWeekday = (day: WeekdayStr) => {
+		setWeekdays((current) => {
+			const next = current.includes(day)
+				? current.length > 1
+					? current.filter((item) => item !== day)
+					: current
+				: [...current, day];
+			return WEEKDAYS.filter((item) => next.includes(item));
+		});
+	};
+
+	const toggleMonthDay = (day: number) => {
+		setMonthDays((current) => {
+			const next = current.includes(day)
+				? current.length > 1
+					? current.filter((item) => item !== day)
+					: current
+				: [...current, day];
+			return [...next].sort((a, b) => a - b);
+		});
 	};
 
 	const onSubmit = (values: ScheduleFormValues) => {
-		const rruleString = buildRruleString(weekday, until || null);
+		const rruleString = buildRruleString(freq, weekdays, monthDays, until || null);
 		if (isEdit) {
 			mutation.mutate({
 				rrule_string: rruleString,
@@ -272,26 +349,105 @@ function ScheduleDialog({
 					) : null}
 					<div className="grid gap-4 sm:grid-cols-2">
 						<div className="flex flex-col gap-1.5">
-							<Label>{t("schedules.day_of_week")}</Label>
-							<Select value={weekday} onValueChange={handleWeekdayChange}>
+							<Label>{t("schedules.frequency")}</Label>
+							<Select
+								value={freq}
+								onValueChange={(value) =>
+									setFreq(value as ScheduleFrequency)
+								}
+							>
 								<SelectTrigger className="w-full">
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									{WEEKDAYS.map((day) => (
-										<SelectItem key={day} value={day}>
-											{t(WEEKDAY_LABELS[day])}
+									{FREQUENCIES.map((option) => (
+										<SelectItem key={option.value} value={option.value}>
+											{t(option.labelKey)}
 										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
 						</div>
-						<FieldInput
-							label={t("schedules.until_optional")}
-							type="date"
-							value={until}
-							onChange={(event) => setUntil(event.target.value)}
-						/>
+						{freq !== "once" ? (
+							<FieldInput
+								label={t("schedules.until_optional")}
+								type="date"
+								value={until}
+								onChange={(event) => setUntil(event.target.value)}
+							/>
+						) : null}
+						{freq === "weekly" ? (
+							<div className="flex flex-col gap-1.5 sm:col-span-2">
+								<Label>{t("schedules.day_of_week")}</Label>
+								<div
+									className="flex flex-wrap gap-1.5"
+									role="group"
+									aria-label={t("schedules.select_weekdays")}
+								>
+									{WEEKDAYS.map((day) => {
+										const selected = weekdays.includes(day);
+										return (
+											<button
+												key={day}
+												type="button"
+												aria-pressed={selected}
+												onClick={() => toggleWeekday(day)}
+												className={cn(
+													"rounded-md border px-3 py-1.5 text-sm transition-colors",
+													selected
+														? "bg-primary text-primary-foreground"
+														: "bg-muted text-muted-foreground",
+												)}
+											>
+												{t(WEEKDAY_LABELS[day])}
+											</button>
+										);
+									})}
+								</div>
+								<p className="text-muted-foreground text-xs">
+									{weekdays.length === 0
+										? t("schedules.at_least_one_day")
+										: t("schedules.select_weekdays")}
+								</p>
+							</div>
+						) : null}
+						{freq === "monthly" ? (
+							<div className="flex flex-col gap-1.5 sm:col-span-2">
+								<Label>{t("schedules.select_month_days")}</Label>
+								<div
+									className="flex flex-wrap gap-1.5"
+									role="group"
+									aria-label={t("schedules.select_month_days")}
+								>
+									{Array.from({ length: 31 }, (_, index) => index + 1).map(
+										(day) => {
+											const selected = monthDays.includes(day);
+											return (
+												<button
+													key={day}
+													type="button"
+													aria-pressed={selected}
+													onClick={() => toggleMonthDay(day)}
+													className={cn(
+														"rounded-md border px-3 py-1.5 text-sm transition-colors",
+														selected
+															? "bg-primary text-primary-foreground"
+															: "bg-muted text-muted-foreground",
+													)}
+												>
+													{day}
+												</button>
+											);
+										},
+									)}
+								</div>
+							</div>
+						) : null}
+						{freq === "daily" ? (
+							<p className="text-muted-foreground text-sm sm:col-span-2">
+								{t("schedules.daily_hint")}
+							</p>
+						) : null}
 						<FieldInput
 							label={t("schedules.start_time")}
 							autoFocus
@@ -308,7 +464,7 @@ function ScheduleDialog({
 							error={form.formState.errors.end_time?.message}
 						/>
 						<FieldInput
-							label="Effective from"
+							label={t("schedules.effective_from")}
 							type="date"
 							required
 							{...form.register("effective_from")}
@@ -346,7 +502,7 @@ function ScheduleDialog({
 						/>
 					) : null}
 					<FieldTextarea
-						label="Notes"
+						label={t("schedules.notes")}
 						{...form.register("notes")}
 						placeholder={t("schedules.notes_placeholder")}
 					/>

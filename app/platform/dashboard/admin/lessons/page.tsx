@@ -11,6 +11,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SearchableSelect } from "@/components/shared/searchable-select";
 import {
@@ -30,12 +31,14 @@ import {
 } from "@/components/ui/table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorBanner } from "@/components/shared/error-banner";
+import { errorMessage } from "@/components/shared/error-text";
 import { FieldInput } from "@/components/shared/field-input";
 import { FieldTextarea } from "@/components/shared/field-textarea";
 import { LoadingSkeleton } from "@/components/shared/loading-skeleton";
 import { PageHeader } from "@/components/shared/page-header";
 import { AttendanceBadge } from "@/components/shared/status-badge";
 import { ApiError } from "@/lib/api/client";
+import { uploadClassFile } from "@/lib/api/classFiles";
 import { createLessons, listLessons } from "@/lib/api/lessons";
 import { listSchedules } from "@/lib/api/schedules";
 import { listStudents } from "@/lib/api/students";
@@ -43,7 +46,7 @@ import { AttendanceStatus, type LessonCreate } from "@/lib/data-contracts";
 import { formatDate, formatTime, todayISO } from "@/lib/dates";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ScrollText } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useForm, type Resolver } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -79,6 +82,7 @@ const defaultValues: LessonFormValues = {
 export default function AdminLessonsPage() {
 	const { t } = useLocalization();
 	const queryClient = useQueryClient();
+	const [file, setFile] = useState<File | null>(null);
 
 	const form = useForm<LessonFormValues>({
 		resolver: useZodResolver(lessonCreateSchema) as Resolver<LessonFormValues>,
@@ -117,12 +121,24 @@ export default function AdminLessonsPage() {
 
 	const createMutation = useMutation({
 		mutationFn: (payload: LessonCreate) => createLessons(payload),
-		onSuccess: () => {
+		onSuccess: async (_, payload) => {
 			queryClient.invalidateQueries({ queryKey: ["lessons"] });
 			queryClient.invalidateQueries({ queryKey: ["classes"] });
 			queryClient.invalidateQueries({ queryKey: ["calendar-grid"] });
 			toast.success(t("lessons.create_success"));
 			form.reset(defaultValues);
+			if (file && payload.schedule_id > 0) {
+				try {
+					await uploadClassFile(payload.schedule_id, file);
+					queryClient.invalidateQueries({
+						queryKey: ["class-files", payload.schedule_id],
+					});
+					toast.success(t("file_upload.uploaded"));
+				} catch (err) {
+					toast.error(errorMessage(err));
+				}
+			}
+			setFile(null);
 		},
 		onError: (err) =>
 			toast.error(
@@ -292,6 +308,15 @@ export default function AdminLessonsPage() {
 								{...form.register("homework")}
 								placeholder={t("lessons.assignment_placeholder")}
 							/>
+							<div className="flex flex-col gap-1.5">
+								<Label>{t("lessons.attach_file")}</Label>
+								<Input
+									type="file"
+									onChange={(event) => {
+										setFile(event.target.files?.[0] ?? null);
+									}}
+								/>
+							</div>
 							<Button type="submit" disabled={createMutation.isPending}>
 								{createMutation.isPending
 									? t("lessons.recording")
@@ -336,6 +361,8 @@ export default function AdminLessonsPage() {
 											<TableHead>{t("common.time")}</TableHead>
 											<TableHead>{t("common.student")}</TableHead>
 											<TableHead>{t("lessons.class")}</TableHead>
+											<TableHead>{t("lessons.heard")}</TableHead>
+											<TableHead>{t("lessons.homework")}</TableHead>
 											<TableHead>{t("lessons.attendance")}</TableHead>
 										</TableRow>
 									</TableHeader>
@@ -350,6 +377,24 @@ export default function AdminLessonsPage() {
 												<TableCell>{studentName(lesson.student_id)}</TableCell>
 												<TableCell>
 													{scheduleLabel(lesson.schedule_id)}
+												</TableCell>
+												<TableCell>
+													{lesson.what_is_heard_from_sheikh ? (
+														<span className="line-clamp-1 max-w-40">
+															{lesson.what_is_heard_from_sheikh}
+														</span>
+													) : (
+														<span className="text-muted-foreground">-</span>
+													)}
+												</TableCell>
+												<TableCell>
+													{lesson.homework ? (
+														<span className="line-clamp-1 max-w-40">
+															{lesson.homework}
+														</span>
+													) : (
+														<span className="text-muted-foreground">-</span>
+													)}
 												</TableCell>
 												<TableCell>
 													<AttendanceBadge status={lesson.attendance} />

@@ -129,6 +129,7 @@ type LessonEditFormValues = {
 	attendance: AttendanceStatus | null;
 	student_notes: string;
 	sheikh_notes: string;
+	what_is_heard_from_sheikh: string;
 	homework: string;
 };
 
@@ -144,6 +145,7 @@ function LessonEditDialog({ lesson, onClose }: LessonEditDialogProps) {
 			attendance: lesson.attendance ?? null,
 			student_notes: lesson.student_notes ?? "",
 			sheikh_notes: lesson.sheikh_notes ?? "",
+			what_is_heard_from_sheikh: lesson.what_is_heard_from_sheikh ?? "",
 			homework: lesson.homework ?? "",
 		},
 	});
@@ -170,6 +172,7 @@ function LessonEditDialog({ lesson, onClose }: LessonEditDialogProps) {
 			attendance: values.attendance ?? undefined,
 			student_notes: values.student_notes || null,
 			sheikh_notes: values.sheikh_notes || null,
+			what_is_heard_from_sheikh: values.what_is_heard_from_sheikh || null,
 			homework: values.homework || null,
 		});
 	};
@@ -227,6 +230,10 @@ function LessonEditDialog({ lesson, onClose }: LessonEditDialogProps) {
 					<FieldTextarea
 						label="Sheikh notes"
 						{...form.register("sheikh_notes")}
+					/>
+					<FieldTextarea
+						label={t("lessons.what_heard")}
+						{...form.register("what_is_heard_from_sheikh")}
 					/>
 					<FieldTextarea label="Homework" {...form.register("homework")} />
 					<DialogFooter>
@@ -514,23 +521,23 @@ export default function AdminClassDetailPage() {
 	const summary = attendanceQuery.data;
 	const statCards = summary
 		? [
-				{
-					label: t("analytics.expected_sessions"),
-					value: String(summary.expected_sessions),
-				},
-				{
-					label: t("analytics.attended_sessions"),
-					value: String(summary.attended_sessions),
-				},
-				{
-					label: t("analytics.absent_sessions"),
-					value: String(summary.absent_sessions),
-				},
-				{
-					label: t("analytics.attendance_rate"),
-					value: formatPercent(summary.attendance_rate, true),
-				},
-			]
+			{
+				label: t("analytics.expected_sessions"),
+				value: String(summary.expected_sessions),
+			},
+			{
+				label: t("analytics.attended_sessions"),
+				value: String(summary.attended_sessions),
+			},
+			{
+				label: t("analytics.absent_sessions"),
+				value: String(summary.absent_sessions),
+			},
+			{
+				label: t("analytics.attendance_rate"),
+				value: formatPercent(summary.attendance_rate, true),
+			},
+		]
 		: [];
 
 	return (
@@ -627,6 +634,8 @@ export default function AdminClassDetailPage() {
 													<TableHead>{t("common.date")}</TableHead>
 													<TableHead>{t("common.time")}</TableHead>
 													<TableHead>{t("lessons.attendance")}</TableHead>
+													<TableHead>{t("lessons.heard")}</TableHead>
+													<TableHead>{t("lessons.homework")}</TableHead>
 													<TableHead className="text-end">
 														{t("common.actions")}
 													</TableHead>
@@ -650,6 +659,24 @@ export default function AdminClassDetailPage() {
 															>
 																<AttendanceBadge status={lesson.attendance} />
 															</Button>
+														</TableCell>
+														<TableCell>
+															{lesson.what_is_heard_from_sheikh ? (
+																<span className="line-clamp-1 max-w-40">
+																	{lesson.what_is_heard_from_sheikh}
+																</span>
+															) : (
+																<span className="text-muted-foreground">-</span>
+															)}
+														</TableCell>
+														<TableCell>
+															{lesson.homework ? (
+																<span className="line-clamp-1 max-w-40">
+																	{lesson.homework}
+																</span>
+															) : (
+																<span className="text-muted-foreground">-</span>
+															)}
 														</TableCell>
 														<TableCell className="text-end">
 															<Button
