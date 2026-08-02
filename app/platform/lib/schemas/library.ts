@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const libraryItemSchema = z.object({
 	title: z.string().min(1),
-	external_url: z.string().url(),
+	external_url: z.string().url().or(z.literal("")),
 	description: z.string().optional().nullable(),
 	category: z.string().optional().nullable(),
 	access_level: z

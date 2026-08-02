@@ -77,6 +77,9 @@ import type {
 const PAGE_SIZE = 12;
 const STUDENTS_PAGE_SIZE = 100;
 
+// Backend requires external_url; keep the pre-refactor default when the sheikh uploads files only.
+const DEFAULT_LIBRARY_URL = "https://www.google.com/";
+
 const accessVariant: Record<LibraryAccessLevel, BadgeVariant> = {
 	all_students: "success",
 	specific_students: "warning",
@@ -99,11 +102,19 @@ function studentName(student: StudentRead): string {
 	return student.full_name_english || student.full_name_arabic;
 }
 
-function thumbnailUrl(path: string): string {
+function thumbnailUrl(path: string | null): string | undefined {
+	if (!path) {
+		return undefined;
+	}
 	if (/^https?:\/\//i.test(path)) {
 		return path;
 	}
-	return `${BACKEND_URL}${path}`;
+	const url = `${BACKEND_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+	try {
+		return new URL(url).toString();
+	} catch {
+		return undefined;
+	}
 }
 
 interface LibraryCardProps {
@@ -116,6 +127,7 @@ function LibraryCard({ item }: LibraryCardProps) {
 	const [expanded, setExpanded] = useState(false);
 	const [thumbnailFailed, setThumbnailFailed] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const thumbnail = thumbnailUrl(item.thumbnail_image_path);
 
 	const filesQuery = useQuery({
 		queryKey: ["library", item.id],
@@ -175,10 +187,10 @@ function LibraryCard({ item }: LibraryCardProps) {
 	return (
 		<Card className="gap-4 py-5">
 			<CardContent className="flex flex-col gap-3 px-5">
-				{item.thumbnail_image_path && !thumbnailFailed ? (
+				{thumbnail && !thumbnailFailed ? (
 					<div className="bg-muted relative h-40 w-full overflow-hidden rounded-md">
 						<Image
-							src={thumbnailUrl(item.thumbnail_image_path)}
+							src={thumbnail}
 							alt={item.title}
 							fill
 							sizes="(max-width: 1024px) 50vw, 33vw"
@@ -195,15 +207,17 @@ function LibraryCard({ item }: LibraryCardProps) {
 				<div className="flex flex-col gap-1">
 					<div className="flex items-start justify-between gap-2">
 						<h3 className="font-semibold leading-snug">{item.title}</h3>
-						<a
-							href={item.external_url}
-							target="_blank"
-							rel="noreferrer"
-							aria-label={t("library.open_external_aria")}
-							className="text-muted-foreground hover:text-foreground"
-						>
-							<ExternalLink className="size-4" />
-						</a>
+						{item.external_url ? (
+							<a
+								href={item.external_url}
+								target="_blank"
+								rel="noreferrer"
+								aria-label={t("library.open_external_aria")}
+								className="text-muted-foreground hover:text-foreground"
+							>
+								<ExternalLink className="size-4" />
+							</a>
+						) : null}
 					</div>
 					{item.description ? (
 						<p className="text-muted-foreground line-clamp-2 text-sm">
@@ -372,7 +386,7 @@ function NewItemDialog({ students, onClose }: NewItemDialogProps) {
 		mutationFn: (values: LibraryItemValues) => {
 			const payload: BodyCreateApiV1LibraryPost = {
 				title: values.title,
-				external_url: values.external_url,
+				external_url: values.external_url?.trim() || DEFAULT_LIBRARY_URL,
 				description: values.description || null,
 				category: values.category || null,
 				access_level: values.access_level as LibraryAccessLevel,
@@ -424,7 +438,6 @@ function NewItemDialog({ students, onClose }: NewItemDialogProps) {
 					<FieldInput
 						label={t("library.url")}
 						type="url"
-						required
 						placeholder={t("library.url_placeholder")}
 						error={errors.external_url?.message}
 						{...register("external_url")}

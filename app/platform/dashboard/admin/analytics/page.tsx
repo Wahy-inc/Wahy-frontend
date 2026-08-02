@@ -33,6 +33,7 @@ import {
 	getOperationalAnalytics,
 	getPerformanceAnalytics,
 } from "@/lib/api/analytics";
+import { listParents } from "@/lib/api/parents";
 import { getStudentAttendanceHours, listStudents } from "@/lib/api/students";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import { shiftDate, todayISO } from "@/lib/dates";
@@ -85,6 +86,15 @@ export default function AdminAnalyticsPage() {
 		queryKey: ["students"],
 		queryFn: () => listStudents({ perPage: STUDENTS_PAGE_SIZE }),
 	});
+
+	const parentsQuery = useQuery({
+		queryKey: ["parents"],
+		queryFn: () => listParents({ perPage: 100 }),
+	});
+
+	const parents = parentsQuery.data?.items ?? [];
+	const parentName = (parentId: number) =>
+		parents.find((p) => p.id === parentId)?.full_name ?? `Parent #${parentId}`;
 
 	const analytics = useQueries({
 		queries: [
@@ -169,7 +179,7 @@ export default function AdminAnalyticsPage() {
 								size="sm"
 								variant={
 									startDate === shiftDate(todayISO(), -days) &&
-									endDate === todayISO()
+										endDate === todayISO()
 										? "default"
 										: "outline"
 								}
@@ -299,7 +309,7 @@ export default function AdminAnalyticsPage() {
 									<Table>
 										<TableHeader>
 											<TableRow>
-												<TableHead>{t("analytics.parent_id")}</TableHead>
+												<TableHead>{t("analytics.parent")}</TableHead>
 												<TableHead className="text-end">
 													{t("analytics.revenue")}
 												</TableHead>
@@ -308,7 +318,7 @@ export default function AdminAnalyticsPage() {
 										<TableBody>
 											{financial.data.revenue_per_student.map((entry: RevenuePerParent) => (
 												<TableRow key={entry.parent_id}>
-													<TableCell>{entry.parent_id}</TableCell>
+													<TableCell>{parentName(entry.parent_id)}</TableCell>
 													<TableCell className="text-end">
 														{formatCurrency(entry.total_revenue)}
 													</TableCell>

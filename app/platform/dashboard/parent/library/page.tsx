@@ -50,7 +50,12 @@ function thumbnailSrc(path: string | null): string | undefined {
 	if (/^https?:\/\//i.test(path)) {
 		return path;
 	}
-	return `${BACKEND_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+	const url = `${BACKEND_URL}${path.startsWith("/") ? "" : "/"}${path}`;
+	try {
+		return new URL(url).toString();
+	} catch {
+		return undefined;
+	}
 }
 
 const accessLevelLabel: Record<LibraryAccessLevel, string> = {
@@ -191,8 +196,8 @@ export default function ParentLibraryPage() {
 													/>
 												) : null}
 												{!filesQuery.isLoading &&
-												!filesQuery.isError &&
-												(filesQuery.data ?? []).length === 0 ? (
+													!filesQuery.isError &&
+													(filesQuery.data ?? []).length === 0 ? (
 													<p className="text-muted-foreground text-sm">
 														{t("library.no_files_item")}
 													</p>
