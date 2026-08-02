@@ -23,6 +23,7 @@ import { CalendarClock } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useChildFilter } from "../child-filter";
+import { ScheduleRead } from "@/lib/data-contracts";
 
 const PER_PAGE = 10;
 
@@ -71,7 +72,7 @@ export default function ParentSchedulesPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{schedules.map((schedule) => (
+								{schedules.map((schedule: ScheduleRead) => (
 									<TableRow key={schedule.id}>
 										<TableCell>
 											<Link
@@ -86,7 +87,7 @@ export default function ParentSchedulesPage() {
 											{formatTime(schedule.end_time)}
 										</TableCell>
 										<TableCell>{formatDate(schedule.effective_from)}</TableCell>
-										<TableCell className="max-w-[280px] whitespace-normal">
+										<TableCell className="max-w-70 whitespace-normal">
 											{schedule.notes || "-"}
 										</TableCell>
 										<TableCell>

@@ -58,6 +58,7 @@ import type {
 	ChildCreate,
 	ParentDetailRead,
 	ParentUpdate,
+	StudentRead,
 	StudentStatus,
 } from "@/lib/data-contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -326,7 +327,7 @@ export default function ParentDetailPage() {
 
 	const regenerateMutation = useMutation({
 		mutationFn: () => regenerateInvite(parentId),
-		onSuccess: (data) => {
+		onSuccess: (data: { code: string; expires_at: string }) => {
 			setInvite({ code: data.code, expires_at: data.expires_at });
 			toast.success(t("parents.invite_regenerated"));
 		},
@@ -341,7 +342,7 @@ export default function ParentDetailPage() {
 
 	const setActiveMutation = useMutation({
 		mutationFn: (active: boolean) => setParentActive(parentId, active),
-		onSuccess: (_data, active) => {
+		onSuccess: (_data: unknown, active: boolean) => {
 			invalidateParent();
 			toast.success(
 				active
@@ -495,7 +496,7 @@ export default function ParentDetailPage() {
 									</TableRow>
 								</TableHeader>
 								<TableBody>
-									{parent.children.map((child) => (
+									{parent.children.map((child: StudentRead) => (
 										<TableRow
 											key={child.id}
 											className="cursor-pointer"

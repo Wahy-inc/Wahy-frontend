@@ -23,6 +23,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Receipt } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { InvoiceRead } from "@/lib/data-contracts";
 
 const PER_PAGE = 10;
 
@@ -60,7 +61,7 @@ export default function ParentInvoicesPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{invoices.map((invoice) => (
+								{invoices.map((invoice: InvoiceRead) => (
 									<TableRow key={invoice.id}>
 										<TableCell>
 											<Link

@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { BookOpen } from "lucide-react";
 import Link from "next/link";
 import { useChildFilter } from "../child-filter";
+import { ClassGroupItem } from "@/lib/data-contracts";
 
 export default function ParentClassesPage() {
 	const { t } = useLocalization();
@@ -43,7 +44,7 @@ export default function ParentClassesPage() {
 			) : null}
 			{!isLoading && !isError && classes.length > 0 ? (
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{classes.map((item) => (
+					{classes.map((item: ClassGroupItem) => (
 						<Link
 							key={item.schedule_id}
 							href={`/platform/dashboard/parent/classes/${item.schedule_id}`}

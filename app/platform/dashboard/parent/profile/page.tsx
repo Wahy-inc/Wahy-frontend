@@ -11,7 +11,7 @@ import { useLocalization } from "@/lib/localization-context";
 import { useQuery } from "@tanstack/react-query";
 import { Info } from "lucide-react";
 import Link from "next/link";
-import type { StudentStatus } from "@/lib/data-contracts";
+import type { ChildRead, StudentStatus } from "@/lib/data-contracts";
 
 export default function ParentProfilePage() {
 	const { t } = useLocalization();
@@ -86,7 +86,7 @@ export default function ParentProfilePage() {
 						</p>
 					) : (
 						<ul className="flex flex-col gap-2">
-							{profile.children.map((child) => (
+							{profile.children.map((child: ChildRead) => (
 								<li key={child.id}>
 									<Link
 										href={`/platform/dashboard/parent/children/${child.id}`}

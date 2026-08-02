@@ -24,6 +24,7 @@ import { Search, UserPlus } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { ParentRead } from "@/lib/data-contracts";
 
 const PER_PAGE = 20;
 
@@ -64,7 +65,7 @@ export default function ParentsPage() {
 				}
 			/>
 			<div className="relative max-w-sm">
-				<Search className="text-muted-foreground absolute top-1/2 start-3 size-4 -translate-y-1/2" />
+				<Search className="text-muted-foreground absolute top-1/2 inset-s-3 size-4 -translate-y-1/2" />
 				<Input
 					type="search"
 					placeholder={t("parents.search_placeholder")}
@@ -102,7 +103,7 @@ export default function ParentsPage() {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{parents.map((parent) => (
+							{parents.map((parent: ParentRead) => (
 								<TableRow
 									key={parent.id}
 									className="cursor-pointer"

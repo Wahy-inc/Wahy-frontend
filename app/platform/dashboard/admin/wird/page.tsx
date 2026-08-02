@@ -142,7 +142,7 @@ function NewWirdDialog({ students, onClose, onSuccess }: NewWirdDialogProps) {
 			onSuccess();
 			onClose();
 		},
-		onError: (err) => setError(errorMessage(err)),
+		onError: (err: unknown) => setError(errorMessage(err)),
 	});
 
 	return (
@@ -298,11 +298,11 @@ function EditWirdDialog({
 			onSuccess();
 			onClose();
 		},
-		onError: (err) => setError(errorMessage(err)),
+		onError: (err: unknown) => setError(errorMessage(err)),
 	});
 
 	const assignmentStudent = students.find(
-		(student) => student.id === assignment.student_id,
+		(student: StudentRead) => student.id === assignment.student_id,
 	);
 
 	return (
@@ -430,7 +430,7 @@ function ReviewWirdDialog({
 			onSuccess();
 			onClose();
 		},
-		onError: (err) => setError(errorMessage(err)),
+		onError: (err: unknown) => setError(errorMessage(err)),
 	});
 
 	const isVerify = mode === "verify";
@@ -531,7 +531,7 @@ export default function AdminWirdPage() {
 			toast.success(t("wird.cancelled_success"));
 			invalidateWird();
 		},
-		onError: (err) => toast.error(errorMessage(err)),
+		onError: (err: unknown) => toast.error(errorMessage(err)),
 	});
 
 	return (
@@ -555,7 +555,7 @@ export default function AdminWirdPage() {
 						onValueChange={setStudentFilter}
 						options={[
 							{ value: "all", label: "All students" },
-							...(studentsQuery.data?.items.map((student) => ({
+							...(studentsQuery.data?.items.map((student: StudentRead) => ({
 								value: String(student.id),
 								label: studentName(student),
 							})) ?? []),
@@ -622,7 +622,7 @@ export default function AdminWirdPage() {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{assignmentsQuery.data.map((assignment) => {
+							{assignmentsQuery.data.map((assignment: WirdAssignmentRead) => {
 								const canCancel =
 									assignment.status !== WirdAssignmentStatus.Cancelled &&
 									assignment.status !== WirdAssignmentStatus.VerifiedBySheikh;

@@ -90,7 +90,7 @@ export default function AdminCalendarPage() {
 			queryClient.invalidateQueries({ queryKey: ["calendar-feed"] });
 			toast.success(t("calendar.feed_updated"));
 		},
-		onError: (err) =>
+		onError: (err: unknown) =>
 			toast.error(
 				err instanceof ApiError
 					? err.message
@@ -100,21 +100,21 @@ export default function AdminCalendarPage() {
 
 	const rotateMutation = useMutation({
 		mutationFn: () => rotateCalendarFeed(),
-		onSuccess: (data) => {
+		onSuccess: (data: CalendarFeedRead) => {
 			queryClient.setQueryData<CalendarFeedRead>(
 				["calendar-feed"],
-				(current) =>
+				(current: CalendarFeedRead | undefined) =>
 					current
 						? {
 								...current,
 								feed_url: data.feed_url,
-								last_rotated_at: data.rotated_at,
+								last_rotated_at: data.last_rotated_at,
 							}
 						: current,
 			);
 			toast.success(t("calendar.token_rotated"));
 		},
-		onError: (err) =>
+		onError: (err: unknown) =>
 			toast.error(
 				err instanceof ApiError
 					? err.message

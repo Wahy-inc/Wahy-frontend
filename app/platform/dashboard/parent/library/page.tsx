@@ -28,7 +28,7 @@ import {
 import Image from "next/image";
 import { toast } from "sonner";
 import { useState } from "react";
-import type { LibraryAccessLevel, LibraryFileRead } from "@/lib/data-contracts";
+import type { LibraryAccessLevel, LibraryFileRead, LibraryItemRead } from "@/lib/data-contracts";
 
 const PER_PAGE = 12;
 
@@ -83,7 +83,7 @@ export default function ParentLibraryPage() {
 	const downloadMutation = useMutation({
 		mutationFn: (file: LibraryFileRead) =>
 			downloadLibraryFile(file.library_item_id, file.id),
-		onSuccess: (blob, file) => {
+		onSuccess: (blob: Blob, file: LibraryFileRead) => {
 			downloadBlob(blob, file.original_filename);
 		},
 		onError: (err: unknown) => {
@@ -124,7 +124,7 @@ export default function ParentLibraryPage() {
 			{itemsQuery.isSuccess && items.length > 0 ? (
 				<>
 					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-						{items.map((item) => {
+						{items.map((item: LibraryItemRead) => {
 							const expanded = expandedId === item.id;
 							const thumbnail = thumbnailSrc(item.thumbnail_image_path);
 							return (
@@ -199,7 +199,7 @@ export default function ParentLibraryPage() {
 												) : null}
 												{!filesQuery.isLoading &&
 													!filesQuery.isError &&
-													(filesQuery.data ?? []).map((file) => (
+													(filesQuery.data ?? []).map((file: LibraryFileRead) => (
 														<div
 															key={file.id}
 															className="bg-muted/50 flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm"

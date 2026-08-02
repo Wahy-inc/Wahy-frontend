@@ -28,6 +28,7 @@ import { ArrowLeft, Download } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
+import { InvoiceItemRead } from "@/lib/data-contracts";
 
 function downloadBlob(blob: Blob, filename: string): void {
 	const url = URL.createObjectURL(blob);
@@ -58,7 +59,7 @@ export default function ParentInvoiceDetailPage() {
 
 	const downloadMutation = useMutation({
 		mutationFn: () => downloadMyInvoicePdf(invoiceId),
-		onSuccess: (blob) => {
+		onSuccess: (blob: Blob) => {
 			downloadBlob(blob, `${invoice?.invoice_number ?? "invoice"}.pdf`);
 		},
 		onError: (err: unknown) => {
@@ -169,7 +170,7 @@ export default function ParentInvoiceDetailPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{invoice.items.map((item) => (
+								{invoice.items.map((item: InvoiceItemRead) => (
 									<TableRow key={item.id}>
 										<TableCell className="max-w-[320px] whitespace-normal">
 											{item.description}

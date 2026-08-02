@@ -134,7 +134,7 @@ export default function AdminCalendarDayPage() {
 	});
 
 	const slots = useMemo(
-		() => (gridQuery.data?.slots ?? []).filter((slot) => slot.date === date),
+		() => (gridQuery.data?.slots ?? []).filter((slot: CalendarSlotItem) => slot.date === date),
 		[gridQuery.data, date],
 	);
 
@@ -151,7 +151,7 @@ export default function AdminCalendarDayPage() {
 			queryClient.invalidateQueries({ queryKey: ["lessons"] });
 			toast.success(t("calendar.attendance_updated"));
 		},
-		onError: (err) =>
+		onError: (err: unknown) =>
 			toast.error(
 				err instanceof ApiError
 					? err.message
@@ -193,7 +193,7 @@ export default function AdminCalendarDayPage() {
 				/>
 			) : (
 				<div className="flex flex-col gap-4">
-					{slots.map((slot) => (
+					{slots.map((slot: CalendarSlotItem) => (
 						<SlotCard
 							key={`${slot.date}-${slot.schedule_id}-${slot.student_id}-${slot.start_time}`}
 							slot={slot}

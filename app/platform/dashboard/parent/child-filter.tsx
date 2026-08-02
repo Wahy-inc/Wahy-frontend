@@ -63,12 +63,12 @@ export function useChildFilter(options: UseChildFilterOptions = {}): ChildFilter
 			onValueChange={handleChange}
 			disabled={isLoading}
 		>
-			<SelectTrigger className="w-[220px]" aria-label={t("children.filter_aria")}>
+			<SelectTrigger className="w-55" aria-label={t("children.filter_aria")}>
 				<SelectValue placeholder={t("children.select_child")} />
 			</SelectTrigger>
 			<SelectContent>
 				{allowAll ? <SelectItem value={ALL_VALUE}>{t("children.all")}</SelectItem> : null}
-				{children.map((child) => (
+				{children.map((child: ChildRead) => (
 					<SelectItem key={child.id} value={String(child.id)}>
 						{child.full_name_english}
 					</SelectItem>

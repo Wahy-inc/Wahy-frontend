@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/table";
 import { ApiError } from "@/lib/api/client";
 import { listStudents } from "@/lib/api/students";
-import { StudentStatus } from "@/lib/data-contracts";
+import { StudentRead, StudentStatus } from "@/lib/data-contracts";
 import { formatCurrency } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -49,7 +49,7 @@ export default function StudentsPage() {
 	const students = data?.items ?? [];
 	const sections = STATUS_ORDER.map((status) => ({
 		status,
-		items: students.filter((student) => student.status === status),
+		items: students.filter((student: StudentRead) => student.status === status),
 	})).filter((section) => section.items.length > 0);
 
 	return (
@@ -86,7 +86,7 @@ export default function StudentsPage() {
 									</TableRow>
 								</TableHeader>
 								<TableBody>
-									{section.items.map((student) => (
+									{section.items.map((student: StudentRead) => (
 										<TableRow
 											key={student.id}
 											className="cursor-pointer"

@@ -35,6 +35,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { NotificationRead } from "@/lib/data-contracts";
 
 const quickLinks = [
 	{
@@ -106,7 +107,7 @@ export default function AdminHomePage() {
 	);
 	const notifications = notificationsQuery.data?.items ?? [];
 	const unreadCount = notifications.filter(
-		(notification) => !notification.is_read,
+		(notification: NotificationRead) => !notification.is_read,
 	).length;
 
 	return (
@@ -210,7 +211,7 @@ export default function AdminHomePage() {
 				) : null}
 				{notificationsQuery.isSuccess && notifications.length > 0 ? (
 					<ul className="flex flex-col gap-2">
-						{notifications.map((notification) => (
+						{notifications.map((notification: NotificationRead) => (
 							<li
 								key={notification.id}
 								className={cn(

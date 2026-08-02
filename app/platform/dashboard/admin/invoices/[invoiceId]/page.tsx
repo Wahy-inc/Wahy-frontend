@@ -120,7 +120,7 @@ function MarkPaidDialog({
 			onSuccess();
 			onClose();
 		},
-		onError: (err) => setError(errorMessage(err)),
+		onError: (err: unknown) => setError(errorMessage(err)),
 	});
 
 	return (
@@ -211,7 +211,7 @@ function OverrideDialog({ item, onClose, onSuccess }: OverrideDialogProps) {
 			onSuccess();
 			onClose();
 		},
-		onError: (err) => setError(errorMessage(err)),
+		onError: (err: unknown) => setError(errorMessage(err)),
 	});
 
 	return (
@@ -289,14 +289,14 @@ export default function AdminInvoiceDetailPage() {
 			toast.success(t("invoices.cancelled_success"));
 			invalidate();
 		},
-		onError: (err) => toast.error(errorMessage(err)),
+		onError: (err: unknown) => toast.error(errorMessage(err)),
 	});
 
 	const handleDownloadPdf = async () => {
 		try {
 			const blob = await downloadInvoicePdf(invoiceId);
 			downloadBlob(blob, "invoice.pdf");
-		} catch (err) {
+		} catch (err: unknown) {
 			toast.error(errorMessage(err));
 		}
 	};
@@ -442,7 +442,7 @@ export default function AdminInvoiceDetailPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{invoice.items.map((item) => (
+								{invoice.items.map((item: InvoiceItemRead) => (
 									<TableRow key={item.id}>
 										<TableCell>{item.description}</TableCell>
 										<TableCell className="text-end">

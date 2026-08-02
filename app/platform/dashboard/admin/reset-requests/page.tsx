@@ -32,7 +32,7 @@ import {
 } from "@/lib/api/auth";
 import { errorMessage } from "@/components/shared/error-text";
 import { formatDateTime } from "@/lib/dates";
-import { ResetRequestStatus } from "@/lib/data-contracts";
+import { ResetRequestRead, ResetRequestStatus } from "@/lib/data-contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, X } from "lucide-react";
 import { useState } from "react";
@@ -66,7 +66,7 @@ export default function ResetRequestsPage() {
 
 	const approveMutation = useMutation({
 		mutationFn: (requestId: number) => approveResetRequest(requestId),
-		onSuccess: (data) => {
+		onSuccess: (data: { code: string; expires_at: string }) => {
 			setCode({ code: data.code, expires_at: data.expires_at });
 			toast.success(t("reset_requests.approved_success"));
 			void queryClient.invalidateQueries({ queryKey: ["reset-requests"] });
@@ -139,7 +139,7 @@ export default function ResetRequestsPage() {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{requests.map((request) => (
+						{requests.map((request: ResetRequestRead) => (
 							<TableRow key={request.id}>
 								<TableCell className="font-medium">
 									{request.identifier_used}

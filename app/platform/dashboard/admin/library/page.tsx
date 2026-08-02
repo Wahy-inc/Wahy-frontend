@@ -129,7 +129,7 @@ function LibraryCard({ item }: LibraryCardProps) {
 			toast.success(t("file_upload.uploaded"));
 			queryClient.invalidateQueries({ queryKey: ["library", item.id] });
 		},
-		onError: (err) => toast.error(errorText(err, t)),
+		onError: (err: unknown) => toast.error(errorText(err, t)),
 	});
 
 	const deleteFileMutation = useMutation({
@@ -138,7 +138,7 @@ function LibraryCard({ item }: LibraryCardProps) {
 			toast.success(t("file_upload.deleted"));
 			queryClient.invalidateQueries({ queryKey: ["library", item.id] });
 		},
-		onError: (err) => toast.error(errorText(err, t)),
+		onError: (err: unknown) => toast.error(errorText(err, t)),
 	});
 
 	const deleteItemMutation = useMutation({
@@ -147,7 +147,7 @@ function LibraryCard({ item }: LibraryCardProps) {
 			toast.success(t("library.deleted_success"));
 			queryClient.invalidateQueries({ queryKey: ["library"] });
 		},
-		onError: (err) => toast.error(errorText(err, t)),
+		onError: (err: unknown) => toast.error(errorText(err, t)),
 	});
 
 	const handleUpload = (event: ChangeEvent<HTMLInputElement>) => {
@@ -289,7 +289,7 @@ function LibraryCard({ item }: LibraryCardProps) {
 								{t("library.no_files")}
 							</p>
 						) : null}
-						{filesQuery.data?.map((file) => (
+						{filesQuery.data?.map((file: LibraryFileRead) => (
 							<div
 								key={file.id}
 								className="bg-muted/50 flex items-center gap-3 rounded-md px-3 py-2 text-sm"
@@ -389,7 +389,7 @@ function NewItemDialog({ students, onClose }: NewItemDialogProps) {
 			queryClient.invalidateQueries({ queryKey: ["library"] });
 			onClose();
 		},
-		onError: (err) => setError(errorText(err, t)),
+		onError: (err: unknown) => setError(errorText(err, t)),
 	});
 
 	const toggleStudent = (id: number, checked: boolean) => {
@@ -575,7 +575,7 @@ export default function AdminLibraryPage() {
 			{libraryQuery.isSuccess && libraryQuery.data.items.length > 0 ? (
 				<div className="flex flex-col gap-4">
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-						{libraryQuery.data.items.map((item) => (
+						{libraryQuery.data.items.map((item: LibraryItemRead) => (
 							<LibraryCard key={item.id} item={item} />
 						))}
 					</div>

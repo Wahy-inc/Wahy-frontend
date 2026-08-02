@@ -49,6 +49,7 @@ import type {
 	ChildRead,
 	InvoiceWithItemsRead,
 	ParentInvoiceGenerateRequest,
+	ParentRead,
 } from "@/lib/data-contracts";
 
 const PAGE_SIZE = 20;
@@ -96,8 +97,8 @@ function GenerateInvoiceDialog({
 
 	const children = parentDetailQuery.data?.children ?? [];
 	const selectedIds = children
-		.filter((child) => !excludedIds.has(child.id))
-		.map((child) => child.id);
+		.filter((child: ChildRead) => !excludedIds.has(child.id))
+		.map((child: ChildRead) => child.id);
 
 	const {
 		register,
@@ -121,13 +122,13 @@ function GenerateInvoiceDialog({
 	const generateMutation = useMutation({
 		mutationFn: (payload: ParentInvoiceGenerateRequest) =>
 			generateInvoice(parentId as number, payload),
-		onSuccess: (invoice) => {
+		onSuccess: (invoice: InvoiceWithItemsRead) => {
 			toast.success(t("invoices.generated_title"));
 			queryClient.invalidateQueries({ queryKey: ["invoices"] });
 			onClose();
 			onGenerated(invoice);
 		},
-		onError: (err) => setError(generateErrorText(err)),
+		onError: (err: unknown) => setError(generateErrorText(err)),
 	});
 
 	const handleParentChange = (value: string) => {
@@ -194,7 +195,7 @@ function GenerateInvoiceDialog({
 							value={parentId === null ? undefined : String(parentId)}
 							onValueChange={handleParentChange}
 							options={
-								parentsQuery.data?.items.map((parent) => ({
+								parentsQuery.data?.items.map((parent: ParentRead) => ({
 									value: String(parent.id),
 									label: parent.full_name,
 								})) ?? []
@@ -222,7 +223,7 @@ function GenerateInvoiceDialog({
 							) : null}
 							{children.length > 0 ? (
 								<div className="flex max-h-40 flex-col gap-2 overflow-y-auto rounded-md border p-3">
-									{children.map((child) => (
+									{children.map((child: ChildRead) => (
 										<label
 											key={child.id}
 											className="flex cursor-pointer items-center gap-2 text-sm"
@@ -382,7 +383,7 @@ export default function AdminInvoicesPage() {
 					}}
 					options={[
 						{ value: "all", label: t("invoices.all_parents") },
-						...(parentsQuery.data?.items.map((parent) => ({
+						...(parentsQuery.data?.items.map((parent: ParentRead) => ({
 							value: String(parent.id),
 							label: parent.full_name,
 						})) ?? []),
@@ -433,7 +434,7 @@ export default function AdminInvoicesPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{invoicesQuery.data.items.map((invoice) => (
+								{invoicesQuery.data.items.map((invoice: InvoiceWithItemsRead) => (
 									<TableRow key={invoice.id}>
 										<TableCell>
 											<Link

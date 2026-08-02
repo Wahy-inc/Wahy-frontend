@@ -17,6 +17,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { ScheduleRead, StudentRead } from "@/lib/data-contracts";
 
 export default function AdminScheduleDetailPage() {
 	const { t } = useLocalization();
@@ -37,13 +38,13 @@ export default function AdminScheduleDetailPage() {
 	});
 
 	const schedule = useMemo(
-		() => schedulesQuery.data?.items.find((item) => item.id === scheduleId),
+		() => schedulesQuery.data?.items.find((item: ScheduleRead) => item.id === scheduleId),
 		[schedulesQuery.data, scheduleId],
 	);
 	const student = useMemo(
 		() =>
 			studentsQuery.data?.items.find(
-				(item) => item.id === schedule?.student_id,
+				(item: StudentRead) => item.id === schedule?.student_id,
 			),
 		[studentsQuery.data, schedule?.student_id],
 	);

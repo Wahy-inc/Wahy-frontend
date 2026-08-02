@@ -34,7 +34,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useState } from "react";
-import type { ClassFileRead } from "@/lib/data-contracts";
+import type { ClassFileRead, LessonRead } from "@/lib/data-contracts";
 
 const HISTORY_LIMIT = 20;
 
@@ -83,7 +83,7 @@ export default function ParentClassDetailPage() {
 	const downloadMutation = useMutation({
 		mutationFn: (file: ClassFileRead) =>
 			downloadMyClassFile(scheduleId, file.id),
-		onSuccess: (blob, file) => {
+		onSuccess: (blob: Blob, file: ClassFileRead) => {
 			downloadBlob(blob, file.original_filename);
 		},
 		onError: (err: unknown) => {
@@ -182,7 +182,7 @@ export default function ParentClassDetailPage() {
 									</TableRow>
 								</TableHeader>
 								<TableBody>
-									{lessons.map((lesson) => (
+									{lessons.map((lesson: LessonRead) => (
 										<TableRow key={lesson.id}>
 											<TableCell>{formatDate(lesson.date)}</TableCell>
 											<TableCell>
@@ -239,7 +239,7 @@ export default function ParentClassDetailPage() {
 				) : null}
 				{filesQuery.isSuccess && files.length > 0 ? (
 					<ul className="flex flex-col gap-2">
-						{files.map((file) => (
+						{files.map((file: ClassFileRead) => (
 							<li
 								key={file.id}
 								className="bg-muted/50 flex items-center justify-between gap-3 rounded-md border px-3 py-2 text-sm"

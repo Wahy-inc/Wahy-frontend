@@ -54,6 +54,9 @@ import { listSchedules } from "@/lib/api/schedules";
 import { listStudents } from "@/lib/api/students";
 import {
 	AttendanceStatus,
+	RescheduleResponse,
+	ScheduleRead,
+	StudentRead,
 	type ConflictItem,
 	type LessonRead,
 	type LessonUpdate,
@@ -157,7 +160,7 @@ function LessonEditDialog({ lesson, onClose }: LessonEditDialogProps) {
 			toast.success(t("lessons.update_success"));
 			onClose();
 		},
-		onError: (err) =>
+		onError: (err: unknown) =>
 			toast.error(
 				err instanceof ApiError
 					? err.message
@@ -282,7 +285,7 @@ function RescheduleDialog({ lesson, onClose }: RescheduleDialogProps) {
 	const mutation = useMutation({
 		mutationFn: (payload: RescheduleRequest) =>
 			rescheduleLesson(lesson.id, payload),
-		onSuccess: (data) => {
+		onSuccess: (data: RescheduleResponse) => {
 			const conflicts = data.conflicts ?? [];
 			if (conflicts.length > 0) {
 				setConflictData({
@@ -298,7 +301,7 @@ function RescheduleDialog({ lesson, onClose }: RescheduleDialogProps) {
 			toast.success(t("lessons.reschedule_success"));
 			onClose();
 		},
-		onError: (err) => {
+		onError: (err: unknown) => {
 			const payload = extractReschedulePayload(err);
 			if (payload) {
 				setConflictData({
@@ -483,13 +486,13 @@ export default function AdminClassDetailPage() {
 	});
 
 	const schedule = useMemo(
-		() => schedulesQuery.data?.items.find((item) => item.id === scheduleId),
+		() => schedulesQuery.data?.items.find((item: ScheduleRead) => item.id === scheduleId),
 		[schedulesQuery.data, scheduleId],
 	);
 	const student = useMemo(
 		() =>
 			studentsQuery.data?.items.find(
-				(item) => item.id === schedule?.student_id,
+				(item: StudentRead) => item.id === schedule?.student_id,
 			),
 		[studentsQuery.data, schedule?.student_id],
 	);
@@ -633,7 +636,7 @@ export default function AdminClassDetailPage() {
 												</TableRow>
 											</TableHeader>
 											<TableBody>
-												{historyQuery.data?.lessons.map((lesson) => (
+												{historyQuery.data?.lessons.map((lesson: LessonRead) => (
 													<TableRow key={lesson.id}>
 														<TableCell>{formatDate(lesson.date)}</TableCell>
 														<TableCell>

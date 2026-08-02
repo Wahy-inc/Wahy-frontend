@@ -169,7 +169,7 @@ export default function ParentWirdPage() {
 				{childSelect}
 				<Select value={status} onValueChange={setStatus}>
 					<SelectTrigger
-						className="w-[180px]"
+						className="w-45"
 						aria-label={t("wird.filter_status_aria")}
 					>
 						<SelectValue placeholder={t("wird.all_statuses")} />
@@ -194,7 +194,7 @@ export default function ParentWirdPage() {
 			) : null}
 			{!isLoading && !isError && data.length > 0 ? (
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{data.map((assignment) => {
+					{data.map((assignment: WirdAssignmentRead) => {
 						const ayahRange = formatAyahRange(assignment);
 						return (
 							<Card key={assignment.id}>

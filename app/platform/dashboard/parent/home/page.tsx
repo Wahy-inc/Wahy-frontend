@@ -37,6 +37,7 @@ import {
 import Link from "next/link";
 import { toast } from "sonner";
 import { useChildFilter } from "../child-filter";
+import { NotificationRead } from "@/lib/data-contracts";
 
 const quickLinks = [
 	{
@@ -114,7 +115,7 @@ export default function ParentHomePage() {
 	);
 	const notifications = notificationsQuery.data?.items ?? [];
 	const unreadCount = notifications.filter(
-		(notification) => !notification.is_read,
+		(notification: NotificationRead) => !notification.is_read,
 	).length;
 
 	return (
@@ -235,7 +236,7 @@ export default function ParentHomePage() {
 				) : null}
 				{notificationsQuery.isSuccess && notifications.length > 0 ? (
 					<ul className="flex flex-col gap-2">
-						{notifications.map((notification) => (
+						{notifications.map((notification: NotificationRead) => (
 							<li
 								key={notification.id}
 								className={cn(

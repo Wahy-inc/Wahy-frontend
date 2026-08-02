@@ -37,7 +37,7 @@ import { getStudentAttendanceHours, listStudents } from "@/lib/api/students";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import { shiftDate, todayISO } from "@/lib/dates";
 import type { ReactNode } from "react";
-import type { StudentRead } from "@/lib/data-contracts";
+import type { RevenuePerParent, StudentRead } from "@/lib/data-contracts";
 
 const RANGE_PRESETS = [7, 30, 90];
 
@@ -306,7 +306,7 @@ export default function AdminAnalyticsPage() {
 											</TableRow>
 										</TableHeader>
 										<TableBody>
-											{financial.data.revenue_per_student.map((entry) => (
+											{financial.data.revenue_per_student.map((entry: RevenuePerParent) => (
 												<TableRow key={entry.parent_id}>
 													<TableCell>{entry.parent_id}</TableCell>
 													<TableCell className="text-end">
@@ -347,7 +347,7 @@ export default function AdminAnalyticsPage() {
 						value={studentFilter}
 						onValueChange={setStudentFilter}
 						options={
-							studentsQuery.data?.items.map((student) => ({
+							studentsQuery.data?.items.map((student: StudentRead) => ({
 								value: String(student.id),
 								label: studentName(student),
 							})) ?? []

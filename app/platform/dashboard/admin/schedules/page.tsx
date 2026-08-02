@@ -182,7 +182,7 @@ function ScheduleDialog({
 			);
 			onSaved();
 		},
-		onError: (err) =>
+		onError: (err: unknown) =>
 			toast.error(
 				err instanceof ApiError
 					? err.message
@@ -389,7 +389,7 @@ export default function AdminSchedulesPage() {
 	});
 	const students = studentsQuery.data?.items ?? [];
 	const studentName = (studentId: number) =>
-		students.find((student) => student.id === studentId)?.full_name_english ??
+		students.find((student: StudentRead) => student.id === studentId)?.full_name_english ??
 		`Student #${studentId}`;
 
 	const deleteMutation = useMutation({
@@ -400,7 +400,7 @@ export default function AdminSchedulesPage() {
 			queryClient.invalidateQueries({ queryKey: ["calendar-grid"] });
 			toast.success(t("schedules.deactivated_success"));
 		},
-		onError: (err) =>
+		onError: (err: unknown) =>
 			toast.error(
 				err instanceof ApiError
 					? err.message
@@ -471,7 +471,7 @@ export default function AdminSchedulesPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{schedules.map((schedule) => (
+								{schedules.map((schedule: ScheduleRead) => (
 									<TableRow
 										key={schedule.id}
 										className="cursor-pointer"

@@ -39,7 +39,7 @@ import { ApiError } from "@/lib/api/client";
 import { createLessons, listLessons } from "@/lib/api/lessons";
 import { listSchedules } from "@/lib/api/schedules";
 import { listStudents } from "@/lib/api/students";
-import { AttendanceStatus, type LessonCreate } from "@/lib/data-contracts";
+import { AttendanceStatus, LessonRead, ScheduleRead, StudentRead, type LessonCreate } from "@/lib/data-contracts";
 import { formatDate, formatTime, todayISO } from "@/lib/dates";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ScrollText } from "lucide-react";
@@ -100,16 +100,16 @@ export default function AdminLessonsPage() {
 	const availableSchedules = useMemo(
 		() =>
 			(schedulesQuery.data?.items ?? []).filter(
-				(schedule) => schedule.student_id === watchedStudentId,
+				(schedule: ScheduleRead) => schedule.student_id === watchedStudentId,
 			),
 		[schedulesQuery.data, watchedStudentId],
 	);
 
 	const studentName = (studentId: number) =>
-		students.find((student) => student.id === studentId)?.full_name_english ??
+		students.find((student: StudentRead) => student.id === studentId)?.full_name_english ??
 		`Student #${studentId}`;
 	const scheduleLabel = (scheduleId: number) => {
-		const schedule = schedules.find((item) => item.id === scheduleId);
+		const schedule = schedules.find((item: ScheduleRead) => item.id === scheduleId);
 		return schedule
 			? `${schedule.day_label} - ${formatTime(schedule.start_time)}`
 			: `Schedule #${scheduleId}`;
@@ -124,7 +124,7 @@ export default function AdminLessonsPage() {
 			toast.success(t("lessons.create_success"));
 			form.reset(defaultValues);
 		},
-		onError: (err) =>
+		onError: (err: unknown) =>
 			toast.error(
 				err instanceof ApiError
 					? err.message
@@ -182,7 +182,7 @@ export default function AdminLessonsPage() {
 													shouldValidate: true,
 												});
 											}}
-											options={students.map((student) => ({
+											options={students.map((student: StudentRead) => ({
 												value: String(student.id),
 												label: student.full_name_english,
 											}))}
@@ -220,7 +220,7 @@ export default function AdminLessonsPage() {
 												/>
 											</SelectTrigger>
 											<SelectContent>
-												{availableSchedules.map((schedule) => (
+												{availableSchedules.map((schedule: ScheduleRead) => (
 													<SelectItem
 														key={schedule.id}
 														value={String(schedule.id)}
@@ -340,7 +340,7 @@ export default function AdminLessonsPage() {
 										</TableRow>
 									</TableHeader>
 									<TableBody>
-										{recentLessons.map((lesson) => (
+										{recentLessons.map((lesson: LessonRead) => (
 											<TableRow key={lesson.id}>
 												<TableCell>{formatDate(lesson.date)}</TableCell>
 												<TableCell>
