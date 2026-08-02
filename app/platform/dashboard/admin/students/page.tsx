@@ -1,429 +1,119 @@
-'use client'
-
-import React from "react";
-import * as openApi from "@/lib/openApi"
-import { getStudent, listStudents, updateStudent } from "@/app/platform/actions/students";
-import DashboardPage from "../page";
-import TitleElement from "./title_element";
-import { Field } from "@/components/ui/field";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button"
-import {
-  Item,
-  ItemActions,
-  ItemContent,
-  ItemMedia,
-  ItemTitle,
-} from "@/components/ui/item"
-import { User} from 'lucide-react'
-import { UpdateStudentFormState } from "../../../lib/definitions";
-import { AlertDialog, AlertDialogCancel, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { useAuth } from "@/lib/auth-context";
+"use client";
 import { useLocalization } from "@/lib/localization-context";
-import { useToastListener } from "@/lib/toastListener";
-import { Badge } from "@/components/ui/badge";
 
-export default function Students() {
-    const [students, setStudents] = React.useState<openApi.PaginatedResponse<openApi.StudentRead> | null>(null)
-    const [loading, setLoading] = React.useState(true)
-    const [error, setError] = React.useState<string | null>(null)
-    const updateStudentActionState = (state: UpdateStudentFormState, formData: FormData) => updateStudent(state, formData, Number(formData.get('id')))
-    const [updateStudentState, updateStudentAction, updateStudentPending] = React.useActionState(updateStudentActionState, undefined)
-    const [getStudentState, getStudentAction, getStudentPending] = React.useActionState(getStudent, undefined)
-    const [editingStudentId, setEditingStudentId] = React.useState<number | null>(null)
-    // const [approvalStatus, setApprovalStatus] = React.useState<'success' | 'queued' | 'fail' | null>(null)
-    const { isAdmin, isLoading: authLoading } = useAuth()
-    const { t, language } = useLocalization()
+import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorBanner } from "@/components/shared/error-banner";
+import { LoadingSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
+import { Pagination } from "@/components/shared/pagination";
+import { StudentStatusBadge } from "@/components/shared/status-badge";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { ApiError } from "@/lib/api/client";
+import { listStudents } from "@/lib/api/students";
+import { StudentStatus } from "@/lib/data-contracts";
+import { formatCurrency } from "@/lib/format";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-    useToastListener(updateStudentState, {functionName: "Update Student", successMessage: t('students.update_success'), errorMessage: t('students.update_error')})
-    useToastListener(getStudentState, {functionName: "Get Student", successMessage: t('students.create_success'), errorMessage: t('students.create_error')})
-    
-    React.useEffect(() => {
-        if (getStudentState?.message === 'success' && getStudentState.data) {
-            setStudents({ items: [getStudentState.data], total: 1, page: 1, per_page: 1, has_next: false })
-        }
-        if (
-            updateStudentState?.message === 'success' ||
-            updateStudentState?.message === 'queued'
-        ) {
-            const fetchStudents = async () => {
-                try {
-                    setLoading(true)
-                    const data = await listStudents(10,1)
-                    setStudents(data)
-                    setError(null)
-                } catch (err) {
-                    setError('Failed to load students')
-                    setStudents(null)
-                } finally {
-                    setLoading(false)
-                }
-            }
-            fetchStudents()
-        }
-    }, [getStudentState, updateStudentState, isAdmin])
+const PER_PAGE = 20;
 
-    React.useEffect(() => {
-        if (updateStudentState?.message === 'success' || updateStudentState?.message === 'queued') {
-            setEditingStudentId(null)
-        }
-    }, [updateStudentState])
+const STATUS_ORDER = [
+	StudentStatus.Active,
+	StudentStatus.OnHold,
+	StudentStatus.Graduated,
+	StudentStatus.Inactive,
+];
 
-    React.useEffect(() => {
-        if (authLoading) return
+function errorMessage(error: unknown, t: (key: string) => string): string {
+	return error instanceof ApiError ? error.message : t("common.something_went_wrong");
+}
 
-            // const cachedStudents = getCachedData<openApi.StudentRead[]>(offlineCacheKeys.studentsList)
-            // if (cachedStudents && cachedStudents.length > 0) {
-            //     setStudents(cachedStudents)
-            //     setLoading(false)
-            // }
+export default function StudentsPage() {
+	const { t } = useLocalization();
+	const router = useRouter();
+	const [page, setPage] = useState(1);
 
-        const fetchStudents = async () => {
-                try {
-                    setLoading(true)
-                    const data = await listStudents(10, 1)
-                    setStudents(data)
-                    setError(null)
-                } catch (err) {
-                    setError('Failed to load students')
-                    setStudents(null)
-                } finally {
-                    setLoading(false)
-                }
-            }
-        fetchStudents()
-    }, [isAdmin, authLoading])
+	const { data, isLoading, isError, error } = useQuery({
+		queryKey: ["students", { page, perPage: PER_PAGE }],
+		queryFn: () => listStudents({ page, perPage: PER_PAGE }),
+	});
 
-    if (!isAdmin) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <div className="text-center">
-                    <h1 className="text-2xl font-bold">Access Denied</h1>
-                    <p className="text-lg">You do not have permission to view this page.</p>
-                </div>
-            </div>
-        )
-    }
+	const students = data?.items ?? [];
+	const sections = STATUS_ORDER.map((status) => ({
+		status,
+		items: students.filter((student) => student.status === status),
+	})).filter((section) => section.items.length > 0);
 
-    const fieldInput = (label: string, name: string, holder: string, type: string) => (        
-        <Field orientation="vertical" className='w-full inline'>
-            <Label htmlFor={name}>{label}</Label>
-            <Input id={name} name={name} type={type} placeholder={holder} defaultValue={holder}></Input>
-        </Field>
-    )
-
-    const getRegistrationStatusLabel = (status: string): string => {
-        const statusLower = status?.toLowerCase() || ''
-        if (statusLower.includes('approved')) return t('common.yes')
-        if (statusLower.includes('pending')) return t('common.no')
-        if (statusLower.includes('rejected')) return t('students.reject')
-        return status
-    }
-
-    const getStudentStatusLabel = (status: string): string => {
-        const statusLower = status?.toLowerCase() || ''
-        if (statusLower.includes('active')) return t('schedules.active')
-        if (statusLower.includes('graduated')) return t('students.status_graduated')
-        if (statusLower.includes('inactive')) return t('schedules.inactive')
-        if (statusLower.includes('on_hold') || statusLower.includes('onhold')) return t('students.status_on_hold')
-        return status
-    }
-
-    const studentElement = (student: openApi.StudentRead, color: string) => (
-        <div className="flex w-full flex-col gap-6">
-            <Item variant="outline" style={{borderColor: color}}>
-                <ItemContent>
-                    <ItemMedia variant="icon">
-                        <User />
-                    </ItemMedia>
-                <ItemTitle>{language === 'ar' ? student.full_name_arabic : student.full_name_english} <Badge variant="default" className="bg-slate-800 text-white text-[13px] px-1 py-0 mx-1 my-0">ID: {student.id}</Badge></ItemTitle>
-                    {t('students.status')}: {getRegistrationStatusLabel(student.status)} | {t('auth.student_code_label')}: {student.student_code} <br />
-                    <div id="accordion-data">
-                        <Accordion
-                        type="single"
-                        collapsible
-                        className="w-full"
-                        >
-                            <AccordionItem key={student.id} value={student.id.toString()}>
-                            <AccordionTrigger>{t('common.edit')}</AccordionTrigger>
-                            <AccordionContent>
-                                <div className={`space-y-6 pt-4 ${language === 'ar' ? 'text-right' : 'text-left'}`}>
-                                  {/* Identifiers & Contact */}
-                                  <div className="bg-linear-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
-                                    <h3 className="font-semibold text-blue-900 mb-3 text-sm">{t('auth.student_code_label')} • {t('students.phone')} • {t('students.status')}</h3>
-                                    <div className="grid grid-cols-3 gap-4">
-                                      <div className="flex flex-col">
-                                        <span className="text-xs text-blue-700 font-medium">{t('auth.student_code_label')}</span>
-                                        <span className="text-sm text-slate-800 font-semibold">{student.student_code}</span>
-                                      </div>
-                                      <div className="flex flex-col">
-                                        <span className="text-xs text-blue-700 font-medium">{t('students.phone')}</span>
-                                        <span className="text-sm text-slate-800 font-semibold">{student.phone}</span>
-                                      </div>
-                                      <div className="flex flex-col">
-                                        <span className="text-xs text-blue-700 font-medium">{t('students.status')}</span>
-                                        <span className="inline-block bg-blue-200 text-blue-800 px-2 py-1 rounded text-xs font-semibold w-fit">{getStudentStatusLabel(student.status)}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Personal Information */}
-                                  <div className="bg-linear-to-r from-purple-50 to-purple-100 p-4 rounded-lg">
-                                    <h3 className="font-semibold text-purple-900 mb-3 text-sm">{t('students.date_of_birth')} • {t('students.timezone')}</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div className="flex flex-col">
-                                        <span className="text-xs text-purple-700 font-medium">{t('students.date_of_birth')}</span>
-                                        <span className="text-sm text-slate-800 font-semibold">{student.date_of_birth}</span>
-                                      </div>
-                                      <div className="flex flex-col">
-                                        <span className="text-xs text-purple-700 font-medium">{t('students.timezone')}</span>
-                                        <span className="text-sm text-slate-800 font-semibold">{student.timezone}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Lessons & Billing */}
-                                  <div className="bg-linear-to-r from-amber-50 to-amber-100 p-4 rounded-lg">
-                                    <h3 className="font-semibold text-amber-900 mb-3 text-sm">{t('students.lessons_rate')} • {t('students.lessons_per_week')} • {t('students.billing_cycle')}</h3>
-                                    <div className="grid grid-cols-3 gap-4">
-                                      <div className="flex flex-col">
-                                        <span className="text-xs text-amber-700 font-medium">{t('students.lessons_rate')}</span>
-                                        <span className="text-sm text-slate-800 font-semibold">{student.lesson_rate}</span>
-                                      </div>
-                                      <div className="flex flex-col">
-                                        <span className="text-xs text-amber-700 font-medium">{t('students.lessons_per_week')}</span>
-                                        <span className="text-sm text-slate-800 font-semibold">{student.lessons_per_week}</span>
-                                      </div>
-                                      <div className="flex flex-col">
-                                        <span className="text-xs text-amber-700 font-medium">{t('students.billing_cycle')}</span>
-                                        <span className="inline-block bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-semibold w-fit">{student.billing_cycle}</span>
-                                      </div>
-                                    </div>
-                                  </div>
-
-                                  {/* Notes */}
-                                  <div className="space-y-3">
-                                    {student.special_notes && (
-                                      <div className="bg-gray-50 border-l-4 border-gray-400 p-3 rounded">
-                                        <span className="text-xs text-gray-700 font-medium">{t('students.special_notes')}</span>
-                                        <p className="text-sm text-slate-700 mt-1">{student.special_notes}</p>
-                                      </div>
-                                    )}
-                                  </div>
-                                </div>
-                            </AccordionContent>
-                            </AccordionItem>
-                        </Accordion>
-                    </div>
-                </ItemContent>
-                    {(
-                    <AlertDialog open={editingStudentId === student.id} onOpenChange={(open: boolean) => setEditingStudentId(open ? student.id : null)}>
-                        <AlertDialogTrigger asChild>
-                            <ItemActions>
-                                <Button onClick={() => setEditingStudentId(student.id)} size="sm" variant="outline" className="transition duration-300 border-gray-500 border text-gray-500 bg-transparent hover:bg-gray-500 hover:text-white">
-                                    {t('common.update')}
-                                </Button>
-                            </ItemActions>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <form action={updateStudentAction} id={`update-${student.id}`}>
-                            <AlertDialogHeader>
-                            <AlertDialogTitle>{t('students.update_student')}</AlertDialogTitle>
-                                <div className="flex flex-col gap-4 rtl:text-right">
-                                <input type="number" name="id" id="id" hidden value={Number(student.id)} readOnly />
-                                <div className="bg-slate-100 p-3 rounded border border-slate-300">
-                                  <span className="text-xs text-slate-600 font-medium">{t('auth.student_code_label')}</span>
-                                  <p className="text-sm text-slate-800 font-semibold mt-1">{student.student_code}</p>
-                                </div>
-                                <div className="flex flex-row justify-between gap-3">
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('students.name_arabic'),"ar-name", student.full_name_arabic, "text")}
-                                        {updateStudentState?.error?.arname && <p className="text-red-500 text-sm">{updateStudentState.error.arname}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('students.name_english'),"en-name", student.full_name_english, "text")}
-                                        {updateStudentState?.error?.enname && <p className="text-red-500 text-sm">{updateStudentState.error.enname}</p>}
-                                    </div>
-                                </div>
-                                <div className='flex flex-col'>
-                                    {fieldInput(t('students.phone'),"phone", String(student.phone), "text")}
-                                    {updateStudentState?.error?.phone && <p className="text-red-500 text-sm">{updateStudentState.error.phone}</p>}
-                                </div>
-                                <div className="flex flex-row justify-between gap-3">
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('students.date_of_birth'),"date-of-birth", String(student.date_of_birth), "date")}
-                                        {updateStudentState?.error?.dateOfBirth && <p className="text-red-500 text-sm">{updateStudentState.error.dateOfBirth}</p>}
-                                    </div>
-                                <div className='flex flex-col'>
-                                    {fieldInput(t('students.timezone'),"time-zone", String(student.timezone), "text")}
-                                    {updateStudentState?.error?.timeZone && <p className="text-red-500 text-sm">{updateStudentState.error.timeZone}</p>}
-                                </div>
-                                </div>
-                                <div className="flex flex-row justify-between gap-3 items-center">
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('students.lessons_per_week'),"lessons-per-week", String(student.lessons_per_week), "text")}
-                                        {updateStudentState?.error?.lessonsPerWeek && <p className="text-red-500 text-sm">{updateStudentState.error.lessonsPerWeek}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        {fieldInput(t('students.lessons_rate'),"lesson-rate", String(student.lesson_rate), "number")}
-                                        {updateStudentState?.error?.lessonRate && <p className="text-red-500 text-sm">{updateStudentState.error.lessonRate}</p>}
-                                    </div>
-                                    <div className='flex flex-col'>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="billing-cycle" className="text-sm font-medium">{t('students.billing_cycle')}</label>
-                                            <Select name="billing-cycle" defaultValue={student.billing_cycle}>
-                                                <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder={t('common.submit')} />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectLabel>{t('students.billing_cycle')}</SelectLabel>
-                                                        <SelectItem value={openApi.BillingCycle.Monthly}>{t('students.monthly')}</SelectItem>
-                                                        <SelectItem value={openApi.BillingCycle.Weekly}>{t('students.weekly')}</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        {updateStudentState?.error?.billingCycle && <p className="text-red-500 text-sm">{updateStudentState.error.status}</p>}
-                                    </div>
-                                </div>
-                                <div className="flex flex-row justify-between gap-3 items-center">
-                                    <div className='flex flex-col'>
-                                        <div className="flex flex-col">
-                                            <label htmlFor="status" className="text-sm font-medium">{t('students.status')}</label>
-                                            <Select name="status" defaultValue={student.status}>
-                                                <SelectTrigger className="w-full max-w-48">
-                                                    <SelectValue placeholder={t('common.submit')} />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectGroup>
-                                                        <SelectLabel>{t('students.status')}</SelectLabel>
-                                                        <SelectItem value={openApi.StudentStatus.Active}>{t('schedules.active')}</SelectItem>
-                                                        <SelectItem value={openApi.StudentStatus.Graduated}>{t('students.status_graduated')}</SelectItem>
-                                                        <SelectItem value={openApi.StudentStatus.Inactive}>{t('schedules.inactive')}</SelectItem>
-                                                        <SelectItem value={openApi.StudentStatus.OnHold}>{t('students.status_on_hold')}</SelectItem>
-                                                    </SelectGroup>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        {updateStudentState?.error?.status && <p className="text-red-500 text-sm">{updateStudentState.error.status}</p>}
-                                    </div>
-                                </div>
-                                <div className='flex flex-col'>
-                                    {fieldInput(t('students.special_notes'),"special-notes", String(student.special_notes), "text")}
-                                    {updateStudentState?.error?.specialNotes && <p className="text-red-500 text-sm">{updateStudentState.error.specialNotes}</p>}
-                                </div>
-                                </div>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter className="mt-4">
-                                <AlertDialogCancel type="reset" disabled={updateStudentPending}>{t('common.cancel')}</AlertDialogCancel>
-                                <Button type="submit" disabled={updateStudentPending} >{updateStudentPending ? t('common.updating') : t('common.update')}</Button>
-                            </AlertDialogFooter>
-                            </form>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                    )}
-            </Item>
-        </div>
-    )
-
-    const title = (
-        <TitleElement
-            title={t('students.title')}
-            getStudentAction={getStudentAction}
-            getStudentState={getStudentState}
-            getStudentPending={getStudentPending}
-            fieldInput={fieldInput}
-        />
-    )
-
-    if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.loading')}</p></DashboardPage>
-    if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!students || students.items.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('students.no_students_found')}</p></DashboardPage>    
-
-    const inactiveStudents = students.items.filter(student => student.status.toLowerCase().includes('inactive'))
-    const onHoldStudents = students.items.filter(student => student.status.toLowerCase().includes('on_hold') || student.status.toLowerCase().includes('onhold'))
-    const activeStudents = students.items.filter(student => student.status.toLowerCase() === 'active' || student.status.toLowerCase().includes('graduated'))
-    const content = (
-        <div className="flex flex-col gap-12 w-full">
-            {/* {(updateStudentState?.message || approvalStatus) && (
-                <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
-                    updateStudentState?.message === 'queued' || approvalStatus === 'queued'
-                        ? 'border-amber-200 bg-amber-50 text-amber-800'
-                        : updateStudentState?.message === 'fail' || approvalStatus === 'fail'
-                            ? 'border-red-200 bg-red-50 text-red-800'
-                            : 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                }`}>
-                    {updateStudentState?.message === 'queued' || approvalStatus === 'queued'
-                        ? t('schedules.offline_sync')
-                        : updateStudentState?.message === 'fail' || approvalStatus === 'fail'
-                            ? t('schedules.offline_error')
-                            : t('messages.success')}
-                </div>
-            )} */}
-            <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">{t('students.approved_students')}</p>
-                {activeStudents && activeStudents.length > 0 ? activeStudents.map((student: openApi.StudentRead) => (
-                    <div key={student.id}>
-                        {studentElement(student, '#6a7282')}
-                    </div>
-                )) : <p className="text-slate-700 text-xl">{t('students.no_approved_students')}</p>}
-            </div>
-            <div className="w-full h-1 bg-gray-400 rounded-lg m-2"></div>
-            <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">{t('students.pending_students')}</p>
-                {onHoldStudents && onHoldStudents.length > 0 ? onHoldStudents.map((student: openApi.StudentRead) => (
-                    <div key={student.id}>
-                        {studentElement(student, '#6a7282')}
-                    </div>
-                )) : <p className="text-slate-700 text-xl">{t('students.no_pending_students')}</p>}
-            </div>
-            <div className="w-full h-1 bg-gray-400 rounded-lg m-2"></div>
-            <div className="flex flex-col gap-4">
-                <p className="text-2xl text-slate-700 font-semibold">{t('students.rejected_students')}</p>
-                {inactiveStudents && inactiveStudents.length > 0 ? inactiveStudents.map((student: openApi.StudentRead) => (
-                    <div key={student.id}>
-                        {studentElement(student, '#6a7282')}
-                    </div>
-                )) : <p className="text-slate-700 text-xl">{t('students.no_rejected_students')}</p>}
-            </div>
-        </div>
-    )
-
-    return <DashboardPage title={(
-        <TitleElement
-            title={t('students.title')}
-            getStudentAction={getStudentAction}
-            getStudentState={getStudentState}
-            getStudentPending={getStudentPending}
-            fieldInput={fieldInput}
-        />
-    )}>
-        <div className="flex flex-col gap-4 w-full">{content}</div>
-                <div id="pagination" className="grid grid-cols-3 text-sm my-4">
-            <div className="col-start-1 col-end-2"></div>
-            <div className="col-start-2 col-end-3">
-                page <span className="font-bold text-slate-800">{students.page}</span> of <span className="font-bold text-slate-800">{Math.ceil((students.total || 0) / students.per_page)}</span>
-            </div>
-            <div className="flex flex-row justify-end items-center gap-2 col-start-3 col-end-4">
-                <Button variant="outline" disabled={students.page === 1 || students.items.length === 0} onClick={
-                    () => listStudents(10, students.page - 1).then((data) => {
-                        if (data) {
-                            setStudents(data)
-                        }
-                    })
-                }>Previous</Button>
-                <Button variant="outline" disabled={!students.has_next || students.items.length === 0} onClick={
-                    () => listStudents(10, students.page + 1).then((data) => {
-                        if (data) {
-                            setStudents(data)
-                        }
-                    })
-                }>Next</Button>
-            </div>
-        </div>
-    </DashboardPage>
+	return (
+		<div className="flex flex-col gap-6">
+			<PageHeader
+				title={t("students.title")}
+				description={t("students.description")}
+			/>
+			{isLoading ? <LoadingSkeleton rows={8} /> : null}
+			{isError ? <ErrorBanner message={errorMessage(error, t)} /> : null}
+			{!isLoading && !isError && students.length === 0 ? (
+				<EmptyState
+					title={t("students.no_students_found")}
+					description={t("students.no_students_desc")}
+				/>
+			) : null}
+			{!isLoading && !isError && sections.length > 0 ? (
+				<div className="flex flex-col gap-8">
+					{sections.map((section) => (
+						<section key={section.status} className="flex flex-col gap-3">
+							<div className="flex items-center gap-2">
+								<StudentStatusBadge status={section.status} />
+								<span className="text-muted-foreground text-sm">
+									{section.items.length}
+								</span>
+							</div>
+							<Table>
+								<TableHeader>
+									<TableRow>
+										<TableHead>{t("students.full_name")}</TableHead>
+										<TableHead>{t("students.lessons_per_week")}</TableHead>
+										<TableHead>{t("students.base_rate")}</TableHead>
+										<TableHead>{t("common.notes")}</TableHead>
+									</TableRow>
+								</TableHeader>
+								<TableBody>
+									{section.items.map((student) => (
+										<TableRow
+											key={student.id}
+											className="cursor-pointer"
+											onClick={() =>
+												router.push(`/platform/dashboard/admin/students/${student.id}`)
+											}
+										>
+											<TableCell>
+												<p className="font-medium">{student.full_name_english}</p>
+												<p className="text-muted-foreground text-sm" dir="rtl">
+													{student.full_name_arabic}
+												</p>
+											</TableCell>
+											<TableCell>{student.lessons_per_week}</TableCell>
+											<TableCell>{formatCurrency(student.base_rate)}</TableCell>
+											<TableCell>
+												{student.private_notes ?? student.special_notes ?? "—"}
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</section>
+					))}
+					<Pagination page={page} perPage={PER_PAGE} total={data?.total ?? 0} onChange={setPage} />
+				</div>
+			) : null}
+		</div>
+	);
 }

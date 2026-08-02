@@ -1,224 +1,368 @@
-'use client'
-
-import React, { useActionState } from "react";
-import * as openApi from "@/lib/openApi"
-import { createLesson, getLessonByDay, listLessons } from "@/app/platform/actions/lessons";
-import DashboardPage from "../page";
-import { Field } from "@/components/ui/field";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import LessonElement from "./lesson_element";
-import TitleElement from "./title_element";
-import { useAuth } from "@/lib/auth-context";
+"use client";
 import { useLocalization } from "@/lib/localization-context";
-import { useToastListener } from "@/lib/toastListener";
 
-import { useRouter } from "next/navigation";
-import { addLocalSchedules } from "@/app/platform/actions/schedules";
+import { useZodResolver } from "@/app/platform/lib/use-zod-resolver";
+import { lessonCreateSchema } from "@/app/platform/lib/schemas/lesson";
+import { Button } from "@/components/ui/button";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { SearchableSelect } from "@/components/shared/searchable-select";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { EmptyState } from "@/components/shared/empty-state";
+import { ErrorBanner } from "@/components/shared/error-banner";
+import { FieldInput } from "@/components/shared/field-input";
+import { FieldTextarea } from "@/components/shared/field-textarea";
+import { LoadingSkeleton } from "@/components/shared/loading-skeleton";
+import { PageHeader } from "@/components/shared/page-header";
+import { AttendanceBadge } from "@/components/shared/status-badge";
+import { ApiError } from "@/lib/api/client";
+import { createLessons, listLessons } from "@/lib/api/lessons";
+import { listSchedules } from "@/lib/api/schedules";
+import { listStudents } from "@/lib/api/students";
+import { AttendanceStatus, type LessonCreate } from "@/lib/data-contracts";
+import { formatDate, formatTime, todayISO } from "@/lib/dates";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ScrollText } from "lucide-react";
+import { useMemo } from "react";
+import { Controller, useForm, type Resolver } from "react-hook-form";
+import { toast } from "sonner";
 
+const ATTENDANCE_OPTIONS: AttendanceStatus[] = [
+	AttendanceStatus.Present,
+	AttendanceStatus.Absent,
+	AttendanceStatus.Late,
+	AttendanceStatus.Excused,
+];
 
-export default function Lessons() {
-    const {isAdmin, isLoading: authLoading } = useAuth()
-    const { t } = useLocalization()
-    const router = useRouter()
-    const [lessons, setLessons] = React.useState<openApi.ClassGroupItem[]>([])
-    const [loading, setLoading] = React.useState(true)
-    const [error, setError] = React.useState<string | null>(null)
-    const [createState, createAction, createPending] = useActionState(createLesson, undefined)
-    const [getLessonState, getLessonFormAction, getLessonPending] = useActionState(getLessonByDay, undefined)
-    const [fetchedLessons, setFetchedLessons] = React.useState<openApi.ClassGroupItem[]>([])
-    const [searchStudentId, setSearchStudentId] = React.useState<string>("")
-    const [filteredLessons, setFilteredLessons] = React.useState<openApi.ClassGroupItem[]>([])
+type LessonFormValues = {
+	student_id: number;
+	schedule_id: number;
+	date: string;
+	attendance: AttendanceStatus;
+	student_notes: string;
+	sheikh_notes: string;
+	what_is_heard_from_sheikh: string;
+	homework: string;
+};
 
-    useToastListener(createState, {functionName: "Create Lesson", successMessage: t('lessons.create_success'), errorMessage: t('lessons.create_error')})
-    useToastListener(getLessonState, {functionName: "Get Lesson", successMessage: t('lessons.get_success'), errorMessage: t('lessons.get_error')})
-    
-    React.useEffect(() => {
-        if (authLoading) return
+const defaultValues: LessonFormValues = {
+	student_id: 0,
+	schedule_id: 0,
+	date: todayISO(),
+	attendance: AttendanceStatus.Present,
+	student_notes: "",
+	sheikh_notes: "",
+	what_is_heard_from_sheikh: "",
+	homework: "",
+};
 
+export default function AdminLessonsPage() {
+	const { t } = useLocalization();
+	const queryClient = useQueryClient();
 
-        
-        const fetchLessons = async () => {
-            try {
-                setLoading(true)
-                const data = await listLessons()
-                setLessons(data)
-                addLocalSchedules()
-                setError(null)
-            } catch (err) {
-                setError(t('lessons.loading_lessons'))
-                setLessons([])
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchLessons()
-    }, [authLoading, t])
+	const form = useForm<LessonFormValues>({
+		resolver: useZodResolver(lessonCreateSchema) as Resolver<LessonFormValues>,
+		defaultValues,
+	});
+	const watchedStudentId = form.watch("student_id");
 
-    React.useEffect(() => {
-        if (getLessonState?.message == 'success' && getLessonState.data) {
-            setFetchedLessons(getLessonState.data)
-        }
-        if (
-            createState?.message === 'success' ||
-            createState?.message === 'queued'
-        ) {
-            const fetchLessons = async () => {
-                try {
-                    setLoading(true)
-                    const data = await listLessons()
-                    setLessons(data || [])
-                    setError(null)
-                } catch (err) {
-                    setError(t('lessons.loading_lessons'))
-                    setLessons([])
-                } finally {
-                    setLoading(false)
-                }
-            }
-            fetchLessons()
-        }
-    }, [getLessonState, createState, t])
+	const studentsQuery = useQuery({
+		queryKey: ["students"],
+		queryFn: () => listStudents({ perPage: 100 }),
+	});
+	const students = studentsQuery.data?.items ?? [];
 
-    if (!isAdmin) {
-            return (
-                <div className="flex items-center justify-center min-h-screen">
-                    <div className="text-center">
-                        <h1 className="text-2xl font-bold">Access Denied</h1>
-                        <p className="text-lg">You do not have permission to view this page.</p>
-                    </div>
-                </div>
-            )
-        }
+	const schedulesQuery = useQuery({
+		queryKey: ["schedules", { page: 1, perPage: 100 }],
+		queryFn: () => listSchedules({ page: 1, perPage: 100 }),
+	});
+	const schedules = schedulesQuery.data?.items ?? [];
+	const availableSchedules = useMemo(
+		() =>
+			(schedulesQuery.data?.items ?? []).filter(
+				(schedule) => schedule.student_id === watchedStudentId,
+			),
+		[schedulesQuery.data, watchedStudentId],
+	);
 
-    const fieldInput = (label: string, name: string, holder: string, type: string) => (        
-        <Field orientation="vertical" className='w-full inline'>
-            <Label htmlFor={name}>{label}</Label>
-            <Input id={name} name={name} type={type} placeholder={holder} defaultValue={holder}></Input>
-        </Field>
-    )
+	const studentName = (studentId: number) =>
+		students.find((student) => student.id === studentId)?.full_name_english ??
+		`Student #${studentId}`;
+	const scheduleLabel = (scheduleId: number) => {
+		const schedule = schedules.find((item) => item.id === scheduleId);
+		return schedule
+			? `${schedule.day_label} - ${formatTime(schedule.start_time)}`
+			: `Schedule #${scheduleId}`;
+	};
 
-    const handleSearchStudentId = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const studentId = e.target.value.trim()
-        setSearchStudentId(studentId)
-        
-        if (studentId === "") {
-            setFilteredLessons([])
-        } else {
-            const filtered = lessons.filter(lesson => 
-                lesson.student_id.toString().startsWith(studentId)
-            )
-            setFilteredLessons(filtered)
-        }
-    }
+	const createMutation = useMutation({
+		mutationFn: (payload: LessonCreate) => createLessons(payload),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["lessons"] });
+			queryClient.invalidateQueries({ queryKey: ["classes"] });
+			queryClient.invalidateQueries({ queryKey: ["calendar-grid"] });
+			toast.success(t("lessons.create_success"));
+			form.reset(defaultValues);
+		},
+		onError: (err) =>
+			toast.error(
+				err instanceof ApiError
+					? err.message
+					: t("common.something_went_wrong"),
+			),
+	});
 
-    const handleClearFilter = () => {
-        setSearchStudentId("")
-        setFilteredLessons([])
-        const searchInput = document.getElementById("student-id-search") as HTMLInputElement
-        if (searchInput) {
-            searchInput.value = ""
-        }
-    }
+	const recentQuery = useQuery({
+		queryKey: ["lessons", { page: 1, perPage: 10 }],
+		queryFn: () => listLessons({ page: 1, perPage: 10 }),
+	});
+	const recentLessons = recentQuery.data?.items ?? [];
 
-    const content = lessons.map((lesson) => (
-        <div className="my-4" key={`lesson-${lesson.student_id}-${lesson.schedule_id}-${lesson.day_label}-${lesson.rrule_string}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
-            <LessonElement lesson={lesson}/>
-        </div>
-    ))
+	const onSubmit = (values: LessonFormValues) => {
+		createMutation.mutate({
+			student_id: values.student_id,
+			schedule_id: values.schedule_id,
+			date: values.date,
+			attendance: values.attendance,
+			student_notes: values.student_notes || null,
+			sheikh_notes: values.sheikh_notes || null,
+			what_is_heard_from_sheikh: values.what_is_heard_from_sheikh || null,
+			homework: values.homework || null,
+		});
+	};
 
-    let displayContent = content
-    let displayTitle = t('lessons.title')
+	return (
+		<div className="flex flex-col gap-6">
+			<PageHeader
+				title={t("lessons.manage_title")}
+				description={t("lessons.manage_desc")}
+			/>
+			<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)]">
+				<Card>
+					<CardHeader>
+						<CardTitle>{t("lessons.record")}</CardTitle>
+						<CardDescription>{t("lessons.record_desc")}</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<form
+							onSubmit={form.handleSubmit(onSubmit)}
+							className="flex flex-col gap-4"
+						>
+							<Controller
+								control={form.control}
+								name="student_id"
+								render={({ field, fieldState }) => (
+									<div className="flex flex-col gap-1.5">
+										<Label>{t("common.student")}</Label>
+										<SearchableSelect
+											value={field.value ? String(field.value) : ""}
+											onValueChange={(value) => {
+												form.setValue("student_id", Number(value));
+												form.setValue("schedule_id", 0, {
+													shouldValidate: true,
+												});
+											}}
+											options={students.map((student) => ({
+												value: String(student.id),
+												label: student.full_name_english,
+											}))}
+											placeholder={t("common.select_student")}
+										/>
+										{fieldState.error ? (
+											<p className="text-destructive text-xs">
+												{fieldState.error.message}
+											</p>
+										) : null}
+									</div>
+								)}
+							/>
+							<Controller
+								control={form.control}
+								name="schedule_id"
+								render={({ field, fieldState }) => (
+									<div className="flex flex-col gap-1.5">
+										<Label>{t("lessons.class")}</Label>
+										<Select
+											value={field.value ? String(field.value) : ""}
+											onValueChange={(value) => field.onChange(Number(value))}
+											disabled={availableSchedules.length === 0}
+										>
+											<SelectTrigger
+												className="w-full"
+												aria-invalid={fieldState.error ? true : undefined}
+											>
+												<SelectValue
+													placeholder={
+														watchedStudentId
+															? t("lessons.no_schedules")
+															: t("lessons.select_student_first")
+													}
+												/>
+											</SelectTrigger>
+											<SelectContent>
+												{availableSchedules.map((schedule) => (
+													<SelectItem
+														key={schedule.id}
+														value={String(schedule.id)}
+													>
+														{scheduleLabel(schedule.id)}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										{fieldState.error ? (
+											<p className="text-destructive text-xs">
+												{fieldState.error.message}
+											</p>
+										) : null}
+									</div>
+								)}
+							/>
+							<div className="grid gap-4 sm:grid-cols-2">
+								<FieldInput
+									label={t("lessons.date")}
+									type="date"
+									required
+									{...form.register("date")}
+									error={form.formState.errors.date?.message}
+								/>
+								<Controller
+									control={form.control}
+									name="attendance"
+									render={({ field }) => (
+										<div className="flex flex-col gap-1.5">
+											<Label>{t("lessons.attendance")}</Label>
+											<Select
+												value={field.value}
+												onValueChange={(value) =>
+													field.onChange(value as AttendanceStatus)
+												}
+											>
+												<SelectTrigger className="w-full">
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent>
+													{ATTENDANCE_OPTIONS.map((status) => (
+														<SelectItem key={status} value={status}>
+															{status}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+										</div>
+									)}
+								/>
+							</div>
+							<FieldTextarea
+								label="Student notes"
+								{...form.register("student_notes")}
+								placeholder={t("lessons.feedback_placeholder")}
+							/>
+							<FieldTextarea
+								label="Sheikh notes"
+								{...form.register("sheikh_notes")}
+								placeholder={t("lessons.internal_notes")}
+							/>
+							<FieldTextarea
+								label={t("lessons.what_heard")}
+								{...form.register("what_is_heard_from_sheikh")}
+							/>
+							<FieldTextarea
+								label="Homework"
+								{...form.register("homework")}
+								placeholder={t("lessons.assignment_placeholder")}
+							/>
+							<Button type="submit" disabled={createMutation.isPending}>
+								{createMutation.isPending
+									? t("lessons.recording")
+									: t("lessons.record_button")}
+							</Button>
+						</form>
+					</CardContent>
+				</Card>
 
-    if (searchStudentId && filteredLessons) {
-        if (filteredLessons?.length === 0) {
-            displayContent = [<p key="no-lessons" className="text-slate-700 text-xl">{t('lessons.no_lessons_found')} {searchStudentId}</p>]
-            displayTitle = `${t('lessons.title')} - Student ${searchStudentId}`
-        } else {
-            displayContent = filteredLessons.map((lesson) => (
-                <div key={`lesson-${lesson.student_id}-${lesson.schedule_id}-${lesson.day_label}-${lesson.rrule_string}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
-                    <LessonElement lesson={lesson}/>
-                </div>
-            )) 
-            displayTitle = `${t('lessons.title')} - Student ${searchStudentId} (${filteredLessons?.length})`
-        }
-    }
-
-    const title = (
-        <TitleElement
-            title={displayTitle}
-            handleSearchStudentId={handleSearchStudentId}
-            searchStudentId={searchStudentId}
-            handleClearFilter={handleClearFilter}
-            getLessonState={getLessonState}
-            getLessonAction={getLessonFormAction}
-            getLessonPending={getLessonPending}
-            createState={createState}
-            createAction={createAction}
-            createPending={createPending}
-            fieldInput={fieldInput}
-        />
-    )
-
-
-    if (loading) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('lessons.loading_lessons')}</p></DashboardPage>
-    if (error) return <DashboardPage title={title}><p className="text-red-500 text-xl">{error}</p></DashboardPage>
-    if (!lessons || lessons.length === 0) return <DashboardPage title={title}><p className="text-slate-700 text-xl">{t('common.no_data_found')}</p></DashboardPage>
-
-    // const actionStatusBanner = (createState?.message) ? (
-    //     <div className={`rounded-lg border px-4 py-3 text-sm font-medium ${
-    //         createState?.message === 'queued'
-    //             ? 'border-amber-200 bg-amber-50 text-amber-800'
-    //             : createState?.message === 'fail'
-    //                 ? 'border-red-200 bg-red-50 text-red-800'
-    //                 : 'border-emerald-200 bg-emerald-50 text-emerald-800'
-    //     }`}>
-    //         {createState?.message === 'queued'
-    //             ? t('lessons.offline_sync')
-    //             : createState?.message === 'fail'
-    //                 ? t('lessons.offline_error')
-    //                 : t('messages.success')}
-    //     </div>
-    // ) : null
-
-    if (fetchedLessons && getLessonState?.message == 'success') {
-        return <DashboardPage title={(
-            <TitleElement
-                title={`${t('lessons.lesson_details')} ${fetchedLessons?.length? `(${fetchedLessons.length})` : ''}`}
-                createAction={createAction}
-                createState={createState}
-                createPending={createPending}
-                fieldInput={fieldInput}
-                handleSearchStudentId={handleSearchStudentId}
-                searchStudentId={searchStudentId}
-                handleClearFilter={handleClearFilter}
-                getLessonState={getLessonState}
-                getLessonAction={getLessonFormAction}
-                getLessonPending={getLessonPending}
-            />
-        )}>
-            {/* <div className='mx-10'>{actionStatusBanner}</div> */}
-            <div className='flex flex-row justify-end'>
-                <Button variant="outline" className='transition duration-300 mx-10 mt-4 mb-2 border border-red-500 rounded-xl text-red-500 bg-slate-100 cursor-pointer hover:bg-red-500 hover:text-slate-100' onClick={() => {setFetchedLessons([])}}>{t('common.clear')}</Button>
-            </div>
-            <div>
-                {fetchedLessons?.length === 0 ? (
-                    <p className="text-slate-700 text-xl">{t('lessons.no_lessons_found')}</p>
-                ) : (
-                    fetchedLessons.map((lesson) => (
-                        <div key={`lesson-${lesson.student_id}-${lesson.schedule_id}`} onClick={() => router.push(`/platform/dashboard/admin/lessons/lessonData?scheduleID=${lesson.schedule_id}&studentID=${lesson.student_id}&day=${lesson.day_label}`)}>
-                            <LessonElement lesson={lesson}/>
-                        </div>
-                    ))
-                )}
-            </div>
-        </DashboardPage>
-    } else {
-        return <DashboardPage title={title}>
-            {/* <div>{actionStatusBanner}</div> */}
-            <div>{displayContent}</div>
-        </DashboardPage>
-    }
-
+				<Card>
+					<CardHeader>
+						<CardTitle className="flex items-center gap-2">
+							<ScrollText className="size-4" />
+							{t("lessons.recent")}
+						</CardTitle>
+						<CardDescription>{t("lessons.recent_desc")}</CardDescription>
+					</CardHeader>
+					<CardContent>
+						{recentQuery.error ? (
+							<ErrorBanner
+								message={
+									recentQuery.error instanceof Error
+										? recentQuery.error.message
+										: t("common.something_went_wrong")
+								}
+							/>
+						) : null}
+						{recentQuery.isLoading ? (
+							<LoadingSkeleton rows={5} />
+						) : recentLessons.length === 0 ? (
+							<EmptyState
+								icon={ScrollText}
+								title={t("lessons.no_lessons_recorded")}
+								description={t("lessons.no_lessons_recorded_desc")}
+							/>
+						) : (
+							<div className="overflow-hidden rounded-lg border">
+								<Table>
+									<TableHeader>
+										<TableRow>
+											<TableHead>{t("common.date")}</TableHead>
+											<TableHead>{t("common.time")}</TableHead>
+											<TableHead>{t("common.student")}</TableHead>
+											<TableHead>{t("lessons.class")}</TableHead>
+											<TableHead>{t("lessons.attendance")}</TableHead>
+										</TableRow>
+									</TableHeader>
+									<TableBody>
+										{recentLessons.map((lesson) => (
+											<TableRow key={lesson.id}>
+												<TableCell>{formatDate(lesson.date)}</TableCell>
+												<TableCell>
+													{formatTime(lesson.start_time)} -{" "}
+													{formatTime(lesson.end_time)}
+												</TableCell>
+												<TableCell>{studentName(lesson.student_id)}</TableCell>
+												<TableCell>
+													{scheduleLabel(lesson.schedule_id)}
+												</TableCell>
+												<TableCell>
+													<AttendanceBadge status={lesson.attendance} />
+												</TableCell>
+											</TableRow>
+										))}
+									</TableBody>
+								</Table>
+							</div>
+						)}
+					</CardContent>
+				</Card>
+			</div>
+		</div>
+	);
 }
