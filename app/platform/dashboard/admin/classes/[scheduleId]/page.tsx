@@ -639,6 +639,7 @@ export default function AdminClassDetailPage() {
 													<TableHead>{t("lessons.attendance")}</TableHead>
 													<TableHead>{t("lessons.heard")}</TableHead>
 													<TableHead>{t("lessons.homework")}</TableHead>
+													<TableHead>{t("schedules.notes")}</TableHead>
 													<TableHead className="text-end">
 														{t("common.actions")}
 													</TableHead>
@@ -663,19 +664,28 @@ export default function AdminClassDetailPage() {
 																<AttendanceBadge status={lesson.attendance} />
 															</Button>
 														</TableCell>
-														<TableCell>
+														<TableCell className="max-w-40 whitespace-normal wrap-break-word">
 															{lesson.what_is_heard_from_sheikh ? (
-																<span className="line-clamp-1 max-w-40">
+																<span className="whitespace-normal wrap-break-word">
 																	{lesson.what_is_heard_from_sheikh}
 																</span>
 															) : (
 																<span className="text-muted-foreground">-</span>
 															)}
 														</TableCell>
-														<TableCell>
+														<TableCell className="max-w-40 whitespace-normal wrap-break-word">
 															{lesson.homework ? (
-																<span className="line-clamp-1 max-w-40">
+																<span className="whitespace-normal wrap-break-word">
 																	{lesson.homework}
+																</span>
+															) : (
+																<span className="text-muted-foreground">-</span>
+															)}
+														</TableCell>
+														<TableCell className="max-w-40 whitespace-normal wrap-break-word">
+															{lesson.sheikh_notes ? (
+																<span className="whitespace-normal wrap-break-word">
+																	{lesson.sheikh_notes}
 																</span>
 															) : (
 																<span className="text-muted-foreground">-</span>

@@ -177,6 +177,8 @@ export default function ParentClassDetailPage() {
 									<TableRow>
 										<TableHead>{t("common.date")}</TableHead>
 										<TableHead>{t("common.time")}</TableHead>
+										<TableHead>{t("lessons.heard")}</TableHead>
+										<TableHead>{t("lessons.homework")}</TableHead>
 										<TableHead>{t("lessons.attendance")}</TableHead>
 										<TableHead>{t("common.notes")}</TableHead>
 									</TableRow>
@@ -189,19 +191,32 @@ export default function ParentClassDetailPage() {
 												{formatTime(lesson.start_time)} -{" "}
 												{formatTime(lesson.end_time)}
 											</TableCell>
+											<TableCell className="max-w-40 whitespace-normal wrap-break-word">
+												{lesson.what_is_heard_from_sheikh ? (
+													<span className="whitespace-normal wrap-break-word">
+														{lesson.what_is_heard_from_sheikh}
+													</span>
+												) : (
+													<span className="text-muted-foreground">-</span>
+												)}
+											</TableCell>
+											<TableCell className="max-w-40 whitespace-normal wrap-break-word">
+												{lesson.homework ? (
+													<span className="whitespace-normal wrap-break-word">
+														{lesson.homework}
+													</span>
+												) : (
+													<span className="text-muted-foreground">-</span>
+												)}
+											</TableCell>
 											<TableCell>
 												<AttendanceBadge status={lesson.attendance} />
 											</TableCell>
-											<TableCell className="max-w-[320px] whitespace-normal">
-												{lesson.student_notes || lesson.homework ? (
+											<TableCell className="max-w-[320px] whitespace-normal wrap-break-word">
+												{lesson.student_notes ? (
 													<div className="flex flex-col gap-1">
 														{lesson.student_notes ? (
 															<p>{lesson.student_notes}</p>
-														) : null}
-														{lesson.homework ? (
-															<p className="text-muted-foreground text-xs">
-																Homework: {lesson.homework}
-															</p>
 														) : null}
 													</div>
 												) : (

@@ -381,18 +381,18 @@ export default function AdminLessonsPage() {
 												<TableCell>
 													{scheduleLabel(lesson.schedule_id)}
 												</TableCell>
-												<TableCell>
+												<TableCell className="max-w-40 whitespace-normal wrap-break-word">
 													{lesson.what_is_heard_from_sheikh ? (
-														<span className="line-clamp-1 max-w-40">
+														<span className="whitespace-normal wrap-break-word">
 															{lesson.what_is_heard_from_sheikh}
 														</span>
 													) : (
 														<span className="text-muted-foreground">-</span>
 													)}
 												</TableCell>
-												<TableCell>
+												<TableCell className="max-w-40 whitespace-normal wrap-break-word">
 													{lesson.homework ? (
-														<span className="line-clamp-1 max-w-40">
+														<span className="whitespace-normal wrap-break-word">
 															{lesson.homework}
 														</span>
 													) : (
