@@ -640,7 +640,7 @@ export default function AdminSchedulesPage() {
 										<TableCell className="font-medium">
 											{studentName(schedule.student_id)}
 										</TableCell>
-										<TableCell>{schedule.day_label}</TableCell>
+										<TableCell>{schedule.rrule_string?.split('BYDAY=')[1] ?? (schedule.rrule_string?.split('BYMONTHDAY=')[1]?? 'Daily')}</TableCell>
 										<TableCell>
 											{formatTime(schedule.start_time)} -{" "}
 											{formatTime(schedule.end_time)}
