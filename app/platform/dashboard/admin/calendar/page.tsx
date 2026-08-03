@@ -23,7 +23,7 @@ import {
 	rotateCalendarFeed,
 	updateCalendarFeed,
 } from "@/lib/api/calendar";
-import type { CalendarFeedRead, CalendarSlotItem } from "@/lib/data-contracts";
+import type { CalendarFeedRead, CalendarFeedRotateRead, CalendarSlotItem } from "@/lib/data-contracts";
 import { formatDateTime, formatTime, todayISO } from "@/lib/dates";
 import { cn } from "@/lib/utils";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -100,7 +100,7 @@ export default function AdminCalendarPage() {
 
 	const rotateMutation = useMutation({
 		mutationFn: () => rotateCalendarFeed(),
-		onSuccess: (data: CalendarFeedRead) => {
+		onSuccess: (data: CalendarFeedRotateRead) => {
 			queryClient.setQueryData<CalendarFeedRead>(
 				["calendar-feed"],
 				(current: CalendarFeedRead | undefined) =>
@@ -108,7 +108,7 @@ export default function AdminCalendarPage() {
 						? {
 								...current,
 								feed_url: data.feed_url,
-								last_rotated_at: data.last_rotated_at,
+								last_rotated_at: data.rotated_at,
 							}
 						: current,
 			);

@@ -47,6 +47,7 @@ import {
 } from "@/app/platform/lib/schemas/parent";
 import type {
 	ChildRead,
+	InvoiceRead,
 	InvoiceWithItemsRead,
 	ParentInvoiceGenerateRequest,
 	ParentRead,
@@ -434,7 +435,7 @@ export default function AdminInvoicesPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{invoicesQuery.data.items.map((invoice: InvoiceWithItemsRead) => (
+								{invoicesQuery.data.items.map((invoice: InvoiceRead) => (
 									<TableRow key={invoice.id}>
 										<TableCell>
 											<Link

@@ -56,9 +56,9 @@ import { formatDateTime } from "@/lib/dates";
 import { formatCurrency } from "@/lib/format";
 import type {
 	ChildCreate,
+	ChildRead,
 	ParentDetailRead,
 	ParentUpdate,
-	StudentRead,
 	StudentStatus,
 } from "@/lib/data-contracts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -496,7 +496,7 @@ export default function ParentDetailPage() {
 									</TableRow>
 								</TableHeader>
 								<TableBody>
-									{parent.children.map((child: StudentRead) => (
+									{parent.children.map((child: ChildRead) => (
 										<TableRow
 											key={child.id}
 											className="cursor-pointer"

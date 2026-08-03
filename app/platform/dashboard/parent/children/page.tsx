@@ -14,7 +14,7 @@ import { getMyChildren } from "@/lib/api/parents";
 import { useQuery } from "@tanstack/react-query";
 import { Users } from "lucide-react";
 import Link from "next/link";
-import type { StudentRead, StudentStatus } from "@/lib/data-contracts";
+import type { ChildRead, StudentStatus } from "@/lib/data-contracts";
 
 export default function ParentChildrenPage() {
 	const { t } = useLocalization();
@@ -41,7 +41,7 @@ export default function ParentChildrenPage() {
 				/>
 			) : (
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-					{children.map((child: StudentRead) => (
+					{children.map((child: ChildRead) => (
 						<Link
 							key={child.id}
 							href={`/platform/dashboard/parent/children/${child.id}`}

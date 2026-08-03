@@ -29,7 +29,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import type { ReactNode } from "react";
-import type { ScheduleRead, StudentRead, StudentStatus } from "@/lib/data-contracts";
+import type { ChildRead, ScheduleRead, StudentStatus } from "@/lib/data-contracts";
 
 export default function ParentChildDetailPage() {
 	const { t } = useLocalization();
@@ -42,7 +42,7 @@ export default function ParentChildDetailPage() {
 	});
 
 	const child = childrenQuery.data?.find(
-		(candidate: StudentRead) => candidate.id === childId,
+		(candidate: ChildRead) => candidate.id === childId,
 	);
 
 	const schedulesQuery = useQuery({
