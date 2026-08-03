@@ -101,7 +101,7 @@ export default function AdminLessonsPage() {
 		queryFn: () => listSchedules({ page: 1, perPage: 100 }),
 	});
 	const schedules = schedulesQuery.data?.items ?? [];
-	const availableSchedules = useMemo(
+	const availableSchedules: ScheduleRead[] = useMemo(
 		() =>
 			(schedulesQuery.data?.items ?? []).filter(
 				(schedule: ScheduleRead) => schedule.student_id === watchedStudentId,
@@ -113,15 +113,18 @@ export default function AdminLessonsPage() {
 		students.find((student: StudentRead) => student.id === studentId)?.full_name_english ??
 		`Student #${studentId}`;
 	const scheduleLabel = (scheduleId: number) => {
-		const schedule = schedules.find((item: ScheduleRead) => item.id === scheduleId);
-		return schedule
-			? `${schedule.day_label} - ${formatTime(schedule.start_time)}`
-			: `Schedule #${scheduleId}`;
+		const schedule: ScheduleRead | undefined = schedules.find((item: ScheduleRead) => item.id === scheduleId);
+		if (schedule?.rrule_string?.split('BYDAY=')[1]) {
+			return `${schedule.rrule_string?.split('BYDAY=')[1]} - ${formatTime(schedule.start_time)}`;
+		} else if (schedule?.day_label) {
+			return `${schedule.day_label} - ${formatTime(schedule.start_time)}`;
+		}
+		return `Schedule #${scheduleId}`;
 	};
 
 	const createMutation = useMutation({
 		mutationFn: (payload: LessonCreate) => createLessons(payload),
-		onSuccess: async (_, payload) => {
+		onSuccess: async (_: unknown, payload: LessonCreate) => {
 			queryClient.invalidateQueries({ queryKey: ["lessons"] });
 			queryClient.invalidateQueries({ queryKey: ["classes"] });
 			queryClient.invalidateQueries({ queryKey: ["calendar-grid"] });
@@ -236,7 +239,7 @@ export default function AdminLessonsPage() {
 												/>
 											</SelectTrigger>
 											<SelectContent>
-												{availableSchedules.map((schedule: ScheduleRead) => (
+												{availableSchedules.filter((schedule: ScheduleRead) => schedule.is_active == true).map((schedule: ScheduleRead) => (
 													<SelectItem
 														key={schedule.id}
 														value={String(schedule.id)}
@@ -290,6 +293,15 @@ export default function AdminLessonsPage() {
 								/>
 							</div>
 							<FieldTextarea
+								label={t("lessons.what_heard")}
+								{...form.register("what_is_heard_from_sheikh")}
+							/>
+							<FieldTextarea
+								label="Homework"
+								{...form.register("homework")}
+								placeholder={t("lessons.assignment_placeholder")}
+							/>
+							<FieldTextarea
 								label="Student notes"
 								{...form.register("student_notes")}
 								placeholder={t("lessons.feedback_placeholder")}
@@ -298,15 +310,6 @@ export default function AdminLessonsPage() {
 								label="Sheikh notes"
 								{...form.register("sheikh_notes")}
 								placeholder={t("lessons.internal_notes")}
-							/>
-							<FieldTextarea
-								label={t("lessons.what_heard")}
-								{...form.register("what_is_heard_from_sheikh")}
-							/>
-							<FieldTextarea
-								label="Homework"
-								{...form.register("homework")}
-								placeholder={t("lessons.assignment_placeholder")}
 							/>
 							<div className="flex flex-col gap-1.5">
 								<Label>{t("lessons.attach_file")}</Label>

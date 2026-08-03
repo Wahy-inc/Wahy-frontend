@@ -43,7 +43,12 @@ export function formatTime(value: string | null | undefined): string {
 		return "";
 	}
 	const [hours, minutes] = value.split(":");
-	return `${hours}:${minutes}`;
+	if (parseInt(hours) < 12) {
+		return `${hours}:${minutes} AM`;
+	} else if (parseInt(hours) === 12) {
+		return `${hours}:${minutes} PM`;
+	}
+	return `${parseInt(hours) - 12}:${minutes} PM`;
 }
 
 /** Format an ISO 8601 UTC datetime for display. */
