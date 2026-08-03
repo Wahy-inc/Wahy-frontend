@@ -116,6 +116,10 @@ export default function AdminLessonsPage() {
 		const schedule: ScheduleRead | undefined = schedules.find((item: ScheduleRead) => item.id === scheduleId);
 		if (schedule?.rrule_string?.split('BYDAY=')[1]) {
 			return `${schedule.rrule_string?.split('BYDAY=')[1]} - ${formatTime(schedule.start_time)}`;
+		} else if (schedule?.rrule_string?.split('BYMONTHDAY=')[1]) {
+			return `${schedule.rrule_string?.split('BYMONTHDAY=')[1]} - ${formatTime(schedule.start_time)}`;
+		} else if (schedule?.rrule_string?.indexOf('DAILY') !== -1) {
+			return `Daily - ${formatTime(schedule?.start_time)}`;
 		} else if (schedule?.day_label) {
 			return `${schedule.day_label} - ${formatTime(schedule.start_time)}`;
 		}
