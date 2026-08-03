@@ -38,7 +38,7 @@ import { getStudentAttendanceHours, listStudents } from "@/lib/api/students";
 import { formatCurrency, formatPercent } from "@/lib/format";
 import { shiftDate, todayISO } from "@/lib/dates";
 import type { ReactNode } from "react";
-import type { RevenuePerParent, StudentRead } from "@/lib/data-contracts";
+import type { ParentDetailRead, RevenuePerParent, StudentRead } from "@/lib/data-contracts";
 
 const RANGE_PRESETS = [7, 30, 90];
 
@@ -94,7 +94,7 @@ export default function AdminAnalyticsPage() {
 
 	const parents = parentsQuery.data?.items ?? [];
 	const parentName = (parentId: number) =>
-		parents.find((p) => p.id === parentId)?.full_name ?? `Parent #${parentId}`;
+		parents.find((p: ParentDetailRead) => p.id === parentId)?.full_name ?? `Parent #${parentId}`;
 
 	const analytics = useQueries({
 		queries: [

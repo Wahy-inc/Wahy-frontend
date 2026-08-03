@@ -23,7 +23,8 @@ import { CalendarClock } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useChildFilter } from "../child-filter";
-import { ScheduleRead } from "@/lib/data-contracts";
+import { ChildRead, ScheduleRead } from "@/lib/data-contracts";
+import { getMyChildren } from "@/lib/api";
 
 const PER_PAGE = 10;
 
@@ -39,6 +40,12 @@ export default function ParentSchedulesPage() {
 		queryFn: () => listMySchedules({ studentId, page, perPage: PER_PAGE }),
 	});
 
+	const { data: children = [], isLoading: isLoadingChildren, isError: isErrorChildren, error: childrenError } = useQuery({
+		queryKey: ["my-children"],
+		queryFn: getMyChildren,
+	});
+
+
 	const schedules = data?.items ?? [];
 	const total = data?.total ?? 0;
 
@@ -49,21 +56,23 @@ export default function ParentSchedulesPage() {
 				description={t("schedules.parent_desc")}
 				actions={childSelect}
 			/>
-			{isLoading ? <LoadingSkeleton rows={6} /> : null}
+			{isLoading ||  isLoadingChildren? <LoadingSkeleton rows={6} /> : null}
 			{isError ? <ErrorBanner message={errorMessage(error)} /> : null}
-			{!isLoading && !isError && schedules.length === 0 ? (
+			{isErrorChildren ? <ErrorBanner message={errorMessage(childrenError)} /> : null}
+			{!isLoading && !isError && !isLoadingChildren && !isErrorChildren && schedules.length === 0 ? (
 				<EmptyState
 					icon={CalendarClock}
 					title={t("schedules.no_schedules_parent")}
 					description={t("schedules.no_schedules_parent_desc")}
 				/>
 			) : null}
-			{!isLoading && !isError && schedules.length > 0 ? (
+			{!isLoading && !isError && !isLoadingChildren && !isErrorChildren && schedules.length > 0 ? (
 				<>
 					<div className="rounded-md border">
 						<Table>
 							<TableHeader>
 								<TableRow>
+									<TableHead>{t("profile.full_name")}</TableHead>
 									<TableHead>{t("schedules.day")}</TableHead>
 									<TableHead>{t("common.time")}</TableHead>
 									<TableHead>{t("schedules.effective_from")}</TableHead>
@@ -74,12 +83,13 @@ export default function ParentSchedulesPage() {
 							<TableBody>
 								{schedules.map((schedule: ScheduleRead) => (
 									<TableRow key={schedule.id}>
+										<TableCell>{children.find((child: ChildRead) => child.id === schedule.student_id)?.full_name_english || children.find((child: ChildRead) => child.id === schedule.student_id)?.full_name_arabic || `Student #${schedule.student_id}`}</TableCell>
 										<TableCell>
 											<Link
 												href={`/platform/dashboard/parent/classes/${schedule.id}`}
 												className="font-medium hover:underline"
 											>
-												{schedule.day_label}
+												{schedule.rrule_string?.split('BYDAY=')[1] ?? (schedule.rrule_string?.split('BYMONTHDAY=')[1]?? 'Daily')}
 											</Link>
 										</TableCell>
 										<TableCell>
