@@ -25,12 +25,15 @@ import { useState } from "react";
 import { useChildFilter } from "../child-filter";
 import { ChildRead, ScheduleRead } from "@/lib/data-contracts";
 import { getMyChildren } from "@/lib/api";
+import { Input } from "@/components/ui/input";
+import { FieldLabel } from "@/components/ui/field";
 
 const PER_PAGE = 10;
 
 export default function ParentSchedulesPage() {
 	const { t } = useLocalization();
 	const [page, setPage] = useState(1);
+	const [hideInactive, setHideInactive] = useState(true);
 	const { studentId, childSelect } = useChildFilter({
 		onStudentChange: () => setPage(1),
 	});
@@ -54,7 +57,17 @@ export default function ParentSchedulesPage() {
 			<PageHeader
 				title={t("schedules.title")}
 				description={t("schedules.parent_desc")}
-				actions={childSelect}
+				actions={
+					<div className="flex flex-row items-center gap-2">
+						<div className="flex flex-row items-center gap-1 m-2">
+							<Input className="w-4 h-4" id="hide-inactive" type="checkbox" checked={hideInactive} onChange={(e) => setHideInactive(e.target.checked)} />
+							<FieldLabel htmlFor="hide-inactive" className="font-medium">
+								Hide Inactive
+							</FieldLabel>
+						</div>
+						{childSelect}
+					</div>
+				}
 			/>
 			{isLoading ||  isLoadingChildren? <LoadingSkeleton rows={6} /> : null}
 			{isError ? <ErrorBanner message={errorMessage(error)} /> : null}
@@ -81,7 +94,7 @@ export default function ParentSchedulesPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{schedules.map((schedule: ScheduleRead) => (
+								{schedules.filter((schedule: ScheduleRead) => !hideInactive || schedule.is_active).map((schedule: ScheduleRead) => (
 									<TableRow key={schedule.id}>
 										<TableCell>{children.find((child: ChildRead) => child.id === schedule.student_id)?.full_name_english || children.find((child: ChildRead) => child.id === schedule.student_id)?.full_name_arabic || `Student #${schedule.student_id}`}</TableCell>
 										<TableCell>

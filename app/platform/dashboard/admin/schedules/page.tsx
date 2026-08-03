@@ -64,6 +64,8 @@ import { useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { RRule, type WeekdayStr } from "rrule";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { FieldLabel } from "@/components/ui/field";
 
 const PER_PAGE = 20;
 
@@ -529,6 +531,7 @@ export default function AdminSchedulesPage() {
 	const { t } = useLocalization();
 	const router = useRouter();
 	const queryClient = useQueryClient();
+	const [hideInactive, setHideInactive] = useState(true);
 	const [page, setPage] = useState(1);
 	const [dialog, setDialog] = useState<
 		{ mode: "create" } | { mode: "edit"; schedule: ScheduleRead } | null
@@ -572,10 +575,18 @@ export default function AdminSchedulesPage() {
 				title={t("schedules.title")}
 				description={t("schedules.description")}
 				actions={
-					<Button onClick={() => setDialog({ mode: "create" })}>
-						<CalendarPlus className="size-4" />
-						{t("schedules.create_title")}
-					</Button>
+					<div className="flex flex-row items-center gap-2">
+						<div className="flex flex-row items-center gap-1 m-2">
+							<Input className="w-4 h-4" id="hide-inactive" type="checkbox" checked={hideInactive} onChange={(e) => setHideInactive(e.target.checked)} />
+							<FieldLabel htmlFor="hide-inactive" className="font-medium">
+								Hide Inactive
+							</FieldLabel>
+						</div>
+						<Button onClick={() => setDialog({ mode: "create" })}>
+							<CalendarPlus className="size-4" />
+							{t("schedules.create_title")}
+						</Button>
+					</div>
 				}
 			/>
 			{studentsQuery.error ? (
@@ -627,7 +638,7 @@ export default function AdminSchedulesPage() {
 								</TableRow>
 							</TableHeader>
 							<TableBody>
-								{schedules.map((schedule: ScheduleRead) => (
+								{schedules.filter((s: ScheduleRead) => !hideInactive || s.is_active).map((schedule: ScheduleRead) => (
 									<TableRow
 										key={schedule.id}
 										className="cursor-pointer"
