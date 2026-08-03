@@ -99,7 +99,7 @@ export function AppShell({ role, children }: AppShellProps) {
 
 	const handleSignOut = async () => {
 		await signOut();
-		router.replace("/platform/auth/signin");
+		router.replace("/");
 	};
 
 	return (
