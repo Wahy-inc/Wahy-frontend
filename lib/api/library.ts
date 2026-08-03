@@ -72,10 +72,18 @@ export function listLibraryFiles(itemId: number): Promise<LibraryFileRead[]> {
 	return api<LibraryFileRead[]>(`/api/v1/library/${itemId}/files`);
 }
 
+export function listMyLibraryFiles(itemId: number): Promise<LibraryFileRead[]> {
+	return api<LibraryFileRead[]>(`/api/v1/library/me/${itemId}/files`);
+}
+
 export function deleteLibraryFile(itemId: number, fileId: number): Promise<void> {
 	return api<void>(`/api/v1/library/${itemId}/files/${fileId}`, { method: "DELETE" });
 }
 
 export function downloadLibraryFile(itemId: number, fileId: number): Promise<Blob> {
 	return api<Blob>(`/api/v1/library/${itemId}/files/${fileId}`, { blob: true });
+}
+
+export function downloadMyLibraryFile(itemId: number, fileId: number): Promise<Blob> {
+	return api<Blob>(`/api/v1/library/me/${itemId}/files/${fileId}`, { blob: true });
 }

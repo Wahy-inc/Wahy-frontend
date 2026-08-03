@@ -116,7 +116,13 @@ npx swagger-typescript-api generate -p /tmp/wahy-openapi.json -o lib -n data-con
   `attendance_rate` is a **fraction (0-1)**.
 - `revenue_per_parent[].parent_id` is a parent id (the OpenAPI field name
   is `revenue_per_student` for legacy wire compatibility).
-- Parent library listing returns all active items (no access filtering).
+- Parent library listing filters by access level (`all_students`, or
+  `specific_students` with an explicit grant for one of the parent's
+  children); `groups` items are not visible to parents. File list and
+  download also accept parent tokens on `/api/v1/library/{id}/files`.
+- Backdated lessons (recorded after invoice generation with a date inside
+  the invoice period) are auto-appended to the open `generated`/`sent`
+  invoice; the total and PDF are updated.
 - `attendance === null` on a lesson means "not yet held" (not billable).
 - `POST /auth/reset-request` always returns 204 - show the same confirmation
   to every user.

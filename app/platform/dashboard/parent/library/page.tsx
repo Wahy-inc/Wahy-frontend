@@ -12,9 +12,9 @@ import { errorMessage } from "@/components/shared/error-text";
 import { formatBytes } from "@/lib/format";
 import { useLocalization } from "@/lib/localization-context";
 import {
-	downloadLibraryFile,
-	listLibraryFiles,
+	downloadMyLibraryFile,
 	listMyLibrary,
+	listMyLibraryFiles,
 } from "@/lib/api/library";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -87,14 +87,14 @@ export default function ParentLibraryPage() {
 			if (expandedId === null) {
 				return [];
 			}
-			return listLibraryFiles(expandedId);
+			return listMyLibraryFiles(expandedId);
 		},
 		enabled: expandedId !== null,
 	});
 
 	const downloadMutation = useMutation({
 		mutationFn: (file: LibraryFileRead) =>
-			downloadLibraryFile(file.library_item_id, file.id),
+			downloadMyLibraryFile(file.library_item_id, file.id),
 		onSuccess: (blob: Blob, file: LibraryFileRead) => {
 			downloadBlob(blob, file.original_filename);
 		},
