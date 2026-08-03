@@ -5,9 +5,8 @@ import { ErrorBanner } from "@/components/shared/error-banner";
 import { LoadingSkeleton } from "@/components/shared/loading-skeleton";
 import { PageHeader } from "@/components/shared/page-header";
 import { Pagination } from "@/components/shared/pagination";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { BACKEND_URL } from "@/lib/api/client";
 import { errorMessage } from "@/components/shared/error-text";
 import { formatBytes } from "@/lib/format";
@@ -29,8 +28,21 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { useState } from "react";
 import type { LibraryAccessLevel, LibraryFileRead, LibraryItemRead } from "@/lib/data-contracts";
+import { BadgeVariant, StatusBadge } from "@/components/shared/status-badge";
 
 const PER_PAGE = 12;
+
+const accessVariant: Record<LibraryAccessLevel, BadgeVariant> = {
+	all_students: "success",
+	specific_students: "warning",
+	groups: "secondary",
+};
+
+const accessLabel: Record<LibraryAccessLevel, string> = {
+	all_students: "All students",
+	specific_students: "Specific students",
+	groups: "Groups",
+};
 
 function downloadBlob(blob: Blob, filename: string): void {
 	const url = URL.createObjectURL(blob);
@@ -58,16 +70,11 @@ function thumbnailSrc(path: string | null): string | undefined {
 	}
 }
 
-const accessLevelLabel: Record<LibraryAccessLevel, string> = {
-	all_students: "library.all_students",
-	specific_students: "library.specific_students",
-	groups: "library.groups",
-};
-
 export default function ParentLibraryPage() {
 	const { t } = useLocalization();
 	const [page, setPage] = useState(1);
 	const [expandedId, setExpandedId] = useState<number | null>(null);
+	const [thumbnailFailed, setThumbnailFailed] = useState(false);
 
 	const itemsQuery = useQuery({
 		queryKey: ["my-library", page],
@@ -134,35 +141,37 @@ export default function ParentLibraryPage() {
 							const thumbnail = thumbnailSrc(item.thumbnail_image_path);
 							return (
 								<Card key={item.id} className="gap-4">
-									{thumbnail ? (
-										<div className="relative h-40 w-full overflow-hidden rounded-t-xl">
-											<Image
-												src={thumbnail}
-												alt={item.title}
-												fill
-												unoptimized
-												className="object-cover"
-												sizes="(max-width: 768px) 100vw, 33vw"
-											/>
-										</div>
-									) : null}
-									<CardHeader className="gap-2">
-										<CardTitle>{item.title}</CardTitle>
-										<div className="flex flex-wrap gap-2">
-											{item.category ? (
-												<Badge variant="secondary">{item.category}</Badge>
-											) : null}
-											<Badge variant="outline">
-												{t(accessLevelLabel[item.access_level])}
-											</Badge>
-										</div>
-									</CardHeader>
 									<CardContent className="flex flex-1 flex-col gap-3">
+										{thumbnail && !thumbnailFailed ? (
+											<div className="bg-muted relative h-40 w-full overflow-hidden rounded-md">
+												<Image
+													src={thumbnail}
+													alt={item.title}
+													fill
+													sizes="(max-width: 1024px) 50vw, 33vw"
+													className="object-cover"
+													onError={() => setThumbnailFailed(true)}
+												/>
+											</div>
+										) : (
+											<div className="bg-muted flex h-40 w-full items-center justify-center rounded-md">
+												<BookOpen className="text-muted-foreground size-8" />
+											</div>
+										)}
+										<h3 className="font-semibold leading-snug">{item.title}</h3>
 										{item.description ? (
 											<p className="text-muted-foreground text-sm">
 												{item.description}
 											</p>
 										) : null}
+										<div className="flex flex-wrap gap-2 pt-1">
+											{item.category ? (
+												<StatusBadge variant="secondary">{item.category}</StatusBadge>
+											) : null}
+											<StatusBadge variant={accessVariant[item.access_level]}>
+												{accessLabel[item.access_level]}
+											</StatusBadge>
+										</div>
 										<div className="flex flex-wrap gap-2">
 											<Button variant="outline" size="sm" asChild>
 												<a
