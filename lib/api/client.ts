@@ -110,7 +110,7 @@ async function perform<T>(
 ): Promise<T> {
 	const { method = "GET", body, formData, query, blob = false } = options;
 
-	const headers: Record<string, string> = { Accept: "application/json" };
+	const headers: Record<string, string> = { Accept: "application/json" , "ngrok-skip-browser-warning": "true"  };
 	if (body !== undefined) {
 		headers["Content-Type"] = "application/json";
 	}
