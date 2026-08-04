@@ -25,6 +25,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ParentRead } from "@/lib/data-contracts";
+import { FieldLabel } from "@/components/ui/field";
 
 const PER_PAGE = 20;
 
@@ -34,6 +35,7 @@ export default function ParentsPage() {
 	const [searchInput, setSearchInput] = useState("");
 	const [search, setSearch] = useState("");
 	const [page, setPage] = useState(1);
+	const [hideInactive, setHideInactive] = useState(true);
 
 	useEffect(() => {
 		const timer = window.setTimeout(() => {
@@ -56,12 +58,20 @@ export default function ParentsPage() {
 				title={t("parents.title")}
 				description={t("parents.description")}
 				actions={
-					<Button asChild>
-						<Link href="/platform/dashboard/admin/parents/new">
-							<UserPlus className="size-4" />
-							{t("parents.new_parent")}
-						</Link>
-					</Button>
+					<div>
+						<div className="flex flex-row items-center gap-1 m-2">
+							<Input className="w-4 h-4" id="hide-inactive" type="checkbox" checked={hideInactive} onChange={(e) => setHideInactive(e.target.checked)} />
+							<FieldLabel htmlFor="hide-inactive" className="font-medium">
+								Hide Inactive
+							</FieldLabel>
+						</div>
+						<Button asChild>
+							<Link href="/platform/dashboard/admin/parents/new">
+								<UserPlus className="size-4" />
+								{t("parents.new_parent")}
+							</Link>
+						</Button>
+					</div>
 				}
 			/>
 			<div className="relative max-w-sm">
@@ -103,7 +113,7 @@ export default function ParentsPage() {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{parents.map((parent: ParentRead) => (
+							{parents.filter((parent: ParentRead) => !hideInactive || parent.is_active).map((parent: ParentRead) => (
 								<TableRow
 									key={parent.id}
 									className="cursor-pointer"

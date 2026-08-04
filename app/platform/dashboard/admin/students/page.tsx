@@ -22,6 +22,8 @@ import { formatCurrency } from "@/lib/format";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 
 const PER_PAGE = 20;
 
@@ -40,6 +42,7 @@ export default function StudentsPage() {
 	const { t } = useLocalization();
 	const router = useRouter();
 	const [page, setPage] = useState(1);
+	const [hideInactive, setHideInactive] = useState(true);
 
 	const { data, isLoading, isError, error } = useQuery({
 		queryKey: ["students", { page, perPage: PER_PAGE }],
@@ -57,6 +60,14 @@ export default function StudentsPage() {
 			<PageHeader
 				title={t("students.title")}
 				description={t("students.description")}
+				actions={
+					<div className="flex flex-row items-center gap-1 m-2">
+						<Input className="w-4 h-4" id="hide-inactive" type="checkbox" checked={hideInactive} onChange={(e) => setHideInactive(e.target.checked)} />
+						<FieldLabel htmlFor="hide-inactive" className="font-medium">
+							Hide Inactive
+						</FieldLabel>
+					</div>
+				}
 			/>
 			{isLoading ? <LoadingSkeleton rows={8} /> : null}
 			{isError ? <ErrorBanner message={errorMessage(error, t)} /> : null}
@@ -86,7 +97,7 @@ export default function StudentsPage() {
 									</TableRow>
 								</TableHeader>
 								<TableBody>
-									{section.items.map((student: StudentRead) => (
+									{section.items.filter((student: StudentRead) => !hideInactive || student.status === StudentStatus.Active).map((student: StudentRead) => (
 										<TableRow
 											key={student.id}
 											className="cursor-pointer"
