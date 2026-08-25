@@ -7,7 +7,7 @@ export const studentUpdateSchema = z.object({
 	timezone: z.string().min(1),
 	status: z.enum(["active", "on_hold", "graduated", "inactive"]),
 	lessons_per_week: z.coerce.number().int().min(1).max(14).default(2),
-	base_rate: z.coerce.number().min(0).optional().nullable(),
+	base_rate: z.coerce.number().min(0),
 	private_notes: z.string().optional().nullable(),
 	special_notes: z.string().optional().nullable(),
 });
