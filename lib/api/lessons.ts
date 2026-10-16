@@ -1,5 +1,11 @@
 import { api } from "./client";
-import type { LessonCreate, LessonRead, LessonUpdate, RescheduleRequest, RescheduleResponse } from "../data-contracts";
+import type {
+	LessonCreate,
+	LessonRead,
+	LessonUpdate,
+	RescheduleRequest,
+	RescheduleResponse,
+} from "../data-contracts";
 import type { Paginated } from "./parents";
 
 export function listLessons(options?: {
@@ -22,6 +28,12 @@ export function createLessons(payload: LessonCreate): Promise<LessonRead[]> {
 
 export function getLesson(lessonId: number): Promise<LessonRead> {
 	return api<LessonRead>(`/api/v1/lessons/${lessonId}`);
+}
+
+export function deleteLesson(lessonId: number): Promise<void> {
+	return api<void>(`/api/v1/lessons/${lessonId}`, {
+		method: "DELETE",
+	});
 }
 
 export function updateLesson(lessonId: number, payload: LessonUpdate): Promise<LessonRead> {

@@ -43,13 +43,16 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { ErrorBanner } from "@/components/shared/error-banner";
 import { FieldInput } from "@/components/shared/field-input";
 import { FieldTextarea } from "@/components/shared/field-textarea";
+import {
+	ConfirmDialog,
+} from "@/components/shared/confirm-dialog";
 import { LoadingSkeleton } from "@/components/shared/loading-skeleton";
 import { PageHeader } from "@/components/shared/page-header";
 import { Pagination } from "@/components/shared/pagination";
 import { AttendanceBadge } from "@/components/shared/status-badge";
 import { ApiError } from "@/lib/api/client";
 import { getClassAttendance, getClassHistory } from "@/lib/api/classes";
-import { rescheduleLesson, updateLesson } from "@/lib/api/lessons";
+import { deleteLesson, rescheduleLesson, updateLesson } from "@/lib/api/lessons";
 import { listSchedules } from "@/lib/api/schedules";
 import { listStudents } from "@/lib/api/students";
 import {
@@ -73,7 +76,7 @@ import {
 import { formatPercent } from "@/lib/format";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, parseISO } from "date-fns";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -255,6 +258,54 @@ function LessonEditDialog({ lesson, onClose }: LessonEditDialogProps) {
 				</form>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+interface DeleteLessonButtonProps {
+	lesson: LessonRead;
+	onDeleted: () => void;
+}
+
+function DeleteLessonButton({ lesson, onDeleted }: DeleteLessonButtonProps) {
+	const { t } = useLocalization();
+	const queryClient = useQueryClient();
+
+	const mutation = useMutation({
+		mutationFn: () => deleteLesson(lesson.id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["lessons"] });
+			queryClient.invalidateQueries({ queryKey: ["calendar-grid"] });
+			queryClient.invalidateQueries({ queryKey: ["classes"] });
+			toast.success(t("lessons.delete_success"));
+			onDeleted();
+		},
+		onError: (err: unknown) =>
+			toast.error(
+				err instanceof ApiError
+					? err.message
+					: t("common.something_went_wrong"),
+			),
+	});
+
+	return (
+		<ConfirmDialog
+			trigger={
+				<Button
+					variant="ghost"
+					size="sm"
+					className="text-destructive"
+					aria-label={t("lessons.delete_aria")}
+				>
+					<Trash2 className="size-4" />
+					{t("common.delete")}
+				</Button>
+			}
+			title={t("lessons.delete_title")}
+			description={t("lessons.delete_desc")}
+			confirmLabel={t("common.delete")}
+			destructive
+			onConfirm={() => mutation.mutate()}
+		/>
 	);
 }
 
@@ -692,13 +743,26 @@ export default function AdminClassDetailPage() {
 															)}
 														</TableCell>
 														<TableCell className="text-end">
-															<Button
-																variant="outline"
-																size="sm"
-																onClick={() => setRescheduleTarget(lesson)}
-															>
-																{t("lessons.reschedule")}
-															</Button>
+															<div className="flex items-center justify-end gap-2">
+																<Button
+																	variant="outline"
+																	size="sm"
+																	onClick={() => setRescheduleTarget(lesson)}
+																>
+																	{t("lessons.reschedule")}
+																</Button>
+																<DeleteLessonButton
+																	lesson={lesson}
+																	onDeleted={() => {
+																		if (editLesson?.id === lesson.id) {
+																			setEditLesson(null);
+																		}
+																		if (rescheduleTarget?.id === lesson.id) {
+																			setRescheduleTarget(null);
+																		}
+																	}}
+																/>
+															</div>
 														</TableCell>
 													</TableRow>
 												))}
