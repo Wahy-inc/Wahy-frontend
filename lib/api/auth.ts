@@ -17,8 +17,8 @@ import type {
 } from "../data-contracts";
 
 export interface InviteCodeResponse {
-	code: string;
-	expires_at: string;
+	invite_code: string;
+	invite_expires_at: string;
 }
 
 export function signIn(payload: LoginRequest): Promise<TokenResponse> {

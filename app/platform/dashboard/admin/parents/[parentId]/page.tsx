@@ -305,8 +305,8 @@ export default function ParentDetailPage() {
 	const [editOpen, setEditOpen] = useState(false);
 	const [addChildOpen, setAddChildOpen] = useState(false);
 	const [invite, setInvite] = useState<{
-		code: string;
-		expires_at: string;
+		invite_code: string;
+		invite_expires_at: string;
 	} | null>(null);
 
 	const {
@@ -327,8 +327,8 @@ export default function ParentDetailPage() {
 
 	const regenerateMutation = useMutation({
 		mutationFn: () => regenerateInvite(parentId),
-		onSuccess: (data: { code: string; expires_at: string }) => {
-			setInvite({ code: data.code, expires_at: data.expires_at });
+		onSuccess: (data: { invite_code: string; invite_expires_at: string }) => {
+			setInvite({ invite_code: data.invite_code, invite_expires_at: data.invite_expires_at });
 			toast.success(t("parents.invite_regenerated"));
 		},
 		onError: (err: unknown) => {
@@ -561,8 +561,8 @@ export default function ParentDetailPage() {
 				}}
 				title={t("parents.invite_code")}
 				description={t("parents.invite_code_desc")}
-				code={invite?.code ?? ""}
-				expiresAt={invite ? formatDateTime(invite.expires_at) : undefined}
+				code={invite?.invite_code ?? ""}
+				expiresAt={invite ? formatDateTime(invite.invite_expires_at) : undefined}
 				expiresLabel={t("common.expires")}
 			/>
 		</div>

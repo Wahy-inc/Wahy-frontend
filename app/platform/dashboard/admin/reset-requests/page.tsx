@@ -55,7 +55,7 @@ export default function ResetRequestsPage() {
 	const { t } = useLocalization();
 	const queryClient = useQueryClient();
 	const [status, setStatus] = useState<ResetRequestStatus | "all">("all");
-	const [code, setCode] = useState<{ code: string; expires_at: string } | null>(
+	const [code, setCode] = useState<{ invite_code: string; invite_expires_at: string } | null>(
 		null,
 	);
 
@@ -66,8 +66,8 @@ export default function ResetRequestsPage() {
 
 	const approveMutation = useMutation({
 		mutationFn: (requestId: number) => approveResetRequest(requestId),
-		onSuccess: (data: { code: string; expires_at: string }) => {
-			setCode({ code: data.code, expires_at: data.expires_at });
+		onSuccess: (data: { invite_code: string; invite_expires_at: string }) => {
+			setCode({ invite_code: data.invite_code, invite_expires_at: data.invite_expires_at });
 			toast.success(t("reset_requests.approved_success"));
 			void queryClient.invalidateQueries({ queryKey: ["reset-requests"] });
 		},
@@ -197,8 +197,8 @@ export default function ResetRequestsPage() {
 				}}
 				title={t("reset_requests.code_title")}
 				description={t("reset_requests.code_desc")}
-				code={code?.code ?? ""}
-				expiresAt={code ? formatDateTime(code.expires_at) : undefined}
+				code={code?.invite_code ?? ""}
+				expiresAt={code ? formatDateTime(code.invite_expires_at) : undefined}
 				expiresLabel={t("common.expires")}
 			/>
 		</div>
